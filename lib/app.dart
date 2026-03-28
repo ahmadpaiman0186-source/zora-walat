@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/di/app_scope.dart';
+import 'core/onboarding/onboarding_prefs.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/locale/locale_scope.dart';
 import 'core/routing/app_router.dart';
@@ -15,6 +16,7 @@ class ZoraWalatApp extends StatelessWidget {
   const ZoraWalatApp({
     super.key,
     required this.localeController,
+    required this.onboardingPrefs,
     required this.paymentService,
     required this.telecomService,
     required this.transactionLog,
@@ -22,6 +24,7 @@ class ZoraWalatApp extends StatelessWidget {
   });
 
   final LocaleController localeController;
+  final OnboardingPrefs onboardingPrefs;
   final PaymentService paymentService;
   final TelecomService telecomService;
   final TransactionLogStore transactionLog;
@@ -36,6 +39,7 @@ class ZoraWalatApp extends StatelessWidget {
           locale: localeController.locale,
           controller: localeController,
           child: AppScope(
+            onboardingPrefs: onboardingPrefs,
             paymentService: paymentService,
             telecomService: telecomService,
             transactionLog: transactionLog,
@@ -44,8 +48,7 @@ class ZoraWalatApp extends StatelessWidget {
               onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
               debugShowCheckedModeBanner: false,
               locale: localeController.locale,
-              localizationsDelegates:
-                  AppLocalizations.localizationsDelegates,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               theme: AppTheme.dark(locale: localeController.locale),
               themeMode: ThemeMode.dark,

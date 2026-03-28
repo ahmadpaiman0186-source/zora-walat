@@ -27,6 +27,34 @@ class AppLocalizationsFa extends AppLocalizations {
   String get chooseLanguageTitle => 'انتخاب زبان';
 
   @override
+  String get splashTagline =>
+      'شارژ موبایل افغانستان از خارج. امن، شفاف و سریع.';
+
+  @override
+  String get languageOnboardingSubtitle =>
+      'هر زمان می‌توانید از منوی زبان تغییر دهید.';
+
+  @override
+  String get selectAmount => 'مبلغ (دلار آمریکا)';
+
+  @override
+  String get continueCta => 'ادامه';
+
+  @override
+  String get rechargeReviewTitle => 'بررسی';
+
+  @override
+  String get rechargeReviewSubtitle =>
+      'قبل از انتخاب بسته، این موارد را تأیید کنید.';
+
+  @override
+  String get continueToPlans => 'ادامه به تعرفه‌ها';
+
+  @override
+  String get rechargeReviewStripeHint =>
+      'پرداخت کارتی (Stripe) در مراحل بعدی وصل می‌شود.';
+
+  @override
   String get languageSheetSubtitle =>
       'انگلیسی، دری و پښتو به‌طور کامل پشتیبانی می‌شوند.';
 
@@ -60,6 +88,10 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get rechargeHero =>
       'اعتبار یا بستهٔ دیتا را به شماره‌های افغانستان به دلار بفرستید. سریع، شفاف و قابل اعتماد برای کسانی که از آمریکا، کانادا، بریتانیا یا اروپا شارژ می‌کنند.';
+
+  @override
+  String get rechargeTrustLine =>
+      'قیمت‌گذاری دلاری · پرداخت امن · موبایل افغانستان';
 
   @override
   String get recipientNumber => 'شمارهٔ گیرنده';

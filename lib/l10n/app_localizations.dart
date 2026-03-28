@@ -136,6 +136,54 @@ abstract class AppLocalizations {
   /// **'Choose language'**
   String get chooseLanguageTitle;
 
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Afghanistan mobile top-up from abroad. Secure, clear, and fast.'**
+  String get splashTagline;
+
+  /// No description provided for @languageOnboardingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime from the language menu.'**
+  String get languageOnboardingSubtitle;
+
+  /// No description provided for @selectAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (USD)'**
+  String get selectAmount;
+
+  /// No description provided for @continueCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueCta;
+
+  /// No description provided for @rechargeReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get rechargeReviewTitle;
+
+  /// No description provided for @rechargeReviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm these details before you pick a package.'**
+  String get rechargeReviewSubtitle;
+
+  /// No description provided for @continueToPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to plans'**
+  String get continueToPlans;
+
+  /// No description provided for @rechargeReviewStripeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Card payment (Stripe) connects on the next screens.'**
+  String get rechargeReviewStripeHint;
+
   /// No description provided for @languageSheetSubtitle.
   ///
   /// In en, this message translates to:
@@ -201,6 +249,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.'**
   String get rechargeHero;
+
+  /// No description provided for @rechargeTrustLine.
+  ///
+  /// In en, this message translates to:
+  /// **'USD pricing · Secure checkout · Afghanistan mobile'**
+  String get rechargeTrustLine;
 
   /// No description provided for @recipientNumber.
   ///

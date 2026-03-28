@@ -27,6 +27,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseLanguageTitle => 'Choose language';
 
   @override
+  String get splashTagline =>
+      'Afghanistan mobile top-up from abroad. Secure, clear, and fast.';
+
+  @override
+  String get languageOnboardingSubtitle =>
+      'You can change this anytime from the language menu.';
+
+  @override
+  String get selectAmount => 'Amount (USD)';
+
+  @override
+  String get continueCta => 'Continue';
+
+  @override
+  String get rechargeReviewTitle => 'Review';
+
+  @override
+  String get rechargeReviewSubtitle =>
+      'Confirm these details before you pick a package.';
+
+  @override
+  String get continueToPlans => 'Continue to plans';
+
+  @override
+  String get rechargeReviewStripeHint =>
+      'Card payment (Stripe) connects on the next screens.';
+
+  @override
   String get languageSheetSubtitle =>
       'English, Dari, and Pashto are fully supported.';
 
@@ -60,6 +88,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get rechargeHero =>
       'Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.';
+
+  @override
+  String get rechargeTrustLine =>
+      'USD pricing · Secure checkout · Afghanistan mobile';
 
   @override
   String get recipientNumber => 'Recipient number';

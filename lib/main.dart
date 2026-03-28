@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/locale/locale_controller.dart';
+import 'core/onboarding/onboarding_prefs.dart';
 import 'features/payments/data/stripe_payment_service.dart';
 import 'features/telecom/data/remote_telecom_service.dart';
 import 'features/telecom/data/telecom_service.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final localeController = LocaleController(prefs);
+  final onboardingPrefs = OnboardingPrefs(prefs);
   final transactionLog = TransactionLogStore(prefs);
 
   if (AppConfig.stripePublishableKey.isNotEmpty) {
@@ -25,24 +27,25 @@ Future<void> main() async {
 
   final paymentService = StripePaymentService();
   final httpClient = http.Client();
-  final apiBase =
-      AppConfig.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+  final apiBase = AppConfig.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
   final apiService = ApiService(client: httpClient, baseUrl: apiBase);
 
   final TelecomService telecomService =
       AppConfig.paymentsApiBaseUrl.trim().isEmpty
-          ? const PlaceholderTelecomService()
-          : RemoteTelecomService(
-              client: httpClient,
-              baseUrl: AppConfig.paymentsApiBaseUrl
-                  .trim()
-                  .replaceAll(RegExp(r'/+$'), ''),
-            );
+      ? const PlaceholderTelecomService()
+      : RemoteTelecomService(
+          client: httpClient,
+          baseUrl: AppConfig.paymentsApiBaseUrl.trim().replaceAll(
+            RegExp(r'/+$'),
+            '',
+          ),
+        );
 
   // Home route `/` is [RechargeScreen] (see `createAppRouter`).
   runApp(
     ZoraWalatApp(
       localeController: localeController,
+      onboardingPrefs: onboardingPrefs,
       paymentService: paymentService,
       telecomService: telecomService,
       transactionLog: transactionLog,

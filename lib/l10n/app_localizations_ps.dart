@@ -27,6 +27,33 @@ class AppLocalizationsPs extends AppLocalizations {
   String get chooseLanguageTitle => 'ژبه وټاکئ';
 
   @override
+  String get splashTagline =>
+      'د افغانستان موبایل شارژ له بهر څخه. خوندي، روښانه او چټک.';
+
+  @override
+  String get languageOnboardingSubtitle =>
+      'تاسو کولی شئ دا هر وخت د ژبې منو څخه بدل کړئ.';
+
+  @override
+  String get selectAmount => 'اندازه (USD)';
+
+  @override
+  String get continueCta => 'مخته ګورئ';
+
+  @override
+  String get rechargeReviewTitle => 'بیاکتنه';
+
+  @override
+  String get rechargeReviewSubtitle => 'د بسته غوره کولو دمخه دا تایید کړئ.';
+
+  @override
+  String get continueToPlans => 'مخته — تعرفې';
+
+  @override
+  String get rechargeReviewStripeHint =>
+      'د کارت تادیه (Stripe) راتلونکو پردیو کې پیوستون کیږي.';
+
+  @override
   String get languageSheetSubtitle => 'انګلیسی، دری او پښتو بشپړ ملاتړ لري.';
 
   @override
@@ -59,6 +86,9 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get rechargeHero =>
       'په USD کې اېرټایم یا ډیټا افغان شمېرو ته ولېږئ. چټک، روښانه او د باور وړ — له امریکا، کانادا، برتانیا یا اروپا څخه.';
+
+  @override
+  String get rechargeTrustLine => 'USD نرخونه · خوندي تادیه · افغان موبایل';
 
   @override
   String get recipientNumber => 'د اخیستونکي شمېره';
