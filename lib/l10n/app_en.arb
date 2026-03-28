@@ -1,0 +1,135 @@
+{
+  "@@locale": "en",
+  "appTitle": "Zora-Walat",
+  "language": "Language",
+  "languageEnglish": "English",
+  "languageDari": "Dari",
+  "languagePashto": "Pashto",
+  "chooseLanguageTitle": "Choose language",
+  "languageSheetSubtitle": "English, Dari, and Pashto are fully supported.",
+  "done": "Done",
+  "cancel": "Cancel",
+  "help": "Help",
+  "refresh": "Refresh",
+  "wallet": "Wallet",
+  "more": "More",
+  "loading": "Loading…",
+  "processing": "Processing…",
+  "rechargeTitle": "Mobile recharge",
+  "rechargeHero": "Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.",
+  "recipientNumber": "Recipient number",
+  "operator": "Operator",
+  "getPackages": "Get packages",
+  "packages": "Packages",
+  "packageOptionsCount": "{count} options",
+  "@packageOptionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterRecipientError": "Enter a recipient number.",
+  "noPackagesForOperator": "No packages are available for this operator right now.",
+  "orderPlacedDefault": "Order placed",
+  "confirmMockSnack": "{label} · confirmed",
+  "@confirmMockSnack": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "tapGetPackagesHint": "Tap Get packages to load live offers for this number.",
+  "airtimeLabel": "Airtime",
+  "dataBundleLabel": "Data bundle",
+  "amountLabel": "Amount",
+  "priceLabel": "Price",
+  "buyLabel": "Buy",
+  "apiUnreachableRecharge": "We can’t reach the service. Check your connection and try again.",
+  "hubSubtitle": "Recharge · Wallet · Calling",
+  "hubTileRechargeTitle": "Mobile recharge",
+  "hubTileRechargeSub": "Instant packages · USD pricing",
+  "hubTileWalletTitle": "Wallet",
+  "hubTileWalletSub": "Balance & top-up",
+  "hubTileCallingTitle": "International calling",
+  "hubTileCallingSub": "Coming soon",
+  "hubTileLegacyTitle": "Plans & catalog",
+  "hubTileLegacySub": "Airtime & data",
+  "walletScreenTitle": "Wallet",
+  "balanceHeroLabel": "Account balance",
+  "availableLabel": "Available",
+  "quickTopUp": "Quick top-up",
+  "walletTopUpHint": "Add funds securely. Credits apply instantly for testing your integration.",
+  "topUpSuccessSnack": "Added {amount} · balance updated",
+  "@topUpSuccessSnack": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "apiUnreachableWallet": "We can’t reach the service. Check your connection and try again.",
+  "telecomHomeSubtitle": "Afghanistan mobile · USD checkout · Secure payments",
+  "aboutTitle": "About Zora-Walat",
+  "aboutBody": "Pricing is shown in USD. Card payments are processed securely; airtime and data are delivered through your configured carrier integrations.",
+  "aboutDevHint": "Developers: pass STRIPE_PUBLISHABLE_KEY and PAYMENTS_API_BASE_URL at build time.",
+  "tabAirtime": "Airtime",
+  "tabDataPackages": "Data packages",
+  "tabIntlCalling": "Int'l calling",
+  "callingTitle": "International calling",
+  "callingBody": "We’re building international calling with the same secure checkout you use for recharge.\nCheck back soon.",
+  "missingOrder": "We couldn’t open this order. Go back and try again.",
+  "paymentSuccessTitle": "Payment successful",
+  "paymentSuccessBody": "Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.",
+  "paymentCancelled": "Payment cancelled",
+  "reviewPayTitle": "Review & pay",
+  "orderSummary": "Order summary",
+  "serviceLabel": "Service",
+  "phoneNumberLabel": "Phone number",
+  "operatorLabel": "Operator",
+  "packageLabel": "Package",
+  "totalUsd": "Total (USD)",
+  "stripeSectionTitle": "Secure payment",
+  "stripeKeyMissing": "Stripe publishable key not configured for this build.",
+  "stripeKeyLoaded": "Card payments ready. Your server creates the PaymentIntent and returns the client secret.",
+  "payWithStripe": "Pay with card",
+  "lineAirtime": "Airtime",
+  "lineDataPackage": "Data package",
+  "lineInternational": "International",
+  "telecomAirtimeHeadline": "Mobile recharge",
+  "telecomAirtimeSubtitle": "Top up Afghan Wireless, MTN, Etisalat, or Roshan. Prices in USD with secure checkout.",
+  "telecomSelectOperatorSnack": "Select a network or enter a number we recognize.",
+  "telecomChooseAmountSnack": "Choose an amount to continue.",
+  "telecomDetectedOperator": "Detected: {name}",
+  "@telecomDetectedOperator": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "telecomPrefixUnknown": "Prefix not recognized — choose an operator below.",
+  "telecomUseAutoDetect": "Use auto-detect",
+  "telecomMinuteBundlesTitle": "Minute bundles (USD)",
+  "telecomEnterNumberForAmounts": "Enter a valid number and confirm the operator to see amounts.",
+  "telecomPhoneHintAirtime": "07X XXX XXXX or 937…",
+  "telecomDataHeadline": "Data packages",
+  "telecomDataSubtitle": "Daily, weekly, and monthly bundles. All prices in USD.",
+  "telecomPhoneHintData": "07X XXX XXXX",
+  "intlTabHeadline": "International calling",
+  "intlTabBody": "Coming soon: global minutes and long-distance bundles with the same secure card checkout.",
+  "periodDaily": "Daily",
+  "periodWeekly": "Weekly",
+  "periodMonthly": "Monthly",
+  "bestValueBadge": "Best value",
+  "telecomVoiceBundle": "Voice",
+  "telecomMarginNote": "≥{pct}% min. margin",
+  "@telecomMarginNote": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  }
+}

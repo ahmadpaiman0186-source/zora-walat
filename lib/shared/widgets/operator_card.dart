@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+
+import '../../features/telecom/domain/mobile_operator.dart';
+
+class OperatorCard extends StatelessWidget {
+  const OperatorCard({
+    super.key,
+    required this.operator,
+    required this.onTap,
+  });
+
+  final MobileOperator operator;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                operator.brandColor.withValues(alpha: 0.25),
+                operator.brandColor.withValues(alpha: 0.08),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+              color: operator.brandColor.withValues(alpha: 0.45),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: operator.brandColor.withValues(alpha: 0.35),
+                  child: Text(
+                    operator.displayName[0],
+                    style: t.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        operator.displayName,
+                        style: t.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Airtime & data',
+                        style: t.textTheme.bodySmall?.copyWith(
+                          color: t.colorScheme.outline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, color: t.colorScheme.outline),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

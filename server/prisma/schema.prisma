@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Platform commission wallet (10% of captured Stripe amount by default).
+model Wallet {
+  id           String @id
+  balanceCents Int    @default(0)
+  updatedAt    DateTime @updatedAt
+}
+
+model LedgerEntry {
+  id                 String   @id @default(cuid())
+  walletId           String
+  stripePaymentId    String?
+  amountCents        Int
+  direction          String // CREDIT | DEBIT (adjustments)
+  reason             String
+  metadata           String? // JSON string
+  createdAt          DateTime @default(now())
+}
+
+model TopupOrder {
+  id                    String   @id @default(cuid())
+  stripePaymentIntentId String   @unique
+  idempotencyKey        String?  @unique
+  status                String // PENDING | PAID | FULFILLING | FULFILLED | FULFILLMENT_FAILED
+  operatorKey           String
+  recipientE164         String
+  recipientNational     String
+  productId             String
+  amountUsdCents        Int
+  commissionCents       Int
+  reloadlyTransactionId String?
+  reloadlyReference     String?
+  failureReason         String?
+  fraudScore            Int      @default(0)
+  clientIp              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  event     String
+  payload   String // JSON
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model VelocityWindow {
+  id           String @id @default(cuid())
+  phoneHash    String
+  windowHour   String // yyyy-mm-ddTHH (UTC hour bucket)
+  totalCents   Int    @default(0)
+  orderCount   Int    @default(0)
+  @@unique([phoneHash, windowHour])
+}
