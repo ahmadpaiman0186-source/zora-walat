@@ -181,8 +181,62 @@ abstract class AppLocalizations {
   /// No description provided for @rechargeReviewStripeHint.
   ///
   /// In en, this message translates to:
-  /// **'Card payment (Stripe) connects on the next screens.'**
+  /// **'Pay securely with Apple Pay / Google Pay or card. Your card details never touch our servers.'**
   String get rechargeReviewStripeHint;
+
+  /// No description provided for @paymentPayWithCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {amount}'**
+  String paymentPayWithCard(String amount);
+
+  /// No description provided for @paymentPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing secure checkout…'**
+  String get paymentPreparing;
+
+  /// No description provided for @paymentSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successful'**
+  String get paymentSuccessTitle;
+
+  /// No description provided for @paymentSuccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.'**
+  String get paymentSuccessBody;
+
+  /// No description provided for @paymentFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
+  String get paymentFailedTitle;
+
+  /// No description provided for @paymentCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment cancelled'**
+  String get paymentCancelledTitle;
+
+  /// No description provided for @paymentCancelledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No charge was made. You can try again when ready.'**
+  String get paymentCancelledBody;
+
+  /// No description provided for @paymentTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get paymentTryAgain;
+
+  /// No description provided for @paymentBackToReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit details'**
+  String get paymentBackToReview;
 
   /// No description provided for @languageSheetSubtitle.
   ///
@@ -507,18 +561,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We couldn’t open this order. Go back and try again.'**
   String get missingOrder;
-
-  /// No description provided for @paymentSuccessTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment successful'**
-  String get paymentSuccessTitle;
-
-  /// No description provided for @paymentSuccessBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.'**
-  String get paymentSuccessBody;
 
   /// No description provided for @paymentCancelled.
   ///

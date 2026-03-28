@@ -13,7 +13,23 @@
   "rechargeReviewTitle": "Review",
   "rechargeReviewSubtitle": "Confirm these details before you pick a package.",
   "continueToPlans": "Continue to plans",
-  "rechargeReviewStripeHint": "Card payment (Stripe) connects on the next screens.",
+  "rechargeReviewStripeHint": "Pay securely with Apple Pay / Google Pay or card. Your card details never touch our servers.",
+  "paymentPayWithCard": "Pay {amount}",
+  "@paymentPayWithCard": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPreparing": "Preparing secure checkout…",
+  "paymentSuccessTitle": "Payment successful",
+  "paymentSuccessBody": "Your payment is confirmed. You can continue to pick airtime or data packages.",
+  "paymentFailedTitle": "Payment failed",
+  "paymentCancelledTitle": "Payment cancelled",
+  "paymentCancelledBody": "No charge was made. You can try again when ready.",
+  "paymentTryAgain": "Try again",
+  "paymentBackToReview": "Edit details",
   "languageSheetSubtitle": "English, Dari, and Pashto are fully supported.",
   "done": "Done",
   "cancel": "Cancel",

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/config/app_config.dart';
+import '../../../models/recharge_draft.dart';
 import '../../telecom/domain/telecom_order.dart';
 import '../domain/payment_result.dart';
 import 'payment_service.dart';
@@ -48,7 +49,7 @@ class StripePaymentService implements PaymentService {
       );
     }
 
-    final uri = Uri.parse('$base/payment-intents');
+    final uri = Uri.parse('$base/api/payment-intents');
     final client = http.Client();
     try {
       final headers = <String, String>{
@@ -125,6 +126,95 @@ class StripePaymentService implements PaymentService {
     } catch (e) {
       return PaymentFailure(e.toString());
     }
+  }
+
+  @override
+  Future<PaymentResult> payRechargeDraft(RechargeDraft draft) async {
+    if (AppConfig.stripePublishableKey.isEmpty) {
+      return const PaymentFailure(
+        'Stripe is not configured. Run with '
+        '--dart-define=STRIPE_PUBLISHABLE_KEY=<publishable key>',
+      );
+    }
+
+    final cents = (draft.amountUsd * 100).round();
+    if (cents <= 0) {
+      return const PaymentFailure('Invalid amount');
+    }
+
+    try {
+      final metadata = <String, String>{
+        'phone_submitted': draft.phoneE164Style,
+        'operator': draft.operatorKey,
+        'service_line': RechargeDraftConstants.serviceLine,
+        'product_id': RechargeDraftConstants.productId,
+      };
+
+      final resolved = await _resolveRechargeDraft(
+        amountUsdCents: cents,
+        metadata: metadata,
+      );
+
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: resolved.clientSecret,
+          merchantDisplayName: AppConfig.appName,
+          style: ThemeMode.dark,
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+      return PaymentSuccess(paymentIntentId: resolved.paymentIntentId);
+    } on StripeException catch (e) {
+      if (e.error.code == FailureCode.Canceled) {
+        return const PaymentCancelled();
+      }
+      return PaymentFailure(e.error.localizedMessage ?? e.toString());
+    } catch (e) {
+      return PaymentFailure(e.toString());
+    }
+  }
+
+  Future<PaymentIntentResolution> _resolveRechargeDraft({
+    required int amountUsdCents,
+    required Map<String, String> metadata,
+  }) async {
+    final base = AppConfig.paymentsApiBaseUrl.trim();
+    if (base.isEmpty) {
+      throw StateError(
+        'Set PAYMENTS_API_BASE_URL to your API origin (no trailing slash), '
+        'e.g. http://10.0.2.2:3000 for Android emulator.',
+      );
+    }
+
+    final uri = Uri.parse('$base/api/payment-intents/recharge-draft');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Idempotency-Key': const Uuid().v4(),
+      if (AppConfig.bffApiKey.isNotEmpty) 'X-Api-Key': AppConfig.bffApiKey,
+    };
+
+    final res = await _http.post(
+      uri,
+      headers: headers,
+      body: jsonEncode({
+        'amount': amountUsdCents,
+        'currency': 'usd',
+        'metadata': metadata,
+      }),
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError('Payment API error ${res.statusCode}: ${res.body}');
+    }
+
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final secret = map['clientSecret'] as String?;
+    if (secret == null || secret.isEmpty) {
+      throw StateError('Backend response missing clientSecret');
+    }
+    final piId = map['paymentIntentId'] as String?;
+    return (clientSecret: secret, paymentIntentId: piId);
   }
 
   void dispose() {

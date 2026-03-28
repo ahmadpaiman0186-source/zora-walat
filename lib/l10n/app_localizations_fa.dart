@@ -52,7 +52,38 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get rechargeReviewStripeHint =>
-      'پرداخت کارتی (Stripe) در مراحل بعدی وصل می‌شود.';
+      'با Apple Pay / Google Pay یا کارت بپردازید. اطلاعات کارت روی سرورهای ما ذخیره نمی‌شود.';
+
+  @override
+  String paymentPayWithCard(String amount) {
+    return 'پرداخت $amount';
+  }
+
+  @override
+  String get paymentPreparing => 'در حال آماده‌سازی پرداخت امن…';
+
+  @override
+  String get paymentSuccessTitle => 'پرداخت موفق';
+
+  @override
+  String get paymentSuccessBody =>
+      'متشکریم. پرداخت شما تأیید شد؛ تحویل اپراتور به‌زودی انجام می‌شود.';
+
+  @override
+  String get paymentFailedTitle => 'پرداخت ناموفق';
+
+  @override
+  String get paymentCancelledTitle => 'پرداخت لغو شد';
+
+  @override
+  String get paymentCancelledBody =>
+      'هیچ مبلقی کسر نشد. هر زمان بخواهید دوباره تلاش کنید.';
+
+  @override
+  String get paymentTryAgain => 'تلاش دوباره';
+
+  @override
+  String get paymentBackToReview => 'ویرایش جزئیات';
 
   @override
   String get languageSheetSubtitle =>
@@ -232,13 +263,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get missingOrder => 'این سفارش باز نشد. برگردید و دوباره تلاش کنید.';
-
-  @override
-  String get paymentSuccessTitle => 'پرداخت موفق';
-
-  @override
-  String get paymentSuccessBody =>
-      'متشکریم. پرداخت شما تأیید شد؛ تحویل اپراتور به‌زودی انجام می‌شود.';
 
   @override
   String get paymentCancelled => 'پرداخت لغو شد';

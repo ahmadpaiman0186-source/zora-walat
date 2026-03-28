@@ -51,7 +51,38 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get rechargeReviewStripeHint =>
-      'د کارت تادیه (Stripe) راتلونکو پردیو کې پیوستون کیږي.';
+      'د Apple Pay / Google Pay یا کارډ سره تادیه وکړئ. ستاسو د کارډ معلومات زموږ سرورونو ته نه ځي.';
+
+  @override
+  String paymentPayWithCard(String amount) {
+    return 'تادیه $amount';
+  }
+
+  @override
+  String get paymentPreparing => 'خوندي تادیه چمتو کېږي…';
+
+  @override
+  String get paymentSuccessTitle => 'تادیه بریالۍ';
+
+  @override
+  String get paymentSuccessBody =>
+      'مننه. ستاسو تادیه تایید شوه؛ اپراتور تحویل ژر کېږي.';
+
+  @override
+  String get paymentFailedTitle => 'تادیه ناکامه شوه';
+
+  @override
+  String get paymentCancelledTitle => 'تادیه لغوه شوه';
+
+  @override
+  String get paymentCancelledBody =>
+      'هیڅ پیسې نه دي اخیستل شوي. کله چې چمتو یاست بیا هڅه وکړئ.';
+
+  @override
+  String get paymentTryAgain => 'بیا هڅه';
+
+  @override
+  String get paymentBackToReview => 'جزئیات سمول';
 
   @override
   String get languageSheetSubtitle => 'انګلیسی، دری او پښتو بشپړ ملاتړ لري.';
@@ -229,13 +260,6 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get missingOrder =>
       'دا امر نه پرانستل شو. بیرته لاړ شئ او بیا هڅه وکړئ.';
-
-  @override
-  String get paymentSuccessTitle => 'تادیه بریالۍ';
-
-  @override
-  String get paymentSuccessBody =>
-      'مننه. ستاسو تادیه تایید شوه؛ اپراتور تحویل ژر کېږي.';
 
   @override
   String get paymentCancelled => 'تادیه لغوه شوه';

@@ -1,12 +1,16 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import pino from 'pino';
+import { prisma } from './db.js';
 import rechargeRoutes from './routes/recharge.js';
 import walletRoutes from './routes/wallet.js';
 import paymentRoutes from './routes/payment.js';
+import { createPaymentIntentRouter } from './routes/paymentIntents.js';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
 app.use(cors());
 app.use(express.json());
@@ -30,7 +34,11 @@ app.get('/catalog/airtime', (req, res) => {
 app.use('/api/recharge', rechargeRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use(
+  '/api/payment-intents',
+  createPaymentIntentRouter({ prisma, logger }),
+);
 
 app.listen(PORT, () => {
-  console.log('Server running on port 3000');
+  logger.info({ port: PORT }, 'Zora-Walat API listening');
 });

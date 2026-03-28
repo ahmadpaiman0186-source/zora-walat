@@ -52,7 +52,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rechargeReviewStripeHint =>
-      'Card payment (Stripe) connects on the next screens.';
+      'Pay securely with Apple Pay / Google Pay or card. Your card details never touch our servers.';
+
+  @override
+  String paymentPayWithCard(String amount) {
+    return 'Pay $amount';
+  }
+
+  @override
+  String get paymentPreparing => 'Preparing secure checkout…';
+
+  @override
+  String get paymentSuccessTitle => 'Payment successful';
+
+  @override
+  String get paymentSuccessBody =>
+      'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.';
+
+  @override
+  String get paymentFailedTitle => 'Payment failed';
+
+  @override
+  String get paymentCancelledTitle => 'Payment cancelled';
+
+  @override
+  String get paymentCancelledBody =>
+      'No charge was made. You can try again when ready.';
+
+  @override
+  String get paymentTryAgain => 'Try again';
+
+  @override
+  String get paymentBackToReview => 'Edit details';
 
   @override
   String get languageSheetSubtitle =>
@@ -234,13 +265,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get missingOrder =>
       'We couldn’t open this order. Go back and try again.';
-
-  @override
-  String get paymentSuccessTitle => 'Payment successful';
-
-  @override
-  String get paymentSuccessBody =>
-      'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.';
 
   @override
   String get paymentCancelled => 'Payment cancelled';

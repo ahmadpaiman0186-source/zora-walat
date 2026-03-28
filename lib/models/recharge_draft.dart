@@ -1,3 +1,9 @@
+/// Server-side [Stripe PaymentIntent] metadata for the recharge-review flow.
+abstract final class RechargeDraftConstants {
+  static const String productId = 'recharge_draft_v1';
+  static const String serviceLine = 'recharge_home';
+}
+
 /// Snapshot of the recharge home form for the review / checkout step.
 class RechargeDraft {
   const RechargeDraft({

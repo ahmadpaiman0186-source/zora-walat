@@ -8,6 +8,7 @@ import 'package:zora_walat/core/onboarding/onboarding_prefs.dart';
 import 'package:zora_walat/features/payments/data/payment_service.dart';
 import 'package:zora_walat/features/payments/domain/payment_result.dart';
 import 'package:zora_walat/features/telecom/data/telecom_service.dart';
+import 'package:zora_walat/models/recharge_draft.dart';
 import 'package:zora_walat/features/telecom/domain/telecom_order.dart';
 import 'package:zora_walat/features/transactions/data/transaction_log_store.dart';
 import 'package:zora_walat/services/api_service.dart';
@@ -15,6 +16,10 @@ import 'package:zora_walat/services/api_service.dart';
 class _FakePaymentService implements PaymentService {
   @override
   Future<PaymentResult> pay(TelecomOrder order) async =>
+      const PaymentSuccess();
+
+  @override
+  Future<PaymentResult> payRechargeDraft(RechargeDraft draft) async =>
       const PaymentSuccess();
 }
 

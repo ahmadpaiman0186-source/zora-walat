@@ -13,7 +13,23 @@
   "rechargeReviewTitle": "بررسی",
   "rechargeReviewSubtitle": "قبل از انتخاب بسته، این موارد را تأیید کنید.",
   "continueToPlans": "ادامه به تعرفه‌ها",
-  "rechargeReviewStripeHint": "پرداخت کارتی (Stripe) در مراحل بعدی وصل می‌شود.",
+  "rechargeReviewStripeHint": "با Apple Pay / Google Pay یا کارت بپردازید. اطلاعات کارت روی سرورهای ما ذخیره نمی‌شود.",
+  "paymentPayWithCard": "پرداخت {amount}",
+  "@paymentPayWithCard": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPreparing": "در حال آماده‌سازی پرداخت امن…",
+  "paymentSuccessTitle": "پرداخت موفق",
+  "paymentSuccessBody": "پرداخت شما تأیید شد. می‌توانید برای انتخاب بستهٔ اعتبار یا دیتا ادامه دهید.",
+  "paymentFailedTitle": "پرداخت ناموفق",
+  "paymentCancelledTitle": "پرداخت لغو شد",
+  "paymentCancelledBody": "هیچ مبلقی کسر نشد. هر زمان بخواهید دوباره تلاش کنید.",
+  "paymentTryAgain": "تلاش دوباره",
+  "paymentBackToReview": "ویرایش جزئیات",
   "languageSheetSubtitle": "انگلیسی، دری و پښتو به‌طور کامل پشتیبانی می‌شوند.",
   "done": "تأیید",
   "cancel": "لغو",

@@ -10,6 +10,33 @@ import {
 } from '../lib/phone.js';
 import { runFraudChecks } from '../services/fraud.js';
 
+/** Matches Flutter recharge home presets ($5–$25). */
+const RECHARGE_DRAFT_ALLOWED_CENTS = new Set([
+  500, 1000, 1500, 2000, 2500,
+]);
+
+export const RECHARGE_DRAFT_PRODUCT_ID = 'recharge_draft_v1';
+
+const ALLOWED_OPERATORS = new Set([
+  'roshan',
+  'mtn',
+  'etisalat',
+  'afghanWireless',
+]);
+
+const rechargeDraftBodySchema = z.object({
+  amount: z.number().int().positive(),
+  currency: z.string().min(3).max(3),
+  metadata: z
+    .object({
+      phone_submitted: z.string().min(5),
+      operator: z.string(),
+      service_line: z.literal('recharge_home'),
+      product_id: z.literal(RECHARGE_DRAFT_PRODUCT_ID),
+    })
+    .passthrough(),
+});
+
 const bodySchema = z.object({
   amount: z.number().int().positive(),
   currency: z.string().min(3).max(3),
@@ -18,6 +45,152 @@ const bodySchema = z.object({
 
 export function createPaymentIntentRouter({ prisma, logger }) {
   const router = Router();
+
+  /**
+   * PaymentIntent for the app’s recharge review screen (amount chosen on home).
+   * No catalog SKU — amount is allowlisted server-side.
+   */
+  router.post('/recharge-draft', async (req, res) => {
+    const stripe = getStripeClient();
+    if (!stripe) {
+      return res.status(503).json({
+        error: 'Stripe not configured (set STRIPE_SECRET_KEY)',
+      });
+    }
+
+    const parsed = rechargeDraftBodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.flatten() });
+    }
+
+    const { amount, currency, metadata } = parsed.data;
+    if (currency.toLowerCase() !== 'usd') {
+      return res.status(400).json({ error: 'Only usd supported' });
+    }
+
+    if (!RECHARGE_DRAFT_ALLOWED_CENTS.has(amount)) {
+      return res.status(400).json({
+        error: 'Amount not allowed',
+        allowedCents: [...RECHARGE_DRAFT_ALLOWED_CENTS],
+      });
+    }
+
+    const operatorKey = metadata.operator;
+    if (!ALLOWED_OPERATORS.has(operatorKey)) {
+      return res.status(400).json({ error: 'Invalid operator' });
+    }
+
+    const phoneRaw = metadata.phone_submitted || '';
+    const national = normalizeAfghanNational(phoneRaw);
+    const valid = validateAfghanMobileNational(national || '');
+    if (!valid.ok || !national) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid recipient phone', detail: valid.error });
+    }
+
+    const fraud = await runFraudChecks({
+      prisma,
+      nationalPhone: national,
+      amountUsdCents: amount,
+      clientIp: req.ip || req.headers['x-forwarded-for'] || 'unknown',
+    });
+
+    if (!fraud.ok) {
+      await prisma.auditLog.create({
+        data: {
+          event: 'FRAUD_BLOCK_RECHARGE_DRAFT_PI',
+          payload: JSON.stringify({
+            reasons: fraud.reasons,
+            score: fraud.score,
+            operatorKey,
+          }),
+          ip: req.ip,
+        },
+      });
+      return res.status(403).json({
+        error: 'Request blocked by risk checks',
+        code: 'FRAUD',
+        reasons: fraud.reasons,
+      });
+    }
+
+    const idempotencyKey =
+      req.get('idempotency-key') || req.get('Idempotency-Key') || undefined;
+
+    const md = {
+      ...metadata,
+      operator: operatorKey,
+      product_id: RECHARGE_DRAFT_PRODUCT_ID,
+      service_line: 'recharge_home',
+      recipient_national: national,
+      fraud_score: String(fraud.score),
+    };
+
+    try {
+      const pi = await stripe.paymentIntents.create(
+        {
+          amount,
+          currency: 'usd',
+          automatic_payment_methods: { enabled: true },
+          metadata: md,
+        },
+        idempotencyKey ? { idempotencyKey } : undefined,
+      );
+
+      try {
+        await prisma.topupOrder.create({
+          data: {
+            stripePaymentIntentId: pi.id,
+            idempotencyKey: idempotencyKey || null,
+            status: 'PENDING',
+            operatorKey,
+            recipientE164: `+93${national}`,
+            recipientNational: national,
+            productId: RECHARGE_DRAFT_PRODUCT_ID,
+            amountUsdCents: amount,
+            commissionCents: 0,
+            fraudScore: fraud.score,
+            clientIp: req.ip || null,
+          },
+        });
+      } catch (dbErr) {
+        if (
+          dbErr instanceof Prisma.PrismaClientKnownRequestError &&
+          dbErr.code === 'P2002'
+        ) {
+          const again = await stripe.paymentIntents.retrieve(pi.id);
+          return res.json({
+            clientSecret: again.client_secret,
+            paymentIntentId: again.id,
+            idempotent: true,
+          });
+        }
+        throw dbErr;
+      }
+
+      await prisma.auditLog.create({
+        data: {
+          event: 'RECHARGE_DRAFT_PAYMENT_INTENT_CREATED',
+          payload: JSON.stringify({
+            paymentIntentId: pi.id,
+            operatorKey,
+            amount,
+            fraudScore: fraud.score,
+          }),
+          ip: req.ip,
+        },
+      });
+
+      return res.json({
+        clientSecret: pi.client_secret,
+        paymentIntentId: pi.id,
+      });
+    } catch (e) {
+      logger.error({ err: e }, 'recharge-draft PaymentIntent create failed');
+      return res.status(502).json({ error: String(e.message || e) });
+    }
+  });
 
   router.post('/', async (req, res) => {
     const stripe = getStripeClient();

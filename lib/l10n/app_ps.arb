@@ -13,7 +13,23 @@
   "rechargeReviewTitle": "بیاکتنه",
   "rechargeReviewSubtitle": "د بسته غوره کولو دمخه دا تایید کړئ.",
   "continueToPlans": "مخته — تعرفې",
-  "rechargeReviewStripeHint": "د کارت تادیه (Stripe) راتلونکو پردیو کې پیوستون کیږي.",
+  "rechargeReviewStripeHint": "د Apple Pay / Google Pay یا کارډ سره تادیه وکړئ. ستاسو د کارډ معلومات زموږ سرورونو ته نه ځي.",
+  "paymentPayWithCard": "تادیه {amount}",
+  "@paymentPayWithCard": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentPreparing": "خوندي تادیه چمتو کېږي…",
+  "paymentSuccessTitle": "تادیه بریالۍ شوه",
+  "paymentSuccessBody": "تادیه تایید شوه. تاسو کولی شئ د اعتبار یا ډیټا بستو لپاره مخته ځئ.",
+  "paymentFailedTitle": "تادیه ناکامه شوه",
+  "paymentCancelledTitle": "تادیه لغوه شوه",
+  "paymentCancelledBody": "هیڅ پیسې نه دي اخیستل شوي. کله چې چمتو یاست بیا هڅه وکړئ.",
+  "paymentTryAgain": "بیا هڅه",
+  "paymentBackToReview": "جزئیات سمول",
   "languageSheetSubtitle": "انګلیسی، دری او پښتو بشپړ ملاتړ لري.",
   "done": "سمه",
   "cancel": "لغوه",
