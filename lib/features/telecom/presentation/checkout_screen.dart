@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../services/payment_service.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
@@ -171,7 +171,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 Text(l10n.stripeSectionTitle, style: t.textTheme.titleSmall),
                 const SizedBox(height: 8),
                 Text(
-                  AppConfig.stripePublishableKey.isEmpty
+                  !PaymentClientConfig.isStripeConfigured
                       ? l10n.stripeKeyMissing
                       : l10n.stripeKeyLoaded,
                   style: t.textTheme.bodySmall?.copyWith(

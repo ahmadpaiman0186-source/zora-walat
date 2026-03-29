@@ -5,11 +5,11 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
-import '../../../core/config/app_config.dart';
-import '../../../models/recharge_draft.dart';
-import '../../telecom/domain/telecom_order.dart';
-import '../domain/payment_result.dart';
-import 'payment_service.dart';
+import '../core/config/app_config.dart';
+import '../features/payments/domain/payment_result.dart';
+import '../features/telecom/domain/telecom_order.dart';
+import '../models/recharge_draft.dart';
+import '../stripe_keys.dart';
 
 typedef PaymentIntentResolution = ({
   String clientSecret,
@@ -22,10 +22,30 @@ typedef PaymentIntentClientSecretResolver = Future<PaymentIntentResolution> Func
   required Map<String, String> metadata,
 });
 
-/// Stripe PaymentSheet integration.
-///
-/// Wire [resolveClientSecret] to your server: create a PaymentIntent and
-/// return `client_secret`. See https://stripe.com/docs/payments/accept-a-payment?platform=flutter
+/// Client-side Stripe configuration (publishable key only).
+abstract final class PaymentClientConfig {
+  PaymentClientConfig._();
+
+  /// Normalized publishable key (trimmed; no surrounding whitespace).
+  static String get normalizedPublishableKey =>
+      StripeKeys.publishableKey.trim();
+
+  /// True when the key looks like a Stripe publishable key (`pk_test_` / `pk_live_`).
+  static bool get isStripeConfigured {
+    final k = normalizedPublishableKey.replaceAll(RegExp(r'\s'), '');
+    return k.startsWith('pk_test_') || k.startsWith('pk_live_');
+  }
+}
+
+/// Abstraction for checkout. Swap implementations for tests or alternative PSPs.
+abstract class PaymentService {
+  Future<PaymentResult> pay(TelecomOrder order);
+
+  Future<PaymentResult> payRechargeDraft(RechargeDraft draft);
+}
+
+/// Stripe PaymentSheet: [PaymentIntent] is created on the server; this class only
+/// uses the publishable key and [client_secret] from your backend.
 class StripePaymentService implements PaymentService {
   StripePaymentService({
     PaymentIntentClientSecretResolver? resolveClientSecret,
@@ -86,13 +106,6 @@ class StripePaymentService implements PaymentService {
 
   @override
   Future<PaymentResult> pay(TelecomOrder order) async {
-    if (AppConfig.stripePublishableKey.isEmpty) {
-      return const PaymentFailure(
-        'Stripe is not configured. Run with '
-        '--dart-define=STRIPE_PUBLISHABLE_KEY=<your publishable key>',
-      );
-    }
-
     try {
       final metadata = <String, String>{
         ...order.metadata,
@@ -124,19 +137,12 @@ class StripePaymentService implements PaymentService {
       }
       return PaymentFailure(e.error.localizedMessage ?? e.toString());
     } catch (e) {
-      return PaymentFailure(e.toString());
+      return PaymentFailure(_paymentErrorMessage(e));
     }
   }
 
   @override
   Future<PaymentResult> payRechargeDraft(RechargeDraft draft) async {
-    if (AppConfig.stripePublishableKey.isEmpty) {
-      return const PaymentFailure(
-        'Stripe is not configured. Run with '
-        '--dart-define=STRIPE_PUBLISHABLE_KEY=<publishable key>',
-      );
-    }
-
     final cents = (draft.amountUsd * 100).round();
     if (cents <= 0) {
       return const PaymentFailure('Invalid amount');
@@ -171,8 +177,29 @@ class StripePaymentService implements PaymentService {
       }
       return PaymentFailure(e.error.localizedMessage ?? e.toString());
     } catch (e) {
-      return PaymentFailure(e.toString());
+      return PaymentFailure(_paymentErrorMessage(e));
     }
+  }
+
+  static String _paymentErrorMessage(Object e) {
+    final s = e.toString();
+    if (s.contains('Stripe not configured') ||
+        s.contains('STRIPE_SECRET_KEY')) {
+      return 'Server payment setup: add STRIPE_SECRET_KEY to server/.env (test secret), '
+          'restart the API, then try again.';
+    }
+    if (s.contains('PAYMENTS_API_BASE_URL') ||
+        s.contains('payment-intents') ||
+        s.contains('Payment API error') ||
+        s.contains('Failed host lookup') ||
+        s.contains('Connection refused') ||
+        s.contains('Failed to fetch') ||
+        s.contains('ClientException') ||
+        s.contains('SocketException')) {
+      return 'Payment service is unavailable. Check the API is running at '
+          '${AppConfig.paymentsApiBaseUrl} and try again.';
+    }
+    return s;
   }
 
   Future<PaymentIntentResolution> _resolveRechargeDraft({
@@ -183,7 +210,7 @@ class StripePaymentService implements PaymentService {
     if (base.isEmpty) {
       throw StateError(
         'Set PAYMENTS_API_BASE_URL to your API origin (no trailing slash), '
-        'e.g. http://10.0.2.2:3000 for Android emulator.',
+        'e.g. http://10.0.2.2:8787 for Android emulator.',
       );
     }
 

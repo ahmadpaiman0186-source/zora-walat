@@ -98,7 +98,7 @@
   "telecomHomeSubtitle": "Afghanistan mobile · USD checkout · Secure payments",
   "aboutTitle": "About Zora-Walat",
   "aboutBody": "Pricing is shown in USD. Card payments are processed securely; airtime and data are delivered through your configured carrier integrations.",
-  "aboutDevHint": "Developers: pass STRIPE_PUBLISHABLE_KEY and PAYMENTS_API_BASE_URL at build time.",
+  "aboutDevHint": "Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.",
   "tabAirtime": "Airtime",
   "tabDataPackages": "Data packages",
   "tabIntlCalling": "Int'l calling",

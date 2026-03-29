@@ -77,7 +77,7 @@
   "telecomHomeSubtitle": "موبایل افغانستان · پرداخت دلار · امن",
   "aboutTitle": "دربارهٔ زوره‌ولت",
   "aboutBody": "قیمت‌ها به دلار نمایش داده می‌شوند. پرداخت کارت به‌صورت امن پردازش می‌شود؛ اعتبار و دیتا از طریق یکپارچگی‌های اپراتور تحویل داده می‌شود.",
-  "aboutDevHint": "توسعه‌دهندگان: STRIPE_PUBLISHABLE_KEY و PAYMENTS_API_BASE_URL را در زمان build بدهید.",
+  "aboutDevHint": "توسعه‌دهندگان: کلید publishable استرایپ را در lib/stripe_keys.dart قرار دهید؛ در صورت نیاز PAYMENTS_API_BASE_URL را در زمان build بدهید.",
   "tabAirtime": "اعتبار",
   "tabDataPackages": "بسته‌های دیتا",
   "tabIntlCalling": "تماس خارجی",

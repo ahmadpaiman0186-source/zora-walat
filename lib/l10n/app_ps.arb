@@ -77,7 +77,7 @@
   "telecomHomeSubtitle": "افغان موبایل · USD تادیه · خوندي",
   "aboutTitle": "د زوره‌ولت په اړه",
   "aboutBody": "بیې په USD کې ښودل کېږي. د کارت تادیه خوندي پروسس کېږي؛ اېرټایم او ډیټا د اپراتور یوځای کیدو له لارې سپارل کېږي.",
-  "aboutDevHint": "پرمختللونکي: STRIPE_PUBLISHABLE_KEY او PAYMENTS_API_BASE_URL په build کې ورکړئ.",
+  "aboutDevHint": "پرمختللونکي: د Stripe publishable کیلي په lib/stripe_keys.dart کې وټاکئ؛ اړتیا په PAYMENTS_API_BASE_URL په build کې ورکړئ.",
   "tabAirtime": "اېرټایم",
   "tabDataPackages": "ډیټا بستې",
   "tabIntlCalling": "بهرنی زنګ",

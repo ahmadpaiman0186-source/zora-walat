@@ -7,23 +7,26 @@ import 'app.dart';
 import 'core/config/app_config.dart';
 import 'core/locale/locale_controller.dart';
 import 'core/onboarding/onboarding_prefs.dart';
-import 'features/payments/data/stripe_payment_service.dart';
 import 'features/telecom/data/remote_telecom_service.dart';
 import 'features/telecom/data/telecom_service.dart';
 import 'features/transactions/data/transaction_log_store.dart';
 import 'services/api_service.dart';
+import 'services/payment_service.dart';
+import 'stripe_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final publishableKey = StripeKeys.publishableKey.trim();
+  if (publishableKey.isNotEmpty) {
+    Stripe.publishableKey = publishableKey;
+    await Stripe.instance.applySettings();
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final localeController = LocaleController(prefs);
   final onboardingPrefs = OnboardingPrefs(prefs);
   final transactionLog = TransactionLogStore(prefs);
-
-  if (AppConfig.stripePublishableKey.isNotEmpty) {
-    Stripe.publishableKey = AppConfig.stripePublishableKey;
-  }
 
   final paymentService = StripePaymentService();
   final httpClient = http.Client();
@@ -41,7 +44,6 @@ Future<void> main() async {
           ),
         );
 
-  // Home route `/` is [RechargeScreen] (see `createAppRouter`).
   runApp(
     ZoraWalatApp(
       localeController: localeController,

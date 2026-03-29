@@ -7,7 +7,7 @@ import '../models/recharge_package.dart';
 import '../models/wallet_balance.dart';
 
 /// Default API host for Zora-Walat MVP (no trailing slash).
-const String kDefaultApiBaseUrl = 'http://localhost:3000';
+const String kDefaultApiBaseUrl = 'http://localhost:8787';
 
 /// HTTP client for the Node API (`/api/wallet`, `/api/recharge`, `/api/payment`).
 class ApiService {
@@ -80,7 +80,7 @@ class ApiService {
   /// Alias for [topup] — `POST /api/wallet/topup` with `{ amount }`.
   Future<WalletBalance> topUpWallet(double amount) => topup(amount);
 
-  /// Loads packages from `POST /api/recharge/quote` (live backend on port 3000 by default).
+  /// Loads packages from `POST /api/recharge/quote` (live backend; default port 8787).
   Future<List<RechargePackage>> getRechargePackages(String phone, String operator) async {
     final res = await client.post(
       _u('/api/recharge/quote'),

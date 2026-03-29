@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const prismaCli = path.join(root, 'node_modules', 'prisma', 'build', 'index.js');
 
 function tryUnlinkEngineArtifacts() {
   const dir = path.join(root, 'node_modules', '.prisma', 'client');
@@ -34,11 +35,15 @@ function tryUnlinkEngineArtifacts() {
   }
 }
 
+if (!fs.existsSync(prismaCli)) {
+  console.warn('postinstall: prisma CLI not found yet; skip generate (run npm install again).');
+  process.exit(0);
+}
+
 for (let i = 0; i < 5; i++) {
   tryUnlinkEngineArtifacts();
-  const r = spawnSync('npx', ['prisma', 'generate'], {
+  const r = spawnSync(process.execPath, [prismaCli, 'generate'], {
     cwd: root,
-    shell: true,
     stdio: 'inherit',
   });
   if (r.status === 0) process.exit(0);
@@ -49,6 +54,6 @@ for (let i = 0; i < 5; i++) {
 }
 
 console.error(
-  '\nPrisma generate failed. Close other Node processes using this folder, then run: npx prisma generate\n',
+  '\nPrisma generate failed. Close other Node processes using this folder, then run: npm run generate\n',
 );
-process.exit(1);
+process.exit(0);
