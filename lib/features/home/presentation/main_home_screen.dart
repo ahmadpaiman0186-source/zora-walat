@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/config/app_config.dart';
+import '../../../core/di/app_scope.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/language_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -13,6 +14,7 @@ class MainHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final auth = AppScope.authSessionOf(context);
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -25,7 +27,7 @@ class MainHomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppConfig.appName, style: t.textTheme.headlineSmall),
+                      Text('Zora-Walat', style: t.textTheme.headlineSmall),
                       const SizedBox(height: 8),
                       Text(
                         l10n.hubSubtitle,
@@ -45,10 +47,32 @@ class MainHomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             _Tile(
+              icon: Icons.person_outline_rounded,
+              title: l10n.authAccountTileTitle,
+              subtitle: auth.isAuthenticated
+                  ? l10n.authAccountTileSignedInSub
+                  : l10n.authAccountTileSignedOutSub,
+              onTap: () async {
+                if (auth.isAuthenticated) {
+                  final rt = auth.refreshToken;
+                  if (rt != null && rt.isNotEmpty) {
+                    try {
+                      await AppScope.of(context).authApiService.logout(
+                            refreshToken: rt,
+                          );
+                    } catch (_) {}
+                  }
+                  await auth.clear();
+                } else if (context.mounted) {
+                  context.push(AppRoutePaths.signIn);
+                }
+              },
+            ),
+            _Tile(
               icon: Icons.phone_android_rounded,
               title: l10n.hubTileRechargeTitle,
               subtitle: l10n.hubTileRechargeSub,
-              onTap: () => context.go('/'),
+              onTap: () => context.go(AppRoutePaths.recharge),
             ),
             _Tile(
               icon: Icons.account_balance_wallet_outlined,

@@ -29,6 +29,8 @@ class _AirtimeTabState extends State<AirtimeTab> {
   MobileOperator? _detected;
   MobileOperator? _manual;
   AirtimeOffer? _selected;
+  /// Bumps [FutureBuilder] when user taps Retry after a catalog error.
+  int _airtimeCatalogGeneration = 0;
 
   MobileOperator? get _effectiveOperator => _manual ?? _detected;
 
@@ -46,13 +48,12 @@ class _AirtimeTabState extends State<AirtimeTab> {
 
   void _onPhoneChanged() {
     final n = AfghanPhoneUtils.normalizeNational(_phoneCtrl.text);
-    final det = n == null ? null : AfghanPhoneUtils.detectOperator(n);
-    if (det != _detected) {
-      setState(() {
-        _detected = det;
-        if (_manual == null) _selected = null;
-      });
-    }
+    final newDet = n == null ? null : AfghanPhoneUtils.detectOperator(n);
+    setState(() {
+      final opChanged = newDet != _detected;
+      _detected = newDet;
+      if (_manual == null && opChanged) _selected = null;
+    });
   }
 
   void _goCheckout() {
@@ -75,6 +76,8 @@ class _AirtimeTabState extends State<AirtimeTab> {
 
     final national = AfghanPhoneUtils.normalizeNational(_phoneCtrl.text)!;
     final masked = AfghanPhoneUtils.maskForLog(national);
+    final priceStr = NumberFormat.simpleCurrency(name: 'USD')
+        .format(offer.finalUsdCents / 100);
 
     final order = TelecomOrder(
       line: TelecomServiceLine.airtime,
@@ -82,7 +85,7 @@ class _AirtimeTabState extends State<AirtimeTab> {
       phone: PhoneNumber(_phoneCtrl.text.trim()),
       productId: offer.id,
       productTitle:
-          'Airtime ${offer.labelShort} (${NumberFormat.simpleCurrency(name: 'USD').format(offer.finalUsdCents / 100)}) · ${op.displayName}',
+          '${l10n.lineAirtime} ${offer.labelShort} ($priceStr) · ${op.displayName}',
       finalUsdCents: offer.finalUsdCents,
       metadata: {
         'service_line': 'airtime',
@@ -97,6 +100,14 @@ class _AirtimeTabState extends State<AirtimeTab> {
       },
     );
     context.push(AppRoutePaths.checkout, extra: order);
+  }
+
+  bool _canReviewPay(AppLocalizations l10n) {
+    if (AfghanPhoneUtils.validationErrorL10n(l10n, _phoneCtrl.text) != null) {
+      return false;
+    }
+    if (_effectiveOperator == null || _selected == null) return false;
+    return true;
   }
 
   @override
@@ -131,7 +142,8 @@ class _AirtimeTabState extends State<AirtimeTab> {
               hintText: l10n.telecomPhoneHintAirtime,
               prefixIcon: const Icon(Icons.phone_iphone_rounded),
             ),
-            validator: AfghanPhoneUtils.validationError,
+            validator: (v) =>
+                AfghanPhoneUtils.validationErrorL10n(l10n, v),
           ),
           const SizedBox(height: 16),
           if (_detected != null && _manual == null)
@@ -178,8 +190,6 @@ class _AirtimeTabState extends State<AirtimeTab> {
               ),
             ),
           const SizedBox(height: 20),
-          Text(l10n.telecomMinuteBundlesTitle, style: t.textTheme.titleMedium),
-          const SizedBox(height: 12),
           if (op == null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -192,50 +202,158 @@ class _AirtimeTabState extends State<AirtimeTab> {
               ),
             )
           else
-            FutureBuilder<List<AirtimeOffer>>(
-              key: ValueKey(op.apiKey),
-              future: AppScope.of(context)
-                  .telecomService
-                  .fetchAirtimeDenominations(op),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                final rows = snap.data ?? const <AirtimeOffer>[];
-                return LayoutBuilder(
-                  builder: (context, c) {
-                    final cols = c.maxWidth > 480 ? 3 : 2;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: cols,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: cols == 3 ? 0.95 : 1.05,
+            Card(
+              margin: EdgeInsets.zero,
+              color: t.colorScheme.surfaceContainerHighest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: t.colorScheme.outline.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.payments_rounded,
+                          color: t.colorScheme.primary,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            l10n.telecomMinuteBundlesTitle,
+                            style: t.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    FutureBuilder<List<AirtimeOffer>>(
+                      key: ValueKey(
+                        '${op.apiKey}_$_airtimeCatalogGeneration',
                       ),
-                      itemCount: rows.length,
-                      itemBuilder: (context, i) {
-                        final o = rows[i];
-                        return AirtimeAmountTile(
-                          offer: o,
-                          selected: _selected?.id == o.id,
-                          onTap: () => setState(() => _selected = o),
+                      future: AppScope.of(context)
+                          .telecomService
+                          .fetchAirtimeDenominations(op),
+                      builder: (context, snap) {
+                        if (snap.connectionState == ConnectionState.waiting) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 28),
+                            child: Column(
+                              children: [
+                                const CircularProgressIndicator(),
+                                const SizedBox(height: 16),
+                                Text(
+                                  l10n.telecomLoadingAmounts,
+                                  style: t.textTheme.bodyMedium?.copyWith(
+                                    color: t.colorScheme.outline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        if (snap.hasError) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.cloud_off_rounded,
+                                  size: 40,
+                                  color: t.colorScheme.secondary,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  l10n.telecomCatalogLoadError,
+                                  textAlign: TextAlign.center,
+                                  style: t.textTheme.bodyMedium?.copyWith(
+                                    color: t.colorScheme.outline,
+                                    height: 1.35,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton.tonalIcon(
+                                  onPressed: () => setState(
+                                    () => _airtimeCatalogGeneration++,
+                                  ),
+                                  icon: const Icon(Icons.refresh_rounded),
+                                  label: Text(l10n.actionRetry),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        final rows =
+                            snap.data ?? const <AirtimeOffer>[];
+                        if (rows.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 40,
+                                  color: t.colorScheme.outline,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  l10n.telecomAirtimeEmpty,
+                                  textAlign: TextAlign.center,
+                                  style: t.textTheme.bodyLarge?.copyWith(
+                                    color: t.colorScheme.outline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return LayoutBuilder(
+                          builder: (context, c) {
+                            final cols = c.maxWidth > 480 ? 3 : 2;
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: cols,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                                childAspectRatio:
+                                    cols == 3 ? 0.95 : 1.05,
+                              ),
+                              itemCount: rows.length,
+                              itemBuilder: (context, i) {
+                                final offer = rows[i];
+                                return AirtimeAmountTile(
+                                  offer: offer,
+                                  selected: _selected?.id == offer.id,
+                                  onTap: () => setState(
+                                    () => _selected = offer,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         );
                       },
-                    );
-                  },
-                );
-              },
+                    ),
+                  ],
+                ),
+              ),
             ),
           const SizedBox(height: 24),
           ZwPrimaryButton(
             label: l10n.reviewPayTitle,
             icon: Icons.lock_outline_rounded,
-            onPressed: _goCheckout,
+            onPressed: _canReviewPay(l10n) ? _goCheckout : null,
           ),
         ],
       ),

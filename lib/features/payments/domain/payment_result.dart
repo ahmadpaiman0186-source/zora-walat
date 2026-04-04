@@ -1,3 +1,4 @@
+/// UI result: in-app PaymentSheet (mobile/desktop), hosted Stripe Checkout (web), or failure/cancel.
 sealed class PaymentResult {
   const PaymentResult();
 
@@ -9,6 +10,11 @@ class PaymentSuccess extends PaymentResult {
 
   /// Populated when the PSP returns an intent id (extend Stripe flow as needed).
   final String? paymentIntentId;
+}
+
+/// Web only: user was redirected to Stripe Checkout; confirm via return URL or backend webhooks.
+class PaymentHostedCheckoutRedirect extends PaymentResult {
+  const PaymentHostedCheckoutRedirect();
 }
 
 class PaymentFailure extends PaymentResult {

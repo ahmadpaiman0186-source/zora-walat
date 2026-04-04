@@ -62,11 +62,11 @@ class AppLocalizationsPs extends AppLocalizations {
   String get paymentPreparing => 'خوندي تادیه چمتو کېږي…';
 
   @override
-  String get paymentSuccessTitle => 'تادیه بریالۍ';
+  String get paymentSuccessTitle => 'تادیه بریالۍ شوه';
 
   @override
   String get paymentSuccessBody =>
-      'مننه. ستاسو تادیه تایید شوه؛ اپراتور تحویل ژر کېږي.';
+      'تاسو له Stripe څخه راستون شوئ. دا پاڼه یوازې ستاسو د آساتیا لپاره ده — تایید زموږ په سرورونو کې کېږي. اپراتور تحویل وروسته له تایید څخه.';
 
   @override
   String get paymentFailedTitle => 'تادیه ناکامه شوه';
@@ -77,6 +77,13 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get paymentCancelledBody =>
       'هیڅ پیسې نه دي اخیستل شوي. کله چې چمتو یاست بیا هڅه وکړئ.';
+
+  @override
+  String get paymentCheckoutRedirectTitle => 'Stripe تادیه';
+
+  @override
+  String get paymentCheckoutRedirectBody =>
+      'په راتلونکي پاڼه کې تادیه بشپړه کړئ. بیرته راغلې وروسته، تایید ممکن یو څه وخت ونیسي.';
 
   @override
   String get paymentTryAgain => 'بیا هڅه';
@@ -239,7 +246,7 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get aboutDevHint =>
-      'پرمختللونکي: STRIPE_PUBLISHABLE_KEY او PAYMENTS_API_BASE_URL په build کې ورکړئ.';
+      'پرمختللونکي: د Stripe publishable کیلي په lib/stripe_keys.dart کې وټاکئ؛ اړتیا په PAYMENTS_API_BASE_URL په build کې ورکړئ.';
 
   @override
   String get tabAirtime => 'اېرټایم';
@@ -379,4 +386,208 @@ class AppLocalizationsPs extends AppLocalizations {
   String telecomMarginNote(String pct) {
     return 'لږترلږه $pct٪ حاشیه';
   }
+
+  @override
+  String get phoneValidationEmpty => 'د موبایل شمېره ولیکئ.';
+
+  @override
+  String get phoneValidationInvalid => 'د افغانستان معتبر موبایل شمېره ولیکئ.';
+
+  @override
+  String get phoneValidationLength => 'د ۷ وروسته باید ۹ یا ۱۰ عددونه وي.';
+
+  @override
+  String get phoneValidationPrefix => 'د افغان موبایل شمېرې د ۷ سره پیل کېږي.';
+
+  @override
+  String get phoneValidationFormat => 'د شمېرې بڼه ناسمه ده.';
+
+  @override
+  String get telecomNoDataPackages =>
+      'د دې اپراتور لپاره اوس ډیټا بسته نشته. بل اپراتور وټاکئ یا وروسته بیا راشئ.';
+
+  @override
+  String dataVolumeGb(String n) {
+    return '$n GB';
+  }
+
+  @override
+  String dataVolumeMb(String n) {
+    return '$n MB';
+  }
+
+  @override
+  String get validityOneDay => '۱ ورځ';
+
+  @override
+  String get validity7Days => '۷ ورځې';
+
+  @override
+  String get validity30Days => '۳۰ ورځې';
+
+  @override
+  String validityNDays(String n) {
+    return '$n ورځې';
+  }
+
+  @override
+  String get currencyUsdHint => 'بیې په امریکایي ډالرو (USD) کې دي.';
+
+  @override
+  String get actionRetry => 'بیا هڅه';
+
+  @override
+  String get telecomCatalogLoadError =>
+      'انتخابونه نه بار شول. اړیکه مو وګورئ او «بیا هڅه» ووهئ.';
+
+  @override
+  String get telecomAirtimeEmpty => 'د دې شبکې لپاره اوس هیڅ مقدار نشته.';
+
+  @override
+  String get telecomLoadingAmounts => 'مقدارونه بارېږي…';
+
+  @override
+  String get checkoutYourOrder => 'ستاسو امر';
+
+  @override
+  String get checkoutPaymentSecureNote =>
+      'تادیه په خوندي Stripe پاڼه کې کېږي. ستاسو د کارډ معلومات زموږ سرورونو ته نه ځي.';
+
+  @override
+  String get telecomDataPackagesSectionTitle => 'بسته وټاکئ';
+
+  @override
+  String get telecomDataLoadingPackages => 'بستې بارېږي…';
+
+  @override
+  String get authSignInTitle => 'ننوتل';
+
+  @override
+  String get authRegisterTitle => 'حساب جوړول';
+
+  @override
+  String get authEmailLabel => 'بریښنالیک';
+
+  @override
+  String get authPasswordLabel => 'پټنوم';
+
+  @override
+  String get authSignInCta => 'ننوتل';
+
+  @override
+  String get authRegisterCta => 'نوم لیکنه';
+
+  @override
+  String get authRegisterPasswordHint => 'لږترلږه ۱۰ توري وکاروئ';
+
+  @override
+  String get authSwitchToRegister => 'حساب نشته؟ نوم لیکنه';
+
+  @override
+  String get authSwitchToSignIn => 'حساب لرئ؟ ننوتل';
+
+  @override
+  String get authRequiredMessage => 'د دوام لپاره مهرباني وکړئ ننوځئ.';
+
+  @override
+  String get authSignOut => 'وتل';
+
+  @override
+  String get authAccountTileTitle => 'حساب';
+
+  @override
+  String get authAccountTileSignedInSub => 'ننوتلی یاست';
+
+  @override
+  String get authAccountTileSignedOutSub => 'د بټوې او تادیې لپاره ننوځئ';
+
+  @override
+  String get authGenericError => 'ستونزه رامنځته شوه. بیا هڅه وکړئ.';
+
+  @override
+  String get authFillAllFields => 'بریښنالیک او پټنوم ولیکئ.';
+
+  @override
+  String get landingNavBrand => 'زوره‌ولت';
+
+  @override
+  String get landingHeroTitle => 'افغانستان ته په ثانیو کې ایئرټایم واستوئ';
+
+  @override
+  String get landingHeroSubtitle =>
+      'د افغان شمېرو لپاره نړیوال موبایل ټاپ‌آپ — د هغو کورنیو لپاره چې په چټک او باوري لار اړتیا لري.';
+
+  @override
+  String get landingTrustBadge => 'د USD نرخونه · خوندي تادیه · د مهاجرو لپاره';
+
+  @override
+  String get landingCtaGetStarted => 'پیل کړئ';
+
+  @override
+  String get landingCtaSignIn => 'ننوتل';
+
+  @override
+  String get landingLanguagesTitle => 'ژبې';
+
+  @override
+  String get landingLanguagesBody =>
+      'په انګلیسي، دري او پښتو بشپړ تجربه — هر وخت له پټلۍ څخه بدل کړئ.';
+
+  @override
+  String get landingWhyTitle => 'ولې زوره‌ولت';
+
+  @override
+  String get landingWhyFastTitle => 'چټک ټاپ‌آپ';
+
+  @override
+  String get landingWhyFastBody =>
+      'پېرود په چټکۍ بشپړ کړئ او له مقدار څخه بستې ته بې ستونزې لاړ شئ.';
+
+  @override
+  String get landingWhySecureTitle => 'خوندي تادیې';
+
+  @override
+  String get landingWhySecureBody =>
+      'د معتبر چیک‌آوت له لارې تادیه — ستاسو د کارت معلومات زموږ په سرورونو کې نه ساتل کیږي.';
+
+  @override
+  String get landingWhyPricingTitle => 'روښانه نرخونه';
+
+  @override
+  String get landingWhyPricingBody =>
+      'د تادیې دمخه په امریکایي ډالرو کې لګښت ګورئ — په چیک‌آوت کې حیرانونکي نه.';
+
+  @override
+  String get landingWhyLangTitle => 'ګڼ‌ژبې تجربه';
+
+  @override
+  String get landingWhyLangBody =>
+      'په انګلیسي، دري یا پښتو اپ وکاروئ — هغه چې تاسو او کورنۍ ته مناسب وي.';
+
+  @override
+  String get landingHowTitle => 'څنګه کار کوي';
+
+  @override
+  String get landingHowStep1Title => 'افغان شمېره ولیکئ';
+
+  @override
+  String get landingHowStep1Body =>
+      'اپراتور او د امریکایي ډالرو مقدار غوره کړئ یا د ایئرټایم یا ډیټا بسته وټاکئ.';
+
+  @override
+  String get landingHowStep2Title => 'بیاکتنه او خوندي تادیه';
+
+  @override
+  String get landingHowStep2Body =>
+      'جزئیات تصدیق کړئ، بیا په Stripe خوندي پاڼه تادیه وکړئ — ستاسو کارت زموږ په سرورونو کې نه ساتل کیږي.';
+
+  @override
+  String get landingHowStep3Title => 'ټاپ‌آپ تحویل کیږي';
+
+  @override
+  String get landingHowStep3Body =>
+      'موږ سفارش پروسس کوو او اعتبار د ترلاسه کوونکي موبایل خط ته لیږو.';
+
+  @override
+  String get landingFooterNote => 'زوره‌ولت · د افغانستان موبایل ټاپ‌آپ';
 }

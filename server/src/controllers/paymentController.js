@@ -1,0 +1,366 @@
+import { Prisma } from '@prisma/client';
+import { ZodError } from 'zod';
+
+import { getStripeClient } from '../services/stripe.js';
+import { env } from '../config/env.js';
+import {
+  checkoutSessionBodySchema,
+  idempotencyKeyHeaderSchema,
+} from '../validators/checkoutSession.js';
+import { validatePackageOperatorPair } from '../lib/allowedCheckout.js';
+import { resolveCheckoutPricing } from '../domain/pricing/resolveCheckoutPricing.js';
+import {
+  normalizeAfghanNational,
+  validateAfghanMobileNational,
+} from '../lib/phone.js';
+import { originHostnameForLog } from '../lib/corsPolicy.js';
+import { checkoutRequestFingerprint } from '../lib/checkoutFingerprint.js';
+import {
+  findReusableCheckout,
+  createInitiatedRow,
+  markCheckoutCreated,
+  markCheckoutFailed,
+  getCheckoutByIdempotencyKey,
+} from '../services/paymentCheckoutService.js';
+import { writeOrderAudit } from '../services/orderAuditService.js';
+import { prisma } from '../db.js';
+import { ORDER_STATUS } from '../constants/orderStatus.js';
+import { classifyCheckoutAbuseDistributed } from '../services/checkoutAbuseDetectorDistributed.js';
+import { deviceFingerprintHash } from '../lib/deviceFingerprint.js';
+
+function normalizeClientBase(raw) {
+  return String(raw ?? '').trim().replace(/\/$/, '');
+}
+
+export async function createCheckoutSession(req, res) {
+  const authUserId = req.user?.id;
+  if (!authUserId) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return res.status(503).json({
+      error:
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment (see server/.env.example).',
+    });
+  }
+
+  let clientBase;
+  if (env.nodeEnv === 'production') {
+    clientBase = normalizeClientBase(env.clientUrl);
+    if (!clientBase) {
+      return res.status(500).json({
+        error:
+          'CLIENT_URL must be set in production for Stripe Checkout redirects.',
+      });
+    }
+  } else {
+    const origin = req.headers.origin;
+    req.log?.info(
+      { originHost: origin ? originHostnameForLog(origin) : null },
+      'checkout origin',
+    );
+    if (!origin) {
+      return res.status(400).json({ error: 'Missing origin' });
+    }
+    const normalized = normalizeClientBase(origin);
+    if (!normalized) {
+      return res.status(400).json({ error: 'Missing origin' });
+    }
+    try {
+      const u = new URL(normalized);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+        return res.status(400).json({ error: 'Invalid Origin URL scheme.' });
+      }
+    } catch {
+      return res.status(400).json({ error: 'Invalid Origin header.' });
+    }
+    clientBase = normalized;
+  }
+
+  const idemRaw = req.get('idempotency-key');
+  const idemParsed = idempotencyKeyHeaderSchema.safeParse(idemRaw);
+  if (!idemParsed.success) {
+    req.log?.warn(
+      { securityEvent: 'checkout_idempotency_key_invalid' },
+      'security',
+    );
+    return res.status(400).json({
+      error: 'Idempotency-Key header required (UUID v4)',
+    });
+  }
+  const idempotencyKey = idemParsed.data;
+
+  let parsed;
+  try {
+    parsed = checkoutSessionBodySchema.parse(req.body ?? {});
+  } catch (err) {
+    if (err instanceof ZodError) {
+      req.log?.warn(
+        { securityEvent: 'checkout_payload_schema_invalid' },
+        'security',
+      );
+      if (env.nodeEnv === 'production') {
+        return res.status(400).json({ error: 'Invalid request body' });
+      }
+      return res.status(400).json({
+        error: 'Invalid request body',
+        details: err.flatten(),
+      });
+    }
+    throw err;
+  }
+
+  const priced = resolveCheckoutPricing({
+    packageId: parsed.packageId,
+    amountUsdCents: parsed.amountUsdCents,
+  });
+  if (!priced.ok) {
+    req.log?.warn(
+      { securityEvent: 'checkout_pricing_rejected', code: priced.code },
+      'security',
+    );
+    return res.status(400).json({
+      error:
+        env.nodeEnv === 'production'
+          ? 'Checkout cannot be priced safely'
+          : priced.message,
+      code: priced.code,
+    });
+  }
+
+  const trustedCents = priced.pricing.finalPriceCents;
+
+  const pair = validatePackageOperatorPair(
+    parsed.packageId,
+    parsed.operatorKey,
+  );
+  if (!pair.ok) {
+    req.log?.warn(
+      { securityEvent: 'checkout_package_operator_mismatch' },
+      'security',
+    );
+    return res.status(400).json({
+      error:
+        env.nodeEnv === 'production'
+          ? 'Invalid checkout request'
+          : pair.error,
+    });
+  }
+
+  let recipientNational = null;
+  if (parsed.recipientPhone) {
+    recipientNational = normalizeAfghanNational(parsed.recipientPhone);
+    if (!recipientNational) {
+      return res.status(400).json({ error: 'Invalid recipient phone' });
+    }
+    const v = validateAfghanMobileNational(recipientNational);
+    if (!v.ok) {
+      return res
+        .status(400)
+        .json({ error: v.error || 'Invalid recipient phone' });
+    }
+  }
+
+  const fingerprint = checkoutRequestFingerprint({
+    userId: authUserId,
+    amountUsdCents: trustedCents,
+    operatorKey: parsed.operatorKey ?? null,
+    recipientNational,
+    packageId: parsed.packageId ?? null,
+  });
+
+  // Anti-abuse: detect excessive/rapid repeated checkout creation attempts.
+  // This is intentionally conservative: we only block when there is already an
+  // in-flight PaymentCheckout for this fingerprint (before fulfillment starts).
+  const deviceHash = deviceFingerprintHash(req);
+  const abuse = await classifyCheckoutAbuseDistributed({
+    userId: authUserId,
+    ip: req.ip,
+    fingerprint,
+    idempotencyKey,
+    deviceFingerprintHash: deviceHash,
+    now: new Date(),
+  });
+
+  if (abuse.severity === 'high') {
+    // Confirm there is an existing non-terminal checkout for this fingerprint.
+    const latestPending = await prisma.paymentCheckout.findFirst({
+      where: {
+        userId: authUserId,
+        requestFingerprint: fingerprint,
+        orderStatus: {
+          in: [ORDER_STATUS.PENDING, ORDER_STATUS.PAID, ORDER_STATUS.PROCESSING],
+        },
+      },
+      select: { createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const ageMs = latestPending?.createdAt
+      ? Date.now() - new Date(latestPending.createdAt).getTime()
+      : null;
+
+    // Block only if a pending checkout exists and the new attempt is rapid.
+    if (latestPending && ageMs != null && ageMs < 30_000) {
+      req.log?.warn(
+        {
+          securityEvent: 'checkout_abuse_blocked',
+          abuseSeverity: abuse.severity,
+          abuseReasonCode: abuse.reasonCode,
+          reasonCodes: abuse.reasonCodes,
+          abuseDetail: abuse.detail,
+          userId: authUserId,
+          ip: req.ip,
+          fingerprintPrefix: fingerprint.slice(0, 12),
+          pendingAgeMs: ageMs,
+        },
+        'security',
+      );
+      return res.status(429).json({
+        error: 'Too many checkout attempts; please wait.',
+        abuse: {
+          severity: abuse.severity,
+          reasonCode: abuse.reasonCode,
+          reasonCodes: abuse.reasonCodes,
+          detail: abuse.detail,
+          recommendedAction: abuse.recommendedAction,
+        },
+      });
+    }
+
+    // High severity without pending-in-flight is only flagged, never blocked.
+    req.log?.warn(
+      {
+        securityEvent: 'checkout_abuse_flagged',
+        abuseSeverity: abuse.severity,
+        abuseReasonCode: abuse.reasonCode,
+        reasonCodes: abuse.reasonCodes,
+        abuseDetail: abuse.detail,
+        userId: authUserId,
+        ip: req.ip,
+        fingerprintPrefix: fingerprint.slice(0, 12),
+      },
+      'security',
+    );
+  } else if (abuse.severity === 'medium') {
+    req.log?.info(
+      {
+        securityEvent: 'checkout_abuse_flagged',
+        abuseSeverity: abuse.severity,
+        abuseReasonCode: abuse.reasonCode,
+        reasonCodes: abuse.reasonCodes,
+        abuseDetail: abuse.detail,
+        userId: authUserId,
+        ip: req.ip,
+        fingerprintPrefix: fingerprint.slice(0, 12),
+      },
+      'security',
+    );
+  }
+
+  try {
+    const reused = await findReusableCheckout({
+      idempotencyKey,
+      fingerprint,
+      userId: authUserId,
+    });
+    if (reused) {
+      req.log?.info(
+        { checkoutId: reused.id, reused: true },
+        'checkout idempotent replay',
+      );
+      return res.json({
+        url: reused.url,
+        orderId: reused.id,
+        orderReference: reused.id,
+      });
+    }
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message });
+    throw e;
+  }
+
+  let row;
+  try {
+    row = await createInitiatedRow({
+      idempotencyKey,
+      fingerprint,
+      userId: authUserId,
+      amountUsdCents: trustedCents,
+      currency: parsed.currency,
+      operatorKey: parsed.operatorKey ?? null,
+      recipientNational,
+      packageId: parsed.packageId ?? null,
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === 'P2002'
+    ) {
+      const existing = await getCheckoutByIdempotencyKey(idempotencyKey);
+      if (
+        existing &&
+        existing.requestFingerprint === fingerprint &&
+        existing.stripeCheckoutUrl
+      ) {
+        return res.json({ url: existing.stripeCheckoutUrl });
+      }
+      return res.status(409).json({ error: 'Checkout already in progress' });
+    }
+    throw e;
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create(
+      {
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: parsed.currency,
+              product_data: { name: 'Zora Walat payment' },
+              unit_amount: trustedCents,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${clientBase}/success?session_id={CHECKOUT_SESSION_ID}&order_id=${encodeURIComponent(row.id)}`,
+        cancel_url: `${clientBase}/cancel`,
+        client_reference_id: row.id,
+        metadata: {
+          internalCheckoutId: row.id,
+          idempotencyKey,
+          appUserId: authUserId,
+        },
+      },
+      { idempotencyKey },
+    );
+
+    await markCheckoutCreated(row.id, {
+      stripeCheckoutSessionId: session.id,
+      stripeCheckoutUrl: session.url,
+    });
+
+    await writeOrderAudit(prisma, {
+      event: 'checkout_session_created',
+      payload: { orderId: row.id, stripeCheckoutSessionId: session.id },
+      ip: req.ip,
+    });
+
+    req.log?.info(
+      { checkoutId: row.id, sessionId: session.id },
+      'checkout session created',
+    );
+    return res.json({
+      url: session.url,
+      orderId: row.id,
+      orderReference: row.id,
+    });
+  } catch (e) {
+    await markCheckoutFailed(row.id);
+    throw e;
+  }
+}

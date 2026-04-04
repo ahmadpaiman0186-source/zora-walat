@@ -24,10 +24,12 @@
   },
   "paymentPreparing": "Preparing secure checkout…",
   "paymentSuccessTitle": "Payment successful",
-  "paymentSuccessBody": "Your payment is confirmed. You can continue to pick airtime or data packages.",
+  "paymentSuccessBody": "You returned from Stripe after checkout. This screen is for your convenience only — payment confirmation is processed on our servers (not from this page alone). Carrier delivery follows after verification.",
   "paymentFailedTitle": "Payment failed",
   "paymentCancelledTitle": "Payment cancelled",
   "paymentCancelledBody": "No charge was made. You can try again when ready.",
+  "paymentCheckoutRedirectTitle": "Stripe Checkout",
+  "paymentCheckoutRedirectBody": "Complete payment on the next page. When you return here, confirmation may take a moment.",
   "paymentTryAgain": "Try again",
   "paymentBackToReview": "Edit details",
   "languageSheetSubtitle": "English, Dari, and Pashto are fully supported.",
@@ -105,8 +107,6 @@
   "callingTitle": "International calling",
   "callingBody": "We’re building international calling with the same secure checkout you use for recharge.\nCheck back soon.",
   "missingOrder": "We couldn’t open this order. Go back and try again.",
-  "paymentSuccessTitle": "Payment successful",
-  "paymentSuccessBody": "Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.",
   "paymentCancelled": "Payment cancelled",
   "reviewPayTitle": "Review & pay",
   "orderSummary": "Order summary",
@@ -156,5 +156,88 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phoneValidationEmpty": "Enter a mobile number.",
+  "phoneValidationInvalid": "Enter a valid Afghanistan mobile number.",
+  "phoneValidationLength": "Number should be 9–10 digits (after 7…).",
+  "phoneValidationPrefix": "Afghan mobile numbers start with 7.",
+  "phoneValidationFormat": "Invalid mobile format.",
+  "telecomNoDataPackages": "No data packages for this operator right now. Try another network or check back later.",
+  "dataVolumeGb": "{n} GB",
+  "@dataVolumeGb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dataVolumeMb": "{n} MB",
+  "@dataVolumeMb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "validityOneDay": "1 day",
+  "validity7Days": "7 days",
+  "validity30Days": "30 days",
+  "validityNDays": "{n} days",
+  "@validityNDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyUsdHint": "Prices in US dollars (USD).",
+  "actionRetry": "Retry",
+  "telecomCatalogLoadError": "We couldn’t load options. Check your connection and tap Retry.",
+  "telecomAirtimeEmpty": "No amounts are available for this network right now.",
+  "telecomLoadingAmounts": "Loading amounts…",
+  "checkoutYourOrder": "Your order",
+  "checkoutPaymentSecureNote": "You’ll pay on Stripe’s secure page. Your card details never pass through our servers.",
+  "telecomDataPackagesSectionTitle": "Choose a package",
+  "telecomDataLoadingPackages": "Loading packages…",
+  "authSignInTitle": "Sign in",
+  "authRegisterTitle": "Create account",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authSignInCta": "Sign in",
+  "authRegisterCta": "Register",
+  "authRegisterPasswordHint": "Use at least 10 characters",
+  "authSwitchToRegister": "Need an account? Register",
+  "authSwitchToSignIn": "Already have an account? Sign in",
+  "authRequiredMessage": "Please sign in to continue.",
+  "authSignOut": "Sign out",
+  "authAccountTileTitle": "Account",
+  "authAccountTileSignedInSub": "Signed in",
+  "authAccountTileSignedOutSub": "Sign in for wallet and payments",
+  "authGenericError": "Something went wrong. Please try again.",
+  "authFillAllFields": "Enter your email and password.",
+  "landingNavBrand": "Zora-Walat",
+  "landingHeroTitle": "Send airtime to Afghanistan in seconds",
+  "landingHeroSubtitle": "International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.",
+  "landingTrustBadge": "USD pricing · Secure checkout · Built for the diaspora",
+  "landingCtaGetStarted": "Get started",
+  "landingCtaSignIn": "Sign in",
+  "landingLanguagesTitle": "Languages",
+  "landingLanguagesBody": "Full experience in English, Dari, and Pashto — switch anytime from the toolbar.",
+  "landingWhyTitle": "Why Zora-Walat",
+  "landingWhyFastTitle": "Fast top-up",
+  "landingWhyFastBody": "Complete your purchase quickly and move from amount to package without friction.",
+  "landingWhySecureTitle": "Secure payments",
+  "landingWhySecureBody": "Checkout uses trusted card processing — your card details never touch our servers.",
+  "landingWhyPricingTitle": "Transparent pricing",
+  "landingWhyPricingBody": "See costs clearly in US dollars before you pay — no surprises at checkout.",
+  "landingWhyLangTitle": "Multi-language experience",
+  "landingWhyLangBody": "Use the app in English, Dari, or Pashto — whichever fits you and your family.",
+  "landingHowTitle": "How it works",
+  "landingHowStep1Title": "Enter the Afghan number",
+  "landingHowStep1Body": "Choose the operator and amount in USD, or pick an airtime or data package.",
+  "landingHowStep2Title": "Review and pay securely",
+  "landingHowStep2Body": "Confirm details, then complete payment on Stripe’s hosted checkout — your card never touches our servers.",
+  "landingHowStep3Title": "Top-up is delivered",
+  "landingHowStep3Body": "We process your order and send credit to the recipient’s mobile line.",
+  "landingFooterNote": "Zora-Walat · Afghanistan mobile top-up"
 }

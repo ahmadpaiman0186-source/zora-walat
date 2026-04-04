@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,19 +6,24 @@ import '../../l10n/app_localizations.dart';
 import '../../features/calling/calling_placeholder_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/presentation/main_home_screen.dart';
+import '../../features/landing/presentation/landing_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
+import '../../features/payments/presentation/payment_cancel_screen.dart';
+import '../../features/payments/presentation/success_screen.dart';
 import '../../features/recharge/presentation/recharge_review_screen.dart';
 import '../../features/recharge/presentation/recharge_screen.dart';
 import '../../features/telecom/domain/telecom_order.dart';
 import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
+import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../models/recharge_draft.dart';
 
 abstract final class AppRoutePaths {
   static const splash = '/splash';
   static const language = '/language';
-  static const home = '/';
+  /// Public marketing landing (default web root).
+  static const landing = '/';
   static const rechargeReview = '/recharge/review';
   static const hub = '/hub';
   static const recharge = '/recharge';
@@ -25,14 +31,28 @@ abstract final class AppRoutePaths {
   static const calling = '/calling';
   static const telecom = '/telecom';
   static const checkout = '/checkout';
+  static const signIn = '/sign-in';
+  static const paymentSuccess = '/success';
+  static const paymentCancel = '/cancel';
 }
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// On web, honor the browser path for Stripe return URLs (`/success`, `/cancel`).
+/// Root `/` loads the public [LandingScreen] (deploy-friendly home).
+String initialAppLocation() {
+  if (!kIsWeb) return AppRoutePaths.splash;
+  final u = Uri.base;
+  final path = u.path;
+  if (path.isEmpty || path == '/') return AppRoutePaths.landing;
+  if (u.hasQuery) return '$path?${u.query}';
+  return path;
+}
+
 GoRouter createAppRouter() {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutePaths.splash,
+    initialLocation: initialAppLocation(),
     routes: [
       GoRoute(
         path: AppRoutePaths.splash,
@@ -45,9 +65,9 @@ GoRouter createAppRouter() {
         builder: (context, state) => const LanguageSelectionScreen(),
       ),
       GoRoute(
-        path: AppRoutePaths.home,
-        name: 'home',
-        builder: (context, state) => const RechargeScreen(),
+        path: AppRoutePaths.landing,
+        name: 'landing',
+        builder: (context, state) => const LandingScreen(),
       ),
       GoRoute(
         path: AppRoutePaths.rechargeReview,
@@ -97,6 +117,24 @@ GoRouter createAppRouter() {
           }
           return CheckoutScreen(order: order);
         },
+      ),
+      GoRoute(
+        path: AppRoutePaths.signIn,
+        name: 'signIn',
+        builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: AppRoutePaths.paymentSuccess,
+        name: 'paymentSuccess',
+        builder: (context, state) => SuccessScreen(
+          checkoutSessionId: state.uri.queryParameters['session_id'],
+          orderReference: state.uri.queryParameters['order_id'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutePaths.paymentCancel,
+        name: 'paymentCancel',
+        builder: (context, state) => const PaymentCancelScreen(),
       ),
     ],
   );

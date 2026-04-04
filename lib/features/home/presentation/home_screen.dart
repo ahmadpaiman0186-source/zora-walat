@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/widgets/language_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../telecom/presentation/telecom_hub_screen.dart';
@@ -25,7 +24,7 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(AppConfig.appName, style: t.textTheme.headlineSmall),
+                        Text('Zora-Walat', style: t.textTheme.headlineSmall),
                         const SizedBox(height: 4),
                         Text(
                           l10n.telecomHomeSubtitle,

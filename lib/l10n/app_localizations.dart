@@ -205,7 +205,7 @@ abstract class AppLocalizations {
   /// No description provided for @paymentSuccessBody.
   ///
   /// In en, this message translates to:
-  /// **'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.'**
+  /// **'You returned from Stripe after checkout. This screen is for your convenience only — payment confirmation is processed on our servers (not from this page alone). Carrier delivery follows after verification.'**
   String get paymentSuccessBody;
 
   /// No description provided for @paymentFailedTitle.
@@ -225,6 +225,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No charge was made. You can try again when ready.'**
   String get paymentCancelledBody;
+
+  /// No description provided for @paymentCheckoutRedirectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe Checkout'**
+  String get paymentCheckoutRedirectTitle;
+
+  /// No description provided for @paymentCheckoutRedirectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete payment on the next page. When you return here, confirmation may take a moment.'**
+  String get paymentCheckoutRedirectBody;
 
   /// No description provided for @paymentTryAgain.
   ///
@@ -523,7 +535,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDevHint.
   ///
   /// In en, this message translates to:
-  /// **'Developers: pass STRIPE_PUBLISHABLE_KEY and PAYMENTS_API_BASE_URL at build time.'**
+  /// **'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.'**
   String get aboutDevHint;
 
   /// No description provided for @tabAirtime.
@@ -777,6 +789,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'≥{pct}% min. margin'**
   String telecomMarginNote(String pct);
+
+  /// No description provided for @phoneValidationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a mobile number.'**
+  String get phoneValidationEmpty;
+
+  /// No description provided for @phoneValidationInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Afghanistan mobile number.'**
+  String get phoneValidationInvalid;
+
+  /// No description provided for @phoneValidationLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Number should be 9–10 digits (after 7…).'**
+  String get phoneValidationLength;
+
+  /// No description provided for @phoneValidationPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Afghan mobile numbers start with 7.'**
+  String get phoneValidationPrefix;
+
+  /// No description provided for @phoneValidationFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid mobile format.'**
+  String get phoneValidationFormat;
+
+  /// No description provided for @telecomNoDataPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'No data packages for this operator right now. Try another network or check back later.'**
+  String get telecomNoDataPackages;
+
+  /// No description provided for @dataVolumeGb.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} GB'**
+  String dataVolumeGb(String n);
+
+  /// No description provided for @dataVolumeMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} MB'**
+  String dataVolumeMb(String n);
+
+  /// No description provided for @validityOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get validityOneDay;
+
+  /// No description provided for @validity7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days'**
+  String get validity7Days;
+
+  /// No description provided for @validity30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'30 days'**
+  String get validity30Days;
+
+  /// No description provided for @validityNDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} days'**
+  String validityNDays(String n);
+
+  /// No description provided for @currencyUsdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices in US dollars (USD).'**
+  String get currencyUsdHint;
+
+  /// No description provided for @actionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get actionRetry;
+
+  /// No description provided for @telecomCatalogLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t load options. Check your connection and tap Retry.'**
+  String get telecomCatalogLoadError;
+
+  /// No description provided for @telecomAirtimeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No amounts are available for this network right now.'**
+  String get telecomAirtimeEmpty;
+
+  /// No description provided for @telecomLoadingAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading amounts…'**
+  String get telecomLoadingAmounts;
+
+  /// No description provided for @checkoutYourOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order'**
+  String get checkoutYourOrder;
+
+  /// No description provided for @checkoutPaymentSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll pay on Stripe’s secure page. Your card details never pass through our servers.'**
+  String get checkoutPaymentSecureNote;
+
+  /// No description provided for @telecomDataPackagesSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a package'**
+  String get telecomDataPackagesSectionTitle;
+
+  /// No description provided for @telecomDataLoadingPackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading packages…'**
+  String get telecomDataLoadingPackages;
+
+  /// No description provided for @authSignInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInTitle;
+
+  /// No description provided for @authRegisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authRegisterTitle;
+
+  /// No description provided for @authEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmailLabel;
+
+  /// No description provided for @authPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordLabel;
+
+  /// No description provided for @authSignInCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get authSignInCta;
+
+  /// No description provided for @authRegisterCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get authRegisterCta;
+
+  /// No description provided for @authRegisterPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 10 characters'**
+  String get authRegisterPasswordHint;
+
+  /// No description provided for @authSwitchToRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Need an account? Register'**
+  String get authSwitchToRegister;
+
+  /// No description provided for @authSwitchToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get authSwitchToSignIn;
+
+  /// No description provided for @authRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to continue.'**
+  String get authRequiredMessage;
+
+  /// No description provided for @authSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get authSignOut;
+
+  /// No description provided for @authAccountTileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get authAccountTileTitle;
+
+  /// No description provided for @authAccountTileSignedInSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get authAccountTileSignedInSub;
+
+  /// No description provided for @authAccountTileSignedOutSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in for wallet and payments'**
+  String get authAccountTileSignedOutSub;
+
+  /// No description provided for @authGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authGenericError;
+
+  /// No description provided for @authFillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and password.'**
+  String get authFillAllFields;
+
+  /// No description provided for @landingNavBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Zora-Walat'**
+  String get landingNavBrand;
+
+  /// No description provided for @landingHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send airtime to Afghanistan in seconds'**
+  String get landingHeroTitle;
+
+  /// No description provided for @landingHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.'**
+  String get landingHeroSubtitle;
+
+  /// No description provided for @landingTrustBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'USD pricing · Secure checkout · Built for the diaspora'**
+  String get landingTrustBadge;
+
+  /// No description provided for @landingCtaGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get landingCtaGetStarted;
+
+  /// No description provided for @landingCtaSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get landingCtaSignIn;
+
+  /// No description provided for @landingLanguagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get landingLanguagesTitle;
+
+  /// No description provided for @landingLanguagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Full experience in English, Dari, and Pashto — switch anytime from the toolbar.'**
+  String get landingLanguagesBody;
+
+  /// No description provided for @landingWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why Zora-Walat'**
+  String get landingWhyTitle;
+
+  /// No description provided for @landingWhyFastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast top-up'**
+  String get landingWhyFastTitle;
+
+  /// No description provided for @landingWhyFastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your purchase quickly and move from amount to package without friction.'**
+  String get landingWhyFastBody;
+
+  /// No description provided for @landingWhySecureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure payments'**
+  String get landingWhySecureTitle;
+
+  /// No description provided for @landingWhySecureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout uses trusted card processing — your card details never touch our servers.'**
+  String get landingWhySecureBody;
+
+  /// No description provided for @landingWhyPricingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent pricing'**
+  String get landingWhyPricingTitle;
+
+  /// No description provided for @landingWhyPricingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See costs clearly in US dollars before you pay — no surprises at checkout.'**
+  String get landingWhyPricingBody;
+
+  /// No description provided for @landingWhyLangTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-language experience'**
+  String get landingWhyLangTitle;
+
+  /// No description provided for @landingWhyLangBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the app in English, Dari, or Pashto — whichever fits you and your family.'**
+  String get landingWhyLangBody;
+
+  /// No description provided for @landingHowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get landingHowTitle;
+
+  /// No description provided for @landingHowStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the Afghan number'**
+  String get landingHowStep1Title;
+
+  /// No description provided for @landingHowStep1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the operator and amount in USD, or pick an airtime or data package.'**
+  String get landingHowStep1Body;
+
+  /// No description provided for @landingHowStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and pay securely'**
+  String get landingHowStep2Title;
+
+  /// No description provided for @landingHowStep2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm details, then complete payment on Stripe’s hosted checkout — your card never touches our servers.'**
+  String get landingHowStep2Body;
+
+  /// No description provided for @landingHowStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up is delivered'**
+  String get landingHowStep3Title;
+
+  /// No description provided for @landingHowStep3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We process your order and send credit to the recipient’s mobile line.'**
+  String get landingHowStep3Body;
+
+  /// No description provided for @landingFooterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Zora-Walat · Afghanistan mobile top-up'**
+  String get landingFooterNote;
 }
 
 class _AppLocalizationsDelegate

@@ -87,6 +87,19 @@ abstract final class AppTheme {
 
     return base.copyWith(
       textTheme: textTheme,
+      chipTheme: ChipThemeData(
+        backgroundColor: _surfaceVariant,
+        selectedColor: _primary.withValues(alpha: 0.28),
+        disabledColor: _surfaceVariant.withValues(alpha: 0.5),
+        labelStyle: textTheme.labelLarge?.copyWith(color: Colors.white),
+        secondaryLabelStyle: textTheme.labelSmall,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: _onMuted.withValues(alpha: 0.25)),
+        ),
+        showCheckmark: false,
+      ),
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,

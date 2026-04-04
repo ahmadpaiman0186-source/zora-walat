@@ -1,4 +1,5 @@
 import '../../features/telecom/domain/mobile_operator.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Normalizes user input to national mobile digits (leading [7], 9–10 digits).
 ///
@@ -32,25 +33,38 @@ abstract final class AfghanPhoneUtils {
     return d;
   }
 
-  /// Validation suitable for TextFormField (null = valid).
-  static String? validationError(String? raw) {
+  /// Localized validation for [TextFormField] (null = valid).
+  static String? validationErrorL10n(AppLocalizations l10n, String? raw) {
     if (raw == null || raw.trim().isEmpty) {
-      return 'Enter a mobile number';
+      return l10n.phoneValidationEmpty;
     }
     final n = normalizeNational(raw);
     if (n == null || n.isEmpty) {
-      return 'Use a valid Afghanistan mobile number';
+      return l10n.phoneValidationInvalid;
     }
     if (n.length < 9 || n.length > 10) {
-      return 'Number should be 9–10 digits (after 7…)';
+      return l10n.phoneValidationLength;
     }
     if (!n.startsWith('7')) {
-      return 'Afghan mobile numbers start with 7';
+      return l10n.phoneValidationPrefix;
     }
     if (!RegExp(r'^7\d{8,9}$').hasMatch(n)) {
-      return 'Invalid mobile format';
+      return l10n.phoneValidationFormat;
     }
     return null;
+  }
+
+  /// Display as `+93 7XX XXX XXXX` for review screens (national [7…] digits).
+  static String displayInternational(String raw) {
+    final n = normalizeNational(raw);
+    if (n == null || n.isEmpty) return raw.trim();
+    if (n.length == 9) {
+      return '+93 ${n.substring(0, 2)} ${n.substring(2, 5)} ${n.substring(5)}';
+    }
+    if (n.length == 10) {
+      return '+93 ${n.substring(0, 2)} ${n.substring(2, 5)} ${n.substring(5, 9)} ${n.substring(9)}';
+    }
+    return '+93 $n';
   }
 
   /// Masks middle digits for logs: `70••••4567`.

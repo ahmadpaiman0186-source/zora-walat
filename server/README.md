@@ -1,54 +1,34 @@
-# Zora-Walat API (production-oriented BFF)
+# Zora-Walat API (Node / Express + Prisma)
 
-Secure backend for **Stripe** payments, **Reloadly** airtime fulfillment, **ledger + audit logs**, fraud checks, and admin wallet visibility.
+Entry: **`index.js`** (repo `server/index.js`) loads **`bootstrap.js`** (reads **`server/.env`**, then optional **`server/.env.local`**) then **`src/index.js`**.
 
 ## Quick start (Node 20+)
 
 ```bash
 cd server
 cp .env.example .env
-# Fill STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RELOADLY_* and operator IDs.
+# Edit .env: DATABASE_URL, JWT_* secrets, STRIPE_SECRET_KEY for checkout tests
 npm install
-npx prisma db push
-npm run dev
+npm start
 ```
 
-## Reloadly operator IDs
+Default listen: **`http://127.0.0.1:8787`** (`PORT` in `.env`).
 
-1. Obtain OAuth client credentials in the Reloadly dashboard.  
-2. List Afghanistan operators: sandbox/prod Airtime API `GET /operators?countryCode=AF` (see [Reloadly docs](https://docs.reloadly.com/airtime/)).  
-3. Map each Zora-Walat operator to numeric `RELOADLY_OPERATOR_*` in `.env`.
+Dev with auto-restart: `npm run dev`
 
-## Stripe webhook
+## Environment
 
-Point Stripe to `POST https://your-host/webhooks/stripe` with signing secret `STRIPE_WEBHOOK_SECRET`. On `payment_intent.succeeded`, the server:
+- **Template:** `.env.example` (comments describe local vs production).  
+- **Secrets:** never commit `.env` / `.env.local`. Optional **`stripe_secret.key`** (single line, gitignored) instead of `STRIPE_SECRET_KEY` in `.env`.  
+- **Prisma:** `npm run db:validate` / `npm run db:migrate` — use these from `server/` so bootstrap loads env (see `.env.example` note).
 
-1. Validates the DB order
-2. Calls Reloadly for `service_line=airtime`
-3. Credits the **platform commission wallet** (10% of captured amount) only after Reloadly succeeds
-4. Refunds the charge automatically if Reloadly fails (configure alerts for refund failures)
+## Flutter client
 
-Non-airtime SKUs (e.g. data) accrue commission without Reloadly until a data API is wired.
+API base URL for local dev defaults in **`lib/core/config/app_config.dart`** (`http://127.0.0.1:8787`). Override: `--dart-define=API_BASE_URL=...`.
 
-## Flutter
+## Features (high level)
 
-```bash
-flutter run \
-  --dart-define=PAYMENTS_API_BASE_URL=http://10.0.2.2:8787 \
-  --dart-define=STRIPE_PUBLISHABLE_KEY=YOUR_STRIPE_PUBLISHABLE_KEY \
-  --dart-define=BFF_API_KEY=your-shared-secret
-```
-
-Use your LAN IP instead of `10.0.2.2` for physical devices.
-
-## Admin
-
-`GET /admin/wallet` with header `X-Admin-Key: <ADMIN_API_KEY>` returns commission balance, recent ledger rows, and orders.
-
-## Firebase alternative
-
-The same routes can run under **Firebase Cloud Functions** (Express adapter) or **Cloud Run**. Move env vars to Secret Manager; keep **webhook raw body** verification unchanged.
-
-## DT One
-
-See `src/providers/dtone.placeholder.js` for extension point to swap or dual-route providers.
+- **Auth:** `POST /auth/register`, `POST /auth/login`, JWT refresh.  
+- **Stripe:** `POST /create-checkout-session` (authenticated).  
+- **Fulfillment:** airtime via configured provider (e.g. Reloadly or mock); see `src/domain/delivery/`.  
+- **Legacy placeholder:** `src/providers/dtone.placeholder.js` — not the primary integration path.

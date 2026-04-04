@@ -40,8 +40,13 @@ node_modules/
 
 # Secrets (use .env.example for templates)
 .env
+.env.local
 **/.env
 !**/.env.example
+# Named env variants (e.g. .env.staging); keep templates tracked
+**/.env.*
+!**/.env.local.example
+**/stripe_secret.key
 
 # Symbolication related
 app.*.symbols
@@ -53,3 +58,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.vercel
+.env*.local

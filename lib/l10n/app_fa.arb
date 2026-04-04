@@ -24,10 +24,12 @@
   },
   "paymentPreparing": "در حال آماده‌سازی پرداخت امن…",
   "paymentSuccessTitle": "پرداخت موفق",
-  "paymentSuccessBody": "پرداخت شما تأیید شد. می‌توانید برای انتخاب بستهٔ اعتبار یا دیتا ادامه دهید.",
+  "paymentSuccessBody": "از Stripe برگشتید. این صفحه فقط برای راحتی شماست — تأیید نهایی پرداخت روی سرورهای ما انجام می‌شود. تحویل اپراتور پس از تأیید انجام می‌شود.",
   "paymentFailedTitle": "پرداخت ناموفق",
   "paymentCancelledTitle": "پرداخت لغو شد",
   "paymentCancelledBody": "هیچ مبلقی کسر نشد. هر زمان بخواهید دوباره تلاش کنید.",
+  "paymentCheckoutRedirectTitle": "پرداخت Stripe",
+  "paymentCheckoutRedirectBody": "پرداخت را در صفحهٔ بعد تکمیل کنید. پس از بازگشت، تأیید ممکن است کمی طول بکشد.",
   "paymentTryAgain": "تلاش دوباره",
   "paymentBackToReview": "ویرایش جزئیات",
   "languageSheetSubtitle": "انگلیسی، دری و پښتو به‌طور کامل پشتیبانی می‌شوند.",
@@ -84,8 +86,6 @@
   "callingTitle": "تماس بین‌الملل",
   "callingBody": "تماس بین‌الملل را با همان تسویهٔ امن شارژ می‌سازیم.\nبه‌زودی برگردید.",
   "missingOrder": "این سفارش باز نشد. برگردید و دوباره تلاش کنید.",
-  "paymentSuccessTitle": "پرداخت موفق",
-  "paymentSuccessBody": "متشکریم. پرداخت شما تأیید شد؛ تحویل اپراتور به‌زودی انجام می‌شود.",
   "paymentCancelled": "پرداخت لغو شد",
   "reviewPayTitle": "بررسی و پرداخت",
   "orderSummary": "خلاصهٔ سفارش",
@@ -121,5 +121,88 @@
   "periodMonthly": "ماهانه",
   "bestValueBadge": "بهترین ارزش",
   "telecomVoiceBundle": "صدا",
-  "telecomMarginNote": "حداقل {pct}٪ حاشیه"
+  "telecomMarginNote": "حداقل {pct}٪ حاشیه",
+  "phoneValidationEmpty": "شماره موبایل را وارد کنید.",
+  "phoneValidationInvalid": "شماره موبایل معتبر افغانستان را وارد کنید.",
+  "phoneValidationLength": "پس از ۷ باید ۹ یا ۱۰ رقم باشد.",
+  "phoneValidationPrefix": "شماره‌های افغان با ۷ شروع می‌شوند.",
+  "phoneValidationFormat": "قالب شماره نامعتبر است.",
+  "telecomNoDataPackages": "فعلاً بستهٔ دیتایی برای این اپراتور نیست. اپراتور دیگری را امتحان کنید یا بعداً سر بزنید.",
+  "dataVolumeGb": "{n} گیگابایت",
+  "@dataVolumeGb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dataVolumeMb": "{n} مگابایت",
+  "@dataVolumeMb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "validityOneDay": "۱ روز",
+  "validity7Days": "۷ روز",
+  "validity30Days": "۳۰ روز",
+  "validityNDays": "{n} روز",
+  "@validityNDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyUsdHint": "قیمت‌ها به دلار آمریکا (USD) است.",
+  "actionRetry": "تلاش دوباره",
+  "telecomCatalogLoadError": "گزینه‌ها بار نشد. اتصال را بررسی کرده و «تلاش دوباره» را بزنید.",
+  "telecomAirtimeEmpty": "فعلاً مبلغی برای این شبکه موجود نیست.",
+  "telecomLoadingAmounts": "در حال بارگذاری مبالغ…",
+  "checkoutYourOrder": "سفارش شما",
+  "checkoutPaymentSecureNote": "پرداخت در صفحهٔ امن Stripe انجام می‌شود. اطلاعات کارت از سرورهای ما عبور نمی‌کند.",
+  "telecomDataPackagesSectionTitle": "یک بسته انتخاب کنید",
+  "telecomDataLoadingPackages": "در حال بارگذاری بسته‌ها…",
+  "authSignInTitle": "ورود",
+  "authRegisterTitle": "ایجاد حساب",
+  "authEmailLabel": "ایمیل",
+  "authPasswordLabel": "رمز عبور",
+  "authSignInCta": "ورود",
+  "authRegisterCta": "ثبت‌نام",
+  "authRegisterPasswordHint": "حداقل ۱۰ نویسه",
+  "authSwitchToRegister": "حساب ندارید؟ ثبت‌نام",
+  "authSwitchToSignIn": "حساب دارید؟ ورود",
+  "authRequiredMessage": "لطفاً برای ادامه وارد شوید.",
+  "authSignOut": "خروج",
+  "authAccountTileTitle": "حساب",
+  "authAccountTileSignedInSub": "وارد شده‌اید",
+  "authAccountTileSignedOutSub": "برای کیف پول و پرداخت وارد شوید",
+  "authGenericError": "مشکلی پیش آمد. دوباره تلاش کنید.",
+  "authFillAllFields": "ایمیل و رمز عبور را وارد کنید.",
+  "landingNavBrand": "زوره‌ولت",
+  "landingHeroTitle": "شارژ افغانستان را در چند ثانیه بفرستید",
+  "landingHeroSubtitle": "شارژ بین‌المللی برای شماره‌های افغانستان — برای خانواده‌هایی که به راهی سریع و مطمئن برای ارتباط نیاز دارند.",
+  "landingTrustBadge": "قیمت‌گذاری دلاری · پرداخت امن · ساخته‌شده برای مهاجران",
+  "landingCtaGetStarted": "شروع کنید",
+  "landingCtaSignIn": "ورود",
+  "landingLanguagesTitle": "زبان‌ها",
+  "landingLanguagesBody": "تجربه کامل به انگلیسی، دری و پښتو — هر زمان از نوار ابزار عوض کنید.",
+  "landingWhyTitle": "چرا زوره‌ولت",
+  "landingWhyFastTitle": "شارژ سریع",
+  "landingWhyFastBody": "خرید را سریع تکمیل کنید و از مبلغ به بسته بدون دردسر برسید.",
+  "landingWhySecureTitle": "پرداخت امن",
+  "landingWhySecureBody": "تسویه از طریق درگاه معتبر — اطلاعات کارت روی سرورهای ما ذخیره نمی‌شود.",
+  "landingWhyPricingTitle": "قیمت شفاف",
+  "landingWhyPricingBody": "قبل از پرداخت هزینه را به دلار آمریکا ببینید — بدون غافلگیری.",
+  "landingWhyLangTitle": "چندزبانه",
+  "landingWhyLangBody": "به انگلیسی، دری یا پښتو از اپ استفاده کنید — هر کدام که برای شما راحت‌تر است.",
+  "landingHowTitle": "چطور کار می‌کند",
+  "landingHowStep1Title": "شماره افغان را وارد کنید",
+  "landingHowStep1Body": "اپراتور و مبلغ به دلار را انتخاب کنید یا بستهٔ اعتبار یا اینترنت را برگزینید.",
+  "landingHowStep2Title": "بررسی و پرداخت امن",
+  "landingHowStep2Body": "جزئیات را تأیید کنید، سپس در صفحهٔ امن Stripe پرداخت کنید — اطلاعات کارت نزد ما ذخیره نمی‌شود.",
+  "landingHowStep3Title": "شارژ تحویل داده می‌شود",
+  "landingHowStep3Body": "سفارش شما پردازش و اعتبار به خط موبایل گیرنده ارسال می‌شود.",
+  "landingFooterNote": "زوره‌ولت · شارژ موبایل افغانستان"
 }

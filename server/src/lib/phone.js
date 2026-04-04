@@ -30,6 +30,16 @@ export function validateAfghanMobileNational(n) {
   return { ok: true };
 }
 
+/**
+ * Afghan mobile national digits (e.g. 7XXXXXXXX) → E.164 (+937…).
+ * Returns null if input is not a valid Afghan mobile national form.
+ */
+export function afghanNationalToE164(national) {
+  const v = validateAfghanMobileNational(national);
+  if (!v.ok) return null;
+  return `+93${national}`;
+}
+
 export function phoneHash(national) {
   return crypto.createHash('sha256').update(national).digest('hex');
 }

@@ -35,7 +35,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     if (!mounted) return;
     await AppScope.of(context).onboardingPrefs.markLanguageOnboardingComplete();
     if (!mounted) return;
-    context.go(AppRoutePaths.home);
+    context.go(AppRoutePaths.recharge);
   }
 
   @override

@@ -67,7 +67,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paymentSuccessBody =>
-      'Thank you. Your payment is confirmed; carrier delivery completes on our side shortly.';
+      'You returned from Stripe after checkout. This screen is for your convenience only — payment confirmation is processed on our servers (not from this page alone). Carrier delivery follows after verification.';
 
   @override
   String get paymentFailedTitle => 'Payment failed';
@@ -78,6 +78,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get paymentCancelledBody =>
       'No charge was made. You can try again when ready.';
+
+  @override
+  String get paymentCheckoutRedirectTitle => 'Stripe Checkout';
+
+  @override
+  String get paymentCheckoutRedirectBody =>
+      'Complete payment on the next page. When you return here, confirmation may take a moment.';
 
   @override
   String get paymentTryAgain => 'Try again';
@@ -244,7 +251,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDevHint =>
-      'Developers: pass STRIPE_PUBLISHABLE_KEY and PAYMENTS_API_BASE_URL at build time.';
+      'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.';
 
   @override
   String get tabAirtime => 'Airtime';
@@ -385,4 +392,212 @@ class AppLocalizationsEn extends AppLocalizations {
   String telecomMarginNote(String pct) {
     return '≥$pct% min. margin';
   }
+
+  @override
+  String get phoneValidationEmpty => 'Enter a mobile number.';
+
+  @override
+  String get phoneValidationInvalid =>
+      'Enter a valid Afghanistan mobile number.';
+
+  @override
+  String get phoneValidationLength =>
+      'Number should be 9–10 digits (after 7…).';
+
+  @override
+  String get phoneValidationPrefix => 'Afghan mobile numbers start with 7.';
+
+  @override
+  String get phoneValidationFormat => 'Invalid mobile format.';
+
+  @override
+  String get telecomNoDataPackages =>
+      'No data packages for this operator right now. Try another network or check back later.';
+
+  @override
+  String dataVolumeGb(String n) {
+    return '$n GB';
+  }
+
+  @override
+  String dataVolumeMb(String n) {
+    return '$n MB';
+  }
+
+  @override
+  String get validityOneDay => '1 day';
+
+  @override
+  String get validity7Days => '7 days';
+
+  @override
+  String get validity30Days => '30 days';
+
+  @override
+  String validityNDays(String n) {
+    return '$n days';
+  }
+
+  @override
+  String get currencyUsdHint => 'Prices in US dollars (USD).';
+
+  @override
+  String get actionRetry => 'Retry';
+
+  @override
+  String get telecomCatalogLoadError =>
+      'We couldn’t load options. Check your connection and tap Retry.';
+
+  @override
+  String get telecomAirtimeEmpty =>
+      'No amounts are available for this network right now.';
+
+  @override
+  String get telecomLoadingAmounts => 'Loading amounts…';
+
+  @override
+  String get checkoutYourOrder => 'Your order';
+
+  @override
+  String get checkoutPaymentSecureNote =>
+      'You’ll pay on Stripe’s secure page. Your card details never pass through our servers.';
+
+  @override
+  String get telecomDataPackagesSectionTitle => 'Choose a package';
+
+  @override
+  String get telecomDataLoadingPackages => 'Loading packages…';
+
+  @override
+  String get authSignInTitle => 'Sign in';
+
+  @override
+  String get authRegisterTitle => 'Create account';
+
+  @override
+  String get authEmailLabel => 'Email';
+
+  @override
+  String get authPasswordLabel => 'Password';
+
+  @override
+  String get authSignInCta => 'Sign in';
+
+  @override
+  String get authRegisterCta => 'Register';
+
+  @override
+  String get authRegisterPasswordHint => 'Use at least 10 characters';
+
+  @override
+  String get authSwitchToRegister => 'Need an account? Register';
+
+  @override
+  String get authSwitchToSignIn => 'Already have an account? Sign in';
+
+  @override
+  String get authRequiredMessage => 'Please sign in to continue.';
+
+  @override
+  String get authSignOut => 'Sign out';
+
+  @override
+  String get authAccountTileTitle => 'Account';
+
+  @override
+  String get authAccountTileSignedInSub => 'Signed in';
+
+  @override
+  String get authAccountTileSignedOutSub => 'Sign in for wallet and payments';
+
+  @override
+  String get authGenericError => 'Something went wrong. Please try again.';
+
+  @override
+  String get authFillAllFields => 'Enter your email and password.';
+
+  @override
+  String get landingNavBrand => 'Zora-Walat';
+
+  @override
+  String get landingHeroTitle => 'Send airtime to Afghanistan in seconds';
+
+  @override
+  String get landingHeroSubtitle =>
+      'International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.';
+
+  @override
+  String get landingTrustBadge =>
+      'USD pricing · Secure checkout · Built for the diaspora';
+
+  @override
+  String get landingCtaGetStarted => 'Get started';
+
+  @override
+  String get landingCtaSignIn => 'Sign in';
+
+  @override
+  String get landingLanguagesTitle => 'Languages';
+
+  @override
+  String get landingLanguagesBody =>
+      'Full experience in English, Dari, and Pashto — switch anytime from the toolbar.';
+
+  @override
+  String get landingWhyTitle => 'Why Zora-Walat';
+
+  @override
+  String get landingWhyFastTitle => 'Fast top-up';
+
+  @override
+  String get landingWhyFastBody =>
+      'Complete your purchase quickly and move from amount to package without friction.';
+
+  @override
+  String get landingWhySecureTitle => 'Secure payments';
+
+  @override
+  String get landingWhySecureBody =>
+      'Checkout uses trusted card processing — your card details never touch our servers.';
+
+  @override
+  String get landingWhyPricingTitle => 'Transparent pricing';
+
+  @override
+  String get landingWhyPricingBody =>
+      'See costs clearly in US dollars before you pay — no surprises at checkout.';
+
+  @override
+  String get landingWhyLangTitle => 'Multi-language experience';
+
+  @override
+  String get landingWhyLangBody =>
+      'Use the app in English, Dari, or Pashto — whichever fits you and your family.';
+
+  @override
+  String get landingHowTitle => 'How it works';
+
+  @override
+  String get landingHowStep1Title => 'Enter the Afghan number';
+
+  @override
+  String get landingHowStep1Body =>
+      'Choose the operator and amount in USD, or pick an airtime or data package.';
+
+  @override
+  String get landingHowStep2Title => 'Review and pay securely';
+
+  @override
+  String get landingHowStep2Body =>
+      'Confirm details, then complete payment on Stripe’s hosted checkout — your card never touches our servers.';
+
+  @override
+  String get landingHowStep3Title => 'Top-up is delivered';
+
+  @override
+  String get landingHowStep3Body =>
+      'We process your order and send credit to the recipient’s mobile line.';
+
+  @override
+  String get landingFooterNote => 'Zora-Walat · Afghanistan mobile top-up';
 }

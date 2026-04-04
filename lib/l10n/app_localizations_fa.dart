@@ -67,7 +67,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get paymentSuccessBody =>
-      'متشکریم. پرداخت شما تأیید شد؛ تحویل اپراتور به‌زودی انجام می‌شود.';
+      'از Stripe برگشتید. این صفحه فقط برای راحتی شماست — تأیید نهایی پرداخت روی سرورهای ما انجام می‌شود. تحویل اپراتور پس از تأیید انجام می‌شود.';
 
   @override
   String get paymentFailedTitle => 'پرداخت ناموفق';
@@ -78,6 +78,13 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get paymentCancelledBody =>
       'هیچ مبلقی کسر نشد. هر زمان بخواهید دوباره تلاش کنید.';
+
+  @override
+  String get paymentCheckoutRedirectTitle => 'پرداخت Stripe';
+
+  @override
+  String get paymentCheckoutRedirectBody =>
+      'پرداخت را در صفحهٔ بعد تکمیل کنید. پس از بازگشت، تأیید ممکن است کمی طول بکشد.';
 
   @override
   String get paymentTryAgain => 'تلاش دوباره';
@@ -243,7 +250,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get aboutDevHint =>
-      'توسعه‌دهندگان: STRIPE_PUBLISHABLE_KEY و PAYMENTS_API_BASE_URL را در زمان build بدهید.';
+      'توسعه‌دهندگان: کلید publishable استرایپ را در lib/stripe_keys.dart قرار دهید؛ در صورت نیاز PAYMENTS_API_BASE_URL را در زمان build بدهید.';
 
   @override
   String get tabAirtime => 'اعتبار';
@@ -383,4 +390,210 @@ class AppLocalizationsFa extends AppLocalizations {
   String telecomMarginNote(String pct) {
     return 'حداقل $pct٪ حاشیه';
   }
+
+  @override
+  String get phoneValidationEmpty => 'شماره موبایل را وارد کنید.';
+
+  @override
+  String get phoneValidationInvalid =>
+      'شماره موبایل معتبر افغانستان را وارد کنید.';
+
+  @override
+  String get phoneValidationLength => 'پس از ۷ باید ۹ یا ۱۰ رقم باشد.';
+
+  @override
+  String get phoneValidationPrefix => 'شماره‌های افغان با ۷ شروع می‌شوند.';
+
+  @override
+  String get phoneValidationFormat => 'قالب شماره نامعتبر است.';
+
+  @override
+  String get telecomNoDataPackages =>
+      'فعلاً بستهٔ دیتایی برای این اپراتور نیست. اپراتور دیگری را امتحان کنید یا بعداً سر بزنید.';
+
+  @override
+  String dataVolumeGb(String n) {
+    return '$n گیگابایت';
+  }
+
+  @override
+  String dataVolumeMb(String n) {
+    return '$n مگابایت';
+  }
+
+  @override
+  String get validityOneDay => '۱ روز';
+
+  @override
+  String get validity7Days => '۷ روز';
+
+  @override
+  String get validity30Days => '۳۰ روز';
+
+  @override
+  String validityNDays(String n) {
+    return '$n روز';
+  }
+
+  @override
+  String get currencyUsdHint => 'قیمت‌ها به دلار آمریکا (USD) است.';
+
+  @override
+  String get actionRetry => 'تلاش دوباره';
+
+  @override
+  String get telecomCatalogLoadError =>
+      'گزینه‌ها بار نشد. اتصال را بررسی کرده و «تلاش دوباره» را بزنید.';
+
+  @override
+  String get telecomAirtimeEmpty => 'فعلاً مبلغی برای این شبکه موجود نیست.';
+
+  @override
+  String get telecomLoadingAmounts => 'در حال بارگذاری مبالغ…';
+
+  @override
+  String get checkoutYourOrder => 'سفارش شما';
+
+  @override
+  String get checkoutPaymentSecureNote =>
+      'پرداخت در صفحهٔ امن Stripe انجام می‌شود. اطلاعات کارت از سرورهای ما عبور نمی‌کند.';
+
+  @override
+  String get telecomDataPackagesSectionTitle => 'یک بسته انتخاب کنید';
+
+  @override
+  String get telecomDataLoadingPackages => 'در حال بارگذاری بسته‌ها…';
+
+  @override
+  String get authSignInTitle => 'ورود';
+
+  @override
+  String get authRegisterTitle => 'ایجاد حساب';
+
+  @override
+  String get authEmailLabel => 'ایمیل';
+
+  @override
+  String get authPasswordLabel => 'رمز عبور';
+
+  @override
+  String get authSignInCta => 'ورود';
+
+  @override
+  String get authRegisterCta => 'ثبت‌نام';
+
+  @override
+  String get authRegisterPasswordHint => 'حداقل ۱۰ نویسه';
+
+  @override
+  String get authSwitchToRegister => 'حساب ندارید؟ ثبت‌نام';
+
+  @override
+  String get authSwitchToSignIn => 'حساب دارید؟ ورود';
+
+  @override
+  String get authRequiredMessage => 'لطفاً برای ادامه وارد شوید.';
+
+  @override
+  String get authSignOut => 'خروج';
+
+  @override
+  String get authAccountTileTitle => 'حساب';
+
+  @override
+  String get authAccountTileSignedInSub => 'وارد شده‌اید';
+
+  @override
+  String get authAccountTileSignedOutSub => 'برای کیف پول و پرداخت وارد شوید';
+
+  @override
+  String get authGenericError => 'مشکلی پیش آمد. دوباره تلاش کنید.';
+
+  @override
+  String get authFillAllFields => 'ایمیل و رمز عبور را وارد کنید.';
+
+  @override
+  String get landingNavBrand => 'زوره‌ولت';
+
+  @override
+  String get landingHeroTitle => 'شارژ افغانستان را در چند ثانیه بفرستید';
+
+  @override
+  String get landingHeroSubtitle =>
+      'شارژ بین‌المللی برای شماره‌های افغانستان — برای خانواده‌هایی که به راهی سریع و مطمئن برای ارتباط نیاز دارند.';
+
+  @override
+  String get landingTrustBadge =>
+      'قیمت‌گذاری دلاری · پرداخت امن · ساخته‌شده برای مهاجران';
+
+  @override
+  String get landingCtaGetStarted => 'شروع کنید';
+
+  @override
+  String get landingCtaSignIn => 'ورود';
+
+  @override
+  String get landingLanguagesTitle => 'زبان‌ها';
+
+  @override
+  String get landingLanguagesBody =>
+      'تجربه کامل به انگلیسی، دری و پښتو — هر زمان از نوار ابزار عوض کنید.';
+
+  @override
+  String get landingWhyTitle => 'چرا زوره‌ولت';
+
+  @override
+  String get landingWhyFastTitle => 'شارژ سریع';
+
+  @override
+  String get landingWhyFastBody =>
+      'خرید را سریع تکمیل کنید و از مبلغ به بسته بدون دردسر برسید.';
+
+  @override
+  String get landingWhySecureTitle => 'پرداخت امن';
+
+  @override
+  String get landingWhySecureBody =>
+      'تسویه از طریق درگاه معتبر — اطلاعات کارت روی سرورهای ما ذخیره نمی‌شود.';
+
+  @override
+  String get landingWhyPricingTitle => 'قیمت شفاف';
+
+  @override
+  String get landingWhyPricingBody =>
+      'قبل از پرداخت هزینه را به دلار آمریکا ببینید — بدون غافلگیری.';
+
+  @override
+  String get landingWhyLangTitle => 'چندزبانه';
+
+  @override
+  String get landingWhyLangBody =>
+      'به انگلیسی، دری یا پښتو از اپ استفاده کنید — هر کدام که برای شما راحت‌تر است.';
+
+  @override
+  String get landingHowTitle => 'چطور کار می‌کند';
+
+  @override
+  String get landingHowStep1Title => 'شماره افغان را وارد کنید';
+
+  @override
+  String get landingHowStep1Body =>
+      'اپراتور و مبلغ به دلار را انتخاب کنید یا بستهٔ اعتبار یا اینترنت را برگزینید.';
+
+  @override
+  String get landingHowStep2Title => 'بررسی و پرداخت امن';
+
+  @override
+  String get landingHowStep2Body =>
+      'جزئیات را تأیید کنید، سپس در صفحهٔ امن Stripe پرداخت کنید — اطلاعات کارت نزد ما ذخیره نمی‌شود.';
+
+  @override
+  String get landingHowStep3Title => 'شارژ تحویل داده می‌شود';
+
+  @override
+  String get landingHowStep3Body =>
+      'سفارش شما پردازش و اعتبار به خط موبایل گیرنده ارسال می‌شود.';
+
+  @override
+  String get landingFooterNote => 'زوره‌ولت · شارژ موبایل افغانستان';
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/di/app_scope.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/language_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/wallet_balance.dart';
@@ -18,6 +20,7 @@ class _WalletScreenState extends State<WalletScreen> {
   WalletBalance? _balance;
   String? _error;
   bool _busy = false;
+  bool _needsSignIn = false;
 
   static const _topUpAmounts = [5.0, 10.0, 20.0];
 
@@ -28,6 +31,7 @@ class _WalletScreenState extends State<WalletScreen> {
   }
 
   String _friendlyError(Object e, AppLocalizations l10n) {
+    if (e is UnauthorizedException) return l10n.authRequiredMessage;
     final s = e.toString();
     if (s.contains('Failed host lookup') ||
         s.contains('SocketException') ||
@@ -46,10 +50,16 @@ class _WalletScreenState extends State<WalletScreen> {
     try {
       final b = await AppScope.of(context).apiService.getBalance();
       if (!mounted) return;
-      setState(() => _balance = b);
+      setState(() {
+        _balance = b;
+        _needsSignIn = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = _friendlyError(e, l10n));
+      setState(() {
+        _needsSignIn = e is UnauthorizedException;
+        _error = _friendlyError(e, l10n);
+      });
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -78,7 +88,10 @@ class _WalletScreenState extends State<WalletScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = _friendlyError(e, l10n));
+      setState(() {
+        _needsSignIn = e is UnauthorizedException;
+        _error = _friendlyError(e, l10n);
+      });
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -195,6 +208,17 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                     child: Text(_error!, style: t.textTheme.bodySmall),
                   ),
+                  if (_needsSignIn) ...[
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: _busy
+                          ? null
+                          : () => context
+                              .push(AppRoutePaths.signIn)
+                              .then((_) => _refresh()),
+                      child: Text(l10n.authSignInCta),
+                    ),
+                  ],
                 ],
                 const SizedBox(height: 28),
                 Text(

@@ -1,0 +1,20 @@
+# Local PostgreSQL for Zora-Walat (requires Docker Desktop on Windows).
+# Usage from this directory: docker compose up -d
+# Then: npx prisma migrate deploy
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zora-walat-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: zora_walat
+    ports:
+      - '5432:5432'
+    volumes:
+      - zora_walat_pgdata:/var/lib/postgresql/data
+
+volumes:
+  zora_walat_pgdata:

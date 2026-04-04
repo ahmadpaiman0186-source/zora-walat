@@ -1,13 +1,14 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../features/payments/domain/payment_result.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/recharge_draft.dart';
 
-/// Review → Stripe PaymentSheet → success / failure / cancelled.
+/// Review → pay: in-app PaymentSheet (non-web) or Stripe Checkout redirect (web).
 class RechargeReviewScreen extends StatefulWidget {
   const RechargeReviewScreen({super.key, required this.draft});
 
@@ -17,7 +18,14 @@ class RechargeReviewScreen extends StatefulWidget {
   State<RechargeReviewScreen> createState() => _RechargeReviewScreenState();
 }
 
-enum _PaymentPhase { idle, processing, success, failure, cancelled }
+enum _PaymentPhase {
+  idle,
+  processing,
+  success,
+  failure,
+  cancelled,
+  hostedCheckout,
+}
 
 class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
   _PaymentPhase _phase = _PaymentPhase.idle;
@@ -29,30 +37,65 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
   }
 
   Future<void> _pay() async {
-    final payment = AppScope.of(context).paymentService;
+    if (_phase == _PaymentPhase.processing) return;
+    final l10n = AppLocalizations.of(context);
+    final router = GoRouter.of(context);
+    final paymentService = AppScope.of(context).paymentService;
+    final log = AppScope.of(context).transactionLog;
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final cents = (widget.draft.amountUsd * 100).round();
     setState(() {
       _phase = _PaymentPhase.processing;
       _errorMessage = null;
     });
 
-    final result = await payment.payRechargeDraft(widget.draft);
+    await log.append({
+      'event': 'recharge_payment_attempt',
+      'amount_usd_cents': cents,
+      'operator': widget.draft.operatorKey,
+    });
 
-    if (!mounted) return;
-
-    switch (result) {
-      case PaymentSuccess():
-        setState(() => _phase = _PaymentPhase.success);
-      case PaymentFailure(:final message):
-        setState(() {
-          _phase = _PaymentPhase.failure;
-          _errorMessage = message;
-        });
-        messenger?.showSnackBar(
-          SnackBar(content: Text(message)),
-        );
-      case PaymentCancelled():
-        setState(() => _phase = _PaymentPhase.cancelled);
+    try {
+      await paymentService.startCheckout(
+        amountUsdCents: cents,
+        currency: 'usd',
+        operatorKey: widget.draft.operatorKey,
+        recipientPhone: widget.draft.phoneE164Style,
+      );
+      await log.append({
+        'event': 'recharge_checkout_redirect',
+        'amount_usd_cents': cents,
+      });
+      if (!mounted) return;
+      setState(() => _phase = _PaymentPhase.hostedCheckout);
+    } on UnauthorizedException catch (_) {
+      await log.append({
+        'event': 'recharge_payment_failure',
+        'message': 'unauthorized',
+      });
+      if (!mounted) return;
+      setState(() {
+        _phase = _PaymentPhase.failure;
+        _errorMessage = l10n.authRequiredMessage;
+      });
+      messenger?.showSnackBar(
+        SnackBar(content: Text(l10n.authRequiredMessage)),
+      );
+      if (mounted) router.push(AppRoutePaths.signIn);
+    } catch (e) {
+      await log.append({
+        'event': 'recharge_payment_failure',
+        'message': '$e',
+      });
+      if (!mounted) return;
+      final msg = kReleaseMode ? l10n.authGenericError : '$e';
+      setState(() {
+        _phase = _PaymentPhase.failure;
+        _errorMessage = msg;
+      });
+      messenger?.showSnackBar(
+        SnackBar(content: Text(msg)),
+      );
     }
   }
 
@@ -79,7 +122,33 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
             const LinearProgressIndicator(),
             const SizedBox(height: 16),
           ],
-          if (_phase == _PaymentPhase.success) ...[
+          if (_phase == _PaymentPhase.hostedCheckout) ...[
+                Icon(Icons.open_in_new_rounded,
+                    size: 64, color: t.colorScheme.primary),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.paymentCheckoutRedirectTitle,
+                  style: t.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.paymentCheckoutRedirectBody,
+                  style: t.textTheme.bodyMedium?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                FilledButton(
+                  onPressed: () => context.push(AppRoutePaths.telecom),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(54),
+                  ),
+                  child: Text(l10n.continueToPlans),
+                ),
+              ] else if (_phase == _PaymentPhase.success) ...[
                 Icon(Icons.check_circle_rounded,
                     size: 64, color: t.colorScheme.primary),
                 const SizedBox(height: 16),

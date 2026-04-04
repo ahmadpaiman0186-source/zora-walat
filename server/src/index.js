@@ -1,83 +1,150 @@
-import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import pino from 'pino';
-import { getStripeClient } from './config.js';
+import { createApp } from './app.js';
 import { prisma } from './db.js';
-import rechargeRoutes from './routes/recharge.js';
-import walletRoutes from './routes/wallet.js';
-import paymentRoutes from './routes/payment.js';
-import { createPaymentIntentRouter } from './routes/paymentIntents.js';
+import { env } from './config/env.js';
+import {
+  corsOriginsHaveNoWildcards,
+  corsOriginsMatchPrelaunchAllowlist,
+} from './lib/corsPolicy.js';
+import { getValidatedStripeSecretKey } from './config/stripeEnv.js';
+import { stripeKeyStatusLog } from './services/stripe.js';
+import { processPendingPaidOrders } from './services/fulfillmentProcessingService.js';
 
-const app = express();
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+function isPostgresDatabaseUrl(url) {
+  return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
+}
 
-app.use(
-  cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Idempotency-Key', 'X-Api-Key'],
-  }),
-);
-app.use(express.json());
+const jwtAccess = String(env.jwtAccessSecret ?? '');
+const jwtRefresh = String(env.jwtRefreshSecret ?? '');
+if (jwtAccess.length < 32 || jwtRefresh.length < 32) {
+  console.error(
+    '[fatal] JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must each be set and at least 32 characters',
+  );
+  process.exit(1);
+}
 
-app.get('/', (req, res) => res.send('API OK'));
-
-/**
- * Minimal test/dev endpoint (Flutter uses `/api/payment-intents/*` in production).
- * POST body: `{ "amount": 500, "currency": "usd" }` — amount in cents.
- */
-app.post('/create-payment-intent', async (req, res) => {
-  try {
-    const stripe = getStripeClient();
-    if (!stripe) {
-      return res.status(503).json({
-        error: 'Stripe not configured (set STRIPE_SECRET_KEY in .env)',
-      });
-    }
-    const amount = Number(req.body?.amount);
-    if (!Number.isFinite(amount) || amount < 50) {
-      return res.status(400).json({
-        error: 'amount (integer cents, minimum 50) required',
-      });
-    }
-    const currency = String(req.body?.currency || 'usd').toLowerCase();
-    const pi = await stripe.paymentIntents.create({
-      amount: Math.round(amount),
-      currency,
-      automatic_payment_methods: { enabled: true },
-    });
-    return res.json({
-      clientSecret: pi.client_secret,
-      paymentIntentId: pi.id,
-    });
-  } catch (err) {
-    logger.error({ err }, 'create-payment-intent failed');
-    return res.status(502).json({ error: String(err?.message || err) });
+if (env.prelaunchLockdown) {
+  const dbUrl = String(env.databaseUrl ?? '').trim();
+  if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
+    console.error(
+      '[fatal] PRELAUNCH_LOCKDOWN requires DATABASE_URL (PostgreSQL connection string)',
+    );
+    process.exit(1);
   }
-});
+  if (!corsOriginsMatchPrelaunchAllowlist(env.corsOrigins)) {
+    console.error(
+      '[fatal] PRELAUNCH_LOCKDOWN requires CORS_ORIGINS to be exactly: http://localhost:3000,http://127.0.0.1:3000 (order may vary)',
+    );
+    process.exit(1);
+  }
+  if (!String(env.stripeWebhookSecret ?? '').trim()) {
+    console.error(
+      '[fatal] PRELAUNCH_LOCKDOWN requires STRIPE_WEBHOOK_SECRET (webhook verification)',
+    );
+    process.exit(1);
+  }
+}
 
-/** Minimal stub so Flutter [RemoteTelecomService] does not 404 on the legacy hub. */
-app.get('/catalog/airtime', (req, res) => {
-  const operator = String(req.query.operator || 'roshan').replace(/[^a-z0-9]/gi, '');
-  const safe = operator || 'roshan';
-  const items = [
-    { id: `${safe}_air_10m`, minutes: 10, retailUsdCents: 500 },
-    { id: `${safe}_air_15m`, minutes: 15, retailUsdCents: 750 },
-    { id: `${safe}_air_25m`, minutes: 25, retailUsdCents: 1000 },
-  ];
-  res.json({ items });
-});
+if (env.nodeEnv === 'production') {
+  if (process.env.DEV_CHECKOUT_AUTH_BYPASS === 'true') {
+    console.error(
+      '[fatal] DEV_CHECKOUT_AUTH_BYPASS must not be enabled in production (TEMP TEST MODE)',
+    );
+    process.exit(1);
+  }
+  const dbUrl = String(env.databaseUrl ?? '').trim();
+  if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
+    console.error(
+      '[fatal] DATABASE_URL must be set to a PostgreSQL connection string in production',
+    );
+    process.exit(1);
+  }
+  if (!getValidatedStripeSecretKey()) {
+    console.error('[fatal] STRIPE_SECRET_KEY must be set in production');
+    process.exit(1);
+  }
+  if (!String(env.stripeWebhookSecret ?? '').trim()) {
+    console.error(
+      '[fatal] STRIPE_WEBHOOK_SECRET must be set in production (Stripe webhook signature verification)',
+    );
+    process.exit(1);
+  }
+  if (!String(env.clientUrl ?? '').trim()) {
+    console.error('[fatal] CLIENT_URL must be set in production');
+    process.exit(1);
+  }
+  if (env.corsOrigins.length === 0) {
+    console.error('[fatal] CORS_ORIGINS must be set in production (comma-separated)');
+    process.exit(1);
+  }
+  if (!corsOriginsHaveNoWildcards(env.corsOrigins)) {
+    console.error(
+      '[fatal] CORS_ORIGINS must list explicit origins only (no * or wildcards)',
+    );
+    process.exit(1);
+  }
+  if (!String(process.env.ACCESS_TOKEN_TTL ?? '').trim()) {
+    console.error('[fatal] ACCESS_TOKEN_TTL must be set in production (seconds)');
+    process.exit(1);
+  }
+  if (!String(process.env.REFRESH_TOKEN_TTL ?? '').trim()) {
+    console.error('[fatal] REFRESH_TOKEN_TTL must be set in production (seconds)');
+    process.exit(1);
+  }
+} else {
+  const dbUrl = String(env.databaseUrl ?? '').trim();
+  if (!dbUrl) {
+    console.warn(
+      '[warn] DATABASE_URL unset — use PostgreSQL locally (see server/.env.example)',
+    );
+  } else if (!isPostgresDatabaseUrl(dbUrl)) {
+    console.warn(
+      '[warn] DATABASE_URL should be postgres:// or postgresql:// (SQLite is no longer supported)',
+    );
+  }
+  if (!env.stripeWebhookSecret) {
+    console.warn(
+      '[warn] STRIPE_WEBHOOK_SECRET unset — set it to verify checkout.session.completed webhooks',
+    );
+  }
+}
 
-app.use('/api/recharge', rechargeRoutes);
-app.use('/api/wallet', walletRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use(
-  '/api/payment-intents',
-  createPaymentIntentRouter({ prisma, logger }),
-);
+const app = createApp();
 
-app.listen(8787, () => {
-  console.log('Server running on http://localhost:8787');
-  logger.info({ port: 8787 }, 'Zora-Walat API listening');
+app.listen(env.port, async () => {
+  console.log(`Server running on http://127.0.0.1:${env.port}`);
+  console.log(`[zora-walat-api] ${env.nodeEnv}`);
+  if (env.prelaunchLockdown) {
+    console.log('[pre-launch] PRELAUNCH_LOCKDOWN active — money routes return 503; strict CORS');
+  }
+  console.log(stripeKeyStatusLog());
+
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('[db] PostgreSQL: reachable');
+    } catch {
+      console.error(
+        '[db] PostgreSQL: not reachable — check DATABASE_URL and that PostgreSQL is running',
+      );
+    }
+    if (process.env.RELOADLY_AF_PROBE_ON_STARTUP === 'false') {
+      console.log(
+        '[reloadly] AF startup probe skipped (RELOADLY_AF_PROBE_ON_STARTUP=false)',
+      );
+    } else {
+      import('./utils/reloadlyAfOperatorsProbe.js')
+        .then((m) => m.logReloadlyAfOperatorsSample())
+        .catch((e) => console.error('[reloadly] AF operators probe failed', e));
+    }
+  }
+
+  /** Drain queued fulfillment attempts (backup if post-webhook scheduling misses). */
+  const drainMs = Number(process.env.FULFILLMENT_DRAIN_INTERVAL_MS ?? 120_000);
+  if (drainMs > 0 && process.env.NODE_ENV !== 'test') {
+    setInterval(() => {
+      processPendingPaidOrders({ limit: 25 }).catch((e) => {
+        console.error('[fulfillment] processPendingPaidOrders', e);
+      });
+    }, drainMs);
+  }
 });

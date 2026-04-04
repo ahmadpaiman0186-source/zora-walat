@@ -1,9 +1,12 @@
+// Production: PostgreSQL only. Apply migrations with `npm run db:migrate` (deploy) or
+// `npm run db:migrate:dev` (development). Prisma `$transaction` uses the database
+// isolation level (PostgreSQL defaults are fine for concurrent checkout + webhook updates).
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -23,6 +26,8 @@ model LedgerEntry {
   reason             String
   metadata           String? // JSON string
   createdAt          DateTime @default(now())
+
+  @@index([walletId])
 }
 
 model TopupOrder {
@@ -43,6 +48,8 @@ model TopupOrder {
   clientIp              String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
+  @@index([status, createdAt])
 }
 
 model AuditLog {
@@ -60,4 +67,141 @@ model VelocityWindow {
   totalCents   Int    @default(0)
   orderCount   Int    @default(0)
   @@unique([phoneHash, windowHour])
+}
+
+/// Server-authoritative Stripe Checkout attempt (idempotency + webhook lifecycle).
+/// `status`: legacy Stripe row state (INITIATED → CHECKOUT_CREATED → …).
+/// `orderStatus`: canonical business lifecycle (PENDING → PAID → PROCESSING → FULFILLED | FAILED | CANCELLED).
+model PaymentCheckout {
+  id                      String   @id @default(cuid())
+  idempotencyKey          String   @unique
+  requestFingerprint      String
+  stripeCheckoutSessionId String?  @unique
+  stripeCheckoutUrl       String?
+  status                  String
+  amountUsdCents          Int
+  currency                String   @default("usd")
+  operatorKey             String?
+  recipientNational       String?
+  packageId               String?
+  /// Set for all new sessions; null only on legacy rows before user-scoped checkout.
+  userId                  String?
+  user                    User?    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  /// Canonical order lifecycle for APIs and delivery (see `src/constants/orderStatus.js`; terminal success stored as FULFILLED / DELIVERED alias).
+  orderStatus                  String    @default("PENDING")
+  provider                     String    @default("stripe")
+  clientOrigin                 String?
+  failureReason                String?
+  metadata                     Json?
+  stripePaymentIntentId        String?   @unique
+  stripeCustomerId             String?
+  /// Stripe event id (`evt_…`) that first transitioned this order to PAID (idempotent completion).
+  completedByWebhookEventId    String?   @unique
+  paidAt                       DateTime?
+  failedAt                     DateTime?
+  cancelledAt                  DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([userId])
+  @@index([userId, orderStatus, createdAt])
+
+  fulfillmentAttempts FulfillmentAttempt[]
+}
+
+/// One row per fulfillment try for a payment order; supports retries via `attemptNumber`.
+model FulfillmentAttempt {
+  id                String   @id @default(cuid())
+  orderId           String
+  order             PaymentCheckout @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  provider          String   @default("mock")
+  /// QUEUED | PROCESSING | SUCCEEDED | FAILED
+  status            String
+  attemptNumber     Int
+  providerReference String?
+  /// JSON, non-sensitive request summary for provider integration.
+  requestSummary    String?
+  /// JSON, non-sensitive response summary.
+  responseSummary   String?
+  failureReason     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  startedAt         DateTime?
+  completedAt       DateTime?
+  failedAt          DateTime?
+
+  @@unique([orderId, attemptNumber])
+  @@index([orderId, status])
+  @@index([status, createdAt])
+}
+
+/// Processed Stripe webhook event ids (evt_…) — idempotent handling across retries and multiple app instances.
+model StripeWebhookEvent {
+  id         String   @id
+  receivedAt DateTime @default(now())
+}
+
+/// Per-user balance for mock wallet — PostgreSQL-backed (multi-instance safe).
+model UserWallet {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Integer USD cents — avoids float drift; API still exposes decimal dollars for compatibility.
+  balanceUsdCents Int
+  currency        String   @default("USD")
+  updatedAt       DateTime @updatedAt
+}
+
+/// Destination number for recharge/data/calling — normalized E.164, scoped to owning user.
+model Recipient {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  e164               String
+  countryCode        String   @default("AF")
+  operatorKey        String?
+  label              String?
+  verificationStatus String   @default("UNVERIFIED")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, e164])
+  @@index([userId])
+  @@index([e164])
+  @@index([countryCode])
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  /// Application values: "user" | "admin" (enforce in app; promote admin via DB or future admin API).
+  role          String   @default("user")
+  /// Increment to invalidate all outstanding access JWTs (password change / global revoke).
+  tokenVersion  Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  refreshTokens      RefreshToken[]
+  paymentCheckouts   PaymentCheckout[]
+  userWallet         UserWallet?
+  recipients         Recipient[]
+
+  @@index([email])
+}
+
+/// Server-side refresh tokens (hash only). Rotation invalidates previous token in the same chain.
+model RefreshToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId   String
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
 }

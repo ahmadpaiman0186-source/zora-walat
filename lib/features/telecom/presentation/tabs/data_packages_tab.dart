@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/widgets/data_package_tile.dart';
 import '../../../../shared/widgets/zw_primary_button.dart';
 import '../../domain/data_package_offer.dart';
+import '../data_package_l10n.dart';
 import '../../domain/data_package_period.dart';
 import '../../domain/mobile_operator.dart';
 import '../../domain/phone_number.dart';
@@ -27,6 +28,15 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
   final _formKey = GlobalKey<FormState>();
   MobileOperator _operator = MobileOperator.roshan;
   DataPackageOffer? _selected;
+  int _dataCatalogGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneCtrl.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -34,7 +44,7 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
     super.dispose();
   }
 
-  void _goCheckout(DataPackageOffer offer) {
+  void _goCheckout(DataPackageOffer offer, AppLocalizations l10n) {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final national = AfghanPhoneUtils.normalizeNational(_phoneCtrl.text)!;
     final masked = AfghanPhoneUtils.maskForLog(national);
@@ -45,7 +55,7 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
       phone: PhoneNumber(_phoneCtrl.text.trim()),
       productId: offer.id,
       productTitle:
-          '${offer.dataLabel} · ${offer.validityLabel} · ${offer.operator.displayName}',
+          '${offer.localizedDataLabel(l10n)} · ${offer.localizedValidity(l10n)} · ${offer.operator.displayName}',
       finalUsdCents: offer.finalUsdCents,
       metadata: {
         'service_line': 'data',
@@ -67,6 +77,13 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
       DataPackagePeriod.weekly => l10n.periodWeekly,
       DataPackagePeriod.monthly => l10n.periodMonthly,
     };
+  }
+
+  bool _canReviewPay(AppLocalizations l10n) {
+    if (AfghanPhoneUtils.validationErrorL10n(l10n, _phoneCtrl.text) != null) {
+      return false;
+    }
+    return _selected != null;
   }
 
   @override
@@ -100,7 +117,8 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
               hintText: l10n.telecomPhoneHintData,
               prefixIcon: const Icon(Icons.phone_android_rounded),
             ),
-            validator: AfghanPhoneUtils.validationError,
+            validator: (v) =>
+                AfghanPhoneUtils.validationErrorL10n(l10n, v),
           ),
           const SizedBox(height: 20),
           Text(l10n.operator, style: t.textTheme.titleMedium),
@@ -121,61 +139,169 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24),
-          FutureBuilder<List<DataPackageOffer>>(
-            key: ValueKey(_operator.apiKey),
-            future: AppScope.of(context)
-                .telecomService
-                .fetchDataPackages(_operator),
-            builder: (context, snap) {
-              if (snap.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(40),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-              final all = snap.data ?? const <DataPackageOffer>[];
-              final sections = <DataPackagePeriod, List<DataPackageOffer>>{};
-              for (final p in DataPackagePeriod.values) {
-                sections[p] =
-                    all.where((e) => e.period == p).toList(growable: false);
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 20),
+          Card(
+            margin: EdgeInsets.zero,
+            color: t.colorScheme.surfaceContainerHighest,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: t.colorScheme.outline.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final p in DataPackagePeriod.values)
-                    if ((sections[p] ?? const []).isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        _periodName(p, l10n),
-                        style: t.textTheme.titleMedium?.copyWith(
-                          color: t.colorScheme.primary,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.dataset_linked_rounded,
+                        color: t.colorScheme.primary,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          l10n.telecomDataPackagesSectionTitle,
+                          style: t.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      ...sections[p]!.map((offer) {
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  FutureBuilder<List<DataPackageOffer>>(
+                    key: ValueKey(
+                      '${_operator.apiKey}_$_dataCatalogGeneration',
+                    ),
+                    future: AppScope.of(context)
+                        .telecomService
+                        .fetchDataPackages(_operator),
+                    builder: (context, snap) {
+                      if (snap.connectionState ==
+                          ConnectionState.waiting) {
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: DataPackageTile(
-                            offer: offer,
-                            selected: _selected?.id == offer.id,
-                            onTap: () =>
-                                setState(() => _selected = offer),
+                          padding: const EdgeInsets.symmetric(vertical: 28),
+                          child: Column(
+                            children: [
+                              const CircularProgressIndicator(),
+                              const SizedBox(height: 16),
+                              Text(
+                                l10n.telecomDataLoadingPackages,
+                                style: t.textTheme.bodyMedium?.copyWith(
+                                  color: t.colorScheme.outline,
+                                ),
+                              ),
+                            ],
                           ),
                         );
-                      }),
-                    ],
+                      }
+                      if (snap.hasError) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.cloud_off_rounded,
+                                size: 40,
+                                color: t.colorScheme.secondary,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.telecomCatalogLoadError,
+                                textAlign: TextAlign.center,
+                                style: t.textTheme.bodyMedium?.copyWith(
+                                  color: t.colorScheme.outline,
+                                  height: 1.35,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton.tonalIcon(
+                                onPressed: () => setState(
+                                  () => _dataCatalogGeneration++,
+                                ),
+                                icon: const Icon(Icons.refresh_rounded),
+                                label: Text(l10n.actionRetry),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      final all =
+                          snap.data ?? const <DataPackageOffer>[];
+                      if (all.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.inventory_2_outlined,
+                                size: 40,
+                                color: t.colorScheme.outline,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                l10n.telecomNoDataPackages,
+                                textAlign: TextAlign.center,
+                                style: t.textTheme.bodyLarge?.copyWith(
+                                  color: t.colorScheme.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                      final sections =
+                          <DataPackagePeriod, List<DataPackageOffer>>{};
+                      for (final p in DataPackagePeriod.values) {
+                        sections[p] = all
+                            .where((e) => e.period == p)
+                            .toList(growable: false);
+                      }
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final p in DataPackagePeriod.values)
+                            if ((sections[p] ?? const []).isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                _periodName(p, l10n),
+                                style: t.textTheme.titleMedium?.copyWith(
+                                  color: t.colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ...sections[p]!.map((offer) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: DataPackageTile(
+                                    offer: offer,
+                                    selected: _selected?.id == offer.id,
+                                    onTap: () => setState(
+                                      () => _selected = offer,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ],
+                        ],
+                      );
+                    },
+                  ),
                 ],
-              );
-            },
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           ZwPrimaryButton(
             label: l10n.reviewPayTitle,
             icon: Icons.lock_outline_rounded,
-            onPressed: _selected == null
-                ? null
-                : () => _goCheckout(_selected!),
+            onPressed: _canReviewPay(l10n)
+                ? () => _goCheckout(_selected!, l10n)
+                : null,
           ),
         ],
       ),

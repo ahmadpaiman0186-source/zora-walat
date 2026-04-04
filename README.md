@@ -1,17 +1,36 @@
-# zora_walat
+# Zora-Walat
 
-A new Flutter project.
+Flutter client + Node.js API for mobile recharge (Afghanistan-focused), with Stripe Checkout and server-side fulfillment.
 
-## Getting Started
+## Repository layout (where to look)
 
-This project is a starting point for a Flutter application.
+| Area | Path | Notes |
+|------|------|--------|
+| **Flutter app** | `lib/` | UI, features, `main.dart` entry |
+| **API base URL (Flutter)** | `lib/core/config/app_config.dart` | Default `http://127.0.0.1:8787`; override with `--dart-define=API_BASE_URL=...` |
+| **Auth (Flutter)** | `lib/features/auth/`, `lib/services/auth_api_service.dart` | `/auth/register`, `/auth/login` |
+| **HTTP + payments** | `lib/services/api_service.dart`, `lib/services/payment_service.dart` | Authed API + Stripe Checkout session |
+| **Backend** | `server/src/` | Express app, routes, Prisma |
+| **Backend entry** | `server/index.js` → `server/bootstrap.js` (loads `server/.env`) → `server/src/index.js` |
+| **Backend env template** | `server/.env.example` | Copy to `server/.env`; optional `server/.env.local` overrides |
 
-A few resources to get you started if this is your first Flutter project:
+## Usually **not** the first place to debug app↔API issues
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- `build/`, `.dart_tool/` — generated build output  
+- `packages/flutter_stripe_web/` — vendored override; change only if a Flutter/Stripe web bug requires it  
+- `server/prisma/migrations/` — schema history, not runtime logic  
+- `lib/l10n/app_localizations_*.dart` — generated from `.arb` files  
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Local development (quick)
+
+1. **PostgreSQL** running and **`DATABASE_URL`** set in `server/.env` (`postgresql://…`).  
+2. From **`server/`**: `npm install` → `npm start` → API on **`http://127.0.0.1:8787`** (default `PORT`).  
+3. From repo root: `flutter pub get` → `flutter run -d chrome` — Flutter uses **`AppConfig.apiBaseUrl`** (see table above).  
+4. **Stripe (test checkout):** set **`STRIPE_SECRET_KEY`** (`sk_test_…`) in `server/.env`. Webhooks: optional locally; use `stripe listen` and **`STRIPE_WEBHOOK_SECRET`**.  
+5. **Quiet Reloadly logs** while testing auth only: in `server/.env` set **`RELOADLY_AF_PROBE_ON_STARTUP=false`** (Reloadly integration remains; only the startup AF probe is skipped).
+
+Details and env variables: **`server/.env.example`** and **`server/README.md`**.
+
+## Flutter / Dart docs
+
+- [Flutter documentation](https://docs.flutter.dev/)

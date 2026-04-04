@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
       Timer(const Duration(milliseconds: 2200), () {
         if (!mounted) return;
         if (onboarding.hasCompletedLanguageOnboarding) {
-          context.go(AppRoutePaths.home);
+          context.go(AppRoutePaths.recharge);
         } else {
           context.go(AppRoutePaths.language);
         }

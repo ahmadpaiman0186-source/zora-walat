@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
@@ -27,6 +28,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
   String? _error;
   bool _loading = false;
   String? _orderMsg;
+  bool _needsSignIn = false;
 
   @override
   void dispose() {
@@ -42,6 +44,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
   }
 
   String _friendlyError(Object e, AppLocalizations l10n) {
+    if (e is UnauthorizedException) return l10n.authRequiredMessage;
     final s = e.toString();
     if (s.contains('Failed host lookup') ||
         s.contains('SocketException') ||
@@ -103,6 +106,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
       final loc = AppLocalizations.of(context);
       setState(() {
         _packages = list;
+        _needsSignIn = false;
         if (list.isEmpty) {
           _error = loc.noPackagesForOperator;
         }
@@ -111,6 +115,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
       if (!mounted) return;
       setState(() {
         _packages = [];
+        _needsSignIn = e is UnauthorizedException;
         _error = _friendlyError(e, AppLocalizations.of(context));
       });
     } finally {
@@ -141,7 +146,10 @@ class _RechargeScreenState extends State<RechargeScreen> {
         );
       }
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() {
+        _needsSignIn = e is UnauthorizedException;
+        _error = _friendlyError(e, l10n);
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -280,6 +288,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
                         onTap: () => setState(() {
                           _amountUsd = usd;
                           _error = null;
+                          _needsSignIn = false;
                         }),
                       ),
                   ],
@@ -332,6 +341,17 @@ class _RechargeScreenState extends State<RechargeScreen> {
                     ),
                     child: Text(_error!, style: t.textTheme.bodySmall),
                   ),
+                  if (_needsSignIn) ...[
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: _loading
+                          ? null
+                          : () => context
+                              .push(AppRoutePaths.signIn)
+                              .then((_) => _loadPackages()),
+                      child: Text(l10n.authSignInCta),
+                    ),
+                  ],
                 ],
                 if (_orderMsg != null) ...[
                   const SizedBox(height: 16),

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../features/telecom/domain/data_package_offer.dart';
 import '../../features/telecom/domain/data_package_period.dart';
+import '../../features/telecom/presentation/data_package_l10n.dart';
 import '../../l10n/app_localizations.dart';
 
 class DataPackageTile extends StatelessWidget {
@@ -68,7 +69,7 @@ class DataPackageTile extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      offer.dataLabel,
+                      offer.localizedDataLabel(l10n),
                       style: t.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -96,7 +97,7 @@ class DataPackageTile extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '${_periodName(offer.period, l10n)} · ${offer.validityLabel}',
+                '${_periodName(offer.period, l10n)} · ${offer.localizedValidity(l10n)}',
                 style: t.textTheme.bodyMedium?.copyWith(color: cs.outline),
               ),
               const SizedBox(height: 14),

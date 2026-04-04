@@ -2,12 +2,16 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../../../core/config/app_config.dart';
 import '../domain/airtime_offer.dart';
 import '../domain/data_package_offer.dart';
 import '../domain/mobile_operator.dart';
 import 'telecom_catalog_local.dart';
 import 'telecom_service.dart';
+
+const String _kBffApiKey = String.fromEnvironment(
+  'BFF_API_KEY',
+  defaultValue: '',
+);
 
 /// Loads airtime SKUs from the BFF (`GET /catalog/airtime`); data stays local until your API exposes bundles.
 class RemoteTelecomService extends TelecomService {
@@ -20,7 +24,7 @@ class RemoteTelecomService extends TelecomService {
   final String baseUrl;
 
   Map<String, String> get _headers => {
-        if (AppConfig.bffApiKey.isNotEmpty) 'X-Api-Key': AppConfig.bffApiKey,
+        if (_kBffApiKey.isNotEmpty) 'X-Api-Key': _kBffApiKey,
       };
 
   @override

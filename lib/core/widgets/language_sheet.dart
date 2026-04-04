@@ -15,50 +15,52 @@ Future<void> showLanguageSheet(BuildContext context) async {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.chooseLanguageTitle,
-                style: Theme.of(ctx).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.languageSheetSubtitle,
-                style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(ctx).colorScheme.outline,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _LanguageTile(
-                title: l10n.languageEnglish,
-                subtitle: 'English',
-                selected: controller.locale.languageCode == 'en',
-                onTap: () async {
-                  await controller.setLocale(const Locale('en'));
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-              ),
-              _LanguageTile(
-                title: l10n.languageDari,
-                subtitle: 'دری',
-                selected: controller.locale.languageCode == 'fa',
-                onTap: () async {
-                  await controller.setLocale(const Locale('fa'));
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-              ),
-              _LanguageTile(
-                title: l10n.languagePashto,
-                subtitle: 'پښتو',
-                selected: controller.locale.languageCode == 'ps',
-                onTap: () async {
-                  await controller.setLocale(const Locale('ps'));
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.chooseLanguageTitle,
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.languageSheetSubtitle,
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(ctx).colorScheme.outline,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                _LanguageTile(
+                  title: l10n.languageEnglish,
+                  subtitle: 'English',
+                  selected: controller.locale.languageCode == 'en',
+                  onTap: () async {
+                    await controller.setLocale(const Locale('en'));
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                ),
+                _LanguageTile(
+                  title: l10n.languageDari,
+                  subtitle: 'دری',
+                  selected: controller.locale.languageCode == 'fa',
+                  onTap: () async {
+                    await controller.setLocale(const Locale('fa'));
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                ),
+                _LanguageTile(
+                  title: l10n.languagePashto,
+                  subtitle: 'پښتو',
+                  selected: controller.locale.languageCode == 'ps',
+                  onTap: () async {
+                    await controller.setLocale(const Locale('ps'));
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       );

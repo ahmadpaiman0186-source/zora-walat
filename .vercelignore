@@ -1,0 +1,4 @@
+# Speed up uploads: API and local deps are not used for Flutter static web output.
+server/node_modules
+server/.env
+server/.env.local

@@ -1,0 +1,8 @@
+{
+  "name": "zora-walat",
+  "private": true,
+  "description": "Vercel runs npm run build to produce Flutter web output in build/web",
+  "scripts": {
+    "build": "bash scripts/vercel-build.sh"
+  }
+}

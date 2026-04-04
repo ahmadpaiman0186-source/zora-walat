@@ -24,10 +24,12 @@
   },
   "paymentPreparing": "خوندي تادیه چمتو کېږي…",
   "paymentSuccessTitle": "تادیه بریالۍ شوه",
-  "paymentSuccessBody": "تادیه تایید شوه. تاسو کولی شئ د اعتبار یا ډیټا بستو لپاره مخته ځئ.",
+  "paymentSuccessBody": "تاسو له Stripe څخه راستون شوئ. دا پاڼه یوازې ستاسو د آساتیا لپاره ده — تایید زموږ په سرورونو کې کېږي. اپراتور تحویل وروسته له تایید څخه.",
   "paymentFailedTitle": "تادیه ناکامه شوه",
   "paymentCancelledTitle": "تادیه لغوه شوه",
   "paymentCancelledBody": "هیڅ پیسې نه دي اخیستل شوي. کله چې چمتو یاست بیا هڅه وکړئ.",
+  "paymentCheckoutRedirectTitle": "Stripe تادیه",
+  "paymentCheckoutRedirectBody": "په راتلونکي پاڼه کې تادیه بشپړه کړئ. بیرته راغلې وروسته، تایید ممکن یو څه وخت ونیسي.",
   "paymentTryAgain": "بیا هڅه",
   "paymentBackToReview": "جزئیات سمول",
   "languageSheetSubtitle": "انګلیسی، دری او پښتو بشپړ ملاتړ لري.",
@@ -84,8 +86,6 @@
   "callingTitle": "نړیوال زنګ",
   "callingBody": "موږ د شارژ په څېر خوندي تادیه سره نړیوال زنګ جوړوو.\nژر بیرته راشئ.",
   "missingOrder": "دا امر نه پرانستل شو. بیرته لاړ شئ او بیا هڅه وکړئ.",
-  "paymentSuccessTitle": "تادیه بریالۍ",
-  "paymentSuccessBody": "مننه. ستاسو تادیه تایید شوه؛ اپراتور تحویل ژر کېږي.",
   "paymentCancelled": "تادیه لغوه شوه",
   "reviewPayTitle": "کتنه او تادیه",
   "orderSummary": "د امر لنډیز",
@@ -121,5 +121,88 @@
   "periodMonthly": "میاشتنی",
   "bestValueBadge": "غوره ارزښت",
   "telecomVoiceBundle": "غږ",
-  "telecomMarginNote": "لږترلږه {pct}٪ حاشیه"
+  "telecomMarginNote": "لږترلږه {pct}٪ حاشیه",
+  "phoneValidationEmpty": "د موبایل شمېره ولیکئ.",
+  "phoneValidationInvalid": "د افغانستان معتبر موبایل شمېره ولیکئ.",
+  "phoneValidationLength": "د ۷ وروسته باید ۹ یا ۱۰ عددونه وي.",
+  "phoneValidationPrefix": "د افغان موبایل شمېرې د ۷ سره پیل کېږي.",
+  "phoneValidationFormat": "د شمېرې بڼه ناسمه ده.",
+  "telecomNoDataPackages": "د دې اپراتور لپاره اوس ډیټا بسته نشته. بل اپراتور وټاکئ یا وروسته بیا راشئ.",
+  "dataVolumeGb": "{n} GB",
+  "@dataVolumeGb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dataVolumeMb": "{n} MB",
+  "@dataVolumeMb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "validityOneDay": "۱ ورځ",
+  "validity7Days": "۷ ورځې",
+  "validity30Days": "۳۰ ورځې",
+  "validityNDays": "{n} ورځې",
+  "@validityNDays": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyUsdHint": "بیې په امریکایي ډالرو (USD) کې دي.",
+  "actionRetry": "بیا هڅه",
+  "telecomCatalogLoadError": "انتخابونه نه بار شول. اړیکه مو وګورئ او «بیا هڅه» ووهئ.",
+  "telecomAirtimeEmpty": "د دې شبکې لپاره اوس هیڅ مقدار نشته.",
+  "telecomLoadingAmounts": "مقدارونه بارېږي…",
+  "checkoutYourOrder": "ستاسو امر",
+  "checkoutPaymentSecureNote": "تادیه په خوندي Stripe پاڼه کې کېږي. ستاسو د کارډ معلومات زموږ سرورونو ته نه ځي.",
+  "telecomDataPackagesSectionTitle": "بسته وټاکئ",
+  "telecomDataLoadingPackages": "بستې بارېږي…",
+  "authSignInTitle": "ننوتل",
+  "authRegisterTitle": "حساب جوړول",
+  "authEmailLabel": "بریښنالیک",
+  "authPasswordLabel": "پټنوم",
+  "authSignInCta": "ننوتل",
+  "authRegisterCta": "نوم لیکنه",
+  "authRegisterPasswordHint": "لږترلږه ۱۰ توري وکاروئ",
+  "authSwitchToRegister": "حساب نشته؟ نوم لیکنه",
+  "authSwitchToSignIn": "حساب لرئ؟ ننوتل",
+  "authRequiredMessage": "د دوام لپاره مهرباني وکړئ ننوځئ.",
+  "authSignOut": "وتل",
+  "authAccountTileTitle": "حساب",
+  "authAccountTileSignedInSub": "ننوتلی یاست",
+  "authAccountTileSignedOutSub": "د بټوې او تادیې لپاره ننوځئ",
+  "authGenericError": "ستونزه رامنځته شوه. بیا هڅه وکړئ.",
+  "authFillAllFields": "بریښنالیک او پټنوم ولیکئ.",
+  "landingNavBrand": "زوره‌ولت",
+  "landingHeroTitle": "افغانستان ته په ثانیو کې ایئرټایم واستوئ",
+  "landingHeroSubtitle": "د افغان شمېرو لپاره نړیوال موبایل ټاپ‌آپ — د هغو کورنیو لپاره چې په چټک او باوري لار اړتیا لري.",
+  "landingTrustBadge": "د USD نرخونه · خوندي تادیه · د مهاجرو لپاره",
+  "landingCtaGetStarted": "پیل کړئ",
+  "landingCtaSignIn": "ننوتل",
+  "landingLanguagesTitle": "ژبې",
+  "landingLanguagesBody": "په انګلیسي، دري او پښتو بشپړ تجربه — هر وخت له پټلۍ څخه بدل کړئ.",
+  "landingWhyTitle": "ولې زوره‌ولت",
+  "landingWhyFastTitle": "چټک ټاپ‌آپ",
+  "landingWhyFastBody": "پېرود په چټکۍ بشپړ کړئ او له مقدار څخه بستې ته بې ستونزې لاړ شئ.",
+  "landingWhySecureTitle": "خوندي تادیې",
+  "landingWhySecureBody": "د معتبر چیک‌آوت له لارې تادیه — ستاسو د کارت معلومات زموږ په سرورونو کې نه ساتل کیږي.",
+  "landingWhyPricingTitle": "روښانه نرخونه",
+  "landingWhyPricingBody": "د تادیې دمخه په امریکایي ډالرو کې لګښت ګورئ — په چیک‌آوت کې حیرانونکي نه.",
+  "landingWhyLangTitle": "ګڼ‌ژبې تجربه",
+  "landingWhyLangBody": "په انګلیسي، دري یا پښتو اپ وکاروئ — هغه چې تاسو او کورنۍ ته مناسب وي.",
+  "landingHowTitle": "څنګه کار کوي",
+  "landingHowStep1Title": "افغان شمېره ولیکئ",
+  "landingHowStep1Body": "اپراتور او د امریکایي ډالرو مقدار غوره کړئ یا د ایئرټایم یا ډیټا بسته وټاکئ.",
+  "landingHowStep2Title": "بیاکتنه او خوندي تادیه",
+  "landingHowStep2Body": "جزئیات تصدیق کړئ، بیا په Stripe خوندي پاڼه تادیه وکړئ — ستاسو کارت زموږ په سرورونو کې نه ساتل کیږي.",
+  "landingHowStep3Title": "ټاپ‌آپ تحویل کیږي",
+  "landingHowStep3Body": "موږ سفارش پروسس کوو او اعتبار د ترلاسه کوونکي موبایل خط ته لیږو.",
+  "landingFooterNote": "زوره‌ولت · د افغانستان موبایل ټاپ‌آپ"
 }
