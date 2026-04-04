@@ -60,3 +60,7 @@ app.*.map.json
 /android/app/release
 .vercel
 .env*.local
+
+# Next.js
+.next/
+out/
