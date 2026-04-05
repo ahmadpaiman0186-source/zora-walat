@@ -241,6 +241,8 @@
   "trackingBodyPaymentReceived": "Stripe پرداخت شما را تأیید کرد. مراحل بعد خودکار انجام می‌شود.",
   "trackingHeadlineCatchingUp": "تقریباً آماده",
   "trackingBodyCatchingUp": "در حال هم‌گام‌کردن وضعیت. پرداخت ثبت شده — یک دقیقه دیگر برر کنید یا سفارش‌های اخیر را باز کنید.",
+  "trackingHeadlineVerifying": "در حال تأیید با اپراتور",
+  "trackingBodyVerifying": "پرداخت شما امن است. مرحله نهایی را با اپراتور موبایل تأیید می‌کنیم و فقط وقتی اطمینان داشتیم «تحویل‌شده» نشان می‌دهیم — ممکن است کمی بیشتر طول بکشد.",
   "trackingHeadlineSignIn": "برای وضعیت زنده وارد شوید",
   "trackingBodySignIn": "پرداخت ثبت است. با ورود می‌توانید جزئیات تحویل را هر وقت تازه کنید.",
   "paymentSafeBanner": "پرداخت شما محافظت می‌شود. تسویه با Stripe است — ما کارت شما را نگاه نمی‌داریم.",
@@ -277,6 +279,7 @@
   "orderStatusPaymentPending": "تأیید پرداخت",
   "orderStatusCancelled": "لغو شد",
   "orderStatusSending": "در حال ارسال",
+  "orderStatusVerifying": "در حال تأیید تحویل",
   "orderStatusPreparing": "در حال آماده‌سازی",
   "hubTileOrdersTitle": "سفارش‌های اخیر",
   "hubTileOrdersSub": "رسیدها · همگام با حساب پس از ورود",
@@ -403,6 +406,9 @@
   "supportAssistOperatorTitle": "منتظر تأیید اپراتور",
   "supportAssistOperatorBody": "اعتبار از سمت ما به اپراتور موبایل رسیده؛ بیشتر فوراً تأیید می‌شود و بعضی شبکه‌ها دسته‌ای گزارش می‌دهند.",
   "supportAssistOperatorNext": "چند دقیقه صبر و تازه کردن کافی است؛ در صورت نیاز مانده خط را از شبکه بررسی کنید.",
+  "supportAssistVerifyingTitle": "هنوز در حال تأیید ایمن",
+  "supportAssistVerifyingBody": "پرداخت شما محافظت شده است. اپراتور هنوز تأیید نهایی نداده، بنابراین به‌جای حدس، سفارش را در حالت بررسی دقیق نگه می‌داریم — هیچ چیز گم نمی‌شود.",
+  "supportAssistVerifyingNext": "چند دقیقه صبر کنید، سفارش‌های اخیر را تازه کنید و اگر غیرعادی طول کشید با شماره سفارش به پشتیبانی پیام دهید.",
   "supportAssistCancelledTitle": "سفارش لغو شد",
   "supportAssistCancelledBody": "این جلسه قبل از تراکنش موفق متوقف شد؛ هر زمان می‌توانید شارژ تازه بزنید — چیزی معلق نمی‌ماند.",
   "supportAssistCancelledNext": "به شارژ برگردید، شماره را چک کنید و در صورت نیاز تسویه را دوباره انجام دهید.",
@@ -411,5 +417,64 @@
   "hubTileHelpTitle": "کمک و پشتیبانی",
   "hubTileHelpSub": "راهنما · ایمنی پرداخت · کپی جزئیات سفارش",
   "ordersDetailLoadingHint": "در حال بارگذاری رسید…",
-  "ordersEmptySupportLine": "سؤالی هست؟ از خانه «کمک و پشتیبانی» را بزنید."
+  "ordersEmptySupportLine": "سؤالی هست؟ از خانه «کمک و پشتیبانی» را بزنید.",
+  "referralCenterTitle": "دعوت و پاداش",
+  "referralCenterSubtitle": "Zora-Walat را با کسانی که اعتماد دارید به‌اشتراک بگذارید. پاداش روشن، قوانین صادقانه — برای خانواده‌هایی که از خارج شارژ می‌فرستند.",
+  "referralTrustLine": "وقتی اولین شارژ دوستانهٔ شما با موفقیت تمام شود، پاداش به‌صورت خودکار تأیید می‌شود — بدنمایه‌بازی؛ فقط تشکر از رشد جامعهٔ ما.",
+  "referralProgramPaused": "فعلاً دعوت‌ها متوقف است. بعداً سر بزنید — وقتی دوباره باز شود اعلام می‌کنیم.",
+  "referralYourCode": "کد دعوت شما",
+  "referralCopyCode": "کپی کد",
+  "referralCodeCopied": "کد کپی شد",
+  "referralCopyInviteMessage": "کپی پیام دعوت",
+  "referralInviteMessageCopied": "پیام دعوت کپی شد",
+  "referralInviteMessageTemplate": "برای شارژ مطمئن موبایل افغانستان از Zora-Walat استفاده می‌کنم. با کد من عضو شوید: {code}",
+  "@referralInviteMessageTemplate": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralHowItWorksTitle": "پاداش چگونه کار می‌کند",
+  "referralHowItWorksBody": "وقتی دوستی با کد شما ثبت‌نام کند و اولین شارژش با موفقیت تحویل شود — حداقل {minUsd} — شما {rewardUsd} اعتبار کیف‌پول برای خریدهای بعدی می‌گیرید. یک پاداش برای هر دوست.",
+  "@referralHowItWorksBody": {
+    "placeholders": {
+      "rewardUsd": {
+        "type": "String"
+      },
+      "minUsd": {
+        "type": "String"
+      }
+    }
+  },
+  "referralRewardRulesFootnote": "اعتبار دعوت فقط برای شارژ است؛ قابل برداشت نقدی نیست. این برای امنیت همه و منصف ماندن قیمت‌هاست.",
+  "referralWeeklyFairTitle": "سهیم‌بندی منصفانه هر هفته",
+  "referralWeeklyFairBody": "پاداش دعوت از یک سهم هفتگی مشترک می‌آید تا خانواده‌های بیشتری شرکت کنند. اگر هفته‌ای شلوغ باشد، ممکن است برخی دعوت‌ها واجد شرایط شوند درحالی‌که سهم تازه می‌شود — دوستان شما همچنان سرویسی را که پرداخت کرده‌اند دریافت می‌کنند.",
+  "referralStatsInvited": "دعوت‌شده",
+  "referralStatsSuccessful": "موفق",
+  "referralStatsEarned": "کسب‌شده",
+  "referralHistoryTitle": "دعوت‌های شما",
+  "referralHistoryEmpty": "با به‌اشتراک‌گذاری کد، هر دوست اینجا با یک وضعیت ساده دیده می‌شود.",
+  "referralStatusPending": "در جریان",
+  "referralStatusCompleted": "واجد شرایط",
+  "referralStatusRewarded": "پاداش داده شد",
+  "referralStatusRejected": "بدون پاداش",
+  "referralPendingHint": "منتظر اتمام موفق اولین شارژ دوست شما هستیم.",
+  "referralCompletedHint": "واجد شرایط — پاداش شما در حال نهایی‌شدن است.",
+  "referralRewardedHint": "متشکریم — اعتبار در کیف‌پول شما برای شارژهای بعدی است.",
+  "referralRejectedDetailBudget": "پاداش‌های دعوت این هفته قبلاً تخصیص یافته بود. سرویس دوست شما انجام شد — از اشتراک Zora-Walat سپاسگزاریم.",
+  "referralRejectedDetailWeeklyCap": "به سقف پاداش دعوت این هفته رسیده‌اید. هفتهٔ بعد می‌توانید دوباره دعوت کنید.",
+  "referralRejectedDetailLifetimeCap": "به سقف بلندمدت پاداش دعوت حساب خود رسیده‌اید. قدردان همراهی شما با Zora-Walat هستیم.",
+  "referralRejectedDetailNotEligible": "این دعوت با شرایط پاداش هم‌خوان نبود. دوست شما همچنان می‌تواند عادی از Zora-Walat استفاده کند.",
+  "referralRejectedDetailGeneric": "این دعوت پاداش نگرفت. اگر پرسشی دارید، با حساب خود «کمک و پشتیبانی» را باز کنید.",
+  "referralRewardAmountLine": "پاداش: {amount}",
+  "@referralRewardAmountLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "hubTileReferralTitle": "دعوت و پاداش",
+  "hubTileReferralSub": "کد خود را بفرستید · اعتبار کیف‌پول"
 }

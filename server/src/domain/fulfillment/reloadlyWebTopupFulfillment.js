@@ -140,6 +140,15 @@ export function mapReloadlyTopupFailureToFulfillmentResult(sendResult) {
     };
   }
 
+  if (code === 'reloadly_topup_duplicate') {
+    return {
+      outcome: 'pending_verification',
+      errorCode: 'reloadly_duplicate_request',
+      errorMessageSafe:
+        'Provider rejected a duplicate top-up request — verifying existing transaction',
+    };
+  }
+
   if (code === 'reloadly_topup_unauthorized') {
     return {
       outcome: 'failed_retryable',
@@ -171,11 +180,11 @@ export function mapReloadlyTopupFailureToFulfillmentResult(sendResult) {
     };
   }
 
-  if (code === 'reloadly_topup_not_successful') {
+  if (code === 'reloadly_topup_explicit_failure' || code === 'reloadly_topup_not_successful') {
     return {
       outcome: 'failed_terminal',
-      errorCode: 'reloadly_topup_not_successful',
-      errorMessageSafe: String(sendResult.failureMessage ?? 'Reloadly processed but not successful').slice(
+      errorCode: code,
+      errorMessageSafe: String(sendResult.failureMessage ?? 'Reloadly reported a terminal failure').slice(
         0,
         200,
       ),
@@ -184,9 +193,20 @@ export function mapReloadlyTopupFailureToFulfillmentResult(sendResult) {
 
   if (code === 'reloadly_topup_missing_transaction_id') {
     return {
-      outcome: 'failed_retryable',
+      outcome: 'pending_verification',
       errorCode: 'provider_response_incomplete',
-      errorMessageSafe: 'Reloadly response missing transaction id',
+      errorMessageSafe: 'Reloadly response missing transaction id — verifying',
+    };
+  }
+
+  if (code === 'reloadly_topup_ambiguous_response') {
+    return {
+      outcome: 'pending_verification',
+      errorCode: 'reloadly_ambiguous_response',
+      errorMessageSafe: String(sendResult.failureMessage ?? 'Reloadly response ambiguous — verifying').slice(
+        0,
+        200,
+      ),
     };
   }
 
@@ -198,17 +218,48 @@ export function mapReloadlyTopupFailureToFulfillmentResult(sendResult) {
 }
 
 /**
- * @param {{ ok: true, providerReference: string } | { ok: false, failureCode?: string, failureMessage?: string }} r
+ * @param {object} r — {@link sendReloadlyTopupRequest} result (`kind`) or legacy `{ ok }` tests
  * @returns {TopupFulfillmentResult}
  */
 export function mapReloadlyTopupSendResultToFulfillmentResult(r) {
-  if (r.ok) {
+  if (r && typeof r === 'object' && r.ok === true) {
     return {
       outcome: 'succeeded',
       providerReference: r.providerReference,
     };
   }
-  return mapReloadlyTopupFailureToFulfillmentResult(r);
+  if (r && r.kind === 'confirmed') {
+    return {
+      outcome: 'succeeded',
+      providerReference: r.providerReference,
+    };
+  }
+  if (r && r.kind === 'pending') {
+    return {
+      outcome: 'pending_verification',
+      providerReference: r.providerReference ?? undefined,
+      errorCode: 'reloadly_pending_confirmation',
+      errorMessageSafe: 'Reloadly is still processing this top-up',
+    };
+  }
+  if (r && r.kind === 'ambiguous') {
+    return {
+      outcome: 'pending_verification',
+      errorCode: 'reloadly_ambiguous_response',
+      errorMessageSafe: String(r.failureMessage ?? 'Reloadly returned an ambiguous result').slice(0, 200),
+    };
+  }
+  if (r && r.kind === 'failed') {
+    return mapReloadlyTopupFailureToFulfillmentResult(r);
+  }
+  if (r && r.ok === false) {
+    return mapReloadlyTopupFailureToFulfillmentResult(r);
+  }
+  return {
+    outcome: 'failed_retryable',
+    errorCode: 'reloadly_malformed_provider_result',
+    errorMessageSafe: 'Unexpected Reloadly result shape',
+  };
 }
 
 /**

@@ -3,6 +3,8 @@ enum CustomerTrackingStage {
   paymentReceived,
   preparingTopup,
   sendingToOperator,
+  /// Payment captured; operator outcome not yet proven — distinct from “sending” certainty.
+  verifying,
   delivered,
   delayed,
   retrying,
@@ -30,6 +32,12 @@ class CustomerOrderTracking {
 
   static CustomerOrderTracking fromExecuteJson(Map<String, dynamic>? json) {
     final order = json?['order'] as Map<String, dynamic>?;
+    final keyRaw = order?['trackingStageKey'] as String?;
+    final key = keyRaw?.trim();
+    if (key != null && key.isNotEmpty) {
+      return fromServerTrackingStageKey(key);
+    }
+
     final ful = json?['fulfillment'] as Map<String, dynamic>?;
     final orderStatus = (order?['orderStatus'] as String?)?.toUpperCase();
     final fStatus = (ful?['status'] as String?)?.toUpperCase();
@@ -149,6 +157,13 @@ class CustomerOrderTracking {
       case 'sending':
         return const CustomerOrderTracking(
           stage: CustomerTrackingStage.sendingToOperator,
+          linearStepIndex: 2,
+          paymentIsSafe: true,
+          systemIsRetrying: false,
+        );
+      case 'verifying':
+        return const CustomerOrderTracking(
+          stage: CustomerTrackingStage.verifying,
           linearStepIndex: 2,
           paymentIsSafe: true,
           systemIsRetrying: false,

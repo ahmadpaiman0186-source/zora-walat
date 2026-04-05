@@ -22,7 +22,7 @@
     "webtopup:sandbox-verify": "node scripts/webtopup-reloadly-sandbox-verify.mjs",
     "webtopup:sandbox-dispatch-exercise": "node scripts/webtopup-sandbox-dispatch-exercise.mjs",
     "reconciliation:scan": "node scripts/reconciliation-scan.mjs",
-    "test": "node --test test/webTopupReconcile.test.js test/webTopupObservability.test.js test/mockTopupProvider.test.js test/fulfillmentEligibility.test.js test/fulfillmentOutcome.test.js test/providerRegistry.test.js test/reloadlyWebTopupFulfillment.test.js test/webTopupFulfillmentStartup.test.js test/webTopupFulfillmentScope.test.js test/reloadlyWebTopupProvider.test.js test/webTopupFulfillmentRunbook.test.js test/webTopupSandboxPreflight.test.js test/securityHardening.test.js test/marginIntelligence.test.js"
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",

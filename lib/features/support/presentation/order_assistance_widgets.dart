@@ -287,6 +287,14 @@ _EscalationCopy? _escalationCopy(
         icon: Icons.send_rounded,
         tint: scheme.primary,
       );
+    case CustomerTrackingStage.verifying:
+      return _EscalationCopy(
+        title: l10n.supportAssistVerifyingTitle,
+        body: l10n.supportAssistVerifyingBody,
+        nextStep: l10n.supportAssistVerifyingNext,
+        icon: Icons.verified_user_outlined,
+        tint: scheme.secondary,
+      );
     case CustomerTrackingStage.orderCancelled:
       return _EscalationCopy(
         title: l10n.supportAssistCancelledTitle,

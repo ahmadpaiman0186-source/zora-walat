@@ -7,6 +7,8 @@ import { hashReferralCorrelation } from '../../lib/referralPrivacyHash.js';
 import { normalizeReferralCodeInput, ensureUserReferralCode } from './referralCodeService.js';
 import { getReferralProgramConfig } from './referralProgramConfigService.js';
 import { evaluateReferralAbuseSignals } from './referralAbuseService.js';
+import { logReferralEvent } from '../../lib/referralLog.js';
+import { getTraceId } from '../../lib/requestContext.js';
 
 /**
  * @param {object} p
@@ -58,6 +60,7 @@ export async function applyReferralCodeForUser(p) {
     invitee,
     appliedIpHash,
     inviterUserId: inviter.id,
+    currentInviteeUserId: p.invitedUserId,
   });
 
   const fraudFlags = {
@@ -71,12 +74,20 @@ export async function applyReferralCodeForUser(p) {
         inviterUserId: inviter.id,
         invitedUserId: p.invitedUserId,
         status: REFERRAL_STATUS.PENDING,
+        referralCodeUsed: codeNorm,
         fraudFlags,
         invitedSignupIpHash: invitee.signupIpHash,
         appliedIpHash: appliedIpHash ?? undefined,
         appliedDeviceFingerprintHash:
           appliedDeviceFingerprintHash ?? undefined,
       },
+    });
+    logReferralEvent('referral_created', {
+      traceId: getTraceId(),
+      referralId: ref.id,
+      inviterUserId: inviter.id,
+      invitedUserId: p.invitedUserId,
+      extra: { codeLen: codeNorm.length },
     });
     return { ok: true, referralId: ref.id };
   } catch (e) {

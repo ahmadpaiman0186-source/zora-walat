@@ -6,6 +6,19 @@ import { isReloadlyConfigured } from '../services/reloadlyClient.js';
  * Does not exit the process — logs only (operators fix env).
  */
 export function logProductionReloadlyConsistencyWarnings() {
+  const airtime = String(env.airtimeProvider ?? 'mock').trim().toLowerCase();
+  if (airtime === 'reloadly') {
+    if (!isReloadlyConfigured()) {
+      console.error(
+        '[security] AIRTIME_PROVIDER=reloadly but Reloadly credentials are missing (payment-checkout airtime)',
+      );
+    }
+    if (env.nodeEnv === 'production' && env.reloadlySandbox) {
+      console.warn(
+        '[security] AIRTIME_PROVIDER=reloadly with RELOADLY_SANDBOX=true in production — confirm intentional sandbox Topups audience',
+      );
+    }
+  }
   const provider = String(env.webTopupFulfillmentProvider ?? 'mock')
     .trim()
     .toLowerCase();

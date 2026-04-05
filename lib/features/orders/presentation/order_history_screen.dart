@@ -70,6 +70,8 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         return l10n.orderStatusSending;
       case 'preparing':
         return l10n.orderStatusPreparing;
+      case 'verifying':
+        return l10n.orderStatusVerifying;
       default:
         return l10n.orderStatusInProgress;
     }
@@ -118,6 +120,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           t.colorScheme.primary.withValues(alpha: 0.12),
           t.colorScheme.primary,
           Icons.hourglass_top_rounded,
+        );
+      case 'verifying':
+        return (
+          t.colorScheme.secondary.withValues(alpha: 0.14),
+          t.colorScheme.secondary,
+          Icons.verified_outlined,
         );
       default:
         return (

@@ -3,6 +3,11 @@ import { prisma } from './db.js';
 import { env } from './config/env.js';
 import { validateWebTopupFulfillmentProviderConfigOrExit } from './config/webTopupFulfillmentStartup.js';
 import { logProductionReloadlyConsistencyWarnings } from './config/productionReloadlyGuard.js';
+import {
+  getAirtimeReloadlyDiagnosticsSnapshot,
+  validateAirtimeReloadlyConfigOrExit,
+} from './config/airtimeReloadlyStartup.js';
+import { getLaunchSubsystemSnapshot } from './config/launchSubsystemSnapshot.js';
 import { webTopupLog } from './lib/webTopupObservability.js';
 import { isReloadlyConfigured } from './services/reloadlyClient.js';
 import {
@@ -12,6 +17,7 @@ import {
 import { getValidatedStripeSecretKey } from './config/stripeEnv.js';
 import { stripeKeyStatusLog } from './services/stripe.js';
 import { processPendingPaidOrders } from './services/fulfillmentProcessingService.js';
+import { runProcessingRecoveryTick } from './services/processingRecoveryService.js';
 import { processWebTopupFulfillmentJobs } from './services/topupFulfillment/webtopFulfillmentJob.js';
 
 function isPostgresDatabaseUrl(url) {
@@ -28,6 +34,7 @@ if (jwtAccess.length < 32 || jwtRefresh.length < 32) {
 }
 
 validateWebTopupFulfillmentProviderConfigOrExit();
+validateAirtimeReloadlyConfigOrExit();
 logProductionReloadlyConsistencyWarnings();
 
 const webTopupProviderId = String(env.webTopupFulfillmentProvider ?? 'mock')
@@ -39,6 +46,8 @@ webTopupLog(undefined, 'info', 'provider_config_validated', {
     webTopupProviderId !== 'reloadly' || isReloadlyConfigured(),
   reloadlySandboxMode:
     webTopupProviderId === 'reloadly' ? env.reloadlySandbox : null,
+  airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
+  launchSubsystems: getLaunchSubsystemSnapshot(),
 });
 if (process.env.NODE_ENV !== 'test') {
   console.log(
@@ -135,6 +144,19 @@ if (env.nodeEnv === 'production') {
   }
 }
 
+if (env.nodeEnv === 'production') {
+  if (!env.loyaltyAutoGrantOnDelivery) {
+    console.warn(
+      '[launch] LOYALTY_AUTO_GRANT_ON_DELIVERY=false — points will not auto-grant on delivery; reconciliation may flag drift until remediated',
+    );
+  }
+  if (!env.referralEvaluationSchedulingEnabled) {
+    console.warn(
+      '[launch] REFERRAL_EVALUATION_SCHEDULING_ENABLED=false — no delayed referral evaluation after delivery',
+    );
+  }
+}
+
 const app = createApp();
 
 app.listen(env.port, async () => {
@@ -173,6 +195,19 @@ app.listen(env.port, async () => {
         console.error('[fulfillment] processPendingPaidOrders', e);
       });
     }, drainMs);
+  }
+
+  const recoveryPollMs = env.processingRecoveryPollMs;
+  if (
+    recoveryPollMs > 0 &&
+    env.processingRecoveryEnabled &&
+    process.env.NODE_ENV !== 'test'
+  ) {
+    setInterval(() => {
+      runProcessingRecoveryTick().catch((e) => {
+        console.error('[fulfillment] processingRecoveryTick', e);
+      });
+    }, recoveryPollMs);
   }
 
   const jobPollMs = env.webtopupFulfillmentJobPollMs;

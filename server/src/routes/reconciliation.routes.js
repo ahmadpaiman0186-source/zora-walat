@@ -15,8 +15,21 @@ router.get(
   '/reconciliation',
   requireAuth,
   requireAdmin,
-  asyncHandler(async (_req, res) => {
-    const result = await runReconciliationScan();
+  asyncHandler(async (req, res) => {
+    const incremental = String(req.query.incremental ?? '') === '1';
+    const fullChunk = String(req.query.fullChunk ?? '') === '1';
+    const fullCursorId = String(req.query.fullCursorId ?? '').trim() || null;
+    const updateWatermarks = String(req.query.updateWatermarks ?? '1') !== '0';
+    const heavyIntegrity = String(req.query.heavyIntegrity ?? '1') !== '0';
+
+    const result = await runReconciliationScan({
+      incremental,
+      fullChunk: fullChunk
+        ? { cursorId: fullCursorId, size: undefined }
+        : null,
+      updateWatermarks,
+      heavyIntegrity,
+    });
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json(result);
   }),

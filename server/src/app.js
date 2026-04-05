@@ -20,6 +20,7 @@ import orderRoutes from './routes/order.routes.js';
 import reconciliationRoutes from './routes/reconciliation.routes.js';
 import webTopupFulfillmentAdminRoutes from './routes/webTopupFulfillmentAdmin.routes.js';
 import adminOrdersRoutes from './routes/adminOrders.routes.js';
+import processingManualRoutes from './routes/processingManual.routes.js';
 import transactionsRoutes from './routes/transactions.routes.js';
 import loyaltyRoutes from './routes/loyalty.routes.js';
 import notificationsRoutes from './routes/notifications.routes.js';
@@ -27,6 +28,7 @@ import stripeWebhookRouter from './routes/stripeWebhook.routes.js';
 import topupOrderRoutes from './routes/topupOrder.routes.js';
 import opsRoutes from './routes/ops.routes.js';
 import marginRoutes from './routes/margin.routes.js';
+import referralRoutes from './routes/referral.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import {
@@ -110,10 +112,12 @@ export function createApp() {
   app.use('/api/orders', apiIpLimiter, orderRoutes);
   app.use('/api/transactions', apiIpLimiter, transactionsRoutes);
   app.use('/api/loyalty', apiIpLimiter, loyaltyRoutes);
+  app.use('/api/referral', apiIpLimiter, referralRoutes);
   app.use('/api/notifications', apiIpLimiter, notificationsRoutes);
   app.use('/api/admin', apiIpLimiter, reconciliationRoutes);
   app.use('/api/admin', apiIpLimiter, webTopupFulfillmentAdminRoutes);
   app.use('/api/admin', apiIpLimiter, adminOrdersRoutes);
+  app.use('/api/admin', apiIpLimiter, processingManualRoutes);
   app.use('/api/admin', apiIpLimiter, opsRoutes);
   app.use('/api/admin', apiIpLimiter, marginRoutes);
 

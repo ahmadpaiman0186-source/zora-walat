@@ -7,8 +7,9 @@ import { logDeliveryEvent } from './deliveryLogger.js';
  * Structured logs for ops; persistence remains in fulfillmentProcessingService.
  *
  * @param {import('@prisma/client').PaymentCheckout} order
+ * @param {{ attemptId?: string, attemptNumber?: number, traceId?: string | null, log?: import('pino').Logger }} [fulfillmentCtx]
  */
-export async function executeDelivery(order) {
+export async function executeDelivery(order, fulfillmentCtx = {}) {
   const orderId = order.id;
   logDeliveryEvent({
     orderId,
@@ -18,17 +19,26 @@ export async function executeDelivery(order) {
     detail: 'adapter_start',
   });
 
-  const result = await runDeliveryAdapter(order);
+  const result = await runDeliveryAdapter(order, fulfillmentCtx);
 
   const ok = result.outcome === AIRTIME_OUTCOME.SUCCESS;
+  const verifying =
+    result.outcome === AIRTIME_OUTCOME.PENDING_VERIFICATION ||
+    result.outcome === AIRTIME_OUTCOME.AMBIGUOUS;
   logDeliveryEvent({
     orderId,
     phase: 'delivery_provider_result',
-    result: ok ? 'ok' : 'failure',
+    result: ok ? 'ok' : verifying ? 'pending' : 'failure',
     failureReason: ok
       ? null
-      : String(result.failureCode ?? result.errorKind ?? 'unknown').slice(0, 120),
-    detail: ok ? null : String(result.failureMessage ?? '').slice(0, 80),
+      : verifying
+        ? String(result.outcome).slice(0, 120)
+        : String(result.failureCode ?? result.errorKind ?? 'unknown').slice(0, 120),
+    detail: ok
+      ? null
+      : verifying
+        ? String(result.failureMessage ?? result.outcome ?? '').slice(0, 80)
+        : String(result.failureMessage ?? '').slice(0, 80),
   });
 
   return result;

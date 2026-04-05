@@ -6,7 +6,12 @@ const TERMINAL = new Set([
   ORDER_STATUS.CANCELLED,
 ]);
 
-/** Allowed transitions [from -> Set<to>] */
+/**
+ * Allowed transitions [from -> Set<to>].
+ * Business flow: PENDING → PAID (Stripe webhook) → PROCESSING (fulfillment claim)
+ * → FULFILLED (delivery success) | FAILED | CANCELLED. `FULFILLED` is persisted
+ * as `ORDER_STATUS.FULFILLED` (alias constant `DELIVERED`).
+ */
 const EDGES = new Map([
   [
     ORDER_STATUS.PENDING,

@@ -1,6 +1,12 @@
 import { Prisma } from '@prisma/client';
 
 import { env } from '../config/env.js';
+import {
+  LOYALTY_LEDGER_SOURCE,
+  LOYALTY_LEDGER_TYPE,
+  loyaltyLedgerCheckoutRowId,
+  loyaltyLedgerCheckoutSourceId,
+} from '../constants/loyaltyLedger.js';
 
 /** UTC `yyyy-MM` for leaderboard buckets. */
 export function utcLeaderboardMonth(d = new Date()) {
@@ -34,6 +40,9 @@ export async function grantLoyaltyPointsForDeliveredOrderInTx(tx, order) {
   const groupId = member?.groupId ?? null;
   const leaderboardMonth = utcLeaderboardMonth();
 
+  const sourceId = loyaltyLedgerCheckoutSourceId(order.id);
+  const ledgerId = loyaltyLedgerCheckoutRowId(order.id);
+
   try {
     await tx.loyaltyPointsGrant.create({
       data: {
@@ -53,6 +62,28 @@ export async function grantLoyaltyPointsForDeliveredOrderInTx(tx, order) {
       return { granted: false, reason: 'duplicate_checkout' };
     }
     throw e;
+  }
+
+  try {
+    await tx.loyaltyLedger.create({
+      data: {
+        id: ledgerId,
+        userId,
+        source: LOYALTY_LEDGER_SOURCE.CHECKOUT_GRANT,
+        sourceId,
+        amount: points,
+        type: LOYALTY_LEDGER_TYPE.CREDIT,
+      },
+    });
+  } catch (e) {
+    if (
+      e instanceof Prisma.PrismaClientKnownRequestError &&
+      e.code === 'P2002'
+    ) {
+      /* ledger already recorded — idempotent with grant */
+    } else {
+      throw e;
+    }
   }
 
   await tx.user.update({

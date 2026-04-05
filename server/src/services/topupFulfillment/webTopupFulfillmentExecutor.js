@@ -231,6 +231,17 @@ export async function executeWebTopupFulfillmentProviderPhase(orderId, log, ctx 
           : undefined,
       });
       break;
+    case 'pending_verification':
+      webTopupLog(log, 'info', 'fulfillment_pending_verification', {
+        orderIdSuffix: orderId.slice(-8),
+        providerId,
+        traceId: ctx.traceId,
+        errorCode: result.errorCode,
+        referenceSuffix: result.providerReference
+          ? result.providerReference.slice(-12)
+          : undefined,
+      });
+      break;
     case 'failed_retryable':
       webTopupLog(log, 'warn', 'fulfillment_failed_retryable', {
         orderIdSuffix: orderId.slice(-8),

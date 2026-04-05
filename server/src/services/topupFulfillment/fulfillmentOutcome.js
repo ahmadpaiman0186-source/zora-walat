@@ -24,6 +24,17 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         fulfillmentErrorCode: null,
         fulfillmentErrorMessageSafe: null,
       };
+    case 'pending_verification':
+      return {
+        ...base,
+        fulfillmentStatus: FULFILLMENT_STATUS.PROCESSING,
+        fulfillmentReference: result.providerReference ?? null,
+        fulfillmentCompletedAt: null,
+        fulfillmentFailedAt: null,
+        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.PROVIDER_VERIFYING,
+        fulfillmentErrorMessageSafe:
+          result.errorMessageSafe ?? 'Verifying top-up with provider',
+      };
     case 'failed_retryable':
       return {
         ...base,

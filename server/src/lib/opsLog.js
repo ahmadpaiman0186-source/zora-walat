@@ -1,7 +1,7 @@
 import { getTraceId } from './requestContext.js';
 import { safeSuffix } from './webTopupObservability.js';
 
-/** @typedef {'payment' | 'fulfillment' | 'push' | 'http' | 'stripe_webhook'} OpsDomain */
+/** @typedef {'payment' | 'fulfillment' | 'push' | 'http' | 'stripe_webhook' | 'referral'} OpsDomain */
 
 /**
  * Structured operations log line — no PII, short order correlation only.

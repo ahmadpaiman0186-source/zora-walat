@@ -147,6 +147,7 @@ router.post('/', async (req, res) => {
         }
 
         if (total !== row.amountUsdCents || sessionCurrency !== rowCurrency) {
+          checkoutAmountMismatchOrderId = raw;
           req.log?.error(
             {
               expectedCents: row.amountUsdCents,

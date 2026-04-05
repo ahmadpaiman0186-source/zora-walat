@@ -114,6 +114,12 @@ class MainHomeScreen extends StatelessWidget {
               onTap: () => context.push(AppRoutePaths.loyalty),
             ),
             _Tile(
+              icon: Icons.card_giftcard_outlined,
+              title: l10n.hubTileReferralTitle,
+              subtitle: l10n.hubTileReferralSub,
+              onTap: () => context.push(AppRoutePaths.referral),
+            ),
+            _Tile(
               icon: Icons.support_agent_outlined,
               title: l10n.hubTileHelpTitle,
               subtitle: l10n.hubTileHelpSub,

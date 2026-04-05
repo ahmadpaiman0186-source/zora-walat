@@ -18,7 +18,7 @@
  */
 
 /**
- * @typedef {'succeeded' | 'failed_retryable' | 'failed_terminal' | 'unsupported_route' | 'invalid_request'} TopupFulfillmentOutcome
+ * @typedef {'succeeded' | 'pending_verification' | 'failed_retryable' | 'failed_terminal' | 'unsupported_route' | 'invalid_request'} TopupFulfillmentOutcome
  */
 
 /**

@@ -29,7 +29,11 @@ import {
   emitFulfillmentTerminalSideEffects,
   schedulePushSideEffect,
 } from './pushNotifications/userNotificationPipeline.js';
+import { scheduleReferralEvaluationAfterDelivery } from './referral/referralLifecycleService.js';
 import { runWithTrace, getTraceId } from '../lib/requestContext.js';
+import { mergeManualRequiredMetadata } from '../lib/manualRequiredMetadata.js';
+import { logFulfillmentIntegrityEvent } from './fulfillmentLikelySuccessService.js';
+import { logManualRequiredAlert } from '../lib/manualRequiredAlerts.js';
 import {
   recordFulfillmentRunStarted,
 } from '../lib/opsMetrics.js';
@@ -38,6 +42,13 @@ import {
   recordMarginIntelAfterSnapshot,
   MARGIN_PROVIDER_COST_SOURCE,
 } from '../lib/marginIntelligence.js';
+import { detectFailureConfidence } from '../domain/fulfillment/failureConfidence.js';
+import { FAILURE_CONFIDENCE } from '../constants/failureConfidence.js';
+import { isDbOrchestrationFragileError } from '../lib/dbOrchestrationError.js';
+import {
+  emitReloadlyFulfillmentEvent,
+  reloadlyFulfillmentBaseFields,
+} from '../lib/reloadlyFulfillmentObservability.js';
 
 function safeJson(obj) {
   try {
@@ -119,9 +130,9 @@ async function processFulfillmentForOrderInner(orderId) {
     const attempt = await tx.fulfillmentAttempt.findFirst({
       where: {
         orderId,
-        attemptNumber: 1,
         status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
       },
+      orderBy: { attemptNumber: 'asc' },
     });
     if (!attempt) {
       return null;
@@ -172,7 +183,7 @@ async function processFulfillmentForOrderInner(orderId) {
       ip: null,
     });
 
-    return { attemptId: attempt.id };
+    return { attemptId: attempt.id, attemptNumber: attempt.attemptNumber };
   });
 
   if (!phase1) {
@@ -188,8 +199,14 @@ async function processFulfillmentForOrderInner(orderId) {
 
   /** Delivery I/O runs outside DB transactions (timeouts / HTTP). */
   let providerResult;
+  let providerOutcome = AIRTIME_OUTCOME.FAILURE;
   try {
-    providerResult = await executeDelivery(orderRow);
+    providerResult = await executeDelivery(orderRow, {
+      attemptId: phase1.attemptId,
+      attemptNumber: phase1.attemptNumber,
+      traceId: getTraceId(),
+    });
+    providerOutcome = providerResult.outcome;
   } catch (err) {
     const { errorKind, failureCode } = classifyProviderError(err);
     providerResult = {
@@ -201,6 +218,7 @@ async function processFulfillmentForOrderInner(orderId) {
       requestSummary: {},
       responseSummary: { diagnostic: safeErrorDiagnostics(err) },
     };
+    providerOutcome = AIRTIME_OUTCOME.FAILURE;
   }
 
   try {
@@ -279,11 +297,22 @@ async function processFulfillmentForOrderInner(orderId) {
           ip: null,
         });
 
-        await grantLoyaltyPointsForDeliveredOrderInTx(tx, {
-          id: order.id,
-          userId: order.userId,
-          amountUsdCents: order.amountUsdCents,
-        });
+        if (env.loyaltyAutoGrantOnDelivery) {
+          await grantLoyaltyPointsForDeliveredOrderInTx(tx, {
+            id: order.id,
+            userId: order.userId,
+            amountUsdCents: order.amountUsdCents,
+          });
+        } else {
+          await writeOrderAudit(tx, {
+            event: 'loyalty_grant_suppressed',
+            payload: {
+              orderId,
+              reason: 'LOYALTY_AUTO_GRANT_ON_DELIVERY=false',
+            },
+            ip: null,
+          });
+        }
 
         return {
           orderId,
@@ -292,6 +321,102 @@ async function processFulfillmentForOrderInner(orderId) {
             snapshot.marginProviderCostSource ===
             MARGIN_PROVIDER_COST_SOURCE.PROVIDER_API,
         };
+      }
+
+      if (
+        providerResult.outcome === AIRTIME_OUTCOME.PENDING_VERIFICATION ||
+        providerResult.outcome === AIRTIME_OUTCOME.AMBIGUOUS
+      ) {
+        await tx.fulfillmentAttempt.update({
+          where: { id: att.id },
+          data: {
+            status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+            provider: providerResult.providerKey ?? att.provider,
+            providerReference: providerResult.providerReference ?? null,
+            requestSummary: reqStr,
+            responseSummary: resStr,
+          },
+        });
+        const classKey =
+          providerResult.outcome === AIRTIME_OUTCOME.AMBIGUOUS
+            ? 'reloadly_ambiguous_provider_response'
+            : 'reloadly_pending_provider_verification';
+        const newMeta = mergeManualRequiredMetadata(order.metadata, {
+          reason: classKey,
+          traceId,
+          classification: 'provider_truth_uncertain',
+        });
+        await tx.paymentCheckout.updateMany({
+          where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+          data: { metadata: newMeta },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_verifying',
+          payload: {
+            orderId,
+            attemptId: att.id,
+            outcome: providerResult.outcome,
+          },
+          ip: null,
+        });
+        return null;
+      }
+
+      if (providerResult.outcome === AIRTIME_OUTCOME.FAILURE) {
+        const attemptsSnap = await tx.fulfillmentAttempt.findMany({
+          where: { orderId },
+          orderBy: { attemptNumber: 'asc' },
+        });
+        const failConf = detectFailureConfidence(order, attemptsSnap, providerResult);
+        if (failConf !== FAILURE_CONFIDENCE.STRONG_FAILURE) {
+          const resObj =
+            providerResult.responseSummary && typeof providerResult.responseSummary === 'object'
+              ? { ...providerResult.responseSummary }
+              : {};
+          resObj.normalizedOutcome = 'failure_unconfirmed';
+          resObj.proofClassification = 'insufficient_negative_proof';
+          resObj.failureConfidence = failConf;
+          await tx.fulfillmentAttempt.update({
+            where: { id: att.id },
+            data: {
+              status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+              provider: providerResult.providerKey ?? att.provider,
+              providerReference: providerResult.providerReference ?? null,
+              requestSummary: reqStr,
+              responseSummary: safeJson(resObj),
+            },
+          });
+          const newMeta = mergeManualRequiredMetadata(order.metadata, {
+            reason: 'reloadly_failure_low_confidence',
+            traceId: getTraceId(),
+            classification: 'failure_confidence_insufficient',
+            failureConfidence: failConf,
+          });
+          await tx.paymentCheckout.updateMany({
+            where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+            data: { metadata: newMeta },
+          });
+          await writeOrderAudit(tx, {
+            event: 'delivery_failure_blocked',
+            payload: {
+              orderId,
+              attemptId: att.id,
+              failureConfidence: failConf,
+            },
+            ip: null,
+          });
+          emitReloadlyFulfillmentEvent(undefined, 'warn', 'reloadly_failure_blocked_due_to_ambiguity', {
+            ...reloadlyFulfillmentBaseFields(orderId, {
+              traceId: getTraceId(),
+              attemptNumber: phase1.attemptNumber,
+              providerReference: providerResult.providerReference ?? null,
+              normalizedOutcome: 'failure_unconfirmed',
+              decisionPath: 'fulfillment_completion_tx',
+              proofClassification: 'insufficient_negative_proof',
+            }),
+          });
+          return null;
+        }
       }
 
       await tx.fulfillmentAttempt.update({
@@ -344,11 +469,118 @@ async function processFulfillmentForOrderInner(orderId) {
         marginTelemetry.usedApiCost,
         env.marginLowRouteBp,
       );
+      scheduleReferralEvaluationAfterDelivery(orderId, getTraceId());
     }
 
     schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
   } catch (err) {
     console.error('[fulfillment] completion phase failed', orderId, err);
+    const traceId = getTraceId();
+
+    if (providerOutcome === AIRTIME_OUTCOME.SUCCESS) {
+      await prisma.$transaction(async (tx) => {
+        const orderNow = await tx.paymentCheckout.findUnique({
+          where: { id: orderId },
+          select: { metadata: true, orderStatus: true },
+        });
+        if (!orderNow || orderNow.orderStatus !== ORDER_STATUS.PROCESSING) {
+          return;
+        }
+        const newMeta = mergeManualRequiredMetadata(orderNow.metadata, {
+          reason: 'post_provider_success_db_orchestration_failed',
+          traceId,
+          classification: 'orchestration_post_provider_success',
+        });
+        await tx.paymentCheckout.updateMany({
+          where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+          data: { metadata: newMeta },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_orchestration_failed',
+          payload: {
+            orderId,
+            attemptId: phase1.attemptId,
+            mode: 'manual_required_after_provider_success',
+            errorClass: err?.name ?? 'Error',
+          },
+          ip: null,
+        });
+      });
+      logFulfillmentIntegrityEvent('fulfillment_orchestration_failed_after_provider_success', {
+        orderId,
+        traceId,
+        severity: 'ERROR',
+        extra: { attemptIdSuffix: String(phase1.attemptId).slice(-8) },
+      });
+      logManualRequiredAlert({
+        event: 'manual_required_detected',
+        severity: 'CRITICAL',
+        traceId,
+        orderId,
+        extra: { classification: 'orchestration_post_provider_success' },
+      });
+      return;
+    }
+
+    const attemptsForConf = await prisma.fulfillmentAttempt.findMany({
+      where: { orderId },
+      orderBy: { attemptNumber: 'asc' },
+    });
+    const failConf = detectFailureConfidence(
+      null,
+      attemptsForConf,
+      providerResult,
+    );
+    const fragile = isDbOrchestrationFragileError(err);
+    const allowTerminalFail =
+      failConf === FAILURE_CONFIDENCE.STRONG_FAILURE && !fragile;
+
+    if (!allowTerminalFail) {
+      await prisma.$transaction(async (tx) => {
+        const orderNow = await tx.paymentCheckout.findUnique({
+          where: { id: orderId },
+          select: { metadata: true, orderStatus: true },
+        });
+        if (!orderNow || orderNow.orderStatus !== ORDER_STATUS.PROCESSING) {
+          return;
+        }
+        const newMeta = mergeManualRequiredMetadata(orderNow.metadata, {
+          reason: 'failure_confidence_insufficient_or_db_fragile',
+          traceId,
+          classification: 'failure_orchestration_low_confidence',
+        });
+        await tx.paymentCheckout.updateMany({
+          where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+          data: { metadata: newMeta },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_orchestration_failed',
+          payload: {
+            orderId,
+            attemptId: phase1.attemptId,
+            mode: 'manual_required_low_failure_confidence',
+            failureConfidence: failConf,
+            dbFragile: fragile,
+          },
+          ip: null,
+        });
+      });
+      logFulfillmentIntegrityEvent('fulfillment_orchestration_failure_low_confidence', {
+        orderId,
+        traceId,
+        severity: 'WARN',
+        extra: { failureConfidence: failConf, dbFragile: fragile },
+      });
+      logManualRequiredAlert({
+        event: 'manual_required_detected',
+        severity: 'WARN',
+        traceId,
+        orderId,
+        extra: { classification: 'failure_orchestration_low_confidence' },
+      });
+      return;
+    }
+
     await prisma.$transaction(async (tx) => {
       const att = await tx.fulfillmentAttempt.findFirst({
         where: {
@@ -382,7 +614,12 @@ async function processFulfillmentForOrderInner(orderId) {
       });
       await writeOrderAudit(tx, {
         event: 'delivery_orchestration_failed',
-        payload: { orderId, attemptId: att.id },
+        payload: {
+          orderId,
+          attemptId: att.id,
+          mode: 'terminal_fail_after_provider_failure',
+          failureConfidence: failConf,
+        },
         ip: null,
       });
     });

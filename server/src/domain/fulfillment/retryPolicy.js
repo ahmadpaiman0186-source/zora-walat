@@ -1,4 +1,4 @@
-import { AIRTIME_ERROR_KIND } from './airtimeFulfillmentResult.js';
+import { AIRTIME_ERROR_KIND, AIRTIME_OUTCOME } from './airtimeFulfillmentResult.js';
 import { ORDER_STATUS } from '../../constants/orderStatus.js';
 
 /**
@@ -17,7 +17,14 @@ export const AUTO_RETRY_ENABLED = false;
  * Conservative: only transient kinds; never for terminal business failures.
  */
 export function isRetryableFulfillmentFailure(providerResult) {
-  if (!providerResult || providerResult.outcome === 'success') {
+  if (!providerResult || providerResult.outcome === AIRTIME_OUTCOME.SUCCESS) {
+    return false;
+  }
+  if (
+    providerResult.outcome === AIRTIME_OUTCOME.PENDING_VERIFICATION ||
+    providerResult.outcome === AIRTIME_OUTCOME.AMBIGUOUS ||
+    providerResult.outcome === AIRTIME_OUTCOME.UNAVAILABLE
+  ) {
     return false;
   }
   const kind = providerResult.errorKind;

@@ -241,6 +241,8 @@
   "trackingBodyPaymentReceived": "Stripe ستاسو تادیه تایید کړه. نور ګامونه په اتومات ډول کیږي.",
   "trackingHeadlineCatchingUp": "نږدې",
   "trackingBodyCatchingUp": "موږ وروستي حالت همغږیوو. تادیه ثبت ده — یوه دقیقه وروسته وګورئ یا وروستي سفارشونه خلاص کړئ.",
+  "trackingHeadlineVerifying": "د اپراتور سره تاییدېږي",
+  "trackingBodyVerifying": "ستاسو تادیه خوندي ده. موږ د موبایل اپراتور سره وروستی پړاو تاییدوو — یوازې کله «تحویل شوی» وښیو چې موږ یقین ولرو. ښايي یو څه وخت ونیسي.",
   "trackingHeadlineSignIn": "ژوندي حالت لپاره ننوځئ",
   "trackingBodySignIn": "تادیه ثبت ده. په ننوتلو سره کولی شئ هر وخت لیږل تازه کړئ.",
   "paymentSafeBanner": "ستاسو تادیه ساتل کېږي. تادیه Stripe له لارې ده — موږ ستاسو کارت نه ساتو.",
@@ -277,6 +279,7 @@
   "orderStatusPaymentPending": "تادیه تاییدېږي",
   "orderStatusCancelled": "لغوه شو",
   "orderStatusSending": "لیږل کېږي",
+  "orderStatusVerifying": "تحویل تاییدېږي",
   "orderStatusPreparing": "چمتو کېږي",
   "hubTileOrdersTitle": "وروستي سفارشونه",
   "hubTileOrdersSub": "رسيډونه · د ننوتلو وروسته حساب سره",
@@ -403,6 +406,9 @@
   "supportAssistOperatorTitle": "د اپراتور تايید ته انتظار",
   "supportAssistOperatorBody": "زموږ لوري اعتبار اپراتور ته رسېدلی؛ ډېر ژر تأیید کېږي، ځینې شبکې ګډې راپور ورکوي.",
   "supportAssistOperatorNext": "څو دقې او تازه کفایت کوي؛ اړتیا کې د شبکې په واسطه بیلانس وګورئ.",
+  "supportAssistVerifyingTitle": "لا ټینګ تایید کېږي",
+  "supportAssistVerifyingBody": "ستاسو بدلي خوندي ده. اپراتور لا وروستۍ تایید ورکوي — نو د حدس پرځای دقق سفارش په بېرته ګورن کې ساتو؛ هیڅ شی ورکه نه کېږي.",
+  "supportAssistVerifyingNext": "څو دقې صبر، وروستي سفارشونه تازه کړئ؛ که غیرمعمول وخت ونیسي د مرستې سره د سفارش شمېره شریک کړئ.",
   "supportAssistCancelledTitle": "غوښتنه لغوه شوه",
   "supportAssistCancelledBody": "دغه ناسته ګان د بریالي چارج دمخه ودرېدله؛ هر وخت نوی ټاپ‌آپ پیلولی شئ — هیڅ پاتې نه.",
   "supportAssistCancelledNext": "بیا ټاپ‌آپ ته لاړ شئ، شمېره چمتو کړئ او اړتیا کې بیا تادیه.",
@@ -411,5 +417,64 @@
   "hubTileHelpTitle": "مرسته او ملاتړ",
   "hubTileHelpSub": "لارښودونه · تادیه · د غوښتنې کاپی",
   "ordersDetailLoadingHint": "رسيډ بارېږي…",
-  "ordersEmptySupportLine": "پوښتنې لرئ؟ له کور څخه «مرسته او ملاتړ» خلاص کړئ."
+  "ordersEmptySupportLine": "پوښتنې لرئ؟ له کور څخه «مرسته او ملاتړ» خلاص کړئ.",
+  "referralCenterTitle": "بلنه او جایزه",
+  "referralCenterSubtitle": "د هغو خلکو سره Zora-Walat شریک کړئ چې باور پرې لرئ. روښانه جایزې، صادق قواعد — د هغو کورنیو لپاره چې له بهر څخه ټاپ‌آپ کوي.",
+  "referralTrustLine": "کله ستاسو ملګري لومړۍ بریالۍ ډالۍ بشپړه شي، جایزې په اتومات ډول تایید کېږي — نه ننداره؛ د ټولنې پراختیا ته مننه.",
+  "referralProgramPaused": "اوس بلنې ودرول شوې. وروسته راګرځئ — کله بیا پرانیستل شي خبر درشو.",
+  "referralYourCode": "ستاسو د بلنې کوډ",
+  "referralCopyCode": "کوډ کاپی",
+  "referralCodeCopied": "کوډ کاپی شو",
+  "referralCopyInviteMessage": "د بلنې پیام کاپی",
+  "referralInviteMessageCopied": "د بلنې پیام کاپی شو",
+  "referralInviteMessageTemplate": "زه د افغانستان موبایل مطمین ټاپ‌آپ لپاره Zora-Walat کاروم. زما کوډ سره ګډ شئ: {code}",
+  "@referralInviteMessageTemplate": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "referralHowItWorksTitle": "جایزې څنګه کار کوي",
+  "referralHowItWorksBody": "که ملګری ستاسو کوډ سره ننوځي او لومړۍ ډالۍ یې په بریالیتوب سره ورسېږي — لږترلږه {minUsd} — تاسو {rewardUsd} د والټ کرېډیټ ترلاسه کوئ راتلونکي پیرودونو لپاره. هر ملګري ته یو ځل جایزه.",
+  "@referralHowItWorksBody": {
+    "placeholders": {
+      "rewardUsd": {
+        "type": "String"
+      },
+      "minUsd": {
+        "type": "String"
+      }
+    }
+  },
+  "referralRewardRulesFootnote": "د بلنې کرېډیټ یوازې ټاپ‌آپ لپاره دي؛ نغدي نشي اخیستل کیدی. دا د ټولو لپاره ښه او نرخونو ته انصاف دی.",
+  "referralWeeklyFairTitle": "هره اونۍ عادلانه برخه",
+  "referralWeeklyFairBody": "د بلنې جایزې له ګډې اونۍ زېرمې راځي ترڅو ډېرې کورنې برخه واخلي. که اونۍ ګډوډه وي، ځینې بلنې بیا هم وړ کیدی شي پداسې حال کې چې زېرمه نوې کېږي — ستاسو ملګري بیا هم هغه خدمت ترلاسه کوي چې تادیه یې کړې.",
+  "referralStatsInvited": "بلل شوی",
+  "referralStatsSuccessful": "بریالی",
+  "referralStatsEarned": "ترلاسه شوی",
+  "referralHistoryTitle": "ستاسو بلنې",
+  "referralHistoryEmpty": "کله کوډ شریک کړئ، هر ملګری دلته له ساده حالت سره ښکیږي.",
+  "referralStatusPending": "پر مخ",
+  "referralStatusCompleted": "وړ",
+  "referralStatusRewarded": "جایزه ورکړل شوه",
+  "referralStatusRejected": "بې جایزې",
+  "referralPendingHint": "د ملګري لومړۍ بریالۍ ډالۍ د پای ته رسېدو تمه کوو.",
+  "referralCompletedHint": "وړ — ستاسو جایزه نهایی کېږي.",
+  "referralRewardedHint": "مننه — کرېډیټ ستاسو والټ کې د راتلونکو ټاپ‌آپونو لپاره دی.",
+  "referralRejectedDetailBudget": "د دې اونۍ د بلنې جایزې له مخکې ویشل شوې وې. ستاسو ملګري خدمت ترلاسه کوي — د Zora-Walat شریکولو مننه.",
+  "referralRejectedDetailWeeklyCap": "د دې اونۍ د بلنې جایزنې حد ته رسېدلي. بله اونۍ بیا بلنه کولی شئ.",
+  "referralRejectedDetailLifetimeCap": "د حساب لپاره اوږدمهال د بلنې جایزې حد ته رسېدلي. له همکارۍ مننه.",
+  "referralRejectedDetailNotEligible": "دا بلنه د جایزې لارښودونو سره نه وه ګوندې. ملګری بیا هم عادي کارولی شي.",
+  "referralRejectedDetailGeneric": "دا بلنه جایزه ونه ګټله. پوښتنې لرئ؟ ننوځئ او «مرسته» خلاص کړئ.",
+  "referralRewardAmountLine": "جایزه: {amount}",
+  "@referralRewardAmountLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "hubTileReferralTitle": "بلنه او جایزه",
+  "hubTileReferralSub": "کوډ شریک کړئ · والټ کرېډیټ"
 }

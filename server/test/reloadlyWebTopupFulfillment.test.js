@@ -108,4 +108,22 @@ describe('mapReloadlyTopupSendResultToFulfillmentResult', () => {
     });
     assert.equal(m.outcome, 'succeeded');
   });
+
+  it('maps kind confirmed', () => {
+    const m = mapReloadlyTopupSendResultToFulfillmentResult({
+      kind: 'confirmed',
+      providerReference: 'reloadly_tx_2',
+      responseSummary: {},
+    });
+    assert.equal(m.outcome, 'succeeded');
+  });
+
+  it('maps kind pending to pending_verification', () => {
+    const m = mapReloadlyTopupSendResultToFulfillmentResult({
+      kind: 'pending',
+      providerReference: 'reloadly_tx_3',
+      responseSummary: {},
+    });
+    assert.equal(m.outcome, 'pending_verification');
+  });
 });

@@ -9,6 +9,7 @@ import {
 } from '../lib/authCrypto.js';
 import { signAccessToken } from './authTokenService.js';
 import { env } from '../config/env.js';
+import { ensureUserReferralCode } from './referral/referralCodeService.js';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -22,6 +23,7 @@ export async function registerUser({ email, password }) {
         role: 'user',
       },
     });
+    await ensureUserReferralCode(user.id);
     const tokens = await issueTokenPair(user);
     return {
       ...tokens,

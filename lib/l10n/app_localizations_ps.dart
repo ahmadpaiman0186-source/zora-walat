@@ -710,6 +710,13 @@ class AppLocalizationsPs extends AppLocalizations {
       'موږ وروستي حالت همغږیوو. تادیه ثبت ده — یوه دقیقه وروسته وګورئ یا وروستي سفارشونه خلاص کړئ.';
 
   @override
+  String get trackingHeadlineVerifying => 'د اپراتور سره تاییدېږي';
+
+  @override
+  String get trackingBodyVerifying =>
+      'ستاسو تادیه خوندي ده. موږ د موبایل اپراتور سره وروستی پړاو تاییدوو — یوازې کله «تحویل شوی» وښیو چې موږ یقین ولرو. ښايي یو څه وخت ونیسي.';
+
+  @override
   String get trackingHeadlineSignIn => 'ژوندي حالت لپاره ننوځئ';
 
   @override
@@ -804,6 +811,9 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get orderStatusSending => 'لیږل کېږي';
+
+  @override
+  String get orderStatusVerifying => 'تحویل تاییدېږي';
 
   @override
   String get orderStatusPreparing => 'چمتو کېږي';
@@ -1211,6 +1221,17 @@ class AppLocalizationsPs extends AppLocalizations {
       'څو دقې او تازه کفایت کوي؛ اړتیا کې د شبکې په واسطه بیلانس وګورئ.';
 
   @override
+  String get supportAssistVerifyingTitle => 'لا ټینګ تایید کېږي';
+
+  @override
+  String get supportAssistVerifyingBody =>
+      'ستاسو بدلي خوندي ده. اپراتور لا وروستۍ تایید ورکوي — نو د حدس پرځای دقق سفارش په بېرته ګورن کې ساتو؛ هیڅ شی ورکه نه کېږي.';
+
+  @override
+  String get supportAssistVerifyingNext =>
+      'څو دقې صبر، وروستي سفارشونه تازه کړئ؛ که غیرمعمول وخت ونیسي د مرستې سره د سفارش شمېره شریک کړئ.';
+
+  @override
   String get supportAssistCancelledTitle => 'غوښتنه لغوه شوه';
 
   @override
@@ -1240,4 +1261,128 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get ordersEmptySupportLine =>
       'پوښتنې لرئ؟ له کور څخه «مرسته او ملاتړ» خلاص کړئ.';
+
+  @override
+  String get referralCenterTitle => 'بلنه او جایزه';
+
+  @override
+  String get referralCenterSubtitle =>
+      'د هغو خلکو سره Zora-Walat شریک کړئ چې باور پرې لرئ. روښانه جایزې، صادق قواعد — د هغو کورنیو لپاره چې له بهر څخه ټاپ‌آپ کوي.';
+
+  @override
+  String get referralTrustLine =>
+      'کله ستاسو ملګري لومړۍ بریالۍ ډالۍ بشپړه شي، جایزې په اتومات ډول تایید کېږي — نه ننداره؛ د ټولنې پراختیا ته مننه.';
+
+  @override
+  String get referralProgramPaused =>
+      'اوس بلنې ودرول شوې. وروسته راګرځئ — کله بیا پرانیستل شي خبر درشو.';
+
+  @override
+  String get referralYourCode => 'ستاسو د بلنې کوډ';
+
+  @override
+  String get referralCopyCode => 'کوډ کاپی';
+
+  @override
+  String get referralCodeCopied => 'کوډ کاپی شو';
+
+  @override
+  String get referralCopyInviteMessage => 'د بلنې پیام کاپی';
+
+  @override
+  String get referralInviteMessageCopied => 'د بلنې پیام کاپی شو';
+
+  @override
+  String referralInviteMessageTemplate(String code) {
+    return 'زه د افغانستان موبایل مطمین ټاپ‌آپ لپاره Zora-Walat کاروم. زما کوډ سره ګډ شئ: $code';
+  }
+
+  @override
+  String get referralHowItWorksTitle => 'جایزې څنګه کار کوي';
+
+  @override
+  String referralHowItWorksBody(String rewardUsd, String minUsd) {
+    return 'که ملګری ستاسو کوډ سره ننوځي او لومړۍ ډالۍ یې په بریالیتوب سره ورسېږي — لږترلږه $minUsd — تاسو $rewardUsd د والټ کرېډیټ ترلاسه کوئ راتلونکي پیرودونو لپاره. هر ملګري ته یو ځل جایزه.';
+  }
+
+  @override
+  String get referralRewardRulesFootnote =>
+      'د بلنې کرېډیټ یوازې ټاپ‌آپ لپاره دي؛ نغدي نشي اخیستل کیدی. دا د ټولو لپاره ښه او نرخونو ته انصاف دی.';
+
+  @override
+  String get referralWeeklyFairTitle => 'هره اونۍ عادلانه برخه';
+
+  @override
+  String get referralWeeklyFairBody =>
+      'د بلنې جایزې له ګډې اونۍ زېرمې راځي ترڅو ډېرې کورنې برخه واخلي. که اونۍ ګډوډه وي، ځینې بلنې بیا هم وړ کیدی شي پداسې حال کې چې زېرمه نوې کېږي — ستاسو ملګري بیا هم هغه خدمت ترلاسه کوي چې تادیه یې کړې.';
+
+  @override
+  String get referralStatsInvited => 'بلل شوی';
+
+  @override
+  String get referralStatsSuccessful => 'بریالی';
+
+  @override
+  String get referralStatsEarned => 'ترلاسه شوی';
+
+  @override
+  String get referralHistoryTitle => 'ستاسو بلنې';
+
+  @override
+  String get referralHistoryEmpty =>
+      'کله کوډ شریک کړئ، هر ملګری دلته له ساده حالت سره ښکیږي.';
+
+  @override
+  String get referralStatusPending => 'پر مخ';
+
+  @override
+  String get referralStatusCompleted => 'وړ';
+
+  @override
+  String get referralStatusRewarded => 'جایزه ورکړل شوه';
+
+  @override
+  String get referralStatusRejected => 'بې جایزې';
+
+  @override
+  String get referralPendingHint =>
+      'د ملګري لومړۍ بریالۍ ډالۍ د پای ته رسېدو تمه کوو.';
+
+  @override
+  String get referralCompletedHint => 'وړ — ستاسو جایزه نهایی کېږي.';
+
+  @override
+  String get referralRewardedHint =>
+      'مننه — کرېډیټ ستاسو والټ کې د راتلونکو ټاپ‌آپونو لپاره دی.';
+
+  @override
+  String get referralRejectedDetailBudget =>
+      'د دې اونۍ د بلنې جایزې له مخکې ویشل شوې وې. ستاسو ملګري خدمت ترلاسه کوي — د Zora-Walat شریکولو مننه.';
+
+  @override
+  String get referralRejectedDetailWeeklyCap =>
+      'د دې اونۍ د بلنې جایزنې حد ته رسېدلي. بله اونۍ بیا بلنه کولی شئ.';
+
+  @override
+  String get referralRejectedDetailLifetimeCap =>
+      'د حساب لپاره اوږدمهال د بلنې جایزې حد ته رسېدلي. له همکارۍ مننه.';
+
+  @override
+  String get referralRejectedDetailNotEligible =>
+      'دا بلنه د جایزې لارښودونو سره نه وه ګوندې. ملګری بیا هم عادي کارولی شي.';
+
+  @override
+  String get referralRejectedDetailGeneric =>
+      'دا بلنه جایزه ونه ګټله. پوښتنې لرئ؟ ننوځئ او «مرسته» خلاص کړئ.';
+
+  @override
+  String referralRewardAmountLine(String amount) {
+    return 'جایزه: $amount';
+  }
+
+  @override
+  String get hubTileReferralTitle => 'بلنه او جایزه';
+
+  @override
+  String get hubTileReferralSub => 'کوډ شریک کړئ · والټ کرېډیټ';
 }

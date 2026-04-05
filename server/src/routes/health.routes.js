@@ -5,6 +5,8 @@ import { getWebTopupMetricsSnapshot } from '../lib/webTopupObservability.js';
 import { getOpsMetricsSnapshot } from '../lib/opsMetrics.js';
 import { getWebTopupFulfillmentStuckSummary } from '../services/webtopStuckOrders.js';
 import { getTopupProviderCircuitSnapshot } from '../services/topupFulfillment/topupProviderCircuit.js';
+import { getAirtimeReloadlyDiagnosticsSnapshot } from '../config/airtimeReloadlyStartup.js';
+import { getLaunchSubsystemSnapshot } from '../config/launchSubsystemSnapshot.js';
 
 const router = Router();
 
@@ -89,6 +91,8 @@ router.get('/ready', async (_req, res) => {
     webTopupFulfillmentStuck: webTopupStuck,
     topupProviderCircuits: getTopupProviderCircuitSnapshot(),
     webTopupFulfillmentJobsQueued,
+    airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
+    launchSubsystems: getLaunchSubsystemSnapshot(),
   });
 });
 

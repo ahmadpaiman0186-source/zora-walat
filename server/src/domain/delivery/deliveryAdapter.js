@@ -4,19 +4,20 @@ import { executeAirtimeFulfillment } from '../fulfillment/executeAirtimeFulfillm
 import { fulfillMockAirtime } from '../fulfillment/mockAirtimeProvider.js';
 import { fulfillReloadlyDelivery } from '../../services/reloadlyClient.js';
 
-/** Mock fallback when Reloadly is selected but credentials missing — development only. */
+/** Mock fallback when Reloadly is selected but unavailable — explicit env only (never NODE_ENV). */
 function allowReloadlyUnavailableMockFallback() {
-  return process.env.NODE_ENV === 'development';
+  return env.reloadlyAllowUnavailableMockFallback === true;
 }
 
 /**
  * Provider routing: Reloadly sandbox/production vs mock. Orchestration stays upstream.
  *
  * @param {import('@prisma/client').PaymentCheckout} order
+ * @param {{ attemptId?: string, attemptNumber?: number, traceId?: string | null, log?: import('pino').Logger }} [fulfillmentCtx]
  */
-export async function runDeliveryAdapter(order) {
+export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
   if (env.airtimeProvider === 'reloadly') {
-    const r = await fulfillReloadlyDelivery(order);
+    const r = await fulfillReloadlyDelivery(order, fulfillmentCtx);
     if (r.outcome === AIRTIME_OUTCOME.SUCCESS) {
       return r;
     }

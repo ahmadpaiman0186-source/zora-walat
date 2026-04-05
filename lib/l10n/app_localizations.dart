@@ -1378,6 +1378,18 @@ abstract class AppLocalizations {
   /// **'We’re syncing the latest status. Your payment is recorded — check back in a minute or open recent orders.'**
   String get trackingBodyCatchingUp;
 
+  /// No description provided for @trackingHeadlineVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming with the operator'**
+  String get trackingHeadlineVerifying;
+
+  /// No description provided for @trackingBodyVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is secure. We’re verifying the final step with the mobile operator and only show “delivered” when we have proof it completed. This can take a little longer than usual.'**
+  String get trackingBodyVerifying;
+
   /// No description provided for @trackingHeadlineSignIn.
   ///
   /// In en, this message translates to:
@@ -1551,6 +1563,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sending'**
   String get orderStatusSending;
+
+  /// No description provided for @orderStatusVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming delivery'**
+  String get orderStatusVerifying;
 
   /// No description provided for @orderStatusPreparing.
   ///
@@ -2266,6 +2284,24 @@ abstract class AppLocalizations {
   /// **'Best next step: give it a few minutes, refresh, then check the recipient’s balance on the network if needed.'**
   String get supportAssistOperatorNext;
 
+  /// No description provided for @supportAssistVerifyingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still confirming safely'**
+  String get supportAssistVerifyingTitle;
+
+  /// No description provided for @supportAssistVerifyingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is protected. The operator has not yet given us final confirmation, so we keep this order in a careful review state instead of guessing. Nothing is lost while we verify.'**
+  String get supportAssistVerifyingBody;
+
+  /// No description provided for @supportAssistVerifyingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: wait a few minutes, refresh recent orders, and contact support with your order reference if it stays here for an unusually long time.'**
+  String get supportAssistVerifyingNext;
+
   /// No description provided for @supportAssistCancelledTitle.
   ///
   /// In en, this message translates to:
@@ -2319,6 +2355,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Questions? Open Help & support from home for calm guidance.'**
   String get ordersEmptySupportLine;
+
+  /// No description provided for @referralCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite & earn'**
+  String get referralCenterTitle;
+
+  /// No description provided for @referralCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Zora-Walat with people you trust. Clear rewards, honest rules — built for families topping up from abroad.'**
+  String get referralCenterSubtitle;
+
+  /// No description provided for @referralTrustLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards are verified automatically when your friend’s first top-up completes successfully. No gimmicks — just a thank-you for growing the community.'**
+  String get referralTrustLine;
+
+  /// No description provided for @referralProgramPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Invites are paused for now. Please check back later — we’ll announce when sharing is open again.'**
+  String get referralProgramPaused;
+
+  /// No description provided for @referralYourCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invite code'**
+  String get referralYourCode;
+
+  /// No description provided for @referralCopyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get referralCopyCode;
+
+  /// No description provided for @referralCodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get referralCodeCopied;
+
+  /// No description provided for @referralCopyInviteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy invite message'**
+  String get referralCopyInviteMessage;
+
+  /// No description provided for @referralInviteMessageCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite message copied'**
+  String get referralInviteMessageCopied;
+
+  /// No description provided for @referralInviteMessageTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'I use Zora-Walat for trusted Afghanistan mobile top-ups. Join with my code: {code}'**
+  String referralInviteMessageTemplate(String code);
+
+  /// No description provided for @referralHowItWorksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How rewards work'**
+  String get referralHowItWorksTitle;
+
+  /// No description provided for @referralHowItWorksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When a friend creates an account with your code and their first top-up is successfully delivered — for at least {minUsd} — you earn {rewardUsd} in wallet credit for future purchases. One reward per friend.'**
+  String referralHowItWorksBody(String rewardUsd, String minUsd);
+
+  /// No description provided for @referralRewardRulesFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet credits from invites are for top-ups only and can’t be withdrawn as cash. That protects everyone and keeps pricing fair.'**
+  String get referralRewardRulesFootnote;
+
+  /// No description provided for @referralWeeklyFairTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair sharing each week'**
+  String get referralWeeklyFairTitle;
+
+  /// No description provided for @referralWeeklyFairBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite rewards come from a shared weekly pool so many families can participate. If a week is especially busy, some invites may finish qualifying even when the pool needs a fresh start — your friends still get the service they paid for.'**
+  String get referralWeeklyFairBody;
+
+  /// No description provided for @referralStatsInvited.
+  ///
+  /// In en, this message translates to:
+  /// **'Invited'**
+  String get referralStatsInvited;
+
+  /// No description provided for @referralStatsSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Successful'**
+  String get referralStatsSuccessful;
+
+  /// No description provided for @referralStatsEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned'**
+  String get referralStatsEarned;
+
+  /// No description provided for @referralHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your invites'**
+  String get referralHistoryTitle;
+
+  /// No description provided for @referralHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'When you share your code, each friend will appear here with a calm, simple status.'**
+  String get referralHistoryEmpty;
+
+  /// No description provided for @referralStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get referralStatusPending;
+
+  /// No description provided for @referralStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualified'**
+  String get referralStatusCompleted;
+
+  /// No description provided for @referralStatusRewarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewarded'**
+  String get referralStatusRewarded;
+
+  /// No description provided for @referralStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not rewarded'**
+  String get referralStatusRejected;
+
+  /// No description provided for @referralPendingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re waiting for your friend’s first successful top-up to finish.'**
+  String get referralPendingHint;
+
+  /// No description provided for @referralCompletedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualified — your reward is being finalized.'**
+  String get referralCompletedHint;
+
+  /// No description provided for @referralRewardedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you — credit is in your wallet for future top-ups.'**
+  String get referralRewardedHint;
+
+  /// No description provided for @referralRejectedDetailBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'This week’s invite rewards were already fully allocated. Your friend’s service still went through — thank you for sharing Zora-Walat.'**
+  String get referralRejectedDetailBudget;
+
+  /// No description provided for @referralRejectedDetailWeeklyCap.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve reached this week’s invite reward limit. You can invite again next week.'**
+  String get referralRejectedDetailWeeklyCap;
+
+  /// No description provided for @referralRejectedDetailLifetimeCap.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve reached the long-term invite reward limit for your account. We appreciate how much you’ve shared Zora-Walat.'**
+  String get referralRejectedDetailLifetimeCap;
+
+  /// No description provided for @referralRejectedDetailNotEligible.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite didn’t meet the reward guidelines. Your friend can still use Zora-Walat normally.'**
+  String get referralRejectedDetailNotEligible;
+
+  /// No description provided for @referralRejectedDetailGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'This invite didn’t receive a reward. If you have questions, use Help & support with your account signed in.'**
+  String get referralRejectedDetailGeneric;
+
+  /// No description provided for @referralRewardAmountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Reward: {amount}'**
+  String referralRewardAmountLine(String amount);
+
+  /// No description provided for @hubTileReferralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite & earn'**
+  String get hubTileReferralTitle;
+
+  /// No description provided for @hubTileReferralSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your code · wallet rewards'**
+  String get hubTileReferralSub;
 }
 
 class _AppLocalizationsDelegate

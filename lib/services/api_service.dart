@@ -374,6 +374,34 @@ class ApiService {
     }
   }
 
+  /// Referral center summary (`GET /api/referral/me`).
+  Future<Map<String, dynamic>> getReferralMe() async {
+    final res = await _getAuthed('/api/referral/me');
+    if (res.statusCode == 403) {
+      throw StateError(
+        kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Referral me', res),
+      );
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Referral me', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  /// Referral invites as inviter (`GET /api/referral/history`).
+  Future<Map<String, dynamic>> getReferralHistory() async {
+    final res = await _getAuthed('/api/referral/history');
+    if (res.statusCode == 403) {
+      throw StateError(
+        kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Referral history', res),
+      );
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Referral history', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
   /// Account-linked order history (`GET /api/transactions`).
   Future<List<Map<String, dynamic>>> fetchUserOrders({int limit = 24}) async {
     final lim = limit.clamp(1, 50);

@@ -720,6 +720,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'We’re syncing the latest status. Your payment is recorded — check back in a minute or open recent orders.';
 
   @override
+  String get trackingHeadlineVerifying => 'Confirming with the operator';
+
+  @override
+  String get trackingBodyVerifying =>
+      'Your payment is secure. We’re verifying the final step with the mobile operator and only show “delivered” when we have proof it completed. This can take a little longer than usual.';
+
+  @override
   String get trackingHeadlineSignIn => 'Sign in to see live status';
 
   @override
@@ -814,6 +821,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderStatusSending => 'Sending';
+
+  @override
+  String get orderStatusVerifying => 'Confirming delivery';
 
   @override
   String get orderStatusPreparing => 'Preparing';
@@ -1227,6 +1237,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Best next step: give it a few minutes, refresh, then check the recipient’s balance on the network if needed.';
 
   @override
+  String get supportAssistVerifyingTitle => 'Still confirming safely';
+
+  @override
+  String get supportAssistVerifyingBody =>
+      'Your payment is protected. The operator has not yet given us final confirmation, so we keep this order in a careful review state instead of guessing. Nothing is lost while we verify.';
+
+  @override
+  String get supportAssistVerifyingNext =>
+      'Best next step: wait a few minutes, refresh recent orders, and contact support with your order reference if it stays here for an unusually long time.';
+
+  @override
   String get supportAssistCancelledTitle => 'Order cancelled';
 
   @override
@@ -1256,4 +1277,129 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ordersEmptySupportLine =>
       'Questions? Open Help & support from home for calm guidance.';
+
+  @override
+  String get referralCenterTitle => 'Invite & earn';
+
+  @override
+  String get referralCenterSubtitle =>
+      'Share Zora-Walat with people you trust. Clear rewards, honest rules — built for families topping up from abroad.';
+
+  @override
+  String get referralTrustLine =>
+      'Rewards are verified automatically when your friend’s first top-up completes successfully. No gimmicks — just a thank-you for growing the community.';
+
+  @override
+  String get referralProgramPaused =>
+      'Invites are paused for now. Please check back later — we’ll announce when sharing is open again.';
+
+  @override
+  String get referralYourCode => 'Your invite code';
+
+  @override
+  String get referralCopyCode => 'Copy code';
+
+  @override
+  String get referralCodeCopied => 'Code copied';
+
+  @override
+  String get referralCopyInviteMessage => 'Copy invite message';
+
+  @override
+  String get referralInviteMessageCopied => 'Invite message copied';
+
+  @override
+  String referralInviteMessageTemplate(String code) {
+    return 'I use Zora-Walat for trusted Afghanistan mobile top-ups. Join with my code: $code';
+  }
+
+  @override
+  String get referralHowItWorksTitle => 'How rewards work';
+
+  @override
+  String referralHowItWorksBody(String rewardUsd, String minUsd) {
+    return 'When a friend creates an account with your code and their first top-up is successfully delivered — for at least $minUsd — you earn $rewardUsd in wallet credit for future purchases. One reward per friend.';
+  }
+
+  @override
+  String get referralRewardRulesFootnote =>
+      'Wallet credits from invites are for top-ups only and can’t be withdrawn as cash. That protects everyone and keeps pricing fair.';
+
+  @override
+  String get referralWeeklyFairTitle => 'Fair sharing each week';
+
+  @override
+  String get referralWeeklyFairBody =>
+      'Invite rewards come from a shared weekly pool so many families can participate. If a week is especially busy, some invites may finish qualifying even when the pool needs a fresh start — your friends still get the service they paid for.';
+
+  @override
+  String get referralStatsInvited => 'Invited';
+
+  @override
+  String get referralStatsSuccessful => 'Successful';
+
+  @override
+  String get referralStatsEarned => 'Earned';
+
+  @override
+  String get referralHistoryTitle => 'Your invites';
+
+  @override
+  String get referralHistoryEmpty =>
+      'When you share your code, each friend will appear here with a calm, simple status.';
+
+  @override
+  String get referralStatusPending => 'In progress';
+
+  @override
+  String get referralStatusCompleted => 'Qualified';
+
+  @override
+  String get referralStatusRewarded => 'Rewarded';
+
+  @override
+  String get referralStatusRejected => 'Not rewarded';
+
+  @override
+  String get referralPendingHint =>
+      'We’re waiting for your friend’s first successful top-up to finish.';
+
+  @override
+  String get referralCompletedHint =>
+      'Qualified — your reward is being finalized.';
+
+  @override
+  String get referralRewardedHint =>
+      'Thank you — credit is in your wallet for future top-ups.';
+
+  @override
+  String get referralRejectedDetailBudget =>
+      'This week’s invite rewards were already fully allocated. Your friend’s service still went through — thank you for sharing Zora-Walat.';
+
+  @override
+  String get referralRejectedDetailWeeklyCap =>
+      'You’ve reached this week’s invite reward limit. You can invite again next week.';
+
+  @override
+  String get referralRejectedDetailLifetimeCap =>
+      'You’ve reached the long-term invite reward limit for your account. We appreciate how much you’ve shared Zora-Walat.';
+
+  @override
+  String get referralRejectedDetailNotEligible =>
+      'This invite didn’t meet the reward guidelines. Your friend can still use Zora-Walat normally.';
+
+  @override
+  String get referralRejectedDetailGeneric =>
+      'This invite didn’t receive a reward. If you have questions, use Help & support with your account signed in.';
+
+  @override
+  String referralRewardAmountLine(String amount) {
+    return 'Reward: $amount';
+  }
+
+  @override
+  String get hubTileReferralTitle => 'Invite & earn';
+
+  @override
+  String get hubTileReferralSub => 'Share your code · wallet rewards';
 }

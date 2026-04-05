@@ -716,6 +716,13 @@ class AppLocalizationsFa extends AppLocalizations {
       'در حال هم‌گام‌کردن وضعیت. پرداخت ثبت شده — یک دقیقه دیگر برر کنید یا سفارش‌های اخیر را باز کنید.';
 
   @override
+  String get trackingHeadlineVerifying => 'در حال تأیید با اپراتور';
+
+  @override
+  String get trackingBodyVerifying =>
+      'پرداخت شما امن است. مرحله نهایی را با اپراتور موبایل تأیید می‌کنیم و فقط وقتی اطمینان داشتیم «تحویل‌شده» نشان می‌دهیم — ممکن است کمی بیشتر طول بکشد.';
+
+  @override
   String get trackingHeadlineSignIn => 'برای وضعیت زنده وارد شوید';
 
   @override
@@ -811,6 +818,9 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get orderStatusSending => 'در حال ارسال';
+
+  @override
+  String get orderStatusVerifying => 'در حال تأیید تحویل';
 
   @override
   String get orderStatusPreparing => 'در حال آماده‌سازی';
@@ -1218,6 +1228,17 @@ class AppLocalizationsFa extends AppLocalizations {
       'چند دقیقه صبر و تازه کردن کافی است؛ در صورت نیاز مانده خط را از شبکه بررسی کنید.';
 
   @override
+  String get supportAssistVerifyingTitle => 'هنوز در حال تأیید ایمن';
+
+  @override
+  String get supportAssistVerifyingBody =>
+      'پرداخت شما محافظت شده است. اپراتور هنوز تأیید نهایی نداده، بنابراین به‌جای حدس، سفارش را در حالت بررسی دقیق نگه می‌داریم — هیچ چیز گم نمی‌شود.';
+
+  @override
+  String get supportAssistVerifyingNext =>
+      'چند دقیقه صبر کنید، سفارش‌های اخیر را تازه کنید و اگر غیرعادی طول کشید با شماره سفارش به پشتیبانی پیام دهید.';
+
+  @override
   String get supportAssistCancelledTitle => 'سفارش لغو شد';
 
   @override
@@ -1247,4 +1268,129 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get ordersEmptySupportLine =>
       'سؤالی هست؟ از خانه «کمک و پشتیبانی» را بزنید.';
+
+  @override
+  String get referralCenterTitle => 'دعوت و پاداش';
+
+  @override
+  String get referralCenterSubtitle =>
+      'Zora-Walat را با کسانی که اعتماد دارید به‌اشتراک بگذارید. پاداش روشن، قوانین صادقانه — برای خانواده‌هایی که از خارج شارژ می‌فرستند.';
+
+  @override
+  String get referralTrustLine =>
+      'وقتی اولین شارژ دوستانهٔ شما با موفقیت تمام شود، پاداش به‌صورت خودکار تأیید می‌شود — بدنمایه‌بازی؛ فقط تشکر از رشد جامعهٔ ما.';
+
+  @override
+  String get referralProgramPaused =>
+      'فعلاً دعوت‌ها متوقف است. بعداً سر بزنید — وقتی دوباره باز شود اعلام می‌کنیم.';
+
+  @override
+  String get referralYourCode => 'کد دعوت شما';
+
+  @override
+  String get referralCopyCode => 'کپی کد';
+
+  @override
+  String get referralCodeCopied => 'کد کپی شد';
+
+  @override
+  String get referralCopyInviteMessage => 'کپی پیام دعوت';
+
+  @override
+  String get referralInviteMessageCopied => 'پیام دعوت کپی شد';
+
+  @override
+  String referralInviteMessageTemplate(String code) {
+    return 'برای شارژ مطمئن موبایل افغانستان از Zora-Walat استفاده می‌کنم. با کد من عضو شوید: $code';
+  }
+
+  @override
+  String get referralHowItWorksTitle => 'پاداش چگونه کار می‌کند';
+
+  @override
+  String referralHowItWorksBody(String rewardUsd, String minUsd) {
+    return 'وقتی دوستی با کد شما ثبت‌نام کند و اولین شارژش با موفقیت تحویل شود — حداقل $minUsd — شما $rewardUsd اعتبار کیف‌پول برای خریدهای بعدی می‌گیرید. یک پاداش برای هر دوست.';
+  }
+
+  @override
+  String get referralRewardRulesFootnote =>
+      'اعتبار دعوت فقط برای شارژ است؛ قابل برداشت نقدی نیست. این برای امنیت همه و منصف ماندن قیمت‌هاست.';
+
+  @override
+  String get referralWeeklyFairTitle => 'سهیم‌بندی منصفانه هر هفته';
+
+  @override
+  String get referralWeeklyFairBody =>
+      'پاداش دعوت از یک سهم هفتگی مشترک می‌آید تا خانواده‌های بیشتری شرکت کنند. اگر هفته‌ای شلوغ باشد، ممکن است برخی دعوت‌ها واجد شرایط شوند درحالی‌که سهم تازه می‌شود — دوستان شما همچنان سرویسی را که پرداخت کرده‌اند دریافت می‌کنند.';
+
+  @override
+  String get referralStatsInvited => 'دعوت‌شده';
+
+  @override
+  String get referralStatsSuccessful => 'موفق';
+
+  @override
+  String get referralStatsEarned => 'کسب‌شده';
+
+  @override
+  String get referralHistoryTitle => 'دعوت‌های شما';
+
+  @override
+  String get referralHistoryEmpty =>
+      'با به‌اشتراک‌گذاری کد، هر دوست اینجا با یک وضعیت ساده دیده می‌شود.';
+
+  @override
+  String get referralStatusPending => 'در جریان';
+
+  @override
+  String get referralStatusCompleted => 'واجد شرایط';
+
+  @override
+  String get referralStatusRewarded => 'پاداش داده شد';
+
+  @override
+  String get referralStatusRejected => 'بدون پاداش';
+
+  @override
+  String get referralPendingHint =>
+      'منتظر اتمام موفق اولین شارژ دوست شما هستیم.';
+
+  @override
+  String get referralCompletedHint =>
+      'واجد شرایط — پاداش شما در حال نهایی‌شدن است.';
+
+  @override
+  String get referralRewardedHint =>
+      'متشکریم — اعتبار در کیف‌پول شما برای شارژهای بعدی است.';
+
+  @override
+  String get referralRejectedDetailBudget =>
+      'پاداش‌های دعوت این هفته قبلاً تخصیص یافته بود. سرویس دوست شما انجام شد — از اشتراک Zora-Walat سپاسگزاریم.';
+
+  @override
+  String get referralRejectedDetailWeeklyCap =>
+      'به سقف پاداش دعوت این هفته رسیده‌اید. هفتهٔ بعد می‌توانید دوباره دعوت کنید.';
+
+  @override
+  String get referralRejectedDetailLifetimeCap =>
+      'به سقف بلندمدت پاداش دعوت حساب خود رسیده‌اید. قدردان همراهی شما با Zora-Walat هستیم.';
+
+  @override
+  String get referralRejectedDetailNotEligible =>
+      'این دعوت با شرایط پاداش هم‌خوان نبود. دوست شما همچنان می‌تواند عادی از Zora-Walat استفاده کند.';
+
+  @override
+  String get referralRejectedDetailGeneric =>
+      'این دعوت پاداش نگرفت. اگر پرسشی دارید، با حساب خود «کمک و پشتیبانی» را باز کنید.';
+
+  @override
+  String referralRewardAmountLine(String amount) {
+    return 'پاداش: $amount';
+  }
+
+  @override
+  String get hubTileReferralTitle => 'دعوت و پاداش';
+
+  @override
+  String get hubTileReferralSub => 'کد خود را بفرستید · اعتبار کیف‌پول';
 }

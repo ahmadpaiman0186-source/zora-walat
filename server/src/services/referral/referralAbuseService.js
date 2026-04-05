@@ -1,12 +1,14 @@
 import { prisma } from '../../db.js';
 import { REFERRAL_FRAUD_FLAG } from '../../constants/referral.js';
-
 /**
  * @param {object} p
  * @param {{ id: string, signupIpHash: string | null, email: string } | null} p.inviter
  * @param {{ id: string, signupIpHash: string | null, email: string } | null} p.invitee
  * @param {string | null} p.appliedIpHash
  * @param {string} p.inviterUserId
+ * @param {string} p.currentInviteeUserId
+ * @param {unknown} [p.checkoutMetadata] PaymentCheckout.metadata (JSON) — optional fraudSignals
+ * @param {string | null} [p.orderDeviceHash] HMAC of device / fingerprint signal at purchase
  */
 export async function evaluateReferralAbuseSignals(p) {
   /** @type {string[]} */
@@ -40,6 +42,34 @@ export async function evaluateReferralAbuseSignals(p) {
       },
     });
     if (rapid >= 12) {
+      flags.push(REFERRAL_FRAUD_FLAG.REPEATED_PATTERN);
+    }
+  }
+
+  const meta = p.checkoutMetadata;
+  if (meta && typeof meta === 'object' && !Array.isArray(meta)) {
+    const m = /** @type {Record<string, unknown>} */ (meta);
+    const fs = m.fraudSignals;
+    if (fs && typeof fs === 'object' && !Array.isArray(fs)) {
+      const f = /** @type {Record<string, unknown>} */ (fs);
+      if (f.blockReferralReward === true || f.referralBlock === true) {
+        flags.push(REFERRAL_FRAUD_FLAG.DUPLICATE_IDENTITY_SIGNAL);
+      }
+      if (f.deviceClusterMatch === true) {
+        flags.push(REFERRAL_FRAUD_FLAG.DUPLICATE_IDENTITY_SIGNAL);
+      }
+    }
+  }
+
+  if (p.orderDeviceHash && p.inviterUserId && p.currentInviteeUserId) {
+    const dupDevice = await prisma.referral.count({
+      where: {
+        inviterUserId: p.inviterUserId,
+        appliedDeviceFingerprintHash: p.orderDeviceHash,
+        invitedUserId: { not: p.currentInviteeUserId },
+      },
+    });
+    if (dupDevice >= 1) {
       flags.push(REFERRAL_FRAUD_FLAG.REPEATED_PATTERN);
     }
   }

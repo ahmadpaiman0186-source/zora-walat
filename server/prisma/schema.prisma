@@ -305,8 +305,31 @@ model User {
   referralAsInvitee  Referral?              @relation("ReferralInvitee")
   referralRewards    ReferralRewardTransaction[]
   referralLoyaltyFromInvites ReferralLoyaltyBonus[]
+  loyaltyLedgerEntries     LoyaltyLedger[]
 
   @@index([email])
+}
+
+/// Append-only loyalty credits for audit / replay-safe totals (`sourceId` dedupes side effects).
+model LoyaltyLedger {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  source    String
+  sourceId  String   @unique
+  amount    Int
+  type      String   @default("CREDIT")
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// Reconciliation incremental / full-scan checkpoints (internal ops).
+model ReconciliationWatermark {
+  key      String    @id
+  cursorAt DateTime?
+  cursorId String?
+  updatedAt DateTime @updatedAt
 }
 
 /// Singleton-style referral program knobs (editable by admin).
@@ -321,6 +344,8 @@ model ReferralProgramConfig {
   minFirstOrderUsdCents      Int      @default(100)
   /// Max successfully rewarded referrals per inviter (lifetime rolling).
   maxRewardsPerUser          Int      @default(20)
+  /// Cap successful payouts per inviter per UTC week (anti-gaming).
+  maxRewardsPerInviterPerWeek Int     @default(10)
   /// Delay after fulfillment success before attempting payout (chargeback / fraud buffer).
   rewardDelayMinutes         Int      @default(5)
   /// Extra loyalty points for inviter on each rewarded referral (0 disables).
@@ -341,6 +366,8 @@ model Referral {
   inviter       User    @relation("ReferralInviter", fields: [inviterUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   invited       User    @relation("ReferralInvitee", fields: [invitedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   status        String
+  /// Normalized code string applied at signup (audit).
+  referralCodeUsed String?
   firstOrderId  String? @unique
   fraudFlags    Json?
   invitedSignupIpHash String?
@@ -349,12 +376,14 @@ model Referral {
   createdAt     DateTime  @default(now())
   completedAt   DateTime?
   rewardedAt    DateTime?
+  updatedAt     DateTime @updatedAt
 
   rewardTx ReferralRewardTransaction?
   loyaltyBonus ReferralLoyaltyBonus?
 
   @@index([inviterUserId, status])
   @@index([status, createdAt])
+  @@index([updatedAt])
 }
 
 /// Idempotent reward line per referral (`referralId` unique).

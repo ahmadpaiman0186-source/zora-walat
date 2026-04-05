@@ -45,10 +45,74 @@ function orderStatusLabel(status) {
   return labelFromStatus(status, map);
 }
 
-/** Customer-safe stage for Flutter timeline/chips (not raw enums). */
-function deriveCustomerTrackingStage(orderStatus, fulfillmentStatus) {
-  const os = String(orderStatus ?? '').toUpperCase();
-  const fs = String(fulfillmentStatus ?? '').toUpperCase();
+function parseJsonObject(str) {
+  if (str == null || typeof str !== 'string' || !str.trim()) return null;
+  try {
+    const o = JSON.parse(str);
+    return o && typeof o === 'object' && !Array.isArray(o) ? o : null;
+  } catch {
+    return null;
+  }
+}
+
+function orderMetadataIndicatesVerifying(metadata) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return false;
+  }
+  const pr = metadata.processingRecovery;
+  if (!pr || typeof pr !== 'object') return false;
+  if (pr.manualRequired === true) return true;
+  return false;
+}
+
+function attemptResponseSuggestsVerifying(attempt) {
+  if (!attempt?.responseSummary) return false;
+  const o = parseJsonObject(attempt.responseSummary);
+  if (!o) return false;
+  const n =
+    o.normalizedOutcome != null ? String(o.normalizedOutcome).toLowerCase() : '';
+  if (
+    n === 'pending_verification' ||
+    n === 'ambiguous' ||
+    n === 'failure_unconfirmed'
+  ) {
+    return true;
+  }
+  const p = o.proofClassification != null ? String(o.proofClassification) : '';
+  if (
+    p === 'pending_provider' ||
+    p === 'ambiguous_evidence' ||
+    p === 'insufficient_negative_proof'
+  ) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Customer-safe stage for Flutter timeline/chips (not raw enums).
+ * `verifying` = payment safe but provider/manual follow-up — not claimed delivered.
+ * @param {{ orderStatus?: string | null, metadata?: unknown }} order
+ * @param {{ status?: string | null, responseSummary?: string | null } | null | undefined} latestAttempt
+ */
+export function deriveCustomerTrackingStageForOrder(order, latestAttempt) {
+  const os = String(order?.orderStatus ?? '').toUpperCase();
+  const fs = String(latestAttempt?.status ?? '').toUpperCase();
+
+  const terminal =
+    os === ORDER_STATUS.FULFILLED ||
+    os === 'DELIVERED' ||
+    os === ORDER_STATUS.FAILED ||
+    os === ORDER_STATUS.CANCELLED;
+
+  if (
+    !terminal &&
+    (orderMetadataIndicatesVerifying(order?.metadata) ||
+      attemptResponseSuggestsVerifying(latestAttempt))
+  ) {
+    return 'verifying';
+  }
+
   if (os === ORDER_STATUS.CANCELLED) return 'cancelled';
   if (os === ORDER_STATUS.FAILED) return 'failed';
   if (os === ORDER_STATUS.FULFILLED || os === 'DELIVERED') return 'delivered';
@@ -119,10 +183,11 @@ function mapUserOrder({ order, latestAttempt }) {
       ? latestAttempt?.failedAt ?? null
       : null;
 
-  const trackingStageKey = deriveCustomerTrackingStage(
-    order.orderStatus,
-    fulfillmentStatus,
-  );
+  const trackingStageKey = deriveCustomerTrackingStageForOrder(order, latestAttempt);
+  const fulfillmentStatusLabelResolved =
+    trackingStageKey === 'verifying'
+      ? 'Confirming delivery'
+      : fulfillmentStatusLabel(fulfillmentStatus);
 
   return {
     orderId: order.id,
@@ -132,7 +197,7 @@ function mapUserOrder({ order, latestAttempt }) {
     paymentStatus: order.status,
     paymentStatusLabel: paymentStatusLabel(order.status),
     fulfillmentStatus,
-    fulfillmentStatusLabel: fulfillmentStatusLabel(fulfillmentStatus),
+    fulfillmentStatusLabel: fulfillmentStatusLabelResolved,
     amountUsdCents: order.amountUsdCents,
     currency: order.currency,
     operatorKey: order.operatorKey,
@@ -194,6 +259,7 @@ export async function listUserOrders({
       paidAt: true,
       failedAt: true,
       cancelledAt: true,
+      metadata: true,
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'desc' },
         take: 1,
@@ -204,6 +270,7 @@ export async function listUserOrders({
           failedAt: true,
           attemptNumber: true,
           providerReference: true,
+          responseSummary: true,
         },
       },
     },
@@ -246,6 +313,7 @@ export async function inspectUserOrder({ userId, id } = {}) {
       paidAt: true,
       failedAt: true,
       cancelledAt: true,
+      metadata: true,
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'desc' },
         take: 1,
@@ -256,6 +324,7 @@ export async function inspectUserOrder({ userId, id } = {}) {
           failedAt: true,
           attemptNumber: true,
           providerReference: true,
+          responseSummary: true,
         },
       },
     },

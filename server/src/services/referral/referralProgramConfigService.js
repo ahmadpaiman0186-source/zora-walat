@@ -1,4 +1,5 @@
 import { prisma } from '../../db.js';
+import { readReferralEnvOverrides } from './referralEnvOverrides.js';
 
 const DEFAULT_ID = 'default';
 
@@ -8,6 +9,7 @@ const DEFAULTS = {
   rewardAmountUsdCents: 500,
   minFirstOrderUsdCents: 100,
   maxRewardsPerUser: 20,
+  maxRewardsPerInviterPerWeek: 10,
   rewardDelayMinutes: 5,
   referralBonusLoyaltyPoints: 0,
   pausePausedQueueProcessing: false,
@@ -19,7 +21,8 @@ export async function getReferralProgramConfig() {
     create: { id: DEFAULT_ID, ...DEFAULTS },
     update: {},
   });
-  return row;
+  const envOv = readReferralEnvOverrides();
+  return { ...row, ...envOv };
 }
 
 /**
@@ -54,6 +57,12 @@ export async function updateReferralProgramConfig(patch) {
     maxRewardsPerUser: clampInt(
       patch.maxRewardsPerUser,
       cur.maxRewardsPerUser,
+      1,
+      10_000,
+    ),
+    maxRewardsPerInviterPerWeek: clampInt(
+      patch.maxRewardsPerInviterPerWeek,
+      cur.maxRewardsPerInviterPerWeek ?? 10,
       1,
       10_000,
     ),

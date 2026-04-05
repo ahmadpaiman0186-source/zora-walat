@@ -92,7 +92,7 @@ class _LoyaltyHubScreenState extends State<LoyaltyHubScreen>
   }
 
   Future<void> _evaluateLoyaltyNotifications(Map<String, dynamic> summary) async {
-    if (!mounted) return;
+    if (!context.mounted) return;
     final hub = AppScope.of(context).notificationHub;
     final l10n = AppLocalizations.of(context);
     final prefs = await SharedPreferences.getInstance();
@@ -120,14 +120,12 @@ class _LoyaltyHubScreenState extends State<LoyaltyHubScreen>
       final or = (old['monthRank'] as num).toInt();
       if (r < or) {
         await hub.publishLoyalty(
-          context,
           title: l10n.notifLoyaltyRankUpTitle,
           body: l10n.notifLoyaltyRankUpBody,
           tab: 1,
         );
       } else if (r > or) {
         await hub.publishLoyalty(
-          context,
           title: l10n.notifLoyaltyRankDownTitle,
           body: l10n.notifLoyaltyRankDownBody,
           tab: 1,
@@ -138,7 +136,6 @@ class _LoyaltyHubScreenState extends State<LoyaltyHubScreen>
     final oldLife = (old?['lifetimePoints'] as num?)?.toInt() ?? 0;
     if (life >= 100 && oldLife < 100) {
       await hub.publishLoyalty(
-        context,
         title: l10n.notifLoyaltyMilestoneTitle,
         body: l10n.notifLoyaltyMilestoneBody,
         tab: 0,
@@ -152,7 +149,6 @@ class _LoyaltyHubScreenState extends State<LoyaltyHubScreen>
     final lastUrg = prefs.getString('zw_loyalty_urgency_last_day');
     if (days <= 7 && days > 0 && lastUrg != todayKey) {
       await hub.publishLoyalty(
-        context,
         title: l10n.notifLoyaltyMonthUrgencyTitle,
         body: l10n.notifLoyaltyMonthUrgencyBody,
         tab: 1,

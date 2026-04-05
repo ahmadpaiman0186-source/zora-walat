@@ -90,10 +90,15 @@ class _SuccessScreenState extends State<SuccessScreen> {
         }
         tracking = CustomerOrderTracking.fromExecuteJson(r.json);
       } else if (r.isPaymentPending) {
-        final err = r.json['error'] as String? ?? '';
-        tracking = err.toLowerCase().contains('not confirmed')
-            ? CustomerOrderTracking.paymentPending
-            : CustomerOrderTracking.paymentReceived;
+        final orderMap = r.json['order'];
+        if (orderMap is Map<String, dynamic>) {
+          tracking = CustomerOrderTracking.fromExecuteJson(r.json);
+        } else {
+          final err = r.json['error'] as String? ?? '';
+          tracking = err.toLowerCase().contains('not confirmed')
+              ? CustomerOrderTracking.paymentPending
+              : CustomerOrderTracking.paymentReceived;
+        }
       } else {
         tracking = CustomerOrderTracking.unknownAfterPay;
       }
@@ -166,6 +171,8 @@ class _SuccessScreenState extends State<SuccessScreen> {
         return 'retrying';
       case CustomerTrackingStage.paymentConfirming:
         return 'payment_pending';
+      case CustomerTrackingStage.verifying:
+        return 'verifying';
       default:
         return 'in_progress';
     }
@@ -194,6 +201,8 @@ class _SuccessScreenState extends State<SuccessScreen> {
         return l10n.orderStatusRetrying;
       case CustomerTrackingStage.orderCancelled:
         return l10n.orderStatusCancelled;
+      case CustomerTrackingStage.verifying:
+        return l10n.orderStatusVerifying;
       case CustomerTrackingStage.paymentConfirming:
       case CustomerTrackingStage.paymentReceived:
         return l10n.receiptFulfillmentProgress;

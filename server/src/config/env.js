@@ -164,6 +164,12 @@ export const env = {
   reloadlyClientSecret: String(process.env.RELOADLY_CLIENT_SECRET ?? '').trim(),
   /** Use Reloadly sandbox endpoints when true. */
   reloadlySandbox: process.env.RELOADLY_SANDBOX === 'true',
+  /**
+   * When AIRTIME_PROVIDER=reloadly and Reloadly auth/config is unavailable, allow mock airtime fallback.
+   * Default false — must be explicitly enabled (never implicit from NODE_ENV).
+   */
+  reloadlyAllowUnavailableMockFallback:
+    process.env.RELOADLY_ALLOW_UNAVAILABLE_MOCK_FALLBACK === 'true',
   /** HTTP timeout for future real provider calls (ms). */
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
@@ -202,6 +208,59 @@ export const env = {
   reconcileFulfillmentProcessingStuckAfterMs: parsePositiveInt(
     process.env.RECONCILE_FULFILLMENT_PROCESSING_STUCK_MS,
     1_800_000,
+  ),
+  /** Fulfilled orders older than this may be flagged if `order:{id}:delivered` inbox row is absent. */
+  reconcilePushQuietPeriodMs: parsePositiveInt(
+    process.env.RECONCILE_PUSH_QUIET_PERIOD_MS,
+    600_000,
+  ),
+  /** Max rows sampled per auxiliary integrity slice (referral/loyalty/push) per scan. */
+  reconcileIntegritySampleLimit: parsePositiveInt(
+    process.env.RECONCILE_INTEGRITY_SAMPLE_LIMIT,
+    250,
+  ),
+  /** Cap loyalty drift detection user rows per scan (raw aggregate). */
+  reconcileLoyaltyDriftLimit: parsePositiveInt(
+    process.env.RECONCILE_LOYALTY_DRIFT_LIMIT,
+    40,
+  ),
+  /** Default chunk size for `runReconciliationScan({ fullChunk })` id scan; `0` uses service default (500). */
+  reconcileFullChunkSize: parseNonNegativeInt(
+    process.env.RECONCILE_FULL_CHUNK_SIZE,
+    0,
+  ),
+
+  /**
+   * PaymentCheckout stuck in `PROCESSING` (fulfillment) longer than this → recovery worker may revert or retry.
+   * Default 10 minutes.
+   */
+  processingTimeoutMs: parsePositiveInt(process.env.PROCESSING_TIMEOUT_MS, 600_000),
+  /** In-process poll for stuck-processing detection + recovery (`0` disables). Default 60s. */
+  processingRecoveryPollMs: parseNonNegativeInt(
+    process.env.PROCESSING_RECOVERY_POLL_MS,
+    60_000,
+  ),
+  /** Auto recovery actions per order before marking `FAILED` (metadata `processingRecovery.count`). */
+  processingRecoveryMaxAttempts: parsePositiveInt(
+    process.env.PROCESSING_RECOVERY_MAX_ATTEMPTS,
+    3,
+  ),
+  /** Set `false` to disable the worker (detection/recovery); default on. */
+  processingRecoveryEnabled: process.env.PROCESSING_RECOVERY_ENABLED !== 'false',
+  /** `manual_required_count_threshold_exceeded` when open manual-required rows ≥ this. */
+  manualRequiredAlertCountThreshold: parsePositiveInt(
+    process.env.MANUAL_REQUIRED_ALERT_COUNT_THRESHOLD,
+    5,
+  ),
+  /** `manual_required_aged` when manualRequiredAt older than this (ms). Default 1h. */
+  manualRequiredAgedMs: parsePositiveInt(
+    process.env.MANUAL_REQUIRED_AGED_MS,
+    3_600_000,
+  ),
+  /** Minimum length for admin manual-action `reason` (reject noise). */
+  manualRequiredActionReasonMinLen: parsePositiveInt(
+    process.env.MANUAL_REQUIRED_ACTION_REASON_MIN_LEN,
+    8,
   ),
 
   /**
@@ -287,6 +346,19 @@ export const env = {
     process.env.LOYALTY_POINTS_USD_BASIS_CENTS,
     100,
   ),
+
+  /**
+   * When false, loyalty points are not granted on delivery success (audit event still emitted).
+   * Reconciliation will surface drift — use only for controlled freeze / incident response.
+   */
+  loyaltyAutoGrantOnDelivery: process.env.LOYALTY_AUTO_GRANT_ON_DELIVERY !== 'false',
+
+  /**
+   * When false, no delayed referral evaluation job is scheduled after delivery.
+   * Independent of DB `referralEnabled` — this only suppresses the async scheduling hook.
+   */
+  referralEvaluationSchedulingEnabled:
+    process.env.REFERRAL_EVALUATION_SCHEDULING_ENABLED !== 'false',
 
   /**
    * When false, inbox rows are still created but FCM is skipped (dev / staging).

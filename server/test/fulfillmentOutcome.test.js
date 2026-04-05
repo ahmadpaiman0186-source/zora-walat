@@ -50,4 +50,18 @@ describe('fulfillmentResultToStatePatch', () => {
     );
     assert.equal(p.fulfillmentErrorCode, FULFILLMENT_DB_ERROR.UNSUPPORTED_ROUTE);
   });
+
+  it('maps pending_verification to processing', () => {
+    const p = fulfillmentResultToStatePatch(
+      {
+        outcome: 'pending_verification',
+        providerReference: 'reloadly_tx_9',
+        errorMessageSafe: 'Verifying',
+      },
+      hash,
+    );
+    assert.equal(p.fulfillmentStatus, FULFILLMENT_STATUS.PROCESSING);
+    assert.equal(p.fulfillmentErrorCode, FULFILLMENT_DB_ERROR.PROVIDER_VERIFYING);
+    assert.equal(p.fulfillmentReference, 'reloadly_tx_9');
+  });
 });

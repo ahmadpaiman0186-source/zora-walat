@@ -21,6 +21,7 @@ import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/loyalty/presentation/loyalty_hub_screen.dart';
+import '../../features/referral/presentation/referral_center_screen.dart';
 import '../../features/notifications/presentation/notification_inbox_screen.dart';
 import '../../features/support/presentation/help_center_screen.dart';
 import '../../models/recharge_draft.dart';
@@ -42,6 +43,7 @@ abstract final class AppRoutePaths {
   static const paymentCancel = '/cancel';
   static const orders = '/orders';
   static const loyalty = '/loyalty';
+  static const referral = '/referral';
   static const notifications = '/notifications';
   static const helpCenter = '/help';
 }
@@ -173,6 +175,11 @@ GoRouter createAppRouter() {
               int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
           return LoyaltyHubScreen(initialTabIndex: tab.clamp(0, 1));
         },
+      ),
+      GoRoute(
+        path: AppRoutePaths.referral,
+        name: 'referral',
+        builder: (context, state) => const ReferralCenterScreen(),
       ),
       GoRoute(
         path: AppRoutePaths.notifications,

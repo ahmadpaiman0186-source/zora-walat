@@ -53,8 +53,7 @@ class AppNotificationHub {
     );
   }
 
-  Future<void> publishLoyalty(
-    BuildContext context, {
+  Future<void> publishLoyalty({
     required String title,
     required String body,
     int tab = 0,
@@ -176,6 +175,8 @@ OrderNotificationPhase? orderPhaseFromCustomerTracking(CustomerOrderTracking t) 
       return OrderNotificationPhase.retrying;
     case CustomerTrackingStage.sendingToOperator:
       return OrderNotificationPhase.sendingToOperator;
+    case CustomerTrackingStage.verifying:
+      return OrderNotificationPhase.preparing;
     case CustomerTrackingStage.preparingTopup:
       return OrderNotificationPhase.preparing;
     case CustomerTrackingStage.paymentReceived:
@@ -197,6 +198,8 @@ OrderNotificationPhase? orderPhaseFromTrackingKey(String? key) {
       return OrderNotificationPhase.preparing;
     case 'sending':
       return OrderNotificationPhase.sendingToOperator;
+    case 'verifying':
+      return OrderNotificationPhase.preparing;
     case 'delivered':
       return OrderNotificationPhase.delivered;
     case 'retrying':

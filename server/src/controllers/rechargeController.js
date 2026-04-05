@@ -5,6 +5,7 @@ import { resolveRecipientFromBody } from '../services/recipient/recipientService
 import { getRechargeProvider } from '../services/providers/index.js';
 import { processFulfillmentForOrder } from '../services/fulfillmentProcessingService.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
+import { deriveCustomerTrackingStageForOrder } from '../services/transactionsService.js';
 
 export async function postQuote(req, res) {
   const recipient = await resolveRecipientFromBody(req.user.id, req.body);
@@ -57,6 +58,7 @@ function fulfillmentFromRow(row) {
 }
 
 function publicOrderSlice(row) {
+  const latest = row.fulfillmentAttempts?.[0] ?? null;
   return {
     id: row.id,
     orderStatus: row.orderStatus,
@@ -68,6 +70,7 @@ function publicOrderSlice(row) {
     failureReason: row.failureReason ?? null,
     paidAt: row.paidAt,
     failedAt: row.failedAt,
+    trackingStageKey: deriveCustomerTrackingStageForOrder(row, latest),
   };
 }
 
@@ -90,7 +93,7 @@ export async function postExecute(req, res) {
     where: { id: orderId, userId },
     include: {
       fulfillmentAttempts: {
-        where: { attemptNumber: 1 },
+        orderBy: { attemptNumber: 'desc' },
         take: 1,
       },
     },
@@ -136,7 +139,7 @@ export async function postExecute(req, res) {
     where: { id: orderId, userId },
     include: {
       fulfillmentAttempts: {
-        where: { attemptNumber: 1 },
+        orderBy: { attemptNumber: 'desc' },
         take: 1,
       },
     },

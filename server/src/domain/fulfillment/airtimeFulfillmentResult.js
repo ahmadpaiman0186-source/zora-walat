@@ -7,6 +7,10 @@ export const AIRTIME_OUTCOME = {
   SUCCESS: 'success',
   FAILURE: 'failure',
   UNAVAILABLE: 'unavailable',
+  /** Provider accepted or is processing; no confirmed delivery proof yet. */
+  PENDING_VERIFICATION: 'pending_verification',
+  /** Response incomplete or contradictory — cannot prove success or safe failure. */
+  AMBIGUOUS: 'ambiguous',
 };
 
 /** Classify failures for retries / ops (safe strings only). */

@@ -53,7 +53,7 @@ export async function topGroupsByMonthLive(yearMonth, limit = 50) {
  */
 export async function freezeLeaderboardMonth(yearMonth) {
   const cur = utcLeaderboardMonth();
-  if (yearMonth localeCompare cur >= 0) {
+  if (yearMonth.localeCompare(cur) >= 0) {
     return { ok: false, error: 'month_not_closed' };
   }
 

@@ -7,6 +7,11 @@ import {
   buildReloadlyTopupPayload,
   sendReloadlyTopupRequest,
 } from '../domain/fulfillment/reloadlyTopup.js';
+import {
+  emitReloadlyFulfillmentEvent,
+  reloadlyFulfillmentBaseFields,
+} from '../lib/reloadlyFulfillmentObservability.js';
+import { getTraceId } from '../lib/requestContext.js';
 import { getReloadlyAccessTokenCached } from './reloadlyAuthService.js';
 
 const ACCEPT = 'application/com.reloadly.topups-v1+json';
@@ -119,16 +124,23 @@ export async function getOperators(countryCode) {
 }
 
 /**
- * POST /topups — normalized outcome for integrations.
+ * POST /topups — normalized outcome for integrations (truth-first; no legacy `ok` flag).
  * @param {object} p
  * @param {string} p.phone — recipient number as required by Reloadly (e.g. international digits).
  * @param {number|string} p.operatorId
  * @param {string} p.amount — decimal string "0.00"
  * @param {string} p.countryCode — ISO country code for recipient phone
- * @param {string} [p.customIdentifier] — idempotency / correlation (e.g. order id)
- * @returns {Promise<{ success: boolean, providerReference: string, raw: any }>}
+ * @param {string} [p.customIdentifier] — idempotency / correlation (e.g. order id + attempt)
+ * @param {import('pino').Logger | undefined} [p.log]
+ * @param {{ traceId?: string | null, orderId?: string | null, attemptNumber?: number | null }} [p.ctx]
+ * @returns {Promise<
+ *   | { resultType: 'confirmed', providerReference: string, raw: object }
+ *   | { resultType: 'pending', providerReference: string | null, raw: object }
+ *   | { resultType: 'ambiguous', raw: object }
+ *   | { resultType: 'failed', raw: object }
+ * >}
  */
-export async function sendTopup({ phone, operatorId, amount, countryCode, customIdentifier }) {
+export async function sendTopup({ phone, operatorId, amount, countryCode, customIdentifier, log, ctx = {} }) {
   const amountStr =
     typeof amount === 'string' ? amount : Number(amount).toFixed(2);
   const body = {
@@ -146,11 +158,32 @@ export async function sendTopup({ phone, operatorId, amount, countryCode, custom
     body.customIdentifier = String(customIdentifier).trim();
   }
 
+  const traceId = ctx.traceId ?? getTraceId();
+  const t0 = Date.now();
+
+  emitReloadlyFulfillmentEvent(log, 'info', 'reloadly_request_started', {
+    ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+      traceId,
+      attemptNumber: ctx.attemptNumber ?? null,
+      providerReference: customIdentifier ?? null,
+      decisionPath: 'topups_post',
+    }),
+  });
+
   const tokenResult = await getReloadlyAccessTokenCached();
   if (!tokenResult.ok) {
+    const latencyMs = Date.now() - t0;
+    emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_request_failed', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        latencyMs,
+        normalizedOutcome: 'auth_failure',
+        proofClassification: 'no_delivery_proof',
+      }),
+    });
     return {
-      success: false,
-      providerReference: '',
+      resultType: 'failed',
       raw: { phase: 'auth', ...tokenResult },
     };
   }
@@ -163,18 +196,136 @@ export async function sendTopup({ phone, operatorId, amount, countryCode, custom
     baseUrl: env.reloadlyBaseUrl,
   });
 
-  if (!topup.ok) {
+  const latencyMs = Date.now() - t0;
+
+  if (topup.kind === 'confirmed') {
+    emitReloadlyFulfillmentEvent(log, 'info', 'reloadly_request_completed', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        providerReference: topup.providerReference,
+        latencyMs,
+        normalizedOutcome: 'confirmed',
+        proofClassification: 'confirmed_delivery',
+      }),
+    });
+    emitReloadlyFulfillmentEvent(log, 'info', 'reloadly_delivery_confirmed', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        providerReference: topup.providerReference,
+        latencyMs,
+        normalizedOutcome: 'confirmed',
+        decisionPath: 'topups_post',
+      }),
+    });
+    emitReloadlyFulfillmentEvent(log, 'info', 'reloadly_status_mapped', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        providerReference: topup.providerReference,
+        latencyMs,
+        normalizedOutcome: 'confirmed',
+        proofClassification: 'confirmed_delivery',
+      }),
+    });
     return {
-      success: false,
-      providerReference: '',
-      raw: topup,
+      resultType: 'confirmed',
+      providerReference: topup.providerReference,
+      raw: topup.responseSummary,
     };
   }
 
+  if (topup.kind === 'pending') {
+    emitReloadlyFulfillmentEvent(log, 'info', 'reloadly_request_completed', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        providerReference: topup.providerReference,
+        latencyMs,
+        normalizedOutcome: 'pending_verification',
+        proofClassification: 'pending_provider',
+      }),
+    });
+    emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_status_mapped', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        providerReference: topup.providerReference,
+        latencyMs,
+        normalizedOutcome: 'pending_verification',
+        proofClassification: 'pending_provider',
+      }),
+    });
+    return {
+      resultType: 'pending',
+      providerReference: topup.providerReference,
+      raw: topup.responseSummary,
+    };
+  }
+
+  if (topup.kind === 'ambiguous') {
+    emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_request_completed', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        latencyMs,
+        normalizedOutcome: 'ambiguous',
+        proofClassification: 'ambiguous_evidence',
+      }),
+    });
+    emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_ambiguous_result', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        latencyMs,
+        normalizedOutcome: 'ambiguous',
+        decisionPath: 'topups_post',
+        proofClassification: 'ambiguous_evidence',
+      }),
+    });
+    return {
+      resultType: 'ambiguous',
+      raw: topup.responseSummary,
+    };
+  }
+
+  emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_request_failed', {
+    ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+      traceId,
+      attemptNumber: ctx.attemptNumber ?? null,
+      latencyMs,
+      normalizedOutcome: 'failed',
+      proofClassification: 'explicit_non_delivery',
+    }),
+  });
+  if (topup.failureCode === 'reloadly_topup_duplicate') {
+    emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_duplicate_send_prevented', {
+      ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+        traceId,
+        attemptNumber: ctx.attemptNumber ?? null,
+        latencyMs,
+        normalizedOutcome: 'duplicate_rejected',
+        decisionPath: 'http_409',
+        proofClassification: 'no_delivery_proof',
+      }),
+    });
+  }
+  emitReloadlyFulfillmentEvent(log, 'warn', 'reloadly_status_mapped', {
+    ...reloadlyFulfillmentBaseFields(ctx.orderId ?? null, {
+      traceId,
+      attemptNumber: ctx.attemptNumber ?? null,
+      latencyMs,
+      normalizedOutcome: 'failed',
+      proofClassification:
+        topup.failureCode === 'reloadly_topup_explicit_failure'
+          ? 'explicit_non_delivery'
+          : 'no_delivery_proof',
+    }),
+  });
   return {
-    success: true,
-    providerReference: topup.providerReference,
-    raw: topup.responseSummary,
+    resultType: 'failed',
+    raw: topup,
   };
 }
 
@@ -182,9 +333,16 @@ export async function sendTopup({ phone, operatorId, amount, countryCode, custom
  * Paid checkout → Reloadly top-up (uses {@link sendTopup}).
  *
  * @param {import('@prisma/client').PaymentCheckout} order
+ * @param {{ attemptNumber?: number, attemptId?: string, traceId?: string | null, log?: import('pino').Logger }} [fulfillmentCtx]
  */
-export async function fulfillReloadlyDelivery(order) {
+export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
   const apiBase = env.reloadlyBaseUrl;
+  const attemptNum =
+    fulfillmentCtx.attemptNumber != null && Number.isFinite(Number(fulfillmentCtx.attemptNumber))
+      ? Number(fulfillmentCtx.attemptNumber)
+      : 1;
+  const customIdentifier = `${String(order.id)}_a${attemptNum}`.slice(0, 120);
+
   const requestSummary = {
     mode: 'reloadly',
     sandbox: env.reloadlySandbox,
@@ -195,6 +353,10 @@ export async function fulfillReloadlyDelivery(order) {
     recipientHint: safeRecipientHint(order.recipientNational),
     amountUsdCents: order.amountUsdCents,
     currency: order.currency,
+    providerRequestKey: customIdentifier,
+    externalReference: customIdentifier,
+    attemptNumber: attemptNum,
+    attemptId: fulfillmentCtx.attemptId ?? null,
   };
 
   if (!isReloadlyConfigured()) {
@@ -209,7 +371,10 @@ export async function fulfillReloadlyDelivery(order) {
     };
   }
 
-  const payload = buildReloadlyTopupPayload(order, env.reloadlyOperatorMap);
+  const payload = buildReloadlyTopupPayload(order, env.reloadlyOperatorMap, {
+    customIdentifier,
+    providerRequestKey: customIdentifier,
+  });
   if (!payload.ok) {
     return {
       outcome: AIRTIME_OUTCOME.FAILURE,
@@ -222,6 +387,8 @@ export async function fulfillReloadlyDelivery(order) {
     };
   }
 
+  requestSummary.providerRequestKey = payload.providerRequestKey;
+
   const b = payload.body;
   const normalized = await sendTopup({
     phone: b.recipientPhone.number,
@@ -229,40 +396,123 @@ export async function fulfillReloadlyDelivery(order) {
     amount: b.amount,
     countryCode: b.recipientPhone.countryCode,
     customIdentifier: b.customIdentifier,
+    log: fulfillmentCtx.log,
+    ctx: {
+      orderId: order.id,
+      attemptNumber: attemptNum,
+      traceId: fulfillmentCtx.traceId,
+    },
   });
 
-  if (!normalized.success) {
-    const raw = normalized.raw;
-    if (raw && typeof raw === 'object' && raw.ok === false) {
+  const traceId = fulfillmentCtx.traceId ?? getTraceId();
+
+  if (normalized.resultType === 'confirmed') {
+    emitReloadlyFulfillmentEvent(fulfillmentCtx.log, 'info', 'reloadly_reference_recorded', {
+      ...reloadlyFulfillmentBaseFields(order.id, {
+        traceId,
+        attemptNumber: attemptNum,
+        providerReference: normalized.providerReference,
+        normalizedOutcome: 'confirmed',
+        proofClassification: 'confirmed_delivery',
+      }),
+    });
+    return {
+      outcome: AIRTIME_OUTCOME.SUCCESS,
+      providerKey: 'reloadly',
+      providerReference: normalized.providerReference,
+      requestSummary,
+      responseSummary: {
+        ...(typeof normalized.raw === 'object' && normalized.raw ? normalized.raw : {}),
+        topupsBaseUsed: env.reloadlyBaseUrl,
+      },
+    };
+  }
+
+  if (normalized.resultType === 'pending') {
+    const pref = normalized.providerReference ?? null;
+    if (pref) {
+      emitReloadlyFulfillmentEvent(fulfillmentCtx.log, 'info', 'reloadly_reference_recorded', {
+        ...reloadlyFulfillmentBaseFields(order.id, {
+          traceId,
+          attemptNumber: attemptNum,
+          providerReference: pref,
+          normalizedOutcome: 'pending_verification',
+          proofClassification: 'pending_provider',
+        }),
+      });
+    }
+    return {
+      outcome: AIRTIME_OUTCOME.PENDING_VERIFICATION,
+      providerKey: 'reloadly',
+      providerReference: pref,
+      requestSummary,
+      responseSummary: {
+        ...(typeof normalized.raw === 'object' && normalized.raw ? normalized.raw : {}),
+        topupsBaseUsed: env.reloadlyBaseUrl,
+      },
+    };
+  }
+
+  if (normalized.resultType === 'ambiguous') {
+    return {
+      outcome: AIRTIME_OUTCOME.AMBIGUOUS,
+      providerKey: 'reloadly',
+      providerReference: null,
+      failureCode: 'reloadly_topup_ambiguous_response',
+      failureMessage: 'Reloadly response did not provide sufficient proof of outcome',
+      errorKind: AIRTIME_ERROR_KIND.PROVIDER,
+      requestSummary,
+      responseSummary: {
+        ...(typeof normalized.raw === 'object' && normalized.raw ? normalized.raw : {}),
+        topupsBaseUsed: env.reloadlyBaseUrl,
+      },
+    };
+  }
+
+  const raw = normalized.raw;
+  if (raw && typeof raw === 'object' && raw.kind === 'failed') {
+    if (raw.failureCode === 'reloadly_topup_duplicate') {
       return {
-        outcome: AIRTIME_OUTCOME.FAILURE,
+        outcome: AIRTIME_OUTCOME.PENDING_VERIFICATION,
         providerKey: 'reloadly',
-        failureCode: raw.failureCode ?? 'reloadly_topup_failed',
-        failureMessage: raw.failureMessage ?? 'Reloadly top-up failed',
-        errorKind: raw.errorKind ?? AIRTIME_ERROR_KIND.PROVIDER,
+        providerReference: null,
         requestSummary,
-        responseSummary: raw.responseSummary ?? {},
+        responseSummary: {
+          ...(raw.responseSummary && typeof raw.responseSummary === 'object' ? raw.responseSummary : {}),
+          normalizedOutcome: 'pending_verification',
+          proofClassification: 'duplicate_request_at_provider',
+          topupsBaseUsed: env.reloadlyBaseUrl,
+        },
       };
     }
     return {
       outcome: AIRTIME_OUTCOME.FAILURE,
       providerKey: 'reloadly',
-      failureCode: 'reloadly_topup_failed',
-      failureMessage: 'Reloadly top-up failed',
-      errorKind: AIRTIME_ERROR_KIND.PROVIDER,
+      failureCode: raw.failureCode ?? 'reloadly_topup_failed',
+      failureMessage: raw.failureMessage ?? 'Reloadly top-up failed',
+      errorKind: raw.errorKind ?? AIRTIME_ERROR_KIND.PROVIDER,
       requestSummary,
-      responseSummary: {},
+      responseSummary: raw.responseSummary ?? {},
     };
   }
-
+  if (raw && typeof raw === 'object' && raw.phase === 'auth') {
+    return {
+      outcome: AIRTIME_OUTCOME.FAILURE,
+      providerKey: 'reloadly',
+      failureCode: raw.failureCode ?? 'reloadly_auth_failed',
+      failureMessage: raw.failureMessage ?? 'Reloadly OAuth failed',
+      errorKind: AIRTIME_ERROR_KIND.CONFIG,
+      requestSummary,
+      responseSummary: raw.responseSummary ?? {},
+    };
+  }
   return {
-    outcome: AIRTIME_OUTCOME.SUCCESS,
+    outcome: AIRTIME_OUTCOME.FAILURE,
     providerKey: 'reloadly',
-    providerReference: normalized.providerReference,
+    failureCode: 'reloadly_topup_failed',
+    failureMessage: 'Reloadly top-up failed',
+    errorKind: AIRTIME_ERROR_KIND.PROVIDER,
     requestSummary,
-    responseSummary: {
-      ...(typeof normalized.raw === 'object' && normalized.raw ? normalized.raw : {}),
-      topupsBaseUsed: env.reloadlyBaseUrl,
-    },
+    responseSummary: {},
   };
 }

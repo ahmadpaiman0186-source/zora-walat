@@ -16,6 +16,8 @@ abstract final class TrackingMessages {
         return (l10n.trackingHeadlineRetrying, l10n.trackingBodyRetrying);
       case CustomerTrackingStage.sendingToOperator:
         return (l10n.trackingHeadlineSending, l10n.trackingBodySending);
+      case CustomerTrackingStage.verifying:
+        return (l10n.trackingHeadlineVerifying, l10n.trackingBodyVerifying);
       case CustomerTrackingStage.preparingTopup:
         return (l10n.trackingHeadlinePreparing, l10n.trackingBodyPreparing);
       case CustomerTrackingStage.paymentConfirming:

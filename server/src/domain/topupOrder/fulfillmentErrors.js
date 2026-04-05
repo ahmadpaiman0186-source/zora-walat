@@ -22,4 +22,6 @@ export const FULFILLMENT_DB_ERROR = {
   UNSUPPORTED_ROUTE: 'unsupported_route',
   INVALID_PRODUCT: 'invalid_product',
   AMOUNT_MISMATCH: 'amount_mismatch',
+  /** Reloadly (or other) accepted request but delivery not proven yet — not a user fault. */
+  PROVIDER_VERIFYING: 'provider_verifying',
 };
