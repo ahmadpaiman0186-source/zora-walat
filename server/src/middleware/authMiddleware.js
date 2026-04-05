@@ -65,8 +65,30 @@ export function requireAuth(req, res, next) {
   Promise.resolve(requireAuthAsync(req, res, next)).catch(next);
 }
 
+/** Staff roles allowed to access web-top-up fulfillment *read* admin routes. */
+const STAFF_ROLES = new Set(['admin', 'operator', 'viewer']);
+
+/** Roles allowed to dispatch / retry fulfillment. */
+const FULFILLMENT_MUTATION_ROLES = new Set(['admin', 'operator']);
+
 export function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+}
+
+/** Admin, operator, or viewer — for diagnostics / preflight / readiness. */
+export function requireStaff(req, res, next) {
+  if (!req.user || !STAFF_ROLES.has(req.user.role)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  next();
+}
+
+/** Admin or operator — dispatch and retry. */
+export function requireFulfillmentActor(req, res, next) {
+  if (!req.user || !FULFILLMENT_MUTATION_ROLES.has(req.user.role)) {
     return res.status(403).json({ error: 'Forbidden' });
   }
   next();

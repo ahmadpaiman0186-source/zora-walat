@@ -9,6 +9,8 @@ import { PINO_HTTP_REDACT_PATHS } from './config/loggingRedact.js';
 import { isCorsOriginAllowed } from './lib/corsPolicy.js';
 import { logCorsRejected } from './middleware/securityObservability.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
+import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
+import { httpLatencyMiddleware } from './middleware/httpLatencyMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import catalogRoutes from './routes/catalog.routes.js';
@@ -16,15 +18,22 @@ import walletRoutes from './routes/wallet.routes.js';
 import rechargeRoutes from './routes/recharge.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import reconciliationRoutes from './routes/reconciliation.routes.js';
+import webTopupFulfillmentAdminRoutes from './routes/webTopupFulfillmentAdmin.routes.js';
 import adminOrdersRoutes from './routes/adminOrders.routes.js';
 import transactionsRoutes from './routes/transactions.routes.js';
+import loyaltyRoutes from './routes/loyalty.routes.js';
+import notificationsRoutes from './routes/notifications.routes.js';
 import stripeWebhookRouter from './routes/stripeWebhook.routes.js';
+import topupOrderRoutes from './routes/topupOrder.routes.js';
+import opsRoutes from './routes/ops.routes.js';
+import marginRoutes from './routes/margin.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import {
   apiIpLimiter,
   authLimiter,
   catalogLimiter,
+  stripeWebhookLimiter,
 } from './middleware/rateLimits.js';
 import authRoutes from './routes/auth.routes.js';
 
@@ -57,7 +66,7 @@ export function createApp() {
     cors({
       origin: corsOrigin,
       credentials: false,
-      methods: ['GET', 'POST', 'OPTIONS'],
+      methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
       allowedHeaders: [
         'Content-Type',
         'Authorization',
@@ -84,6 +93,7 @@ export function createApp() {
 
   app.use(
     '/webhooks/stripe',
+    stripeWebhookLimiter,
     express.raw({ type: 'application/json', limit: '256kb' }),
     stripeWebhookRouter,
   );
@@ -93,13 +103,19 @@ export function createApp() {
   app.use(healthRoutes);
   app.use('/auth', authLimiter, authRoutes);
   app.use(paymentRoutes);
+  app.use('/api/topup-orders', topupOrderRoutes);
   app.use('/catalog', catalogLimiter, catalogRoutes);
   app.use('/api/wallet', apiIpLimiter, walletRoutes);
   app.use('/api/recharge', apiIpLimiter, rechargeRoutes);
   app.use('/api/orders', apiIpLimiter, orderRoutes);
   app.use('/api/transactions', apiIpLimiter, transactionsRoutes);
+  app.use('/api/loyalty', apiIpLimiter, loyaltyRoutes);
+  app.use('/api/notifications', apiIpLimiter, notificationsRoutes);
   app.use('/api/admin', apiIpLimiter, reconciliationRoutes);
+  app.use('/api/admin', apiIpLimiter, webTopupFulfillmentAdminRoutes);
   app.use('/api/admin', apiIpLimiter, adminOrdersRoutes);
+  app.use('/api/admin', apiIpLimiter, opsRoutes);
+  app.use('/api/admin', apiIpLimiter, marginRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

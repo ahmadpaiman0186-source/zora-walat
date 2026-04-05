@@ -1,4 +1,5 @@
 import { prisma } from '../db.js';
+import { env } from '../config/env.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
@@ -23,6 +24,20 @@ import {
   RETRY_POLICY_VERSION,
   isRetryableFulfillmentFailure,
 } from '../domain/fulfillment/retryPolicy.js';
+import { grantLoyaltyPointsForDeliveredOrderInTx } from './loyaltyPointsService.js';
+import {
+  emitFulfillmentTerminalSideEffects,
+  schedulePushSideEffect,
+} from './pushNotifications/userNotificationPipeline.js';
+import { runWithTrace, getTraceId } from '../lib/requestContext.js';
+import {
+  recordFulfillmentRunStarted,
+} from '../lib/opsMetrics.js';
+import {
+  buildMarginSnapshotForDeliveredOrder,
+  recordMarginIntelAfterSnapshot,
+  MARGIN_PROVIDER_COST_SOURCE,
+} from '../lib/marginIntelligence.js';
 
 function safeJson(obj) {
   try {
@@ -57,8 +72,15 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
 /**
  * Claim PAID + QUEUED attempt → PROCESSING + order PAID → PROCESSING, then airtime provider adapter.
  * Safe under concurrency: `updateMany` claim is atomic; duplicate workers get count 0.
+ * @param {string} orderId
+ * @param {{ traceId?: string | null }} [opts]
  */
-export async function processFulfillmentForOrder(orderId) {
+export async function processFulfillmentForOrder(orderId, opts = {}) {
+  const traceId = opts.traceId ?? getTraceId();
+  return runWithTrace(traceId, () => processFulfillmentForOrderInner(orderId));
+}
+
+async function processFulfillmentForOrderInner(orderId) {
   const peek = await prisma.paymentCheckout.findUnique({
     where: { id: orderId },
     select: { orderStatus: true },
@@ -83,6 +105,8 @@ export async function processFulfillmentForOrder(orderId) {
     });
     return;
   }
+
+  recordFulfillmentRunStarted();
 
   const phase1 = await prisma.$transaction(async (tx) => {
     const order = await tx.paymentCheckout.findUnique({
@@ -180,12 +204,12 @@ export async function processFulfillmentForOrder(orderId) {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const marginTelemetry = await prisma.$transaction(async (tx) => {
       const order = await tx.paymentCheckout.findUnique({
         where: { id: orderId },
       });
       if (!order || order.orderStatus !== ORDER_STATUS.PROCESSING) {
-        return;
+        return null;
       }
 
       const att = await tx.fulfillmentAttempt.findFirst({
@@ -196,7 +220,7 @@ export async function processFulfillmentForOrder(orderId) {
         },
       });
       if (!att) {
-        return;
+        return null;
       }
 
       const reqStr = safeJson(providerResult.requestSummary);
@@ -205,18 +229,32 @@ export async function processFulfillmentForOrder(orderId) {
       if (providerResult.outcome === AIRTIME_OUTCOME.SUCCESS) {
         assertTransition(ORDER_STATUS.PROCESSING, ORDER_STATUS.DELIVERED);
 
+        const snapshot = buildMarginSnapshotForDeliveredOrder(order, providerResult, {
+          pricingStripeFeeBps: env.pricingStripeFeeBps,
+          pricingStripeFixedCents: env.pricingStripeFixedCents,
+          pricingAmountOnlyProviderBps: env.pricingAmountOnlyProviderBps,
+        });
+
         const done = await tx.paymentCheckout.updateMany({
           where: {
             id: orderId,
             orderStatus: ORDER_STATUS.PROCESSING,
+            marginNetUsdCents: null,
           },
           data: {
             orderStatus: ORDER_STATUS.DELIVERED,
             status: PAYMENT_CHECKOUT_STATUS.RECHARGE_COMPLETED,
+            marginSellUsdCents: snapshot.marginSellUsdCents,
+            marginProviderCostUsdCents: snapshot.marginProviderCostUsdCents,
+            marginProviderCostSource: snapshot.marginProviderCostSource,
+            marginPaymentFeeUsdCents: snapshot.marginPaymentFeeUsdCents,
+            marginNetUsdCents: snapshot.marginNetUsdCents,
+            marginPercentBp: snapshot.marginPercentBp,
+            marginCalculatedAt: new Date(),
           },
         });
         if (done.count === 0) {
-          return;
+          return null;
         }
 
         await tx.fulfillmentAttempt.update({
@@ -240,7 +278,20 @@ export async function processFulfillmentForOrder(orderId) {
           },
           ip: null,
         });
-        return;
+
+        await grantLoyaltyPointsForDeliveredOrderInTx(tx, {
+          id: order.id,
+          userId: order.userId,
+          amountUsdCents: order.amountUsdCents,
+        });
+
+        return {
+          orderId,
+          snapshot,
+          usedApiCost:
+            snapshot.marginProviderCostSource ===
+            MARGIN_PROVIDER_COST_SOURCE.PROVIDER_API,
+        };
       }
 
       await tx.fulfillmentAttempt.update({
@@ -283,7 +334,19 @@ export async function processFulfillmentForOrder(orderId) {
         },
         ip: null,
       });
+      return null;
     });
+
+    if (marginTelemetry) {
+      recordMarginIntelAfterSnapshot(
+        marginTelemetry.orderId,
+        marginTelemetry.snapshot,
+        marginTelemetry.usedApiCost,
+        env.marginLowRouteBp,
+      );
+    }
+
+    schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
   } catch (err) {
     console.error('[fulfillment] completion phase failed', orderId, err);
     await prisma.$transaction(async (tx) => {
@@ -323,6 +386,8 @@ export async function processFulfillmentForOrder(orderId) {
         ip: null,
       });
     });
+
+    schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
   }
 }
 
@@ -348,15 +413,19 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
   }
 }
 
-export function scheduleFulfillmentProcessing(orderId) {
+/**
+ * @param {string} orderId
+ * @param {string | null | undefined} traceId from HTTP/webhook request when known
+ */
+export function scheduleFulfillmentProcessing(orderId, traceId) {
   setImmediate(() => {
-    processFulfillmentForOrder(orderId).catch((err) => {
+    processFulfillmentForOrder(orderId, { traceId }).catch((err) => {
       console.error('[fulfillment] processFulfillmentForOrder failed', orderId, err);
     });
   });
 }
 
 /** Explicit entry point for paid → processing → provider → terminal state. */
-export async function markProcessing(orderId) {
-  return processFulfillmentForOrder(orderId);
+export async function markProcessing(orderId, opts = {}) {
+  return processFulfillmentForOrder(orderId, opts);
 }

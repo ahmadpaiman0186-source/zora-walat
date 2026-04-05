@@ -9,6 +9,9 @@ import '../../features/home/presentation/main_home_screen.dart';
 import '../../features/landing/presentation/landing_screen.dart';
 import '../../features/onboarding/presentation/language_selection_screen.dart';
 import '../../features/onboarding/presentation/splash_screen.dart';
+import '../../features/orders/domain/order_center_row.dart';
+import '../../features/orders/presentation/order_detail_screen.dart';
+import '../../features/orders/presentation/order_history_screen.dart';
 import '../../features/payments/presentation/payment_cancel_screen.dart';
 import '../../features/payments/presentation/success_screen.dart';
 import '../../features/recharge/presentation/recharge_review_screen.dart';
@@ -17,6 +20,9 @@ import '../../features/telecom/domain/telecom_order.dart';
 import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
+import '../../features/loyalty/presentation/loyalty_hub_screen.dart';
+import '../../features/notifications/presentation/notification_inbox_screen.dart';
+import '../../features/support/presentation/help_center_screen.dart';
 import '../../models/recharge_draft.dart';
 
 abstract final class AppRoutePaths {
@@ -34,6 +40,10 @@ abstract final class AppRoutePaths {
   static const signIn = '/sign-in';
   static const paymentSuccess = '/success';
   static const paymentCancel = '/cancel';
+  static const orders = '/orders';
+  static const loyalty = '/loyalty';
+  static const notifications = '/notifications';
+  static const helpCenter = '/help';
 }
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -135,6 +145,44 @@ GoRouter createAppRouter() {
         path: AppRoutePaths.paymentCancel,
         name: 'paymentCancel',
         builder: (context, state) => const PaymentCancelScreen(),
+      ),
+      GoRoute(
+        path: AppRoutePaths.orders,
+        name: 'orders',
+        builder: (context, state) => const OrderHistoryScreen(),
+        routes: [
+          GoRoute(
+            path: ':orderId',
+            name: 'orderDetail',
+            builder: (context, state) {
+              final id = state.pathParameters['orderId'] ?? '';
+              final extra = state.extra;
+              return OrderDetailScreen(
+                orderId: id,
+                initialRow: extra is OrderCenterRow ? extra : null,
+              );
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutePaths.loyalty,
+        name: 'loyalty',
+        builder: (context, state) {
+          final tab =
+              int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
+          return LoyaltyHubScreen(initialTabIndex: tab.clamp(0, 1));
+        },
+      ),
+      GoRoute(
+        path: AppRoutePaths.notifications,
+        name: 'notifications',
+        builder: (context, state) => const NotificationInboxScreen(),
+      ),
+      GoRoute(
+        path: AppRoutePaths.helpCenter,
+        name: 'helpCenter',
+        builder: (context, state) => const HelpCenterScreen(),
       ),
     ],
   );

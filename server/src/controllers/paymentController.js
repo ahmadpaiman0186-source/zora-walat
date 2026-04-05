@@ -2,11 +2,18 @@ import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 
 import { getStripeClient } from '../services/stripe.js';
+import { getValidatedStripeSecretKey } from '../config/stripeEnv.js';
 import { env } from '../config/env.js';
 import {
   checkoutSessionBodySchema,
   idempotencyKeyHeaderSchema,
 } from '../validators/checkoutSession.js';
+import { createPaymentIntentBodySchema } from '../validators/paymentIntent.js';
+import {
+  assertTopupOrderEligibleForPaymentIntent,
+  linkWebTopupPaymentIntent,
+} from '../services/topupOrder/topupOrderService.js';
+import { safeSuffix, webTopupLog } from '../lib/webTopupObservability.js';
 import { validatePackageOperatorPair } from '../lib/allowedCheckout.js';
 import { resolveCheckoutPricing } from '../domain/pricing/resolveCheckoutPricing.js';
 import {
@@ -363,4 +370,132 @@ export async function createCheckoutSession(req, res) {
     await markCheckoutFailed(row.id);
     throw e;
   }
+}
+
+/**
+ * POST /create-payment-intent — test/dev helper for embedded Payment Element flows.
+ * Requires a standard Stripe **test** secret key (sk_test_…). Live keys are rejected.
+ */
+export async function createTestPaymentIntent(req, res) {
+  const secret = getValidatedStripeSecretKey();
+  if (!secret || !secret.startsWith('sk_test_')) {
+    return res.status(403).json({
+      error:
+        'Test PaymentIntent is available only with a Stripe test secret key (sk_test_…).',
+    });
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return res.status(503).json({
+      error:
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
+    });
+  }
+
+  let parsed;
+  try {
+    parsed = createPaymentIntentBodySchema.parse(req.body ?? {});
+  } catch (e) {
+    if (e instanceof ZodError) {
+      if (env.nodeEnv !== 'production') {
+        return res.status(400).json({
+          error: 'Invalid request body',
+          details: e.flatten(),
+        });
+      }
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+    throw e;
+  }
+
+  const amountCents = parsed.amount ?? 500;
+
+  let metadata = { source: 'zora_walat_next_test' };
+  if (parsed.orderId != null && parsed.orderId !== '') {
+    try {
+      await assertTopupOrderEligibleForPaymentIntent(
+        parsed.orderId,
+        amountCents,
+      );
+      metadata = { ...metadata, topup_order_id: parsed.orderId };
+    } catch (e) {
+      const c = e?.code;
+      if (c === 'invalid_order') {
+        return res.status(400).json({ error: 'Invalid order id' });
+      }
+      if (c === 'not_found') {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+      if (c === 'order_not_pending') {
+        return res
+          .status(409)
+          .json({ error: 'Order is not pending payment' });
+      }
+      if (c === 'order_already_linked') {
+        return res.status(409).json({
+          error: 'This order already has a PaymentIntent',
+        });
+      }
+      if (c === 'amount_mismatch') {
+        return res.status(400).json({ error: 'Amount does not match order' });
+      }
+      throw e;
+    }
+  }
+
+  let pi;
+  try {
+    pi = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency: 'usd',
+      automatic_payment_methods: { enabled: true },
+      metadata,
+    });
+  } catch (err) {
+    webTopupLog(req.log, 'warn', 'payment_intent_failed', {
+      amountCents,
+      orderIdSuffix:
+        parsed.orderId != null && parsed.orderId !== ''
+          ? String(parsed.orderId).slice(-8)
+          : undefined,
+      stripeType: err?.type,
+      stripeCode: err?.code,
+    });
+    throw err;
+  }
+
+  if (!pi.client_secret) {
+    webTopupLog(req.log, 'error', 'payment_intent_failed', {
+      reason: 'missing_client_secret',
+      paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+    });
+    return res.status(500).json({ error: 'Stripe did not return a client secret' });
+  }
+
+  if (parsed.orderId != null && parsed.orderId !== '') {
+    const linked = await linkWebTopupPaymentIntent(parsed.orderId, pi.id);
+    if (!linked) {
+      webTopupLog(req.log, 'warn', 'suspicious_request_detected', {
+        kind: 'payment_intent_link_failed',
+        orderIdSuffix: String(parsed.orderId).slice(-8),
+        paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+      });
+    }
+  }
+
+  webTopupLog(req.log, 'info', 'payment_intent_created', {
+    paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+    amountCents,
+    hasTopupOrder: Boolean(parsed.orderId),
+    orderIdSuffix:
+      parsed.orderId != null && parsed.orderId !== ''
+        ? String(parsed.orderId).slice(-8)
+        : undefined,
+  });
+
+  return res.status(200).json({
+    clientSecret: pi.client_secret,
+    paymentIntentId: pi.id,
+  });
 }

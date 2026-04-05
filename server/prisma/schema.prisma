@@ -52,6 +52,98 @@ model TopupOrder {
   @@index([status, createdAt])
 }
 
+/// Next.js marketing checkout top-up (session-scoped, Payment Element + webhook lifecycle).
+/// Distinct from legacy `TopupOrder` (Reloadly / operator pipeline).
+model WebTopupOrder {
+  id                      String    @id
+  sessionKey              String
+  /// Optional client idempotency key (header). Replays with same key return the same order.
+  idempotencyKey          String?   @unique
+  /// sha256 hex of canonical create payload — must match on idempotent replay.
+  payloadHash             String
+  originCountry           String
+  destinationCountry      String
+  productType             String
+  operatorKey             String
+  operatorLabel           String
+  phoneNumber             String
+  productId               String
+  productName             String
+  selectedAmountLabel     String
+  amountCents             Int
+  currency                String    @default("usd")
+  paymentIntentId         String?   @unique
+  paymentStatus           String
+  fulfillmentStatus       String
+  /// Provider id (e.g. `mock`, `reloadly`) — set when fulfillment is claimed.
+  fulfillmentProvider           String?
+  fulfillmentAttemptCount       Int       @default(0)
+  fulfillmentRequestedAt        DateTime?
+  fulfillmentCompletedAt        DateTime?
+  fulfillmentFailedAt           DateTime?
+  /// Provider correlation id (safe subset only in public/admin DTOs).
+  fulfillmentReference          String?
+  /// Stable machine code (e.g. `retryable`, `terminal`, provider codes).
+  fulfillmentErrorCode          String?
+  fulfillmentErrorMessageSafe   String?
+  /// sha256 hex of last normalized provider request (audit / idempotency aid).
+  lastProviderPayloadHash       String?
+  updateTokenHash         String
+  /// First Stripe `evt_…` that marked this row paid (webhook replay / duplicate protection).
+  completedByStripeEventId String? @unique
+  /// Non-blocking fraud / velocity flags (JSON). Never store PANs, API secrets, or raw webhook bodies.
+  fraudSignals              Json?
+  /// sha256 hex — destination + normalized national digits only (analytics / velocity correlation).
+  phoneAnalyticsHash        String?
+  /// 0–100 risk score from internal engine (non-blocking).
+  riskScore                 Int       @default(0)
+  /// low | medium | high
+  riskLevel                 String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@index([sessionKey, createdAt])
+  @@index([paymentStatus, createdAt])
+  @@index([fulfillmentStatus, createdAt])
+  @@index([phoneAnalyticsHash])
+}
+
+/// Client-supplied idempotency for admin dispatch/retry (safe replay, no duplicate provider intent).
+model WebTopupFulfillmentIdempotency {
+  id                         String   @id @default(cuid())
+  orderId                    String
+  idempotencyKey             String
+  /// pending | completed | failed
+  status                     String
+  fulfillmentStatusSnapshot  String?
+  fulfillmentErrorCodeSnapshot String?
+  attemptNumber              Int?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  @@unique([orderId, idempotencyKey])
+  @@index([orderId])
+}
+
+/// Queue worker jobs for async web top-up fulfillment (deduped per order attempt).
+model WebTopupFulfillmentJob {
+  id          String   @id @default(cuid())
+  orderId     String
+  dedupeKey   String   @unique
+  /// Optional admin Idempotency-Key for post-job idempotency completion.
+  clientIdempotencyKey String?
+  /// queued | processing | completed | dead_letter
+  status      String
+  attempt     Int      @default(0)
+  maxAttempts Int      @default(5)
+  nextRunAt   DateTime @default(now())
+  lastError   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, nextRunAt])
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   event     String
@@ -100,6 +192,15 @@ model PaymentCheckout {
   paidAt                       DateTime?
   failedAt                     DateTime?
   cancelledAt                  DateTime?
+  /// Pricing intelligence (admin-only): captured once at DELIVERED. Amounts USD cents; marginPercentBp = net/sell * 10000.
+  marginSellUsdCents           Int?
+  marginProviderCostUsdCents   Int?
+  /// provider_api | estimated_face_bps
+  marginProviderCostSource     String?
+  marginPaymentFeeUsdCents     Int?
+  marginNetUsdCents            Int?
+  marginPercentBp              Int?
+  marginCalculatedAt           DateTime?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
@@ -148,6 +249,8 @@ model UserWallet {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   /// Integer USD cents — avoids float drift; API still exposes decimal dollars for compatibility.
   balanceUsdCents Int
+  /// Non-withdrawable credits (e.g. referral rewards) — must be spent on top-ups before general balance when supported at checkout.
+  promotionalBalanceUsdCents Int @default(0)
   currency        String   @default("USD")
   updatedAt       DateTime @updatedAt
 }
@@ -175,11 +278,17 @@ model User {
   id            String   @id @default(cuid())
   email         String   @unique
   passwordHash  String
-  /// Application values: "user" | "admin" (enforce in app; promote admin via DB or future admin API).
+  /// Application values: "user" | "admin" | "operator" | "viewer" (staff roles for /api/admin/*).
   role          String   @default("user")
   /// Increment to invalidate all outstanding access JWTs (password change / global revoke).
   tokenVersion  Int      @default(0)
   isActive      Boolean  @default(true)
+  /// Lifetime loyalty points (completed paid + delivered checkouts only); see LoyaltyPointsGrant.
+  loyaltyPointsTotal Int  @default(0)
+  /// Shareable code; assigned lazily or at registration (see referral service).
+  referralCode  String?  @unique
+  /// HMAC digest for abuse checks (never store raw IP).
+  signupIpHash  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -187,8 +296,209 @@ model User {
   paymentCheckouts   PaymentCheckout[]
   userWallet         UserWallet?
   recipients         Recipient[]
+  loyaltyGrants      LoyaltyPointsGrant[]
+  familyMembership   FamilyGroupMember?
+  ownedFamilyGroups  FamilyGroup[]       @relation("FamilyGroupOwner")
+  pushDevices        PushDevice[]
+  notifications      UserNotification[]
+  referralsAsInviter Referral[]             @relation("ReferralInviter")
+  referralAsInvitee  Referral?              @relation("ReferralInvitee")
+  referralRewards    ReferralRewardTransaction[]
+  referralLoyaltyFromInvites ReferralLoyaltyBonus[]
 
   @@index([email])
+}
+
+/// Singleton-style referral program knobs (editable by admin).
+model ReferralProgramConfig {
+  id                         String   @id @default("default")
+  referralEnabled            Boolean  @default(true)
+  /// Weekly cap on successful referral payouts (USD cents).
+  weeklyBudgetUsdCents       Int      @default(5000)
+  /// Inviter reward per qualifying referral (USD cents).
+  rewardAmountUsdCents       Int      @default(500)
+  /// Minimum first delivered order size for the invitee (USD cents).
+  minFirstOrderUsdCents      Int      @default(100)
+  /// Max successfully rewarded referrals per inviter (lifetime rolling).
+  maxRewardsPerUser          Int      @default(20)
+  /// Delay after fulfillment success before attempting payout (chargeback / fraud buffer).
+  rewardDelayMinutes         Int      @default(5)
+  /// Extra loyalty points for inviter on each rewarded referral (0 disables).
+  referralBonusLoyaltyPoints Int      @default(0)
+  /// When true, automated retries skip paused referrals (admin must unset to resume).
+  pausePausedQueueProcessing Boolean  @default(false)
+  updatedAt                  DateTime @updatedAt
+}
+
+/**
+ * Inviter → invitee link. `invitedUserId` is unique (one referral attribution per user).
+ * Status: PENDING | COMPLETED | REWARDED | REWARD_PAUSED
+ */
+model Referral {
+  id          String    @id @default(cuid())
+  inviterUserId String
+  invitedUserId String  @unique
+  inviter       User    @relation("ReferralInviter", fields: [inviterUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  invited       User    @relation("ReferralInvitee", fields: [invitedUserId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  status        String
+  firstOrderId  String? @unique
+  fraudFlags    Json?
+  invitedSignupIpHash String?
+  appliedIpHash       String?
+  appliedDeviceFingerprintHash String?
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
+  rewardedAt    DateTime?
+
+  rewardTx ReferralRewardTransaction?
+  loyaltyBonus ReferralLoyaltyBonus?
+
+  @@index([inviterUserId, status])
+  @@index([status, createdAt])
+}
+
+/// Idempotent reward line per referral (`referralId` unique).
+model ReferralRewardTransaction {
+  id             String   @id @default(cuid())
+  userId         String
+  referralId     String   @unique
+  amountUsdCents Int
+  source         String   @default("referral")
+  /// COMPLETED | FAILED | PENDING
+  status         String
+  failureReason  String?
+  createdAt      DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+/// Loyalty bonus for inviter on rewarded referral (separate from checkout-based grants).
+model ReferralLoyaltyBonus {
+  id         String   @id @default(cuid())
+  referralId String   @unique
+  userId     String
+  points     Int
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  referral Referral @relation(fields: [referralId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+}
+
+/// FCM registration token (Android/iOS/Web) — one row per device token; cascade on user delete.
+model PushDevice {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fcmToken  String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+/// Server-authoritative notification inbox + idempotent push dedupe (`userId` + `dedupeKey`).
+model UserNotification {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dedupeKey   String
+  category    String
+  title       String
+  body        String
+  payloadJson String?
+  createdAt   DateTime  @default(now())
+  readAt      DateTime?
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, createdAt])
+}
+
+/// One family / household group for shared points visibility (not gambling; skill-free loyalty).
+model FamilyGroup {
+  id          String   @id @default(cuid())
+  name        String
+  ownerUserId String
+  owner       User     @relation("FamilyGroupOwner", fields: [ownerUserId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  /// Short code for invites (unique, rate-limited on join).
+  inviteCode  String   @unique
+  /// Denormalized sum of all completed checkout points earned while members were in group (see grants).
+  totalPoints Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members FamilyGroupMember[]
+  grants  LoyaltyPointsGrant[] @relation("GrantGroup")
+
+  @@unique([ownerUserId])
+  @@index([totalPoints])
+}
+
+/// At most one group per user (simple family model).
+model FamilyGroupMember {
+  id       String      @id @default(cuid())
+  groupId  String
+  group    FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId   String      @unique
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role     String      @default("member") // owner | member
+  joinedAt DateTime    @default(now())
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+}
+
+/// Idempotent: one row per delivered PaymentCheckout — prevents double-counting.
+model LoyaltyPointsGrant {
+  id                 String   @id @default(cuid())
+  paymentCheckoutId  String   @unique
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  /// Group at earn time (nullable if user was not in a group).
+  groupId            String?
+  group              FamilyGroup? @relation("GrantGroup", fields: [groupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  points             Int
+  amountUsdCents     Int
+  /// UTC month key `yyyy-MM` for monthly leaderboard aggregation.
+  leaderboardMonth   String
+  createdAt          DateTime @default(now())
+
+  @@index([userId, leaderboardMonth])
+  @@index([groupId, leaderboardMonth])
+  @@index([leaderboardMonth])
+}
+
+/// Frozen monthly ranks for audit / “closed month” reads (no randomness; deterministic from spend).
+model LoyaltyLeaderboardSnapshot {
+  id         String   @id @default(cuid())
+  yearMonth  String
+  scope      String // GROUP | USER
+  subjectId  String
+  points     Int
+  rank       Int
+  capturedAt DateTime @default(now())
+
+  @@unique([yearMonth, scope, subjectId])
+  @@index([yearMonth, scope, rank])
+}
+
+/// Reward tier definitions only (distribution not implemented). Rank bands are global monthly placement.
+model LoyaltyRewardTier {
+  id          String   @id @default(cuid())
+  rankStart   Int
+  rankEnd     Int?
+  label       String
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([sortOrder])
 }
 
 /// Server-side refresh tokens (hash only). Rotation invalidates previous token in the same chain.

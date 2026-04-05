@@ -1,3 +1,6 @@
+import { getTraceId } from '../lib/requestContext.js';
+import { safeSuffix } from '../lib/webTopupObservability.js';
+
 /**
  * Structured delivery pipeline logs (no secrets, no card data).
  * @param {object} p
@@ -10,7 +13,8 @@
 export function logDeliveryEvent(p) {
   const line = {
     deliveryLog: true,
-    orderId: p.orderId,
+    traceId: getTraceId() ?? null,
+    orderIdSuffix: safeSuffix(p.orderId, 12),
     phase: p.phase,
     result: p.result,
     failureReason: p.failureReason ?? null,

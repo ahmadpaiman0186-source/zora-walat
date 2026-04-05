@@ -11,6 +11,7 @@ export function attachMinimalRequestLogger(logger) {
     const start = Date.now();
     res.on('finish', () => {
       req.log.info({
+        traceId: req.traceId,
         route: req.originalUrl || req.url,
         status: res.statusCode,
         ms: Date.now() - start,

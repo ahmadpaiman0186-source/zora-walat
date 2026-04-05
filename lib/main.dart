@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -14,13 +15,26 @@ import 'core/locale/locale_controller.dart';
 import 'core/onboarding/onboarding_prefs.dart';
 import 'features/telecom/data/remote_telecom_service.dart';
 import 'features/telecom/data/telecom_service.dart';
+import 'features/orders/data/local_order_history_store.dart';
 import 'features/transactions/data/transaction_log_store.dart';
+import 'core/notifications/app_notification_hub.dart';
+import 'core/notifications/in_app_notification_store.dart';
+import 'core/push/fcm_background.dart';
 import 'services/api_service.dart';
 import 'services/auth_api_service.dart';
 import 'services/payment_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb) {
+    try {
+      FirebaseMessaging.onBackgroundMessage(
+        firebaseMessagingBackgroundHandler,
+      );
+    } catch (_) {
+      /* Desktop / unsupported embedding */
+    }
+  }
   await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
     anonKey: SupabaseConfig.supabaseAnonKey,
@@ -33,6 +47,7 @@ Future<void> main() async {
   final localeController = LocaleController(prefs);
   final onboardingPrefs = OnboardingPrefs(prefs);
   final transactionLog = TransactionLogStore(prefs);
+  final orderHistory = LocalOrderHistoryStore(prefs);
 
   final httpClient = http.Client();
   final apiBase = AppConfig.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
@@ -46,6 +61,9 @@ Future<void> main() async {
     authApi: authApiService,
   );
   final paymentService = PaymentService(api: apiService);
+
+  final notificationStore = InAppNotificationStore(prefs);
+  final notificationHub = AppNotificationHub(store: notificationStore);
 
   final TelecomService telecomService =
       AppConfig.apiBaseUrl.trim().isEmpty
@@ -67,7 +85,10 @@ Future<void> main() async {
       paymentService: paymentService,
       telecomService: telecomService,
       transactionLog: transactionLog,
+      orderHistory: orderHistory,
       apiService: apiService,
+      notificationStore: notificationStore,
+      notificationHub: notificationHub,
     ),
   );
 }

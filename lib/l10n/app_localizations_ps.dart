@@ -590,4 +590,654 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get landingFooterNote => 'زوره‌ولت · د افغانستان موبایل ټاپ‌آپ';
+
+  @override
+  String get successScreenTitle => 'ټول څه سم دي';
+
+  @override
+  String get successPaymentConfirmed => 'تادیه ترلاسه شوه';
+
+  @override
+  String get successStripeConfirmedShort =>
+      'ستاسو بانک پېرود تایید کړ. موږ اوس ستاسو ټاپ‌آپ بشپړوو.';
+
+  @override
+  String get receiptTitle => 'رسيډ';
+
+  @override
+  String get receiptOrderRef => 'د سفارش شمېره';
+
+  @override
+  String get receiptPaymentStatus => 'تادیه';
+
+  @override
+  String get receiptFulfillmentStatus => 'د ټاپ‌آپ حالت';
+
+  @override
+  String get receiptWhatNextTitle => 'راتلونکی ګام';
+
+  @override
+  String get receiptWhatNextBody =>
+      'موږ اعتبار هغه شبکې ته لیږو چې تاسو یې غوره کړې. ډېری ټاپ‌اپونه په چند دقیقو کې بشپړېږي. دا پاڼه ستاسو وروستیو سفارشونو کې پاتې کېږي.';
+
+  @override
+  String get successViewOrders => 'وروستي سفارشونه';
+
+  @override
+  String get successBackHome => 'کور ته';
+
+  @override
+  String get trustSecurePayment => 'خوندي تادیه';
+
+  @override
+  String get trustEncrypted => 'رمز شوی چیک‌آوت';
+
+  @override
+  String get trustTransparentPricing => 'روښانه نرخ';
+
+  @override
+  String get trustLiveTracking => 'ژوندۍ مونږه';
+
+  @override
+  String get timelineTitle => 'د سفارش پرمختګ';
+
+  @override
+  String get timelinePayment => 'تادیه ترلاسه شوه';
+
+  @override
+  String get timelinePreparing => 'ټاپ‌آپ چمتو کېږي';
+
+  @override
+  String get timelineSending => 'اپراتور ته لیږل';
+
+  @override
+  String get timelineDelivered => 'خط ته ورسېدل';
+
+  @override
+  String get trackingHeadlineDelivered => 'اعتبار په لاره کې دی';
+
+  @override
+  String get trackingBodyDelivered =>
+      'ستاسو تادیه خوندي ده او اپراتور اعتبار هغه شمېرې ته لګوي چې تاسو غوره کړې. شبکې بشپړېدو وروسته تاییدی شمېره ښکاري.';
+
+  @override
+  String get trackingHeadlineNeedsHelp => 'دا ټاپ‌آپ بشپړ نه شو';
+
+  @override
+  String get trackingBodyFailedCalm =>
+      'ستاسو تادیه سپما ده — څه له لاسه نه ګرځې. زموږ ټیم سفارش کتلی شي. د ملاتړ لپاره د سفارش شمېره وساتئ.';
+
+  @override
+  String get trackingHeadlineRetrying => 'د لیږد لپاره بیا هڅه';
+
+  @override
+  String get trackingBodyRetrying =>
+      'ځینې وخت شبکې یو څو شېبې وار تیروي. موږ اتومات بیکاري کوو — تاسو اوس څه نه کول پکار دي.';
+
+  @override
+  String get trackingHeadlineSending => 'اعتبار لیږل کیږي';
+
+  @override
+  String get trackingBodySending =>
+      'ستاسو بسته موبایل اپراتور ته ځي — معمولاً ګړندی بشپړېږي.';
+
+  @override
+  String get trackingHeadlinePreparing => 'ټاپ‌آپ چمتو کېږي';
+
+  @override
+  String get trackingBodyPreparing =>
+      'تادیه تایید شوه. موږ سم شبکې او شمېرې ته لیږل چمتو کوو.';
+
+  @override
+  String get trackingHeadlinePaymentConfirming => 'تادیه تاییدېږي';
+
+  @override
+  String get trackingBodyPaymentConfirming =>
+      'ستاسو بانک اجازه بشپړوي — یو څو شېبې صبر وکړئ، بیا لیږل پیلېږي.';
+
+  @override
+  String get trackingHeadlinePaymentReceived => 'تادیه ثبت شوه';
+
+  @override
+  String get trackingBodyPaymentReceived =>
+      'Stripe ستاسو تادیه تایید کړه. نور ګامونه په اتومات ډول کیږي.';
+
+  @override
+  String get trackingHeadlineCatchingUp => 'نږدې';
+
+  @override
+  String get trackingBodyCatchingUp =>
+      'موږ وروستي حالت همغږیوو. تادیه ثبت ده — یوه دقیقه وروسته وګورئ یا وروستي سفارشونه خلاص کړئ.';
+
+  @override
+  String get trackingHeadlineSignIn => 'ژوندي حالت لپاره ننوځئ';
+
+  @override
+  String get trackingBodySignIn =>
+      'تادیه ثبت ده. په ننوتلو سره کولی شئ هر وخت لیږل تازه کړئ.';
+
+  @override
+  String get paymentSafeBanner =>
+      'ستاسو تادیه ساتل کېږي. تادیه Stripe له لارې ده — موږ ستاسو کارت نه ساتو.';
+
+  @override
+  String get cancelScreenTitle => 'چیک‌آوت ودرېد';
+
+  @override
+  String get cancelScreenLead => 'کومه ستونزه نشته — هر وخت بیا هڅه کولی شئ.';
+
+  @override
+  String get cancelScreenBody =>
+      'هیڅ نه اخیستل شو. چمتو شئ نو بیرته راشئ او له خوندي چیک‌آوت سره دوام ورکړئ.';
+
+  @override
+  String get cancelBackHome => 'کور ته';
+
+  @override
+  String get ordersScreenTitle => 'وروستي سفارشونه';
+
+  @override
+  String get ordersEmptyTitle => 'لا سفارش نشته';
+
+  @override
+  String get ordersEmptyBody =>
+      'د ټاپ‌آپ بشپړېدو وروسته رسيډ پدې وسیله کې ښکاري ترڅو لیږنور په مونځه.';
+
+  @override
+  String get ordersEmptyBodySignedIn =>
+      'کله چې ننوځئ، رسيډونه ستاسو په حساب کې خوندي کېږي او دلته ښکاري. د مخکینۍ وسیلې یوازینۍ سفارشونه هم لیدل کېږي.';
+
+  @override
+  String get ordersSourceAccount => 'همغږی';
+
+  @override
+  String get ordersSourceDevice => 'دا وسیله';
+
+  @override
+  String get ordersCloudRefreshFailed =>
+      'ستاسو د حساب سفارشونو ته لیږد ونشو. پدې وسیله کې زېرمې شوې ښکاري.';
+
+  @override
+  String get ordersDetailTitle => 'د سفارش جزئیات';
+
+  @override
+  String get ordersSectionLive => 'اوسنی حالت';
+
+  @override
+  String get ordersSectionRecord => 'رسيډ';
+
+  @override
+  String get ordersCopyReference => 'حواله کاپي';
+
+  @override
+  String get ordersReferenceCopied => 'حواله کاپي شوه';
+
+  @override
+  String get trackingHeadlineCancelled => 'دا سفارش لغوه شو';
+
+  @override
+  String get trackingBodyCancelled =>
+      'د دې سفارش لپاره تادیه بشپړه نه شوه. تاسو کولی شئ نوي ټاپ‌آپ پیل کړئ.';
+
+  @override
+  String ordersLastUpdated(String time) {
+    return 'تازه $time';
+  }
+
+  @override
+  String get orderStatusDelivered => 'ورسوول شو';
+
+  @override
+  String get orderStatusInProgress => 'پروسه کې';
+
+  @override
+  String get orderStatusRetrying => 'بیا هڅه';
+
+  @override
+  String get orderStatusFailed => 'پاملرنه پکار';
+
+  @override
+  String get orderStatusPaymentPending => 'تادیه تاییدېږي';
+
+  @override
+  String get orderStatusCancelled => 'لغوه شو';
+
+  @override
+  String get orderStatusSending => 'لیږل کېږي';
+
+  @override
+  String get orderStatusPreparing => 'چمتو کېږي';
+
+  @override
+  String get hubTileOrdersTitle => 'وروستي سفارشونه';
+
+  @override
+  String get hubTileOrdersSub => 'رسيډونه · د ننوتلو وروسته حساب سره';
+
+  @override
+  String get receiptPaymentPaid => 'ورکړل شو';
+
+  @override
+  String get receiptPaymentPending => 'تایید کېږي';
+
+  @override
+  String get receiptFulfillmentDone => 'لیږل شو';
+
+  @override
+  String get receiptFulfillmentProgress => 'پروسس کې';
+
+  @override
+  String get receiptCarrierRef => 'د اپراتور حواله';
+
+  @override
+  String get rechargeFailureCalmTitle => 'چیک‌آوت نه بشپړ شو';
+
+  @override
+  String get rechargeFailureCalmBody =>
+      'هیڅ نه اخیستل شو. اړیکه وګورئ او بیا هڅه وکړئ — ستاسو جزئیات دلته دي.';
+
+  @override
+  String get checkoutTrustCallout =>
+      'تادیه په خوندي Stripe پاڼه کې ځي. ستاسو کارت زموږ په سرورونو کې لا نه تیرېږي.';
+
+  @override
+  String get loyaltyHubTitle => 'کورنۍ پیژندنه';
+
+  @override
+  String get loyaltyHubSubtitle =>
+      'د بشپړو ټاپ‌اپونو څخه نومرې ترلاسه کړئ — قرعه یا لوبه نشته.';
+
+  @override
+  String get loyaltyLifetimePoints => 'ټولې نومرې';
+
+  @override
+  String get loyaltyMonthPoints => 'دا میاشت';
+
+  @override
+  String get loyaltyMonthRank => 'میاشتنی درجه';
+
+  @override
+  String get loyaltyGroupPoints => 'د کورنۍ ډلې نومرې';
+
+  @override
+  String get loyaltyGroupRank => 'د ډلې درجه';
+
+  @override
+  String get loyaltyLeaderboardTab => 'لیدر بورډ';
+
+  @override
+  String get loyaltyYouTab => 'تاسو او کورنۍ';
+
+  @override
+  String get loyaltyTopGroups => 'مشتری ډلې';
+
+  @override
+  String get loyaltyTopMembers => 'فعاله برخه اخیستونکي';
+
+  @override
+  String get loyaltyRecognitionBand => 'پیژندنې کچه';
+
+  @override
+  String get loyaltyProgressClimb =>
+      'له وړو سفارشونو سره پورته شئ — هیڅ تصادف نشته.';
+
+  @override
+  String get loyaltyLegalFootnote =>
+      'نومرې یوازې له بریالۍ غوښتنو څخه دي؛ قرعه نشته.';
+
+  @override
+  String get loyaltyCreateGroup => 'کورنۍ ډله جوړه کړئ';
+
+  @override
+  String get loyaltyJoinGroup => 'د بلنې کوډ سره یوځای شئ';
+
+  @override
+  String get loyaltyInviteHint =>
+      'یوازې مالک کوډ شري کولی شي — په مطمېن چو کې وساتئ.';
+
+  @override
+  String get loyaltyDissolveGroup => 'ډله پای ته ورسوئ';
+
+  @override
+  String get loyaltyLeaveGroup => 'ډله پرېږدئ';
+
+  @override
+  String get loyaltyRefresh => 'تازه';
+
+  @override
+  String get hubTileLoyaltyTitle => 'کورنۍ پیژندنه';
+
+  @override
+  String get hubTileLoyaltySub => 'نومرې · لیدر بورډ · بلنې';
+
+  @override
+  String loyaltyDaysLeft(int days) {
+    return 'پدې میاشت کې $days ورځې پاتې';
+  }
+
+  @override
+  String loyaltyPointsToRankAhead(int points, int rank) {
+    return '$points نومرې تر #$rank';
+  }
+
+  @override
+  String loyaltyRanksToTier(int ranks, String tier) {
+    return '$ranks درجې تر $tier';
+  }
+
+  @override
+  String loyaltyYouPlacement(String label) {
+    return '$label دا میاشت';
+  }
+
+  @override
+  String get loyaltyTightBehind =>
+      'وروسته پر مخ نږدې دي — دوامدار سفارش ستاسو ځای ساتي.';
+
+  @override
+  String loyaltyChasingPack(int rank, int pts) {
+    return '#$rank د $pts نومرو په فاصله کې دی';
+  }
+
+  @override
+  String get loyaltyProgressYourMonthTitle => 'ستاسو میاشتنی حرکت';
+
+  @override
+  String get loyaltyProgressGroupTitle => 'د کورنۍ میاشتنی حرکت';
+
+  @override
+  String get loyaltyProgressTierTitle => 'بل پوښ ته لاره';
+
+  @override
+  String get loyaltyProgressRankTitle => 'په مخکینۍ درجه نږدې کېدل';
+
+  @override
+  String loyaltyGroupBoardGap(int pts) {
+    return '$pts نومرې مخکې ډلو ته';
+  }
+
+  @override
+  String loyaltyYourShareOfFamily(int pct) {
+    return 'د کورنۍ د میاشتې برخه ستاسو: $pct٪';
+  }
+
+  @override
+  String get loyaltySoloFamilyMonth => 'تاسو د کورنۍ د میاشتې ریتم ټاکئ.';
+
+  @override
+  String get loyaltyCarryingMost => 'د میاشتې زیاته فعالیت ستاسو ده.';
+
+  @override
+  String get loyaltyAchievementsHeading => 'پړاوونه';
+
+  @override
+  String get loyaltyAchFirstOrderTitle => 'لومړۍ وړه غوښتنه';
+
+  @override
+  String get loyaltyAchFirstOrderSub =>
+      'پېژندنه له یو بشپړ ټاپ‌آپ څخه پیل کېږي.';
+
+  @override
+  String get loyaltyAchCenturyTitle => '۱۰۰ تلپاتې نمرې';
+
+  @override
+  String get loyaltyAchCenturySub => 'استقامت ارزښت لري — مننه.';
+
+  @override
+  String get loyaltyAchGroupTitle => 'کورنۍ مدار';
+
+  @override
+  String get loyaltyAchGroupSub => 'ستاسو ډله یو ګډ پوړ ته ورسېدله.';
+
+  @override
+  String get loyaltyRankBadge => 'درجه';
+
+  @override
+  String get notifOrderPaymentTitle => 'تادیه تایید شوه';
+
+  @override
+  String get notifOrderPaymentBody =>
+      'ستاسو ټاپ‌آپ ثبت دی — موږ لیږد چمتو کوو.';
+
+  @override
+  String get notifOrderPreparingTitle => 'ټاپ‌آپ چمتو کېږي';
+
+  @override
+  String get notifOrderPreparingBody =>
+      'د هغه اپراتور سره سمون — څه چې تاسو ټاکلی.';
+
+  @override
+  String get notifOrderSendingTitle => 'اپراتور ته لیږل';
+
+  @override
+  String get notifOrderSendingBody =>
+      'اعتبار په لاره کې دی — ډېر وخت په څو دقو کې.';
+
+  @override
+  String get notifOrderDeliveredTitle => 'ورسېدل';
+
+  @override
+  String get notifOrderDeliveredBody =>
+      'په لیکه کې ښکاري — رسيډ لپاره څرګند کړئ.';
+
+  @override
+  String get notifOrderRetryingTitle => 'نور یو شیبه';
+
+  @override
+  String get notifOrderRetryingBody => 'شبکې بیا هڅه غوښتله — موږ په اتومات.';
+
+  @override
+  String get notifOrderFailedTitle => 'موږ سره یاست';
+
+  @override
+  String get notifOrderFailedBody =>
+      'ستاسو تادیه خوندي ده — ارام ګامونه خلاص کړئ.';
+
+  @override
+  String get notifInboxTitle => 'تازه پیغامونه';
+
+  @override
+  String get notifInboxEmpty => 'ټول تازه دي.';
+
+  @override
+  String get notifHubTooltip => 'خبرتیاوې';
+
+  @override
+  String get notifLoyaltyRankUpTitle => 'پورته مو ځای';
+
+  @override
+  String get notifLoyaltyRankUpBody =>
+      'میاشتنی درجه ښه شوه — کورنۍ پیژندنه وګورئ.';
+
+  @override
+  String get notifLoyaltyRankDownTitle => 'جدول بدل شو';
+
+  @override
+  String get notifLoyaltyRankDownBody =>
+      'نور مخکې دي — دوامدار فعالیت مرسته کوي.';
+
+  @override
+  String get notifLoyaltyMilestoneTitle => 'د نمرو ټک';
+
+  @override
+  String get notifLoyaltyMilestoneBody =>
+      'یو پړاو مو ترلاسه کړ — په کورنۍ پیژندنه کې.';
+
+  @override
+  String get notifLoyaltyMonthUrgencyTitle => 'میاشت نږدې پای ته';
+
+  @override
+  String get notifLoyaltyMonthUrgencyBody =>
+      'څو ورځې پاتې د میاشتې درجه ټینګولو لپاره.';
+
+  @override
+  String get notifMarkAllRead => 'ټول لوستل شوي';
+
+  @override
+  String get helpCenterTitle => 'مرستې مرکز';
+
+  @override
+  String get helpCenterSubtitle =>
+      'د تادیې، تحویلي او غوښتنو په اړه روښانه ځوابونه — په ساده ژبه.';
+
+  @override
+  String get helpSectionPaymentTitle => 'د تادیې خونديتوب';
+
+  @override
+  String get helpSectionPaymentBody =>
+      'تادیه په Stripe خوندي پاڼه کې کېږي. Zora-Walat ستاسو بشپړه کارت نه ګوري او نه ساتي. که بانک تراکنش ښيي، یعنی هغه پیرود چې تاسو یې پخلی کړی.';
+
+  @override
+  String get helpSectionDeliveryTitle => 'د تحویلي وخت';
+
+  @override
+  String get helpSectionDeliveryBody =>
+      'ډېر افغان موبایل ټاپ‌آپ په څو دقو کې بشپړېږي؛ کله اپراتور نور وخت غواړي. د غوښتنې پاډه راکش کړئ — حالت ژر تر ژره توافقي کېږي.';
+
+  @override
+  String get helpSectionRetryTitle => 'بیا هڅه او لنډ ځنډ';
+
+  @override
+  String get helpSectionRetryBody =>
+      'کله شبکې بیا هڅه غواړي — زموږ سیسټم اتومات اداره کوي. بیا تادیه نه غواړي. که غیرمعمول وخت ونیسي، تادیه خوندي پاتې ده تر همغږۍ.';
+
+  @override
+  String get helpSectionTrackingTitle => 'د غوښتنې تعقیب';
+
+  @override
+  String get helpSectionTrackingBody =>
+      'پړاوونه د اپراتور ته ورته دي: تادیه، چمتو کېدل، اپراتور ته لیږل، بیا تحویل. هر هغه څه چې پاملرنه غواړي ښکاره دي — بې ټکنیکي ګډوډۍ.';
+
+  @override
+  String get helpSectionLoyaltyTitle => 'جایزې او کورنۍ نمرې';
+
+  @override
+  String get helpSectionLoyaltyBody =>
+      'بریالي ټاپ‌آپونه ستاسو او اختیاري کورنۍ ډلې لپاره نمرې ډکوي؛ قرعه نشته — ځای په لیدر بورډ کې واقعي فعالیت ښيي.';
+
+  @override
+  String get helpSectionContactTitle => 'اړیکه او بل ګام';
+
+  @override
+  String get helpSectionContactBody =>
+      'هرې غوښتنې ته لاړ شئ او «د مرستې لپاره کاپی» فشار ورکړئ — د غوښتنې شمېره، شبکه، ماسک شمېره، حالتونه او وخت په یوه کې.';
+
+  @override
+  String get helpOpenLoyalty => 'کورنۍ پیژندنه خلاصه کړئ';
+
+  @override
+  String get supportNeedHelp => 'مرستې ته اړتیا لرئ؟';
+
+  @override
+  String get supportOpenHelpCenter => 'مرستې مرکز';
+
+  @override
+  String get supportCopyPacket => 'د مرستې لپاره کاپی';
+
+  @override
+  String get supportPacketCopied => 'د مرستې لنډیز کاپی شو';
+
+  @override
+  String get supportPacketHeader => 'Zora-Walat — د مرستې لنډیز';
+
+  @override
+  String get supportPacketOrderRef => 'د غوښتنې مرجع';
+
+  @override
+  String get supportPacketRoute => 'لاره';
+
+  @override
+  String get supportPacketRouteValue => 'موبایل ټاپ‌آپ (ایرټایم / ډېټا)';
+
+  @override
+  String get supportPacketRecipient => 'ترلاسه‌کوونکی (ماسک شوی)';
+
+  @override
+  String get supportPacketUpdated => 'وروستی تازه';
+
+  @override
+  String get supportAssistRetryingTitle => 'موږ په اوتومات بیا هڅه کوو';
+
+  @override
+  String get supportAssistRetryingBody =>
+      'اپراتور شبکې بله هڅه غوښتله — دا عام دی؛ بیا تادیه یا نو پیل نه غواړي.';
+
+  @override
+  String get supportAssistRetryingNext =>
+      'څو دقې وګورئ، بیا پاډه راکش کړئ چې تازه شي.';
+
+  @override
+  String get supportAssistDelayedTitle => 'لا هم همغږۍ کې';
+
+  @override
+  String get supportAssistDelayedBody =>
+      'همغږۍ یا تحویل یو څه نور وخت نیسي؛ تادیه ثبت ده او ورکه نه کېږي.';
+
+  @override
+  String get supportAssistDelayedNext =>
+      'پاډه تازه کړئ، تازه غوښتنې وګورئ؛ که امر وي ننوځئ چې ژوندی حالت راشي.';
+
+  @override
+  String get supportAssistFailedTitle => 'په پاملرنې سره ګورو';
+
+  @override
+  String get supportAssistFailedBody =>
+      'لومړۍ لاره بشپړه نه شوه خو تادیه خوندي ده — د مرجع سره همغږي کېدی شي؛ ویډه یا تکرار تادیه نه.';
+
+  @override
+  String get supportAssistFailedNext =>
+      'د مرستې لنډیز کاپی کړئ او د مرستې غوښتنې سره یې شریک کړئ.';
+
+  @override
+  String get supportAssistPaymentConfirmTitle => 'تادیه لا تاييدېږي';
+
+  @override
+  String get supportAssistPaymentConfirmBody =>
+      'ستاسو بانک یا کارت شبکه اجازه بشپړوي — یو شیبه کېدی شي. تر بشپړ تايید لیږد نه پیلېږي او دوه چارج نه.';
+
+  @override
+  String get supportAssistPaymentConfirmNext =>
+      'لنډه همینجا پاتې شئ؛ که پاتې شو، یو دقیقه وروسته تازه کړئ.';
+
+  @override
+  String get supportAssistOperatorTitle => 'د اپراتور تايید ته انتظار';
+
+  @override
+  String get supportAssistOperatorBody =>
+      'زموږ لوري اعتبار اپراتور ته رسېدلی؛ ډېر ژر تأیید کېږي، ځینې شبکې ګډې راپور ورکوي.';
+
+  @override
+  String get supportAssistOperatorNext =>
+      'څو دقې او تازه کفایت کوي؛ اړتیا کې د شبکې په واسطه بیلانس وګورئ.';
+
+  @override
+  String get supportAssistCancelledTitle => 'غوښتنه لغوه شوه';
+
+  @override
+  String get supportAssistCancelledBody =>
+      'دغه ناسته ګان د بریالي چارج دمخه ودرېدله؛ هر وخت نوی ټاپ‌آپ پیلولی شئ — هیڅ پاتې نه.';
+
+  @override
+  String get supportAssistCancelledNext =>
+      'بیا ټاپ‌آپ ته لاړ شئ، شمېره چمتو کړئ او اړتیا کې بیا تادیه.';
+
+  @override
+  String get supportReassuranceFooter =>
+      'د تادیې خوندیتوب او څېړنه زموږ خوا ده — رښتینی حالت دلته دی.';
+
+  @override
+  String get supportOrderListHelpTooltip => 'لارښود';
+
+  @override
+  String get hubTileHelpTitle => 'مرسته او ملاتړ';
+
+  @override
+  String get hubTileHelpSub => 'لارښودونه · تادیه · د غوښتنې کاپی';
+
+  @override
+  String get ordersDetailLoadingHint => 'رسيډ بارېږي…';
+
+  @override
+  String get ordersEmptySupportLine =>
+      'پوښتنې لرئ؟ له کور څخه «مرسته او ملاتړ» خلاص کړئ.';
 }

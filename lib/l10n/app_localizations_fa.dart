@@ -596,4 +596,655 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get landingFooterNote => 'زوره‌ولت · شارژ موبایل افغانستان';
+
+  @override
+  String get successScreenTitle => 'همه‌چیز مرتب است';
+
+  @override
+  String get successPaymentConfirmed => 'پرداخت دریافت شد';
+
+  @override
+  String get successStripeConfirmedShort =>
+      'بانک شما خرید را تأیید کرد. اکنون در حال تکمیل شارژ هستیم.';
+
+  @override
+  String get receiptTitle => 'رسید';
+
+  @override
+  String get receiptOrderRef => 'شماره سفارش';
+
+  @override
+  String get receiptPaymentStatus => 'پرداخت';
+
+  @override
+  String get receiptFulfillmentStatus => 'وضعیت شارژ';
+
+  @override
+  String get receiptWhatNextTitle => 'قدم بعدی';
+
+  @override
+  String get receiptWhatNextBody =>
+      'اعتبار به شبکه‌ای که انتخاب کردید ارسال می‌شود. بیشتر شارژها در چند دقیقه تمام می‌شود. این صفحه در سفارش‌های اخیر باقی می‌ماند.';
+
+  @override
+  String get successViewOrders => 'سفارش‌های اخیر';
+
+  @override
+  String get successBackHome => 'خانه';
+
+  @override
+  String get trustSecurePayment => 'پرداخت امن';
+
+  @override
+  String get trustEncrypted => 'درگاه رمزنگاری‌شده';
+
+  @override
+  String get trustTransparentPricing => 'قیمت شفاف';
+
+  @override
+  String get trustLiveTracking => 'پیگیری زنده';
+
+  @override
+  String get timelineTitle => 'پیشرفت سفارش';
+
+  @override
+  String get timelinePayment => 'پرداخت دریافت شد';
+
+  @override
+  String get timelinePreparing => 'آماده‌سازی شارژ';
+
+  @override
+  String get timelineSending => 'ارسال به اپراتور';
+
+  @override
+  String get timelineDelivered => 'تحویل به خط';
+
+  @override
+  String get trackingHeadlineDelivered => 'اعتبار در راه است';
+
+  @override
+  String get trackingBodyDelivered =>
+      'پرداخت شما امن است و اپراتور اعتبار را به شماره انتخابی اعمال می‌کند. پس از اتمام شبکه، مرجع تأیید را خواهید دید.';
+
+  @override
+  String get trackingHeadlineNeedsHelp => 'این شارژ کامل نشد';
+
+  @override
+  String get trackingBodyFailedCalm =>
+      'پرداخت شما سپرده امن است و چیزی از دست نرفته. تیم ما می‌تواند سفارش را بررسی کند. در تماس با پشتیبانی شماره سفارش را نگه دارید.';
+
+  @override
+  String get trackingHeadlineRetrying => 'در حال تلاش مجدد برای ارسال';
+
+  @override
+  String get trackingBodyRetrying =>
+      'گاهی شبکه لحظه‌ای تاخیر دارد. ما خودکار دوباره تلاش می‌کنیم؛ فعلاً نیازی به کار شما نیست.';
+
+  @override
+  String get trackingHeadlineSending => 'در حال ارسال اعتبار';
+
+  @override
+  String get trackingBodySending =>
+      'بسته به شبکه موبایل می‌رود؛ معمولاً سریع تمام می‌شود.';
+
+  @override
+  String get trackingHeadlinePreparing => 'در حال آماده‌سازی شارژ';
+
+  @override
+  String get trackingBodyPreparing =>
+      'پرداخت تأیید شد. در حال آماده‌سازی ارسال به شبکه و شماره درست هستیم.';
+
+  @override
+  String get trackingHeadlinePaymentConfirming => 'در حال تأیید پرداخت';
+
+  @override
+  String get trackingBodyPaymentConfirming =>
+      'بانک در حال نهایی‌کردن مجوز است — کمی صبر کنید، پس از آن تحویل آغاز می‌شود.';
+
+  @override
+  String get trackingHeadlinePaymentReceived => 'پرداخت ثبت شد';
+
+  @override
+  String get trackingBodyPaymentReceived =>
+      'Stripe پرداخت شما را تأیید کرد. مراحل بعد خودکار انجام می‌شود.';
+
+  @override
+  String get trackingHeadlineCatchingUp => 'تقریباً آماده';
+
+  @override
+  String get trackingBodyCatchingUp =>
+      'در حال هم‌گام‌کردن وضعیت. پرداخت ثبت شده — یک دقیقه دیگر برر کنید یا سفارش‌های اخیر را باز کنید.';
+
+  @override
+  String get trackingHeadlineSignIn => 'برای وضعیت زنده وارد شوید';
+
+  @override
+  String get trackingBodySignIn =>
+      'پرداخت ثبت است. با ورود می‌توانید جزئیات تحویل را هر وقت تازه کنید.';
+
+  @override
+  String get paymentSafeBanner =>
+      'پرداخت شما محافظت می‌شود. تسویه با Stripe است — ما کارت شما را نگاه نمی‌داریم.';
+
+  @override
+  String get cancelScreenTitle => 'پرداخت متوقف شد';
+
+  @override
+  String get cancelScreenLead =>
+      'اشکالی ندارد — هر وقت بخواهید دوباره می‌توانید.';
+
+  @override
+  String get cancelScreenBody =>
+      'هیچ مبلقی کسر نشد. وقتی آماده شدید برگردید و با درگاه امن ادامه دهید.';
+
+  @override
+  String get cancelBackHome => 'خانه';
+
+  @override
+  String get ordersScreenTitle => 'سفارش‌های اخیر';
+
+  @override
+  String get ordersEmptyTitle => 'هنوز سفارشی نیست';
+
+  @override
+  String get ordersEmptyBody =>
+      'پس از تکمیل شارژ، رسید اینجا نشان داده می‌شود تا تحویل را دنبال کنید.';
+
+  @override
+  String get ordersEmptyBodySignedIn =>
+      'با ورود، رسیدهای شارژ در حساب شما نگه داشته می‌شوند و اینجا نمایش داده می‌شوند. سفارش‌های قدیمی فقط روی دستگاه همچنین دیده می‌شوند.';
+
+  @override
+  String get ordersSourceAccount => 'همگام';
+
+  @override
+  String get ordersSourceDevice => 'همین دستگاه';
+
+  @override
+  String get ordersCloudRefreshFailed =>
+      'اتصال به سفارش‌های حساب برقرار نشد. موارد ذخیره‌شده روی این دستگاه نمایش داده می‌شود.';
+
+  @override
+  String get ordersDetailTitle => 'جزئیات سفارش';
+
+  @override
+  String get ordersSectionLive => 'وضعیت فعلی';
+
+  @override
+  String get ordersSectionRecord => 'رسید';
+
+  @override
+  String get ordersCopyReference => 'کپی مرجع';
+
+  @override
+  String get ordersReferenceCopied => 'مرجع کپی شد';
+
+  @override
+  String get trackingHeadlineCancelled => 'این سفارش لغو شد';
+
+  @override
+  String get trackingBodyCancelled =>
+      'پرداختی برای این سفارش تکمیل نشد. هر زمان می‌توانید شارژ جدید بزنید.';
+
+  @override
+  String ordersLastUpdated(String time) {
+    return 'به‌روزرسانی $time';
+  }
+
+  @override
+  String get orderStatusDelivered => 'تحویل شد';
+
+  @override
+  String get orderStatusInProgress => 'در حال انجام';
+
+  @override
+  String get orderStatusRetrying => 'تلاش مجدد';
+
+  @override
+  String get orderStatusFailed => 'نیاز به بررسی';
+
+  @override
+  String get orderStatusPaymentPending => 'تأیید پرداخت';
+
+  @override
+  String get orderStatusCancelled => 'لغو شد';
+
+  @override
+  String get orderStatusSending => 'در حال ارسال';
+
+  @override
+  String get orderStatusPreparing => 'در حال آماده‌سازی';
+
+  @override
+  String get hubTileOrdersTitle => 'سفارش‌های اخیر';
+
+  @override
+  String get hubTileOrdersSub => 'رسیدها · همگام با حساب پس از ورود';
+
+  @override
+  String get receiptPaymentPaid => 'پرداخت شد';
+
+  @override
+  String get receiptPaymentPending => 'در حال تأیید';
+
+  @override
+  String get receiptFulfillmentDone => 'ارسال شد';
+
+  @override
+  String get receiptFulfillmentProgress => 'در حال پردازش';
+
+  @override
+  String get receiptCarrierRef => 'مرجع اپراتور';
+
+  @override
+  String get rechargeFailureCalmTitle => 'پرداخت کامل نشد';
+
+  @override
+  String get rechargeFailureCalmBody =>
+      'هیچ مبلقی کسر نشد. اتصال را بررسی و دوباره امتحان کنید — جزئیات شما اینجاست.';
+
+  @override
+  String get checkoutTrustCallout =>
+      'پرداخت در صفحه امن Stripe انجام می‌شود. کارت از سرورهای ما عبور نمی‌کند.';
+
+  @override
+  String get loyaltyHubTitle => 'اعتبار خانوادگی';
+
+  @override
+  String get loyaltyHubSubtitle =>
+      'از شارژهای تکمیل‌شده امتیاز بگیرید — بدون قرعه‌کشی؛ فعالیت شفاف و کنترل‌شده.';
+
+  @override
+  String get loyaltyLifetimePoints => 'امتیاز کل';
+
+  @override
+  String get loyaltyMonthPoints => 'این ماه';
+
+  @override
+  String get loyaltyMonthRank => 'رتبه ماهانه';
+
+  @override
+  String get loyaltyGroupPoints => 'امتیاز گروه خانواده';
+
+  @override
+  String get loyaltyGroupRank => 'رتبه گروه';
+
+  @override
+  String get loyaltyLeaderboardTab => 'جدول';
+
+  @override
+  String get loyaltyYouTab => 'شما و خانواده';
+
+  @override
+  String get loyaltyTopGroups => 'برترین گروه‌ها';
+
+  @override
+  String get loyaltyTopMembers => 'فعال‌ترین‌ها';
+
+  @override
+  String get loyaltyRecognitionBand => 'سطح بازشناسی';
+
+  @override
+  String get loyaltyProgressClimb =>
+      'با سفارش‌های واجد شرایط در جدول بالا بیایید — نه شانس تصادفی.';
+
+  @override
+  String get loyaltyLegalFootnote =>
+      'امتیاز فقط بر اساس سفارش‌های موفق است؛ قرعه‌کشی یا بازی شانسی وجود ندارد.';
+
+  @override
+  String get loyaltyCreateGroup => 'ایجاد گروه خانواده';
+
+  @override
+  String get loyaltyJoinGroup => 'پیوستن با کد دعوت';
+
+  @override
+  String get loyaltyInviteHint =>
+      'فقط مالک می‌تواند کد را به اشتراک بگذارد؛ در چت‌های مطمئن نگه دارید.';
+
+  @override
+  String get loyaltyDissolveGroup => 'پایان گروه';
+
+  @override
+  String get loyaltyLeaveGroup => 'ترک گروه';
+
+  @override
+  String get loyaltyRefresh => 'به‌روزرسانی';
+
+  @override
+  String get hubTileLoyaltyTitle => 'اعتبار خانوادگی';
+
+  @override
+  String get hubTileLoyaltySub => 'امتیاز · جدول · دعوت';
+
+  @override
+  String loyaltyDaysLeft(int days) {
+    return '$days روز مانده از این ماه';
+  }
+
+  @override
+  String loyaltyPointsToRankAhead(int points, int rank) {
+    return '$points امتیاز تا هم‌ردیف #$rank';
+  }
+
+  @override
+  String loyaltyRanksToTier(int ranks, String tier) {
+    return '$ranks رتبه تا $tier';
+  }
+
+  @override
+  String loyaltyYouPlacement(String label) {
+    return '$label این ماه';
+  }
+
+  @override
+  String get loyaltyTightBehind =>
+      'فاصله‌ها کم است — ثبت سفارش، جایگاه را پایدار می‌کند.';
+
+  @override
+  String loyaltyChasingPack(int rank, int pts) {
+    return 'ردیف #$rank با فاصله $pts امتیاز';
+  }
+
+  @override
+  String get loyaltyProgressYourMonthTitle => 'شتاب ماهانه شما';
+
+  @override
+  String get loyaltyProgressGroupTitle => 'شتاب ماهانه خانواده';
+
+  @override
+  String get loyaltyProgressTierTitle => 'مسیر سطح بعدی';
+
+  @override
+  String get loyaltyProgressRankTitle => 'نزدیک‌شدن به رتبه بالاتر';
+
+  @override
+  String loyaltyGroupBoardGap(int pts) {
+    return '$pts امتیاز تا حرکت در جدول گروه‌ها';
+  }
+
+  @override
+  String loyaltyYourShareOfFamily(int pct) {
+    return 'سهم شما از امتیاز ماه خانواده: $pct٪';
+  }
+
+  @override
+  String get loyaltySoloFamilyMonth => 'شما ریتم ماه خانواده را تعیین می‌کنید.';
+
+  @override
+  String get loyaltyCarryingMost => 'بیشترین فعالیت ماه خانواده از شماست.';
+
+  @override
+  String get loyaltyAchievementsHeading => 'نقاط عطف';
+
+  @override
+  String get loyaltyAchFirstOrderTitle => 'اولین سفارش مؤثر';
+
+  @override
+  String get loyaltyAchFirstOrderSub =>
+      'پیشرفت با یک شارژ تکمیل‌شده شروع می‌شود.';
+
+  @override
+  String get loyaltyAchCenturyTitle => '۱۰۰ امتیاز مادام‌العمر';
+
+  @override
+  String get loyaltyAchCenturySub => 'ثبات مهم است — متشکریم.';
+
+  @override
+  String get loyaltyAchGroupTitle => 'مدار خانواده';
+
+  @override
+  String get loyaltyAchGroupSub => 'گروه شما به یک نشانه هم‌افزایی رسید.';
+
+  @override
+  String get loyaltyRankBadge => 'رتبه';
+
+  @override
+  String get notifOrderPaymentTitle => 'پرداخت تأیید شد';
+
+  @override
+  String get notifOrderPaymentBody =>
+      'شارژ شما ثبت است — در حال آماده‌سازی ارسال.';
+
+  @override
+  String get notifOrderPreparingTitle => 'آماده‌سازی شارژ';
+
+  @override
+  String get notifOrderPreparingBody =>
+      'در حال هم‌ترازی با اپراتور انتخابی شما.';
+
+  @override
+  String get notifOrderSendingTitle => 'ارسال به اپراتور';
+
+  @override
+  String get notifOrderSendingBody => 'اعتبار در راه است — معمولاً چند دقیقه.';
+
+  @override
+  String get notifOrderDeliveredTitle => 'تحویل شد';
+
+  @override
+  String get notifOrderDeliveredBody =>
+      'احتمالاً روی خط دیده می‌شود — برای رسید بزنید.';
+
+  @override
+  String get notifOrderRetryingTitle => 'کمی بیشتر زمان';
+
+  @override
+  String get notifOrderRetryingBody =>
+      'شبکه درخواست تلاش مجدد داد — ما خودکار ادامه می‌دهیم.';
+
+  @override
+  String get notifOrderFailedTitle => 'کنار شماییم';
+
+  @override
+  String get notifOrderFailedBody =>
+      'پرداخت شما محفوظ است — برای گام بعد آرام باز کنید.';
+
+  @override
+  String get notifInboxTitle => 'به‌روزرسانی‌ها';
+
+  @override
+  String get notifInboxEmpty => 'همه چیز به‌روز است.';
+
+  @override
+  String get notifHubTooltip => 'اعلان‌ها';
+
+  @override
+  String get notifLoyaltyRankUpTitle => 'پیشروی شما';
+
+  @override
+  String get notifLoyaltyRankUpBody =>
+      'رتبه ماهانه بهتر شد — اعتبار خانوادگی را ببینید.';
+
+  @override
+  String get notifLoyaltyRankDownTitle => 'جدول جابه‌جا شد';
+
+  @override
+  String get notifLoyaltyRankDownBody =>
+      'پیشتازی دیگران موقت است — فعالیت منظم کمک می‌کند.';
+
+  @override
+  String get notifLoyaltyMilestoneTitle => 'نقطه عطف امتیاز';
+
+  @override
+  String get notifLoyaltyMilestoneBody =>
+      'به یک نشان recognition رسیدید — جزئیات در اعتبار خانوادگی.';
+
+  @override
+  String get notifLoyaltyMonthUrgencyTitle => 'نزدیک پایان ماه';
+
+  @override
+  String get notifLoyaltyMonthUrgencyBody =>
+      'چند روز مانده تا تثبیت جایگاه این ماه.';
+
+  @override
+  String get notifMarkAllRead => 'همه خوانده شد';
+
+  @override
+  String get helpCenterTitle => 'مرکز راهنما';
+
+  @override
+  String get helpCenterSubtitle =>
+      'پاسخ‌های روشن درباره پرداخت، تحویل و سفارش‌ها — به زبان ساده.';
+
+  @override
+  String get helpSectionPaymentTitle => 'ایمنی پرداخت';
+
+  @override
+  String get helpSectionPaymentBody =>
+      'پرداخت در صفحه امن Stripe انجام می‌شود. Zora-Walat شماره کارت کامل شما را نمی‌بیند و ذخیره نمی‌کند. اگر تراکنش در بانک دیده شود، به‌معنای تأیید خریدی است که انتخاب کرده‌اید.';
+
+  @override
+  String get helpSectionDeliveryTitle => 'زمان تحویل';
+
+  @override
+  String get helpSectionDeliveryBody =>
+      'بیشتر شارژهای افغانستان ظرف چند دقیقه می‌رسند؛ گاهی اپراتور زمان بیشتری می‌خواهد. صفحه سفارش را بکشید تا تازه شود — وضعیت به‌محض دریافت گزارش به‌روز می‌شود.';
+
+  @override
+  String get helpSectionRetryTitle => 'تلاش مجدد و تأخیر کوتاه';
+
+  @override
+  String get helpSectionRetryBody =>
+      'گاهی شبکه درخواست تلاش دوباره می‌دهد؛ سیستم ما خودکار هندل می‌کند. نیاز به پرداخت دوبسته نیست. اگر غیرعادی طول بکشد، رکورد پرداخت امن می‌ماند تا با اپراتور هماهنگ شود.';
+
+  @override
+  String get helpSectionTrackingTitle => 'پیگیری سفارش';
+
+  @override
+  String get helpSectionTrackingBody =>
+      'مراحل شبیه حامل است: پرداخت، آماده‌سازی، ارسال به اپراتور، سپس تحویل. هرچه به توجه شما نیاز دارد شفاف برچسب می‌خورد — بدون اصطلاح فنی مبهم.';
+
+  @override
+  String get helpSectionLoyaltyTitle => 'پاداش و امتیاز خانواده';
+
+  @override
+  String get helpSectionLoyaltyBody =>
+      'شارژهای موفق امتیاز پیژنش برای شما و گروه اختیاری خانواده می‌سازد؛ قرعه‌کشی تصادفی نیست — جایگاه از فعالیت واقعی روی جدول دیده می‌شود.';
+
+  @override
+  String get helpSectionContactTitle => 'تماس و گام بعد';
+
+  @override
+  String get helpSectionContactBody =>
+      'در هر سفارش «کپی برای پشتیبانی» را بزنید تا خلاصه حرفه‌ای (شماره سفارش، شبکه، شماره ماسک‌شده، وضعیت‌ها و زمان) آماده شود — سریع‌ترین راه کمک دقیق بدون افشای اطلاعات خصوصی.';
+
+  @override
+  String get helpOpenLoyalty => 'باز کردن اعتبار خانوادگی';
+
+  @override
+  String get supportNeedHelp => 'کمک نیاز دارید؟';
+
+  @override
+  String get supportOpenHelpCenter => 'مرکز راهنما';
+
+  @override
+  String get supportCopyPacket => 'کپی برای پشتیبانی';
+
+  @override
+  String get supportPacketCopied => 'خلاصه پشتیبانی کپی شد';
+
+  @override
+  String get supportPacketHeader => 'Zora-Walat — خلاصه پشتیبانی';
+
+  @override
+  String get supportPacketOrderRef => 'شماره سفارش';
+
+  @override
+  String get supportPacketRoute => 'مسیر';
+
+  @override
+  String get supportPacketRouteValue => 'شارژ موبایل (اعتبار / بسته)';
+
+  @override
+  String get supportPacketRecipient => 'گیرنده (ماسک‌شده)';
+
+  @override
+  String get supportPacketUpdated => 'آخرین به‌روزرسانی';
+
+  @override
+  String get supportAssistRetryingTitle => 'در حال تلاش خودکار';
+
+  @override
+  String get supportAssistRetryingBody =>
+      'شبکه اپراتور تلاش دوباره خواسته؛ این رایج است — نیاز نیست دوباره پرداخت یا شروع تازه کنید.';
+
+  @override
+  String get supportAssistRetryingNext =>
+      'چند دقیقه صبر کنید، سپس صفحه را به‌پایین بکشید تا تازه شود.';
+
+  @override
+  String get supportAssistDelayedTitle => 'هنوز در حال هم‌ترازی';
+
+  @override
+  String get supportAssistDelayedBody =>
+      'همگام‌سازی یا تحویل کمی بیشتر طول کشیده؛ پرداخت ثبت شده و از بین نمی‌رود.';
+
+  @override
+  String get supportAssistDelayedNext =>
+      'صفحه را تازه کنید، سفارش‌های اخیر را ببینید؛ در صورت نیاز وارد حساب شوید تا وضعیت زنده بیاید.';
+
+  @override
+  String get supportAssistFailedTitle => 'با دقت بررسی می‌کنیم';
+
+  @override
+  String get supportAssistFailedBody =>
+      'مسیر اول تحویل کامل نشد اما پرداخت محفوظ مانده؛ با شماره سفارش می‌توان با دو طرف هماهنگ کرد — نگرانی پنهان یا پرداخت دوباره لازم نیست.';
+
+  @override
+  String get supportAssistFailedNext =>
+      'خلاصه پشتیبانی را کپی کنید و همراه درخواست کمک ارسال کنید.';
+
+  @override
+  String get supportAssistPaymentConfirmTitle => 'پرداخت در حال تأیید';
+
+  @override
+  String get supportAssistPaymentConfirmBody =>
+      'بانک یا شبکه کارت در حال نهایی‌کردن اجازه است؛ ممکن است لحظه‌ای طول بکشد. تا تأیید کامل، ارسال شروع نمی‌شود و دو بار هزینه نمی‌شود.';
+
+  @override
+  String get supportAssistPaymentConfirmNext =>
+      'کمی همین‌جا بمانید؛ اگر ماند، بعد از یک دقیقه تازه کنید یا سفارش‌های اخیر را ببینید.';
+
+  @override
+  String get supportAssistOperatorTitle => 'منتظر تأیید اپراتور';
+
+  @override
+  String get supportAssistOperatorBody =>
+      'اعتبار از سمت ما به اپراتور موبایل رسیده؛ بیشتر فوراً تأیید می‌شود و بعضی شبکه‌ها دسته‌ای گزارش می‌دهند.';
+
+  @override
+  String get supportAssistOperatorNext =>
+      'چند دقیقه صبر و تازه کردن کافی است؛ در صورت نیاز مانده خط را از شبکه بررسی کنید.';
+
+  @override
+  String get supportAssistCancelledTitle => 'سفارش لغو شد';
+
+  @override
+  String get supportAssistCancelledBody =>
+      'این جلسه قبل از تراکنش موفق متوقف شد؛ هر زمان می‌توانید شارژ تازه بزنید — چیزی معلق نمی‌ماند.';
+
+  @override
+  String get supportAssistCancelledNext =>
+      'به شارژ برگردید، شماره را چک کنید و در صورت نیاز تسویه را دوباره انجام دهید.';
+
+  @override
+  String get supportReassuranceFooter =>
+      'ایمنی پرداخت و بررسی دقیق با ماست — وضعیت صادبانه همین‌جاست.';
+
+  @override
+  String get supportOrderListHelpTooltip => 'راهنما';
+
+  @override
+  String get hubTileHelpTitle => 'کمک و پشتیبانی';
+
+  @override
+  String get hubTileHelpSub => 'راهنما · ایمنی پرداخت · کپی جزئیات سفارش';
+
+  @override
+  String get ordersDetailLoadingHint => 'در حال بارگذاری رسید…';
+
+  @override
+  String get ordersEmptySupportLine =>
+      'سؤالی هست؟ از خانه «کمک و پشتیبانی» را بزنید.';
 }

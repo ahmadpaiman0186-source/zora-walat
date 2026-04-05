@@ -239,5 +239,264 @@
   "landingHowStep2Body": "Confirm details, then complete payment on Stripe’s hosted checkout — your card never touches our servers.",
   "landingHowStep3Title": "Top-up is delivered",
   "landingHowStep3Body": "We process your order and send credit to the recipient’s mobile line.",
-  "landingFooterNote": "Zora-Walat · Afghanistan mobile top-up"
+  "landingFooterNote": "Zora-Walat · Afghanistan mobile top-up",
+  "successScreenTitle": "You’re all set",
+  "successPaymentConfirmed": "Payment received",
+  "successStripeConfirmedShort": "Your bank authorized this purchase. We’re completing your top-up now.",
+  "receiptTitle": "Receipt",
+  "receiptOrderRef": "Order reference",
+  "receiptPaymentStatus": "Payment",
+  "receiptFulfillmentStatus": "Top-up status",
+  "receiptWhatNextTitle": "What happens next",
+  "receiptWhatNextBody": "We’ll send credit to the operator network you selected. Most top-ups finish within a few minutes. This screen stays available in your recent orders.",
+  "successViewOrders": "View recent orders",
+  "successBackHome": "Back to home",
+  "trustSecurePayment": "Secure payment",
+  "trustEncrypted": "Encrypted checkout",
+  "trustTransparentPricing": "Clear pricing",
+  "trustLiveTracking": "Live tracking",
+  "timelineTitle": "Order progress",
+  "timelinePayment": "Payment received",
+  "timelinePreparing": "Preparing your top-up",
+  "timelineSending": "Sending to operator",
+  "timelineDelivered": "Delivered to line",
+  "trackingHeadlineDelivered": "Credit is on its way",
+  "trackingBodyDelivered": "Your payment is secure and the carrier is applying credit to the number you chose. You’ll see a confirmation reference when the network finishes.",
+  "trackingHeadlineNeedsHelp": "We couldn’t finish this top-up",
+  "trackingBodyFailedCalm": "Your payment went through safely — nothing was lost. Our team can review this order and help complete delivery. Save your order reference if you contact support.",
+  "trackingHeadlineRetrying": "Taking another path to deliver",
+  "trackingBodyRetrying": "Sometimes networks need a moment. We’re retrying delivery automatically so you don’t have to do anything yet.",
+  "trackingHeadlineSending": "Sending credit now",
+  "trackingBodySending": "Your package is moving to the mobile operator. This usually completes quickly.",
+  "trackingHeadlinePreparing": "Preparing your top-up",
+  "trackingBodyPreparing": "Your payment is confirmed. We’re lining up delivery to the correct network and number.",
+  "trackingHeadlinePaymentConfirming": "Confirming your payment",
+  "trackingBodyPaymentConfirming": "Your bank is finishing authorization. Sit tight — delivery will begin right after confirmation.",
+  "trackingHeadlinePaymentReceived": "Payment secured",
+  "trackingBodyPaymentReceived": "Stripe confirmed your payment. The next steps happen automatically on our side.",
+  "trackingHeadlineCatchingUp": "Almost there",
+  "trackingBodyCatchingUp": "We’re syncing the latest status. Your payment is recorded — check back in a minute or open recent orders.",
+  "trackingHeadlineSignIn": "Sign in to see live status",
+  "trackingBodySignIn": "Your payment is on file. Sign in to refresh delivery details whenever you like.",
+  "paymentSafeBanner": "Your payment is protected. Charges are processed by Stripe — we never store your card.",
+  "cancelScreenTitle": "Checkout paused",
+  "cancelScreenLead": "No worries — you can try again anytime.",
+  "cancelScreenBody": "Nothing was charged. When you’re ready, return to your order and continue with secure checkout.",
+  "cancelBackHome": "Back to home",
+  "ordersScreenTitle": "Recent orders",
+  "ordersEmptyTitle": "No orders yet",
+  "ordersEmptyBody": "After you complete a top-up, a receipt appears here on this device so you can track delivery.",
+  "ordersEmptyBodySignedIn": "When you complete a top-up while signed in, your receipts stay with your account and sync here. You can still see device-only drafts from before sign-in.",
+  "ordersSourceAccount": "Synced",
+  "ordersSourceDevice": "This device",
+  "ordersCloudRefreshFailed": "We couldn’t reach your account orders. Showing what’s saved on this device.",
+  "ordersDetailTitle": "Order details",
+  "ordersSectionLive": "Current status",
+  "ordersSectionRecord": "Receipt",
+  "ordersCopyReference": "Copy reference",
+  "ordersReferenceCopied": "Reference copied",
+  "trackingHeadlineCancelled": "This order was cancelled",
+  "trackingBodyCancelled": "No charge was completed for this order. You can start a new top-up anytime.",
+  "ordersLastUpdated": "Updated {time}",
+  "@ordersLastUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orderStatusDelivered": "Delivered",
+  "orderStatusInProgress": "In progress",
+  "orderStatusRetrying": "Retrying",
+  "orderStatusFailed": "Needs attention",
+  "orderStatusPaymentPending": "Confirming payment",
+  "orderStatusCancelled": "Cancelled",
+  "orderStatusSending": "Sending",
+  "orderStatusPreparing": "Preparing",
+  "hubTileOrdersTitle": "Recent orders",
+  "hubTileOrdersSub": "Receipts · synced when signed in",
+  "receiptPaymentPaid": "Paid",
+  "receiptPaymentPending": "Confirming",
+  "receiptFulfillmentDone": "Sent",
+  "receiptFulfillmentProgress": "Processing",
+  "receiptCarrierRef": "Carrier reference",
+  "rechargeFailureCalmTitle": "Checkout didn’t complete",
+  "rechargeFailureCalmBody": "Nothing was charged. Check your connection and try again — your details are still here.",
+  "checkoutTrustCallout": "You’ll complete payment on a secure Stripe page. Your card never passes through our servers.",
+  "loyaltyHubTitle": "Family recognition",
+  "loyaltyHubSubtitle": "Earn points from completed top-ups. No games or drawings — just transparent activity you control.",
+  "loyaltyLifetimePoints": "Lifetime points",
+  "loyaltyMonthPoints": "This month",
+  "loyaltyMonthRank": "Monthly placement",
+  "loyaltyGroupPoints": "Family group points",
+  "loyaltyGroupRank": "Group placement",
+  "loyaltyLeaderboardTab": "Leaderboard",
+  "loyaltyYouTab": "You & family",
+  "loyaltyTopGroups": "Top groups",
+  "loyaltyTopMembers": "Top participants",
+  "loyaltyRecognitionBand": "Recognition band",
+  "loyaltyProgressClimb": "Move up the leaderboard with qualifying orders — never random chance.",
+  "loyaltyLegalFootnote": "Points are based on successful orders only. There is no lottery, sweepstakes, or prize game.",
+  "loyaltyCreateGroup": "Create family group",
+  "loyaltyJoinGroup": "Join with invite code",
+  "loyaltyInviteHint": "Owners can share the invite code from this screen. Keep it in trusted chats only.",
+  "loyaltyDissolveGroup": "End group",
+  "loyaltyLeaveGroup": "Leave group",
+  "loyaltyRefresh": "Refresh",
+  "hubTileLoyaltyTitle": "Family recognition",
+  "hubTileLoyaltySub": "Points · leaderboard · invites",
+  "loyaltyDaysLeft": "{days} days left this month",
+  "@loyaltyDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltyPointsToRankAhead": "{points} pts to tie #{rank}",
+  "@loyaltyPointsToRankAhead": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltyRanksToTier": "{ranks} ranks to reach {tier}",
+  "@loyaltyRanksToTier": {
+    "placeholders": {
+      "ranks": {
+        "type": "int"
+      },
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "loyaltyYouPlacement": "{label} this month",
+  "@loyaltyYouPlacement": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "loyaltyTightBehind": "The field behind you is close — steady orders help hold your place.",
+  "loyaltyChasingPack": "#{rank} trails by {pts} pts",
+  "@loyaltyChasingPack": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "pts": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltyProgressYourMonthTitle": "Your monthly momentum",
+  "loyaltyProgressGroupTitle": "Family monthly momentum",
+  "loyaltyProgressTierTitle": "Tier runway",
+  "loyaltyProgressRankTitle": "Closing on the rank ahead",
+  "loyaltyGroupBoardGap": "{pts} pts to move up vs top groups",
+  "@loyaltyGroupBoardGap": {
+    "placeholders": {
+      "pts": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltyYourShareOfFamily": "Your share of this month's family points: {pct}%",
+  "@loyaltyYourShareOfFamily": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "loyaltySoloFamilyMonth": "You're setting the pace for your family's month.",
+  "loyaltyCarryingMost": "You're carrying most of this month's family activity.",
+  "loyaltyAchievementsHeading": "Milestones",
+  "loyaltyAchFirstOrderTitle": "First qualifying order",
+  "loyaltyAchFirstOrderSub": "Recognition starts with one completed top-up.",
+  "loyaltyAchCenturyTitle": "100 lifetime points",
+  "loyaltyAchCenturySub": "Consistency adds up — thank you for staying with us.",
+  "loyaltyAchGroupTitle": "Family orbit",
+  "loyaltyAchGroupSub": "Your family group crossed a visibility milestone together.",
+  "loyaltyRankBadge": "Rank",
+  "notifOrderPaymentTitle": "Payment secured",
+  "notifOrderPaymentBody": "Your top-up is confirmed. We’re preparing delivery now.",
+  "notifOrderPreparingTitle": "Preparing your top-up",
+  "notifOrderPreparingBody": "We’re aligning delivery with the network you selected.",
+  "notifOrderSendingTitle": "Sending to the operator",
+  "notifOrderSendingBody": "Credit is on the way — most finish within a few minutes.",
+  "notifOrderDeliveredTitle": "Delivered",
+  "notifOrderDeliveredBody": "Your line should show the top-up. Tap to view your receipt.",
+  "notifOrderRetryingTitle": "Taking another moment",
+  "notifOrderRetryingBody": "The network asked for a retry — we’re handling it for you.",
+  "notifOrderFailedTitle": "We’re here to help",
+  "notifOrderFailedBody": "Your payment stayed protected. Open the order for calm next steps.",
+  "notifInboxTitle": "Updates",
+  "notifInboxEmpty": "You’re all caught up. We’ll let you know when something changes.",
+  "notifHubTooltip": "Notifications",
+  "notifLoyaltyRankUpTitle": "You moved up",
+  "notifLoyaltyRankUpBody": "Your monthly standing improved — see Family recognition.",
+  "notifLoyaltyRankDownTitle": "Rankings shifted",
+  "notifLoyaltyRankDownBody": "Others moved ahead this month — steady activity keeps you in the race.",
+  "notifLoyaltyMilestoneTitle": "Points milestone",
+  "notifLoyaltyMilestoneBody": "You crossed a recognition milestone — open Family recognition.",
+  "notifLoyaltyMonthUrgencyTitle": "Month closing soon",
+  "notifLoyaltyMonthUrgencyBody": "Just a few days left to firm up this month’s placement.",
+  "notifMarkAllRead": "Mark all read",
+  "helpCenterTitle": "Help center",
+  "helpCenterSubtitle": "Straight answers about payments, delivery, and your orders — in plain language.",
+  "helpSectionPaymentTitle": "Payment safety",
+  "helpSectionPaymentBody": "Checkout runs on Stripe’s secure page. Zora-Walat never sees or stores your full card number. If a charge appears, your bank authorized it — we only complete the top-up you confirmed.",
+  "helpSectionDeliveryTitle": "Delivery timing",
+  "helpSectionDeliveryBody": "Most Afghan mobile top-ups finish within a few minutes. Operator networks occasionally need extra time. Pull to refresh on your order — status updates as soon as our partners report back.",
+  "helpSectionRetryTitle": "Retries and short delays",
+  "helpSectionRetryBody": "When a network asks for another attempt, our systems retry automatically. You don’t need to pay again. If an order stays unusual longer than expected, your payment record stays safe while we work with the operator.",
+  "helpSectionTrackingTitle": "Order tracking",
+  "helpSectionTrackingBody": "Recent orders show the same stages you’d expect from a carrier: payment confirmed, preparation, handoff to the operator, then delivered. Anything that needs your attention is labeled clearly — never hidden in technical jargon.",
+  "helpSectionLoyaltyTitle": "Rewards and family points",
+  "helpSectionLoyaltyBody": "Successful top-ups earn recognition points for you and optional family groups. There’s no random drawing — placement reflects real activity you can see on the leaderboard.",
+  "helpSectionContactTitle": "Contact and next steps",
+  "helpSectionContactBody": "Open any order and tap “Copy for support” to grab a professional summary (order reference, network, masked number, statuses, and time). Share that with whoever assists you — it’s the fastest way to get precise help without exposing private details.",
+  "helpOpenLoyalty": "Open family recognition",
+  "supportNeedHelp": "Need help?",
+  "supportOpenHelpCenter": "Help center",
+  "supportCopyPacket": "Copy for support",
+  "supportPacketCopied": "Support summary copied",
+  "supportPacketHeader": "Zora-Walat — support summary",
+  "supportPacketOrderRef": "Order reference",
+  "supportPacketRoute": "Route",
+  "supportPacketRouteValue": "Mobile top-up (airtime / data)",
+  "supportPacketRecipient": "Recipient (masked)",
+  "supportPacketUpdated": "Last updated",
+  "supportAssistRetryingTitle": "We’re retrying automatically",
+  "supportAssistRetryingBody": "The operator network requested another delivery attempt. That’s common — our systems handle retries so you don’t have to start over or pay twice.",
+  "supportAssistRetryingNext": "Best next step: wait a few minutes, then pull down to refresh. You’ll see each update here.",
+  "supportAssistDelayedTitle": "Still catching up",
+  "supportAssistDelayedBody": "This order is taking a bit longer than usual to sync or deliver. Your payment is already logged — nothing disappears when timing stretches.",
+  "supportAssistDelayedNext": "Best next step: refresh this screen, check recent orders, and sign in if prompted so live status can sync.",
+  "supportAssistFailedTitle": "We’re reviewing with care",
+  "supportAssistFailedBody": "Delivery didn’t finish on the first path, but your payment stayed protected. Our team and partners can reconcile using your order reference — no need to panic or repeat payment.",
+  "supportAssistFailedNext": "Best next step: copy the support summary from this screen and share it when you reach out. Keep the app handy for updates.",
+  "supportAssistPaymentConfirmTitle": "Payment still confirming",
+  "supportAssistPaymentConfirmBody": "Your bank or card network is finishing authorization. That can take a short moment. We don’t start delivery until payment is fully confirmed — your line isn’t charged twice.",
+  "supportAssistPaymentConfirmNext": "Best next step: stay on this screen briefly; if it lingers, refresh or check your recent orders after a minute.",
+  "supportAssistOperatorTitle": "Waiting on operator confirmation",
+  "supportAssistOperatorBody": "Credit has left our side and is with the mobile operator. Most confirmations arrive quickly; some networks batch their acknowledgements.",
+  "supportAssistOperatorNext": "Best next step: give it a few minutes, refresh, then check the recipient’s balance on the network if needed.",
+  "supportAssistCancelledTitle": "Order cancelled",
+  "supportAssistCancelledBody": "This session stopped before a successful charge. You can start a fresh top-up whenever you like — nothing here is stuck in limbo.",
+  "supportAssistCancelledNext": "Best next step: return to recharge, double-check the number, and complete checkout again if you still need airtime.",
+  "supportReassuranceFooter": "Payment safety and careful review stay on our side — you’ll always see honest status here.",
+  "supportOrderListHelpTooltip": "Help",
+  "hubTileHelpTitle": "Help & support",
+  "hubTileHelpSub": "Guides · payment safety · copy order details",
+  "ordersDetailLoadingHint": "Loading your receipt…",
+  "ordersEmptySupportLine": "Questions? Open Help & support from home for calm guidance."
 }
+

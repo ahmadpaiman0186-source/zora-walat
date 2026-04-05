@@ -288,6 +288,176 @@ class ApiService {
     }
     return RechargeExecuteResponse(statusCode: res.statusCode, json: body);
   }
+
+  /// Recognition tiers (`GET /api/loyalty/tiers`).
+  Future<Map<String, dynamic>> getLoyaltyTiers() async {
+    final res = await _getAuthed('/api/loyalty/tiers');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Loyalty tiers', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  /// Family / loyalty program (no random rewards; points from completed orders).
+  Future<Map<String, dynamic>> getLoyaltySummary() async {
+    final res = await _getAuthed('/api/loyalty/summary');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Loyalty summary', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getLoyaltyLeaderboard({
+    String? month,
+    String scope = 'groups',
+    int limit = 15,
+  }) async {
+    final q = <String, String>{
+      'scope': scope,
+      'limit': '$limit',
+      if (month != null && month.isNotEmpty) 'month': month,
+    };
+    final uri = _u('/api/loyalty/leaderboard').replace(queryParameters: q);
+    var token = await _requireAccessToken();
+    var res = await client.get(uri, headers: _getHeadersBearer(token));
+    if (res.statusCode == 401 && await _tryRefreshAuth()) {
+      token = await _requireAccessToken();
+      res = await client.get(uri, headers: _getHeadersBearer(token));
+    }
+    if (res.statusCode == 401) {
+      await _session?.clear();
+      throw UnauthorizedException();
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Loyalty leaderboard', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getMyFamilyGroup() async {
+    final res = await _getAuthed('/api/loyalty/groups/me');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Family group', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> createFamilyGroup(String name) async {
+    final res = await _postAuthed('/api/loyalty/groups', {'name': name});
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Create group', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> joinFamilyGroup(String inviteCode) async {
+    final res = await _postAuthed('/api/loyalty/groups/join', {
+      'inviteCode': inviteCode,
+    });
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Join group', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
+
+  Future<void> dissolveFamilyGroup() async {
+    final res = await _postAuthed('/api/loyalty/groups/dissolve', {});
+    if (res.statusCode != 204 && res.statusCode != 200) {
+      throw StateError(_httpErrorMessage('Dissolve group', res));
+    }
+  }
+
+  Future<void> leaveFamilyGroup() async {
+    final res = await _postAuthed('/api/loyalty/groups/leave', {});
+    if (res.statusCode != 204 && res.statusCode != 200) {
+      throw StateError(_httpErrorMessage('Leave group', res));
+    }
+  }
+
+  /// Account-linked order history (`GET /api/transactions`).
+  Future<List<Map<String, dynamic>>> fetchUserOrders({int limit = 24}) async {
+    final lim = limit.clamp(1, 50);
+    final res = await _getAuthed('/api/transactions?limit=$lim');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Orders list', res));
+    }
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final list = map['orders'] as List<dynamic>? ?? [];
+    return list
+        .map((e) => Map<String, dynamic>.from(e as Map<dynamic, dynamic>))
+        .toList();
+  }
+
+  /// `POST /api/notifications/devices` — register FCM token (204 expected).
+  Future<void> registerPushDevice({
+    required String token,
+    required String platform,
+  }) async {
+    final res = await _postAuthed('/api/notifications/devices', {
+      'token': token,
+      'platform': platform,
+    });
+    if (res.statusCode != 204) {
+      throw StateError(_httpErrorMessage('Push register', res));
+    }
+  }
+
+  /// `DELETE /api/notifications/devices` — remove FCM token on sign-out.
+  Future<void> unregisterPushDevice(String token) async {
+    var t = await _requireAccessToken();
+    var res = await client.delete(
+      _u('/api/notifications/devices'),
+      headers: _jsonHeadersBearer(t),
+      body: jsonEncode({'token': token}),
+    );
+    if (res.statusCode == 401 && await _tryRefreshAuth()) {
+      t = await _requireAccessToken();
+      res = await client.delete(
+        _u('/api/notifications/devices'),
+        headers: _jsonHeadersBearer(t),
+        body: jsonEncode({'token': token}),
+      );
+    }
+    if (res.statusCode == 401) {
+      await _session?.clear();
+      throw UnauthorizedException();
+    }
+    if (res.statusCode != 204) {
+      throw StateError(_httpErrorMessage('Push unregister', res));
+    }
+  }
+
+  /// `GET /api/notifications/inbox` — server inbox for merge (newest first).
+  Future<List<Map<String, dynamic>>> fetchNotificationInbox({
+    int limit = 40,
+  }) async {
+    final res = await _getAuthed('/api/notifications/inbox?limit=$limit');
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Notification inbox', res));
+    }
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final list = map['items'] as List<dynamic>? ?? [];
+    return list
+        .map((e) => Map<String, dynamic>.from(e as Map<dynamic, dynamic>))
+        .toList();
+  }
+
+  /// Single order for receipt / tracking (`GET /api/transactions/:id`).
+  Future<Map<String, dynamic>> fetchUserOrder(String orderId) async {
+    final id = orderId.trim();
+    if (id.isEmpty) {
+      throw ArgumentError('orderId empty');
+    }
+    final enc = Uri.encodeComponent(id);
+    final res = await _getAuthed('/api/transactions/$enc');
+    if (res.statusCode == 404) {
+      throw StateError('Orders detail ${res.statusCode}: not found');
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Orders detail', res));
+    }
+    return jsonDecode(res.body) as Map<String, dynamic>;
+  }
 }
 
 /// Response from [ApiService.postRechargeExecute].

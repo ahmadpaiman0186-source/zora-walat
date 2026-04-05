@@ -93,10 +93,10 @@ abstract final class AppTheme {
         disabledColor: _surfaceVariant.withValues(alpha: 0.5),
         labelStyle: textTheme.labelLarge?.copyWith(color: Colors.white),
         secondaryLabelStyle: textTheme.labelSmall,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: _onMuted.withValues(alpha: 0.25)),
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: _onMuted.withValues(alpha: 0.22)),
         ),
         showCheckmark: false,
       ),
@@ -111,7 +111,11 @@ abstract final class AppTheme {
       cardTheme: CardThemeData(
         color: _surface,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shadowColor: Colors.black.withValues(alpha: 0.35),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(color: _onMuted.withValues(alpha: 0.12)),
+        ),
         margin: EdgeInsets.zero,
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -137,6 +141,16 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           textStyle: textTheme.labelLarge,
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          side: BorderSide(color: _onMuted.withValues(alpha: 0.45)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(

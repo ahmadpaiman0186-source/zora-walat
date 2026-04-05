@@ -113,3 +113,109 @@ export const authLimiter = rateLimit({
   message: { error: 'Too many authentication attempts; try again later.' },
   handler: rateLimitHandler,
 });
+
+/** Stripe webhook ingress — high ceiling; still bounded for abuse. */
+export const stripeWebhookLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 2000 : 8000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many webhook requests' },
+  handler: rateLimitHandler,
+});
+
+/** Public marketing top-up: create order. */
+export const topupOrderCreateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 40 : 150,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many order requests; try again later.' },
+  handler: rateLimitHandler,
+});
+
+export const topupOrderReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 120 : 400,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many requests; try again later.' },
+  handler: rateLimitHandler,
+});
+
+/** Mark-paid + similar sensitive transitions. */
+export const topupOrderMarkPaidLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 60 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many payment updates; try again later.' },
+  handler: rateLimitHandler,
+});
+
+/** Test PaymentIntent creation (Next.js checkout). */
+export const topupPaymentIntentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 60 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many payment intents; try again later.' },
+  handler: rateLimitHandler,
+});
+
+/**
+ * Web top-up order create — second bucket on `sessionKey` + IP (after `topupOrderCreateLimiter`).
+ * Requires `express.json` before route so `req.body.sessionKey` is available.
+ */
+export const topupOrderSessionBurstLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 60 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const sk = String(req.body?.sessionKey ?? '_').trim().slice(0, 128);
+    return `topup_sess:${ip}:${sk || '_'}`;
+  },
+  message: { error: 'Too many orders for this session; try again later.' },
+  handler: rateLimitHandler,
+});
+
+/** Admin fulfillment mutations — IP + authenticated user (after requireAuth). */
+export const fulfillmentAdminMutationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 50 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id ?? 'anon';
+    return `adm_fulfill_mut:${ip}:${uid}`;
+  },
+  message: {
+    error: 'Too many fulfillment actions from this client; slow down and retry.',
+  },
+  handler: rateLimitHandler,
+});
+
+/** Per orderId + user — reduces hammering on a single order. */
+export const fulfillmentPerOrderLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 25 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const oid = String(req.params?.orderId ?? 'unknown').slice(0, 80);
+    const uid = req.user?.id ?? 'anon';
+    return `adm_fulfill_ord:${uid}:${oid}`;
+  },
+  message: {
+    error: 'Too many attempts for this order; wait before retrying dispatch.',
+  },
+  handler: rateLimitHandler,
+});

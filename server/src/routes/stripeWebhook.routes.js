@@ -12,6 +12,25 @@ import {
   ensureQueuedFulfillmentAttempt,
   scheduleFulfillmentProcessing,
 } from '../services/fulfillmentProcessingService.js';
+import {
+  emitPaymentSuccessSideEffect,
+  schedulePushSideEffect,
+} from '../services/pushNotifications/userNotificationPipeline.js';
+import {
+  handleWebTopupPaymentIntentFailed,
+  handleWebTopupPaymentIntentSucceeded,
+} from '../services/topupOrder/webtopupWebhookHandlers.js';
+import { safeSuffix, webTopupLog } from '../lib/webTopupObservability.js';
+import {
+  recordPaymentCheckoutOutcome,
+  bumpCounter,
+  recordRetry,
+} from '../lib/opsMetrics.js';
+import {
+  evaluateRollingAlerts,
+  emitProviderDegradationAlert,
+} from '../lib/opsAlerts.js';
+import { logOpsEvent } from '../lib/opsLog.js';
 
 const router = Router();
 
@@ -72,7 +91,11 @@ router.post('/', async (req, res) => {
 
   req.log?.info({ eventType: event.type }, 'stripe webhook');
 
+  const stripeEventIdSuffix = safeSuffix(event.id, 8);
+
   let orderIdToScheduleFulfillment = null;
+  /** Set when `checkout.session.completed` fails validation vs Stripe totals (possible misconfig or tamper). */
+  let checkoutAmountMismatchOrderId = null;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -206,6 +229,18 @@ router.post('/', async (req, res) => {
         return;
       }
 
+      if (event.type === 'payment_intent.succeeded') {
+        const pi = event.data.object;
+        await handleWebTopupPaymentIntentSucceeded(tx, event, pi, req.log);
+        return;
+      }
+
+      if (event.type === 'payment_intent.payment_failed') {
+        const pi = event.data.object;
+        await handleWebTopupPaymentIntentFailed(tx, pi, req.log);
+        return;
+      }
+
       if (event.type === 'checkout.session.expired') {
         const session = event.data.object;
         const raw = session.metadata?.internalCheckoutId;
@@ -245,19 +280,72 @@ router.post('/', async (req, res) => {
         });
       }
     });
+
+    webTopupLog(req.log, 'info', 'webhook_processed', {
+      stripeEventType: event.type,
+      stripeEventIdSuffix,
+    });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      req.log?.info(
-        { securityEvent: 'webhook_duplicate_delivery' },
-        'security',
-      );
+      recordRetry('webhook_event_duplicate');
+      webTopupLog(req.log, 'info', 'webhook_duplicate_ignored', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        prismaCode: 'P2002',
+      });
       return res.json({ received: true });
     }
+    bumpCounter('stripe_webhook_transaction_failed');
+    logOpsEvent({
+      domain: 'stripe_webhook',
+      event: 'webhook_transaction',
+      outcome: 'error',
+      traceId: req.traceId,
+      extra: {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        errName: e?.name,
+        prismaCode: e?.code,
+      },
+    });
+    webTopupLog(req.log, 'error', 'webhook_failed', {
+      stripeEventType: event.type,
+      stripeEventIdSuffix,
+      errName: e?.name,
+      errCode: e?.code,
+      message: typeof e?.message === 'string' ? e.message.slice(0, 200) : undefined,
+    });
     throw e;
   }
 
   if (orderIdToScheduleFulfillment) {
-    scheduleFulfillmentProcessing(orderIdToScheduleFulfillment);
+    recordPaymentCheckoutOutcome(true);
+    logOpsEvent({
+      domain: 'stripe_webhook',
+      event: 'checkout.session.completed',
+      outcome: 'paid',
+      orderId: orderIdToScheduleFulfillment,
+      traceId: req.traceId,
+    });
+    evaluateRollingAlerts();
+    scheduleFulfillmentProcessing(orderIdToScheduleFulfillment, req.traceId);
+    schedulePushSideEffect(
+      () => emitPaymentSuccessSideEffect(orderIdToScheduleFulfillment),
+      req.traceId,
+    );
+  } else if (checkoutAmountMismatchOrderId) {
+    recordPaymentCheckoutOutcome(false);
+    emitProviderDegradationAlert('stripe_amount_currency_mismatch', {
+      orderIdSuffix: safeSuffix(checkoutAmountMismatchOrderId, 12),
+    });
+    logOpsEvent({
+      domain: 'stripe_webhook',
+      event: 'checkout.session.completed',
+      outcome: 'amount_mismatch',
+      orderId: checkoutAmountMismatchOrderId,
+      traceId: req.traceId,
+    });
+    evaluateRollingAlerts();
   }
 
   return res.json({ received: true });

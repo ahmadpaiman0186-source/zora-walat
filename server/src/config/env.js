@@ -154,6 +154,11 @@ export const env = {
     9000,
   ),
 
+  /**
+   * Margin intel: routes with net/sell ratio below this (basis points) emit `low_margin_route_detected` (e.g. 500 = 5%).
+   */
+  marginLowRouteBp: parseBps(process.env.MARGIN_LOW_ROUTE_BP, 500),
+
   /** Reloadly API — server-only; never expose to clients. */
   reloadlyClientId: String(process.env.RELOADLY_CLIENT_ID ?? '').trim(),
   reloadlyClientSecret: String(process.env.RELOADLY_CLIENT_SECRET ?? '').trim(),
@@ -212,6 +217,98 @@ export const env = {
   devCheckoutBypassUserId: String(
     process.env.DEV_CHECKOUT_BYPASS_USER_ID ?? '',
   ).trim(),
+
+  /**
+   * Web top-up fulfillment provider: `mock` | `reloadly` (Reloadly = AF + airtime only; see reloadlyWebTopupProvider).
+   */
+  webTopupFulfillmentProvider: String(
+    process.env.WEBTOPUP_FULFILLMENT_PROVIDER ?? 'mock',
+  )
+    .trim()
+    .toLowerCase(),
+
+  /** When false, all web top-up fulfillment dispatch/retry is rejected (503). Default on. */
+  fulfillmentDispatchEnabled: process.env.FULFILLMENT_DISPATCH_ENABLED !== 'false',
+  /** Emergency kill switch — rejects dispatch/retry immediately (503). */
+  fulfillmentDispatchKillSwitch:
+    process.env.FULFILLMENT_DISPATCH_KILL_SWITCH === 'true',
+  /**
+   * When false, Reloadly adapter dispatch is disabled (503) while mock may still run.
+   * Scope remains AF + airtime only when enabled.
+   */
+  reloadlyWebTopupProviderActive:
+    process.env.RELOADLY_WEBTOPUP_PROVIDER_ACTIVE !== 'false',
+
+  webtopupVelocitySessionWindowMs: parsePositiveInt(
+    process.env.WEBTOPUP_VELOCITY_SESSION_WINDOW_MS,
+    600_000,
+  ),
+  webtopupVelocitySessionOrdersWarn: parsePositiveInt(
+    process.env.WEBTOPUP_VELOCITY_SESSION_ORDERS_WARN,
+    8,
+  ),
+  webtopupVelocityPhoneHourOrdersWarn: parsePositiveInt(
+    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_ORDERS_WARN,
+    12,
+  ),
+  webtopupVelocityPhoneHourSameAmountWarn: parsePositiveInt(
+    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_SAME_AMOUNT_WARN,
+    6,
+  ),
+
+  /** When true, admin dispatch enqueues DB job only; worker runs provider I/O (see webtopFulfillmentJob.js). */
+  webtopupFulfillmentAsync: process.env.WEBTOPUP_FULFILLMENT_ASYNC === 'true',
+  /** Poll interval for WebTopupFulfillmentJob worker (`0` disables the interval). */
+  webtopupFulfillmentJobPollMs: parseNonNegativeInt(
+    process.env.WEBTOPUP_FULFILLMENT_JOB_POLL_MS,
+    3_000,
+  ),
+
+  providerCircuitFailureThreshold: parsePositiveInt(
+    process.env.PROVIDER_CIRCUIT_FAILURE_THRESHOLD,
+    5,
+  ),
+  providerCircuitWindowMs: parsePositiveInt(
+    process.env.PROVIDER_CIRCUIT_WINDOW_MS,
+    60_000,
+  ),
+  providerCircuitOpenMs: parsePositiveInt(
+    process.env.PROVIDER_CIRCUIT_OPEN_MS,
+    120_000,
+  ),
+
+  /**
+   * Mock-provider failure simulation (never affects Reloadly): timeout | terminal | unsupported
+   */
+  webtopupFailsim: String(process.env.WEBTOPUP_FAILSIM ?? '').trim().toLowerCase(),
+
+  /** USD cents per 1 loyalty point (e.g. 100 → $1.00 = 1 point). */
+  loyaltyPointsUsdBasisCents: parsePositiveInt(
+    process.env.LOYALTY_POINTS_USD_BASIS_CENTS,
+    100,
+  ),
+
+  /**
+   * When false, inbox rows are still created but FCM is skipped (dev / staging).
+   */
+  pushNotificationsEnabled: process.env.PUSH_NOTIFICATIONS_ENABLED !== 'false',
+
+  /**
+   * Firebase service account JSON (entire object as a single line), or path via GOOGLE_APPLICATION_CREDENTIALS.
+   * Prefer FIREBASE_SERVICE_ACCOUNT_JSON for explicit app config.
+   */
+  firebaseServiceAccountJson: String(
+    process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? '',
+  ).trim(),
+
+  /** Cap loyalty-related pushes per user per rolling hour (spam guard). */
+  pushLoyaltyPerHourMax: parsePositiveInt(process.env.PUSH_LOYALTY_PER_HOUR_MAX, 4),
+
+  /**
+   * Optional extra salt for referral IP/device correlation hashes (HMAC).
+   * Falls back to JWT_ACCESS_SECRET when unset.
+   */
+  referralPrivacySalt: String(process.env.REFERRAL_PRIVACY_SALT ?? '').trim(),
 };
 
 /**

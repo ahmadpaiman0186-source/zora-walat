@@ -6,6 +6,7 @@ import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/trust_strip.dart';
 import '../../../models/recharge_draft.dart';
 
 /// Review → pay: in-app PaymentSheet (non-web) or Stripe Checkout redirect (web).
@@ -175,23 +176,55 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                   child: Text(l10n.continueToPlans),
                 ),
               ] else if (_phase == _PaymentPhase.failure) ...[
-                Icon(Icons.error_outline_rounded,
-                    size: 56, color: t.colorScheme.error),
-                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: t.colorScheme.error.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.hourglass_disabled_outlined,
+                    size: 48,
+                    color: t.colorScheme.error.withValues(alpha: 0.85),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(
-                  l10n.paymentFailedTitle,
+                  l10n.rechargeFailureCalmTitle,
+                  textAlign: TextAlign.center,
                   style: t.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 8),
-                if (_errorMessage != null)
-                  Text(
-                    _errorMessage!,
-                    style: t.textTheme.bodyMedium?.copyWith(
-                      color: t.colorScheme.outline,
+                const SizedBox(height: 12),
+                Text(
+                  l10n.rechargeFailureCalmBody,
+                  textAlign: TextAlign.center,
+                  style: t.textTheme.bodyMedium?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.45,
+                  ),
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: t.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: t.colorScheme.outline.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Text(
+                      _errorMessage!,
+                      style: t.textTheme.bodySmall?.copyWith(height: 1.4),
                     ),
                   ),
+                ],
+                const SizedBox(height: 20),
+                const TrustStrip(compact: true),
                 const SizedBox(height: 28),
                 FilledButton(
                   onPressed: _resetToIdle,
@@ -238,7 +271,9 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                     color: t.colorScheme.outline,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                const TrustStrip(compact: true),
+                const SizedBox(height: 20),
                 _SummaryCard(
                   rows: [
                     _Row(l10n.recipientNumber, widget.draft.phoneE164Style),

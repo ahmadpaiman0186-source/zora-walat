@@ -3,7 +3,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/di/app_scope.dart';
+import '../../../core/notifications/app_notification_hub.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/order_tracking_timeline.dart';
+import '../../../shared/widgets/trust_strip.dart';
+import '../domain/customer_order_tracking.dart';
+import 'tracking_messages.dart';
 
 /// Shown after Stripe Checkout when the app opens at `/success`.
 ///
@@ -24,175 +30,299 @@ class SuccessScreen extends StatefulWidget {
 }
 
 class _SuccessScreenState extends State<SuccessScreen> {
-  String? _deliveryLine;
+  CustomerOrderTracking? _tracking;
+  String? _providerRefTail;
   bool _busy = false;
+  OrderNotificationPhase? _lastOrderNotif;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeKickFulfillment());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _seedLocalHistory();
+      await _maybeKickFulfillment();
+    });
+  }
+
+  Future<void> _seedLocalHistory() async {
+    final oid = widget.orderReference?.trim();
+    if (oid == null || oid.isEmpty) return;
+    final l10n = AppLocalizations.of(context);
+    await AppScope.of(context).orderHistory.upsertOrder(
+          orderId: oid,
+          checkoutSessionId: widget.checkoutSessionId,
+          trackingStageKey: 'payment_pending',
+          statusHeadline: l10n.trackingHeadlinePaymentReceived,
+          paymentStateLabel: l10n.receiptPaymentPaid,
+          fulfillmentStateLabel: l10n.receiptFulfillmentProgress,
+        );
+    if (!mounted) return;
+    final hub = AppScope.of(context).notificationHub;
+    await hub.publishOrderPhase(
+      context,
+      orderId: oid,
+      phase: OrderNotificationPhase.paymentSecured,
+    );
+    _lastOrderNotif = OrderNotificationPhase.paymentSecured;
   }
 
   Future<void> _maybeKickFulfillment() async {
     final oid = widget.orderReference?.trim();
-    if (oid == null || oid.isEmpty) return;
+    if (oid == null || oid.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _tracking = CustomerOrderTracking.paymentReceived;
+      });
+      return;
+    }
     setState(() => _busy = true);
+    CustomerOrderTracking tracking = CustomerOrderTracking.paymentReceived;
+    String? refTail;
     try {
       final api = AppScope.of(context).apiService;
       final r = await api.postRechargeExecute(oid);
       if (!mounted) return;
       if (r.isOk) {
-        final order = r.json['order'] as Map<String, dynamic>?;
         final ful = r.json['fulfillment'] as Map<String, dynamic>?;
-        final orderStatus = order?['orderStatus'] as String?;
-        final fStatus = ful?['status'] as String?;
         final ref = ful?['providerReference'] as String?;
-        if (orderStatus == 'FULFILLED') {
-          _deliveryLine = ref != null && ref.isNotEmpty
-              ? 'Airtime sent. Reference: $ref'
-              : 'Airtime delivery completed.';
-        } else if (orderStatus == 'FAILED') {
-          _deliveryLine =
-              'Recharge could not be completed. Check your orders for details.';
-        } else if (fStatus == 'SUCCEEDED') {
-          _deliveryLine = ref != null && ref.isNotEmpty
-              ? 'Airtime sent. Reference: $ref'
-              : 'Airtime delivery completed.';
-        } else if (orderStatus == 'PROCESSING' ||
-            fStatus == 'PROCESSING' ||
-            fStatus == 'QUEUED') {
-          _deliveryLine = 'Delivery in progress…';
-        } else {
-          _deliveryLine = 'Order: ${orderStatus ?? '—'}';
+        if (ref != null && ref.length > 6) {
+          refTail = ref.length <= 14 ? ref : '…${ref.substring(ref.length - 10)}';
         }
+        tracking = CustomerOrderTracking.fromExecuteJson(r.json);
       } else if (r.isPaymentPending) {
         final err = r.json['error'] as String? ?? '';
-        _deliveryLine = err.contains('not confirmed')
-            ? 'Payment is still confirming. Delivery will start in a moment.'
-            : err;
+        tracking = err.toLowerCase().contains('not confirmed')
+            ? CustomerOrderTracking.paymentPending
+            : CustomerOrderTracking.paymentReceived;
+      } else {
+        tracking = CustomerOrderTracking.unknownAfterPay;
       }
+
+      await _persistOrderSnapshot(
+        orderId: oid,
+        tracking: tracking,
+        refTail: refTail,
+      );
+      if (!mounted) return;
+      final ph = orderPhaseFromCustomerTracking(tracking);
+      if (ph != null && ph != _lastOrderNotif) {
+        _lastOrderNotif = ph;
+        await AppScope.of(context).notificationHub.publishOrderPhase(
+              context,
+              orderId: oid,
+              phase: ph,
+            );
+      }
+      setState(() {
+        _tracking = tracking;
+        _providerRefTail = refTail;
+      });
     } on UnauthorizedException {
       if (!mounted) return;
-      _deliveryLine =
-          'Sign in to track recharge status in your orders.';
+      final l10n = AppLocalizations.of(context);
+      await AppScope.of(context).orderHistory.upsertOrder(
+            orderId: oid,
+            trackingStageKey: 'in_progress',
+            statusHeadline: l10n.trackingHeadlineSignIn,
+            paymentStateLabel: l10n.receiptPaymentPaid,
+            fulfillmentStateLabel: l10n.receiptFulfillmentProgress,
+          );
+      setState(() => _tracking = CustomerOrderTracking.signInToTrack);
     } catch (_) {
       if (!mounted) return;
-      _deliveryLine =
-          'Could not refresh delivery status. Your payment is recorded; check orders shortly.';
+      tracking = CustomerOrderTracking.unknownAfterPay;
+      await _persistOrderSnapshot(orderId: oid, tracking: tracking);
+      setState(() => _tracking = tracking);
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _persistOrderSnapshot({
+    required String orderId,
+    required CustomerOrderTracking tracking,
+    String? refTail,
+  }) async {
+    final l10n = AppLocalizations.of(context);
+    final headline = TrackingMessages.forTracking(l10n, tracking).$1;
+    await AppScope.of(context).orderHistory.upsertOrder(
+          orderId: orderId,
+          checkoutSessionId: widget.checkoutSessionId,
+          trackingStageKey: _storageKeyFor(tracking.stage),
+          statusHeadline: headline,
+          paymentStateLabel: _paymentLabel(l10n, tracking),
+          fulfillmentStateLabel: _fulfillmentLabel(l10n, tracking),
+          providerReferenceSuffix: refTail,
+        );
+  }
+
+  static String _storageKeyFor(CustomerTrackingStage s) {
+    switch (s) {
+      case CustomerTrackingStage.delivered:
+        return 'delivered';
+      case CustomerTrackingStage.failed:
+        return 'failed';
+      case CustomerTrackingStage.retrying:
+        return 'retrying';
+      case CustomerTrackingStage.paymentConfirming:
+        return 'payment_pending';
+      default:
+        return 'in_progress';
+    }
+  }
+
+  static String _paymentLabel(
+    AppLocalizations l10n,
+    CustomerOrderTracking t,
+  ) {
+    if (t.stage == CustomerTrackingStage.paymentConfirming) {
+      return l10n.receiptPaymentPending;
+    }
+    return l10n.receiptPaymentPaid;
+  }
+
+  static String _fulfillmentLabel(
+    AppLocalizations l10n,
+    CustomerOrderTracking t,
+  ) {
+    switch (t.stage) {
+      case CustomerTrackingStage.delivered:
+        return l10n.receiptFulfillmentDone;
+      case CustomerTrackingStage.failed:
+        return l10n.orderStatusFailed;
+      case CustomerTrackingStage.retrying:
+        return l10n.orderStatusRetrying;
+      case CustomerTrackingStage.orderCancelled:
+        return l10n.orderStatusCancelled;
+      case CustomerTrackingStage.paymentConfirming:
+      case CustomerTrackingStage.paymentReceived:
+        return l10n.receiptFulfillmentProgress;
+      default:
+        return l10n.receiptFulfillmentProgress;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final cs = t.colorScheme;
+    final tracking = _tracking ?? CustomerOrderTracking.paymentReceived;
+    final copy = TrackingMessages.forTracking(l10n, tracking);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment received'),
+        title: Text(l10n.successScreenTitle),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 8),
               Align(
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(22),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: cs.primary.withValues(alpha: 0.12),
                     border: Border.all(
-                      color: cs.primary.withValues(alpha: 0.35),
+                      color: cs.primary.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Icon(
-                    Icons.check_rounded,
-                    size: 40,
+                    Icons.verified_rounded,
+                    size: 44,
                     color: cs.primary,
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 22),
               Text(
-                'Stripe confirmed your payment',
+                l10n.successPaymentConfirmed,
                 textAlign: TextAlign.center,
+                style: t.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                l10n.successStripeConfirmedShort,
+                textAlign: TextAlign.center,
+                style: t.textTheme.bodyMedium?.copyWith(
+                  color: cs.outline,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              TrustStrip(compact: true),
+              const SizedBox(height: 24),
+              if (_busy) const LinearProgressIndicator(minHeight: 3),
+              if (_busy) const SizedBox(height: 16),
+              Text(
+                copy.$1,
                 style: t.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  height: 1.35,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                copy.$2,
+                style: t.textTheme.bodyMedium?.copyWith(
+                  color: cs.outline,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: 22),
+              OrderTrackingTimeline(
+                activeIndex: tracking.linearStepIndex,
+                highlightStep: tracking.linearStepIndex,
+                failedAtStep: tracking.stage == CustomerTrackingStage.failed,
+              ),
+              const SizedBox(height: 22),
+              _SafeBanner(l10n: l10n),
+              const SizedBox(height: 20),
+              Text(
+                l10n.receiptTitle,
+                style: t.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _ReceiptCard(
+                l10n: l10n,
+                orderRef: _primaryReference(),
+                sessionSnippet: _stripeSessionSnippet(),
+                paymentLabel: _paymentLabel(l10n, tracking),
+                fulfillmentLabel: _fulfillmentLabel(l10n, tracking),
+                providerRef: _providerRefTail,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10n.receiptWhatNextTitle,
+                style: t.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.receiptWhatNextBody,
+                style: t.textTheme.bodyMedium?.copyWith(
+                  color: cs.outline,
+                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 28),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHighest.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: cs.outline.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Reference',
-                        style: t.textTheme.labelLarge?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _primaryReference(),
-                        style: t.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.15,
-                        ),
-                      ),
-                      if (_hasStripeSessionLine()) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Stripe session: ${_stripeSessionSnippet()}',
-                          style: t.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurface.withValues(alpha: 0.65),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      Text(
-                        'Airtime or data delivery is processed on our servers after payment. Status below updates when available.',
-                        style: t.textTheme.bodySmall?.copyWith(
-                          color: cs.onSurface.withValues(alpha: 0.65),
-                          height: 1.35,
-                        ),
-                      ),
-                      if (_busy) ...[
-                        const SizedBox(height: 12),
-                        const LinearProgressIndicator(minHeight: 3),
-                      ],
-                      if (_deliveryLine != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _deliveryLine!,
-                          style: t.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurface.withValues(alpha: 0.85),
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const Spacer(),
               FilledButton(
+                onPressed: () => context.push(AppRoutePaths.orders),
+                child: Text(l10n.successViewOrders),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
                 onPressed: () => context.go(AppRoutePaths.hub),
-                child: const Text('Go Home'),
+                child: Text(l10n.successBackHome),
               ),
             ],
           ),
@@ -209,18 +339,166 @@ class _SuccessScreenState extends State<SuccessScreen> {
     return '—';
   }
 
-  bool _hasStripeSessionLine() {
-    final o = widget.orderReference?.trim();
+  String? _stripeSessionSnippet() {
     final s = widget.checkoutSessionId?.trim();
-    return o != null &&
-        o.isNotEmpty &&
-        s != null &&
-        s.isNotEmpty;
-  }
-
-  String _stripeSessionSnippet() {
-    final s = widget.checkoutSessionId!.trim();
+    if (s == null || s.isEmpty) return null;
     if (s.length <= 24) return s;
-    return '${s.substring(0, 12)}…${s.substring(s.length - 8)}';
+    return '${s.substring(0, 10)}…${s.substring(s.length - 8)}';
+  }
+}
+
+class _SafeBanner extends StatelessWidget {
+  const _SafeBanner({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: t.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: t.colorScheme.primary.withValues(alpha: 0.28),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.gpp_good_outlined, color: t.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.paymentSafeBanner,
+              style: t.textTheme.bodySmall?.copyWith(height: 1.45),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReceiptCard extends StatelessWidget {
+  const _ReceiptCard({
+    required this.l10n,
+    required this.orderRef,
+    required this.paymentLabel,
+    required this.fulfillmentLabel,
+    this.sessionSnippet,
+    this.providerRef,
+  });
+
+  final AppLocalizations l10n;
+  final String orderRef;
+  final String paymentLabel;
+  final String fulfillmentLabel;
+  final String? sessionSnippet;
+  final String? providerRef;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: t.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: t.colorScheme.outline.withValues(alpha: 0.18),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.receiptOrderRef,
+            style: t.textTheme.labelLarge?.copyWith(
+              color: t.colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 6),
+          SelectableText(
+            orderRef,
+            style: t.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+          if (sessionSnippet != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              '${l10n.stripeSectionTitle} · $sessionSnippet',
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          _Row(l10n.receiptPaymentStatus, paymentLabel, t),
+          _Row(l10n.receiptFulfillmentStatus, fulfillmentLabel, t),
+          if (providerRef != null && providerRef!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '${l10n.receiptCarrierRef}: $providerRef',
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Row extends StatelessWidget {
+  const _Row(this.label, this.value, this.t);
+
+  final String label;
+  final String value;
+  final ThemeData t;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: t.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

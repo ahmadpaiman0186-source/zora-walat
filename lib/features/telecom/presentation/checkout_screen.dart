@@ -8,6 +8,7 @@ import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/utils/afghan_phone_utils.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/widgets/trust_strip.dart';
 import '../../../shared/widgets/zw_primary_button.dart';
 import '../../../stripe_keys.dart';
 import '../domain/telecom_order.dart';
@@ -216,12 +217,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 18),
+          TrustStrip(),
+          const SizedBox(height: 18),
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: t.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: t.colorScheme.outline.withValues(alpha: 0.15),
               ),
@@ -255,6 +258,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     height: 1.45,
                   ),
                 ),
+                if (StripeKeys.publishableKey.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    l10n.checkoutTrustCallout,
+                    style: t.textTheme.labelSmall?.copyWith(
+                      color: t.colorScheme.primary.withValues(alpha: 0.95),
+                      height: 1.4,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.15,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

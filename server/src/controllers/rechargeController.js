@@ -130,7 +130,7 @@ export async function postExecute(req, res) {
     });
   }
 
-  await processFulfillmentForOrder(orderId);
+  await processFulfillmentForOrder(orderId, { traceId: req.traceId });
 
   const fresh = await prisma.paymentCheckout.findFirst({
     where: { id: orderId, userId },

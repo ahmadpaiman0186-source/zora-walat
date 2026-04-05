@@ -1,0 +1,124 @@
+.page {
+  min-height: 100vh;
+  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.backLink {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #34d399;
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #f8fafc;
+  margin-bottom: 0.5rem;
+}
+
+.sub {
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.muted {
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.card {
+  padding: 1rem 1.15rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(165deg, rgba(22, 30, 40, 0.92) 0%, rgba(14, 19, 26, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgba(201, 162, 39, 0.95);
+  word-break: break-all;
+}
+
+.amount {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #ecfdf5;
+  flex-shrink: 0;
+}
+
+.meta {
+  font-size: 0.82rem;
+  color: rgba(226, 232, 240, 0.9);
+  line-height: 1.4;
+}
+
+.status {
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.reload {
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.reload:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+[dir='rtl'] .cardTop {
+  flex-direction: row-reverse;
+}

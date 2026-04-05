@@ -1,6 +1,10 @@
 import { createApp } from './app.js';
 import { prisma } from './db.js';
 import { env } from './config/env.js';
+import { validateWebTopupFulfillmentProviderConfigOrExit } from './config/webTopupFulfillmentStartup.js';
+import { logProductionReloadlyConsistencyWarnings } from './config/productionReloadlyGuard.js';
+import { webTopupLog } from './lib/webTopupObservability.js';
+import { isReloadlyConfigured } from './services/reloadlyClient.js';
 import {
   corsOriginsHaveNoWildcards,
   corsOriginsMatchPrelaunchAllowlist,
@@ -8,6 +12,7 @@ import {
 import { getValidatedStripeSecretKey } from './config/stripeEnv.js';
 import { stripeKeyStatusLog } from './services/stripe.js';
 import { processPendingPaidOrders } from './services/fulfillmentProcessingService.js';
+import { processWebTopupFulfillmentJobs } from './services/topupFulfillment/webtopFulfillmentJob.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -20,6 +25,28 @@ if (jwtAccess.length < 32 || jwtRefresh.length < 32) {
     '[fatal] JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must each be set and at least 32 characters',
   );
   process.exit(1);
+}
+
+validateWebTopupFulfillmentProviderConfigOrExit();
+logProductionReloadlyConsistencyWarnings();
+
+const webTopupProviderId = String(env.webTopupFulfillmentProvider ?? 'mock')
+  .trim()
+  .toLowerCase();
+webTopupLog(undefined, 'info', 'provider_config_validated', {
+  webTopupFulfillmentProvider: webTopupProviderId,
+  reloadlyCredentialsPresent:
+    webTopupProviderId !== 'reloadly' || isReloadlyConfigured(),
+  reloadlySandboxMode:
+    webTopupProviderId === 'reloadly' ? env.reloadlySandbox : null,
+});
+if (process.env.NODE_ENV !== 'test') {
+  console.log(
+    `[startup] provider_config_validated provider=${webTopupProviderId}` +
+      (webTopupProviderId === 'reloadly'
+        ? ` reloadly_creds=${isReloadlyConfigured() ? 'present' : 'missing'} sandbox=${env.reloadlySandbox}`
+        : ''),
+  );
 }
 
 if (env.prelaunchLockdown) {
@@ -146,5 +173,14 @@ app.listen(env.port, async () => {
         console.error('[fulfillment] processPendingPaidOrders', e);
       });
     }, drainMs);
+  }
+
+  const jobPollMs = env.webtopupFulfillmentJobPollMs;
+  if (jobPollMs > 0 && process.env.NODE_ENV !== 'test') {
+    setInterval(() => {
+      processWebTopupFulfillmentJobs({ limit: 15 }).catch((e) => {
+        console.error('[fulfillment] processWebTopupFulfillmentJobs', e);
+      });
+    }, jobPollMs);
   }
 });

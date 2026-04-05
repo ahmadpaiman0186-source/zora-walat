@@ -45,6 +45,43 @@ function orderStatusLabel(status) {
   return labelFromStatus(status, map);
 }
 
+/** Customer-safe stage for Flutter timeline/chips (not raw enums). */
+function deriveCustomerTrackingStage(orderStatus, fulfillmentStatus) {
+  const os = String(orderStatus ?? '').toUpperCase();
+  const fs = String(fulfillmentStatus ?? '').toUpperCase();
+  if (os === ORDER_STATUS.CANCELLED) return 'cancelled';
+  if (os === ORDER_STATUS.FAILED) return 'failed';
+  if (os === ORDER_STATUS.FULFILLED || os === 'DELIVERED') return 'delivered';
+  if (os === ORDER_STATUS.PENDING) return 'payment_pending';
+  if (os === ORDER_STATUS.PAID) {
+    if (fs === FULFILLMENT_ATTEMPT_STATUS.PROCESSING) return 'sending';
+    if (fs === FULFILLMENT_ATTEMPT_STATUS.QUEUED) return 'preparing';
+    return 'preparing';
+  }
+  if (os === ORDER_STATUS.PROCESSING) {
+    if (fs === FULFILLMENT_ATTEMPT_STATUS.PROCESSING) return 'sending';
+    if (fs === FULFILLMENT_ATTEMPT_STATUS.QUEUED) return 'preparing';
+    if (fs === FULFILLMENT_ATTEMPT_STATUS.FAILED) return 'retrying';
+    return 'preparing';
+  }
+  return 'preparing';
+}
+
+function maskNationalDigits(raw) {
+  const d = String(raw ?? '').replace(/\D/g, '');
+  if (d.length < 4) return null;
+  const tail = d.slice(-4);
+  const stars = '•'.repeat(Math.min(6, Math.max(0, d.length - 4)));
+  return `${stars}${tail}`;
+}
+
+function providerRefSuffix(ref) {
+  const s = String(ref ?? '').trim();
+  if (!s) return null;
+  if (s.length <= 12) return s;
+  return `…${s.slice(-10)}`;
+}
+
 function friendlyFailureReason(orderFailureReason, attemptFailureReason) {
   const raw = String(orderFailureReason ?? attemptFailureReason ?? '').toLowerCase();
   if (!raw) return null;
@@ -82,6 +119,11 @@ function mapUserOrder({ order, latestAttempt }) {
       ? latestAttempt?.failedAt ?? null
       : null;
 
+  const trackingStageKey = deriveCustomerTrackingStage(
+    order.orderStatus,
+    fulfillmentStatus,
+  );
+
   return {
     orderId: order.id,
     orderReference: order.id,
@@ -107,6 +149,13 @@ function mapUserOrder({ order, latestAttempt }) {
     fulfillmentFailedAt,
 
     failureReason: friendlyFailureReason(order.failureReason, latestAttempt?.failureReason),
+
+    trackingStageKey,
+    providerReferenceSuffix: providerRefSuffix(latestAttempt?.providerReference),
+    recipientMasked: maskNationalDigits(order.recipientNational),
+    /** Server is source of truth for account-linked orders. */
+    dataSource: 'account',
+    updatedAtIso: order.updatedAt.toISOString(),
   };
 }
 
@@ -138,6 +187,7 @@ export async function listUserOrders({
       currency: true,
       operatorKey: true,
       packageId: true,
+      recipientNational: true,
       failureReason: true,
       createdAt: true,
       updatedAt: true,
@@ -153,6 +203,7 @@ export async function listUserOrders({
           completedAt: true,
           failedAt: true,
           attemptNumber: true,
+          providerReference: true,
         },
       },
     },
@@ -188,6 +239,7 @@ export async function inspectUserOrder({ userId, id } = {}) {
       currency: true,
       operatorKey: true,
       packageId: true,
+      recipientNational: true,
       failureReason: true,
       createdAt: true,
       updatedAt: true,
@@ -203,6 +255,7 @@ export async function inspectUserOrder({ userId, id } = {}) {
           completedAt: true,
           failedAt: true,
           attemptNumber: true,
+          providerReference: true,
         },
       },
     },

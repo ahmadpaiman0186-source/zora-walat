@@ -19,7 +19,10 @@
     "db:studio": "node scripts/prisma-cli.mjs studio",
     "db:health": "node scripts/test-db-connection.mjs",
     "reloadly:sandbox-readiness": "node scripts/reloadly-sandbox-readiness.mjs",
-    "reconciliation:scan": "node scripts/reconciliation-scan.mjs"
+    "webtopup:sandbox-verify": "node scripts/webtopup-reloadly-sandbox-verify.mjs",
+    "webtopup:sandbox-dispatch-exercise": "node scripts/webtopup-sandbox-dispatch-exercise.mjs",
+    "reconciliation:scan": "node scripts/reconciliation-scan.mjs",
+    "test": "node --test test/webTopupReconcile.test.js test/webTopupObservability.test.js test/mockTopupProvider.test.js test/fulfillmentEligibility.test.js test/fulfillmentOutcome.test.js test/providerRegistry.test.js test/reloadlyWebTopupFulfillment.test.js test/webTopupFulfillmentStartup.test.js test/webTopupFulfillmentScope.test.js test/reloadlyWebTopupProvider.test.js test/webTopupFulfillmentRunbook.test.js test/webTopupSandboxPreflight.test.js test/securityHardening.test.js test/marginIntelligence.test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
@@ -28,6 +31,7 @@
     "dotenv": "^17.2.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.0.1",
+    "firebase-admin": "^12.7.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "pino": "^9.9.0",

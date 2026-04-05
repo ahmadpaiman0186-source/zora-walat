@@ -38,6 +38,33 @@ class MainHomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                ListenableBuilder(
+                  listenable: AppScope.of(context).notificationStore,
+                  builder: (context, _) {
+                    final unread =
+                        AppScope.of(context).notificationStore.unreadCount();
+                    final label = unread > 9 ? '9+' : '$unread';
+                    return Badge(
+                      isLabelVisible: unread > 0,
+                      backgroundColor: t.colorScheme.primary,
+                      textColor: t.colorScheme.onPrimary,
+                      label: Text(
+                        label,
+                        style: t.textTheme.labelSmall?.copyWith(
+                          color: t.colorScheme.onPrimary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      child: IconButton(
+                        tooltip: l10n.notifHubTooltip,
+                        icon: const Icon(Icons.notifications_outlined),
+                        onPressed: () =>
+                            context.push(AppRoutePaths.notifications),
+                      ),
+                    );
+                  },
+                ),
                 IconButton(
                   tooltip: l10n.language,
                   icon: const Icon(Icons.language_rounded),
@@ -73,6 +100,24 @@ class MainHomeScreen extends StatelessWidget {
               title: l10n.hubTileRechargeTitle,
               subtitle: l10n.hubTileRechargeSub,
               onTap: () => context.go(AppRoutePaths.recharge),
+            ),
+            _Tile(
+              icon: Icons.receipt_long_rounded,
+              title: l10n.hubTileOrdersTitle,
+              subtitle: l10n.hubTileOrdersSub,
+              onTap: () => context.push(AppRoutePaths.orders),
+            ),
+            _Tile(
+              icon: Icons.groups_2_outlined,
+              title: l10n.hubTileLoyaltyTitle,
+              subtitle: l10n.hubTileLoyaltySub,
+              onTap: () => context.push(AppRoutePaths.loyalty),
+            ),
+            _Tile(
+              icon: Icons.support_agent_outlined,
+              title: l10n.hubTileHelpTitle,
+              subtitle: l10n.hubTileHelpSub,
+              onTap: () => context.push(AppRoutePaths.helpCenter),
             ),
             _Tile(
               icon: Icons.account_balance_wallet_outlined,
@@ -119,11 +164,19 @@ class _Tile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: t.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
+        shadowColor: Colors.black.withValues(alpha: 0.2),
+        elevation: 0,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: t.colorScheme.outline.withValues(alpha: 0.12),
+              ),
+            ),
             padding: const EdgeInsets.all(18),
             child: Row(
               children: [

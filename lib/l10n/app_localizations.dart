@@ -1161,6 +1161,1164 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Zora-Walat · Afghanistan mobile top-up'**
   String get landingFooterNote;
+
+  /// No description provided for @successScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re all set'**
+  String get successScreenTitle;
+
+  /// No description provided for @successPaymentConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get successPaymentConfirmed;
+
+  /// No description provided for @successStripeConfirmedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank authorized this purchase. We’re completing your top-up now.'**
+  String get successStripeConfirmedShort;
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receiptTitle;
+
+  /// No description provided for @receiptOrderRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Order reference'**
+  String get receiptOrderRef;
+
+  /// No description provided for @receiptPaymentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get receiptPaymentStatus;
+
+  /// No description provided for @receiptFulfillmentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-up status'**
+  String get receiptFulfillmentStatus;
+
+  /// No description provided for @receiptWhatNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next'**
+  String get receiptWhatNextTitle;
+
+  /// No description provided for @receiptWhatNextBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We’ll send credit to the operator network you selected. Most top-ups finish within a few minutes. This screen stays available in your recent orders.'**
+  String get receiptWhatNextBody;
+
+  /// No description provided for @successViewOrders.
+  ///
+  /// In en, this message translates to:
+  /// **'View recent orders'**
+  String get successViewOrders;
+
+  /// No description provided for @successBackHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get successBackHome;
+
+  /// No description provided for @trustSecurePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure payment'**
+  String get trustSecurePayment;
+
+  /// No description provided for @trustEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted checkout'**
+  String get trustEncrypted;
+
+  /// No description provided for @trustTransparentPricing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear pricing'**
+  String get trustTransparentPricing;
+
+  /// No description provided for @trustLiveTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Live tracking'**
+  String get trustLiveTracking;
+
+  /// No description provided for @timelineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order progress'**
+  String get timelineTitle;
+
+  /// No description provided for @timelinePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment received'**
+  String get timelinePayment;
+
+  /// No description provided for @timelinePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your top-up'**
+  String get timelinePreparing;
+
+  /// No description provided for @timelineSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending to operator'**
+  String get timelineSending;
+
+  /// No description provided for @timelineDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered to line'**
+  String get timelineDelivered;
+
+  /// No description provided for @trackingHeadlineDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit is on its way'**
+  String get trackingHeadlineDelivered;
+
+  /// No description provided for @trackingBodyDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is secure and the carrier is applying credit to the number you chose. You’ll see a confirmation reference when the network finishes.'**
+  String get trackingBodyDelivered;
+
+  /// No description provided for @trackingHeadlineNeedsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t finish this top-up'**
+  String get trackingHeadlineNeedsHelp;
+
+  /// No description provided for @trackingBodyFailedCalm.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment went through safely — nothing was lost. Our team can review this order and help complete delivery. Save your order reference if you contact support.'**
+  String get trackingBodyFailedCalm;
+
+  /// No description provided for @trackingHeadlineRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking another path to deliver'**
+  String get trackingHeadlineRetrying;
+
+  /// No description provided for @trackingBodyRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Sometimes networks need a moment. We’re retrying delivery automatically so you don’t have to do anything yet.'**
+  String get trackingBodyRetrying;
+
+  /// No description provided for @trackingHeadlineSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending credit now'**
+  String get trackingHeadlineSending;
+
+  /// No description provided for @trackingBodySending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your package is moving to the mobile operator. This usually completes quickly.'**
+  String get trackingBodySending;
+
+  /// No description provided for @trackingHeadlinePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your top-up'**
+  String get trackingHeadlinePreparing;
+
+  /// No description provided for @trackingBodyPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is confirmed. We’re lining up delivery to the correct network and number.'**
+  String get trackingBodyPreparing;
+
+  /// No description provided for @trackingHeadlinePaymentConfirming.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your payment'**
+  String get trackingHeadlinePaymentConfirming;
+
+  /// No description provided for @trackingBodyPaymentConfirming.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank is finishing authorization. Sit tight — delivery will begin right after confirmation.'**
+  String get trackingBodyPaymentConfirming;
+
+  /// No description provided for @trackingHeadlinePaymentReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment secured'**
+  String get trackingHeadlinePaymentReceived;
+
+  /// No description provided for @trackingBodyPaymentReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripe confirmed your payment. The next steps happen automatically on our side.'**
+  String get trackingBodyPaymentReceived;
+
+  /// No description provided for @trackingHeadlineCatchingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there'**
+  String get trackingHeadlineCatchingUp;
+
+  /// No description provided for @trackingBodyCatchingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re syncing the latest status. Your payment is recorded — check back in a minute or open recent orders.'**
+  String get trackingBodyCatchingUp;
+
+  /// No description provided for @trackingHeadlineSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see live status'**
+  String get trackingHeadlineSignIn;
+
+  /// No description provided for @trackingBodySignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is on file. Sign in to refresh delivery details whenever you like.'**
+  String get trackingBodySignIn;
+
+  /// No description provided for @paymentSafeBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment is protected. Charges are processed by Stripe — we never store your card.'**
+  String get paymentSafeBanner;
+
+  /// No description provided for @cancelScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout paused'**
+  String get cancelScreenTitle;
+
+  /// No description provided for @cancelScreenLead.
+  ///
+  /// In en, this message translates to:
+  /// **'No worries — you can try again anytime.'**
+  String get cancelScreenLead;
+
+  /// No description provided for @cancelScreenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was charged. When you’re ready, return to your order and continue with secure checkout.'**
+  String get cancelScreenBody;
+
+  /// No description provided for @cancelBackHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get cancelBackHome;
+
+  /// No description provided for @ordersScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent orders'**
+  String get ordersScreenTitle;
+
+  /// No description provided for @ordersEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No orders yet'**
+  String get ordersEmptyTitle;
+
+  /// No description provided for @ordersEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After you complete a top-up, a receipt appears here on this device so you can track delivery.'**
+  String get ordersEmptyBody;
+
+  /// No description provided for @ordersEmptyBodySignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'When you complete a top-up while signed in, your receipts stay with your account and sync here. You can still see device-only drafts from before sign-in.'**
+  String get ordersEmptyBodySignedIn;
+
+  /// No description provided for @ordersSourceAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get ordersSourceAccount;
+
+  /// No description provided for @ordersSourceDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get ordersSourceDevice;
+
+  /// No description provided for @ordersCloudRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t reach your account orders. Showing what’s saved on this device.'**
+  String get ordersCloudRefreshFailed;
+
+  /// No description provided for @ordersDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order details'**
+  String get ordersDetailTitle;
+
+  /// No description provided for @ordersSectionLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Current status'**
+  String get ordersSectionLive;
+
+  /// No description provided for @ordersSectionRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get ordersSectionRecord;
+
+  /// No description provided for @ordersCopyReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy reference'**
+  String get ordersCopyReference;
+
+  /// No description provided for @ordersReferenceCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference copied'**
+  String get ordersReferenceCopied;
+
+  /// No description provided for @trackingHeadlineCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This order was cancelled'**
+  String get trackingHeadlineCancelled;
+
+  /// No description provided for @trackingBodyCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'No charge was completed for this order. You can start a new top-up anytime.'**
+  String get trackingBodyCancelled;
+
+  /// No description provided for @ordersLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time}'**
+  String ordersLastUpdated(String time);
+
+  /// No description provided for @orderStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderStatusDelivered;
+
+  /// No description provided for @orderStatusInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get orderStatusInProgress;
+
+  /// No description provided for @orderStatusRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying'**
+  String get orderStatusRetrying;
+
+  /// No description provided for @orderStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get orderStatusFailed;
+
+  /// No description provided for @orderStatusPaymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming payment'**
+  String get orderStatusPaymentPending;
+
+  /// No description provided for @orderStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderStatusCancelled;
+
+  /// No description provided for @orderStatusSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending'**
+  String get orderStatusSending;
+
+  /// No description provided for @orderStatusPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing'**
+  String get orderStatusPreparing;
+
+  /// No description provided for @hubTileOrdersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent orders'**
+  String get hubTileOrdersTitle;
+
+  /// No description provided for @hubTileOrdersSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts · synced when signed in'**
+  String get hubTileOrdersSub;
+
+  /// No description provided for @receiptPaymentPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get receiptPaymentPaid;
+
+  /// No description provided for @receiptPaymentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming'**
+  String get receiptPaymentPending;
+
+  /// No description provided for @receiptFulfillmentDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get receiptFulfillmentDone;
+
+  /// No description provided for @receiptFulfillmentProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get receiptFulfillmentProgress;
+
+  /// No description provided for @receiptCarrierRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier reference'**
+  String get receiptCarrierRef;
+
+  /// No description provided for @rechargeFailureCalmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout didn’t complete'**
+  String get rechargeFailureCalmTitle;
+
+  /// No description provided for @rechargeFailureCalmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was charged. Check your connection and try again — your details are still here.'**
+  String get rechargeFailureCalmBody;
+
+  /// No description provided for @checkoutTrustCallout.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ll complete payment on a secure Stripe page. Your card never passes through our servers.'**
+  String get checkoutTrustCallout;
+
+  /// No description provided for @loyaltyHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family recognition'**
+  String get loyaltyHubTitle;
+
+  /// No description provided for @loyaltyHubSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn points from completed top-ups. No games or drawings — just transparent activity you control.'**
+  String get loyaltyHubSubtitle;
+
+  /// No description provided for @loyaltyLifetimePoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime points'**
+  String get loyaltyLifetimePoints;
+
+  /// No description provided for @loyaltyMonthPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get loyaltyMonthPoints;
+
+  /// No description provided for @loyaltyMonthRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly placement'**
+  String get loyaltyMonthRank;
+
+  /// No description provided for @loyaltyGroupPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Family group points'**
+  String get loyaltyGroupPoints;
+
+  /// No description provided for @loyaltyGroupRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Group placement'**
+  String get loyaltyGroupRank;
+
+  /// No description provided for @loyaltyLeaderboardTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get loyaltyLeaderboardTab;
+
+  /// No description provided for @loyaltyYouTab.
+  ///
+  /// In en, this message translates to:
+  /// **'You & family'**
+  String get loyaltyYouTab;
+
+  /// No description provided for @loyaltyTopGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Top groups'**
+  String get loyaltyTopGroups;
+
+  /// No description provided for @loyaltyTopMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top participants'**
+  String get loyaltyTopMembers;
+
+  /// No description provided for @loyaltyRecognitionBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition band'**
+  String get loyaltyRecognitionBand;
+
+  /// No description provided for @loyaltyProgressClimb.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up the leaderboard with qualifying orders — never random chance.'**
+  String get loyaltyProgressClimb;
+
+  /// No description provided for @loyaltyLegalFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Points are based on successful orders only. There is no lottery, sweepstakes, or prize game.'**
+  String get loyaltyLegalFootnote;
+
+  /// No description provided for @loyaltyCreateGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Create family group'**
+  String get loyaltyCreateGroup;
+
+  /// No description provided for @loyaltyJoinGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with invite code'**
+  String get loyaltyJoinGroup;
+
+  /// No description provided for @loyaltyInviteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners can share the invite code from this screen. Keep it in trusted chats only.'**
+  String get loyaltyInviteHint;
+
+  /// No description provided for @loyaltyDissolveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'End group'**
+  String get loyaltyDissolveGroup;
+
+  /// No description provided for @loyaltyLeaveGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get loyaltyLeaveGroup;
+
+  /// No description provided for @loyaltyRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get loyaltyRefresh;
+
+  /// No description provided for @hubTileLoyaltyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family recognition'**
+  String get hubTileLoyaltyTitle;
+
+  /// No description provided for @hubTileLoyaltySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Points · leaderboard · invites'**
+  String get hubTileLoyaltySub;
+
+  /// No description provided for @loyaltyDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left this month'**
+  String loyaltyDaysLeft(int days);
+
+  /// No description provided for @loyaltyPointsToRankAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts to tie #{rank}'**
+  String loyaltyPointsToRankAhead(int points, int rank);
+
+  /// No description provided for @loyaltyRanksToTier.
+  ///
+  /// In en, this message translates to:
+  /// **'{ranks} ranks to reach {tier}'**
+  String loyaltyRanksToTier(int ranks, String tier);
+
+  /// No description provided for @loyaltyYouPlacement.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} this month'**
+  String loyaltyYouPlacement(String label);
+
+  /// No description provided for @loyaltyTightBehind.
+  ///
+  /// In en, this message translates to:
+  /// **'The field behind you is close — steady orders help hold your place.'**
+  String get loyaltyTightBehind;
+
+  /// No description provided for @loyaltyChasingPack.
+  ///
+  /// In en, this message translates to:
+  /// **'#{rank} trails by {pts} pts'**
+  String loyaltyChasingPack(int rank, int pts);
+
+  /// No description provided for @loyaltyProgressYourMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly momentum'**
+  String get loyaltyProgressYourMonthTitle;
+
+  /// No description provided for @loyaltyProgressGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family monthly momentum'**
+  String get loyaltyProgressGroupTitle;
+
+  /// No description provided for @loyaltyProgressTierTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier runway'**
+  String get loyaltyProgressTierTitle;
+
+  /// No description provided for @loyaltyProgressRankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing on the rank ahead'**
+  String get loyaltyProgressRankTitle;
+
+  /// No description provided for @loyaltyGroupBoardGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{pts} pts to move up vs top groups'**
+  String loyaltyGroupBoardGap(int pts);
+
+  /// No description provided for @loyaltyYourShareOfFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Your share of this month\'s family points: {pct}%'**
+  String loyaltyYourShareOfFamily(int pct);
+
+  /// No description provided for @loyaltySoloFamilyMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re setting the pace for your family\'s month.'**
+  String get loyaltySoloFamilyMonth;
+
+  /// No description provided for @loyaltyCarryingMost.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re carrying most of this month\'s family activity.'**
+  String get loyaltyCarryingMost;
+
+  /// No description provided for @loyaltyAchievementsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Milestones'**
+  String get loyaltyAchievementsHeading;
+
+  /// No description provided for @loyaltyAchFirstOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First qualifying order'**
+  String get loyaltyAchFirstOrderTitle;
+
+  /// No description provided for @loyaltyAchFirstOrderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognition starts with one completed top-up.'**
+  String get loyaltyAchFirstOrderSub;
+
+  /// No description provided for @loyaltyAchCenturyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'100 lifetime points'**
+  String get loyaltyAchCenturyTitle;
+
+  /// No description provided for @loyaltyAchCenturySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency adds up — thank you for staying with us.'**
+  String get loyaltyAchCenturySub;
+
+  /// No description provided for @loyaltyAchGroupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family orbit'**
+  String get loyaltyAchGroupTitle;
+
+  /// No description provided for @loyaltyAchGroupSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family group crossed a visibility milestone together.'**
+  String get loyaltyAchGroupSub;
+
+  /// No description provided for @loyaltyRankBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank'**
+  String get loyaltyRankBadge;
+
+  /// No description provided for @notifOrderPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment secured'**
+  String get notifOrderPaymentTitle;
+
+  /// No description provided for @notifOrderPaymentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your top-up is confirmed. We’re preparing delivery now.'**
+  String get notifOrderPaymentBody;
+
+  /// No description provided for @notifOrderPreparingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your top-up'**
+  String get notifOrderPreparingTitle;
+
+  /// No description provided for @notifOrderPreparingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re aligning delivery with the network you selected.'**
+  String get notifOrderPreparingBody;
+
+  /// No description provided for @notifOrderSendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending to the operator'**
+  String get notifOrderSendingTitle;
+
+  /// No description provided for @notifOrderSendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit is on the way — most finish within a few minutes.'**
+  String get notifOrderSendingBody;
+
+  /// No description provided for @notifOrderDeliveredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get notifOrderDeliveredTitle;
+
+  /// No description provided for @notifOrderDeliveredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your line should show the top-up. Tap to view your receipt.'**
+  String get notifOrderDeliveredBody;
+
+  /// No description provided for @notifOrderRetryingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Taking another moment'**
+  String get notifOrderRetryingTitle;
+
+  /// No description provided for @notifOrderRetryingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The network asked for a retry — we’re handling it for you.'**
+  String get notifOrderRetryingBody;
+
+  /// No description provided for @notifOrderFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re here to help'**
+  String get notifOrderFailedTitle;
+
+  /// No description provided for @notifOrderFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your payment stayed protected. Open the order for calm next steps.'**
+  String get notifOrderFailedBody;
+
+  /// No description provided for @notifInboxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get notifInboxTitle;
+
+  /// No description provided for @notifInboxEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re all caught up. We’ll let you know when something changes.'**
+  String get notifInboxEmpty;
+
+  /// No description provided for @notifHubTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifHubTooltip;
+
+  /// No description provided for @notifLoyaltyRankUpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You moved up'**
+  String get notifLoyaltyRankUpTitle;
+
+  /// No description provided for @notifLoyaltyRankUpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly standing improved — see Family recognition.'**
+  String get notifLoyaltyRankUpBody;
+
+  /// No description provided for @notifLoyaltyRankDownTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rankings shifted'**
+  String get notifLoyaltyRankDownTitle;
+
+  /// No description provided for @notifLoyaltyRankDownBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Others moved ahead this month — steady activity keeps you in the race.'**
+  String get notifLoyaltyRankDownBody;
+
+  /// No description provided for @notifLoyaltyMilestoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Points milestone'**
+  String get notifLoyaltyMilestoneTitle;
+
+  /// No description provided for @notifLoyaltyMilestoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You crossed a recognition milestone — open Family recognition.'**
+  String get notifLoyaltyMilestoneBody;
+
+  /// No description provided for @notifLoyaltyMonthUrgencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Month closing soon'**
+  String get notifLoyaltyMonthUrgencyTitle;
+
+  /// No description provided for @notifLoyaltyMonthUrgencyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Just a few days left to firm up this month’s placement.'**
+  String get notifLoyaltyMonthUrgencyBody;
+
+  /// No description provided for @notifMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get notifMarkAllRead;
+
+  /// No description provided for @helpCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help center'**
+  String get helpCenterTitle;
+
+  /// No description provided for @helpCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight answers about payments, delivery, and your orders — in plain language.'**
+  String get helpCenterSubtitle;
+
+  /// No description provided for @helpSectionPaymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment safety'**
+  String get helpSectionPaymentTitle;
+
+  /// No description provided for @helpSectionPaymentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout runs on Stripe’s secure page. Zora-Walat never sees or stores your full card number. If a charge appears, your bank authorized it — we only complete the top-up you confirmed.'**
+  String get helpSectionPaymentBody;
+
+  /// No description provided for @helpSectionDeliveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery timing'**
+  String get helpSectionDeliveryTitle;
+
+  /// No description provided for @helpSectionDeliveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Afghan mobile top-ups finish within a few minutes. Operator networks occasionally need extra time. Pull to refresh on your order — status updates as soon as our partners report back.'**
+  String get helpSectionDeliveryBody;
+
+  /// No description provided for @helpSectionRetryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Retries and short delays'**
+  String get helpSectionRetryTitle;
+
+  /// No description provided for @helpSectionRetryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When a network asks for another attempt, our systems retry automatically. You don’t need to pay again. If an order stays unusual longer than expected, your payment record stays safe while we work with the operator.'**
+  String get helpSectionRetryBody;
+
+  /// No description provided for @helpSectionTrackingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order tracking'**
+  String get helpSectionTrackingTitle;
+
+  /// No description provided for @helpSectionTrackingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent orders show the same stages you’d expect from a carrier: payment confirmed, preparation, handoff to the operator, then delivered. Anything that needs your attention is labeled clearly — never hidden in technical jargon.'**
+  String get helpSectionTrackingBody;
+
+  /// No description provided for @helpSectionLoyaltyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rewards and family points'**
+  String get helpSectionLoyaltyTitle;
+
+  /// No description provided for @helpSectionLoyaltyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Successful top-ups earn recognition points for you and optional family groups. There’s no random drawing — placement reflects real activity you can see on the leaderboard.'**
+  String get helpSectionLoyaltyBody;
+
+  /// No description provided for @helpSectionContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact and next steps'**
+  String get helpSectionContactTitle;
+
+  /// No description provided for @helpSectionContactBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open any order and tap “Copy for support” to grab a professional summary (order reference, network, masked number, statuses, and time). Share that with whoever assists you — it’s the fastest way to get precise help without exposing private details.'**
+  String get helpSectionContactBody;
+
+  /// No description provided for @helpOpenLoyalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Open family recognition'**
+  String get helpOpenLoyalty;
+
+  /// No description provided for @supportNeedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Need help?'**
+  String get supportNeedHelp;
+
+  /// No description provided for @supportOpenHelpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help center'**
+  String get supportOpenHelpCenter;
+
+  /// No description provided for @supportCopyPacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy for support'**
+  String get supportCopyPacket;
+
+  /// No description provided for @supportPacketCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Support summary copied'**
+  String get supportPacketCopied;
+
+  /// No description provided for @supportPacketHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Zora-Walat — support summary'**
+  String get supportPacketHeader;
+
+  /// No description provided for @supportPacketOrderRef.
+  ///
+  /// In en, this message translates to:
+  /// **'Order reference'**
+  String get supportPacketOrderRef;
+
+  /// No description provided for @supportPacketRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get supportPacketRoute;
+
+  /// No description provided for @supportPacketRouteValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile top-up (airtime / data)'**
+  String get supportPacketRouteValue;
+
+  /// No description provided for @supportPacketRecipient.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipient (masked)'**
+  String get supportPacketRecipient;
+
+  /// No description provided for @supportPacketUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get supportPacketUpdated;
+
+  /// No description provided for @supportAssistRetryingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re retrying automatically'**
+  String get supportAssistRetryingTitle;
+
+  /// No description provided for @supportAssistRetryingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The operator network requested another delivery attempt. That’s common — our systems handle retries so you don’t have to start over or pay twice.'**
+  String get supportAssistRetryingBody;
+
+  /// No description provided for @supportAssistRetryingNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: wait a few minutes, then pull down to refresh. You’ll see each update here.'**
+  String get supportAssistRetryingNext;
+
+  /// No description provided for @supportAssistDelayedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still catching up'**
+  String get supportAssistDelayedTitle;
+
+  /// No description provided for @supportAssistDelayedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This order is taking a bit longer than usual to sync or deliver. Your payment is already logged — nothing disappears when timing stretches.'**
+  String get supportAssistDelayedBody;
+
+  /// No description provided for @supportAssistDelayedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: refresh this screen, check recent orders, and sign in if prompted so live status can sync.'**
+  String get supportAssistDelayedNext;
+
+  /// No description provided for @supportAssistFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re reviewing with care'**
+  String get supportAssistFailedTitle;
+
+  /// No description provided for @supportAssistFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery didn’t finish on the first path, but your payment stayed protected. Our team and partners can reconcile using your order reference — no need to panic or repeat payment.'**
+  String get supportAssistFailedBody;
+
+  /// No description provided for @supportAssistFailedNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: copy the support summary from this screen and share it when you reach out. Keep the app handy for updates.'**
+  String get supportAssistFailedNext;
+
+  /// No description provided for @supportAssistPaymentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment still confirming'**
+  String get supportAssistPaymentConfirmTitle;
+
+  /// No description provided for @supportAssistPaymentConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your bank or card network is finishing authorization. That can take a short moment. We don’t start delivery until payment is fully confirmed — your line isn’t charged twice.'**
+  String get supportAssistPaymentConfirmBody;
+
+  /// No description provided for @supportAssistPaymentConfirmNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: stay on this screen briefly; if it lingers, refresh or check your recent orders after a minute.'**
+  String get supportAssistPaymentConfirmNext;
+
+  /// No description provided for @supportAssistOperatorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting on operator confirmation'**
+  String get supportAssistOperatorTitle;
+
+  /// No description provided for @supportAssistOperatorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit has left our side and is with the mobile operator. Most confirmations arrive quickly; some networks batch their acknowledgements.'**
+  String get supportAssistOperatorBody;
+
+  /// No description provided for @supportAssistOperatorNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: give it a few minutes, refresh, then check the recipient’s balance on the network if needed.'**
+  String get supportAssistOperatorNext;
+
+  /// No description provided for @supportAssistCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Order cancelled'**
+  String get supportAssistCancelledTitle;
+
+  /// No description provided for @supportAssistCancelledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This session stopped before a successful charge. You can start a fresh top-up whenever you like — nothing here is stuck in limbo.'**
+  String get supportAssistCancelledBody;
+
+  /// No description provided for @supportAssistCancelledNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Best next step: return to recharge, double-check the number, and complete checkout again if you still need airtime.'**
+  String get supportAssistCancelledNext;
+
+  /// No description provided for @supportReassuranceFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment safety and careful review stay on our side — you’ll always see honest status here.'**
+  String get supportReassuranceFooter;
+
+  /// No description provided for @supportOrderListHelpTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get supportOrderListHelpTooltip;
+
+  /// No description provided for @hubTileHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & support'**
+  String get hubTileHelpTitle;
+
+  /// No description provided for @hubTileHelpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Guides · payment safety · copy order details'**
+  String get hubTileHelpSub;
+
+  /// No description provided for @ordersDetailLoadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your receipt…'**
+  String get ordersDetailLoadingHint;
+
+  /// No description provided for @ordersEmptySupportLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions? Open Help & support from home for calm guidance.'**
+  String get ordersEmptySupportLine;
 }
 
 class _AppLocalizationsDelegate

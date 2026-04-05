@@ -7,10 +7,13 @@ import 'package:zora_walat/core/auth/auth_session.dart';
 import 'package:zora_walat/core/locale/locale_controller.dart';
 import 'package:zora_walat/core/onboarding/onboarding_prefs.dart';
 import 'package:zora_walat/features/telecom/data/telecom_service.dart';
+import 'package:zora_walat/features/orders/data/local_order_history_store.dart';
 import 'package:zora_walat/features/transactions/data/transaction_log_store.dart';
 import 'package:zora_walat/services/api_service.dart';
 import 'package:zora_walat/services/auth_api_service.dart';
 import 'package:zora_walat/services/payment_service.dart';
+import 'package:zora_walat/core/notifications/app_notification_hub.dart';
+import 'package:zora_walat/core/notifications/in_app_notification_store.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +27,7 @@ void main() {
     final localeController = LocaleController(prefs);
     final onboardingPrefs = OnboardingPrefs(prefs);
     final log = TransactionLogStore(prefs);
+    final orderHistory = LocalOrderHistoryStore(prefs);
     final httpClient = http.Client();
     const base = 'http://localhost:0';
     final authSession = AuthSession(prefs);
@@ -36,6 +40,8 @@ void main() {
       authApi: authApi,
     );
     final paymentService = PaymentService(api: apiService);
+    final notificationStore = InAppNotificationStore(prefs);
+    final notificationHub = AppNotificationHub(store: notificationStore);
 
     await tester.pumpWidget(
       ZoraWalatApp(
@@ -46,7 +52,10 @@ void main() {
         paymentService: paymentService,
         telecomService: const PlaceholderTelecomService(),
         transactionLog: log,
+        orderHistory: orderHistory,
         apiService: apiService,
+        notificationStore: notificationStore,
+        notificationHub: notificationHub,
       ),
     );
     await tester.pump(const Duration(milliseconds: 2300));

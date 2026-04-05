@@ -600,4 +600,660 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get landingFooterNote => 'Zora-Walat · Afghanistan mobile top-up';
+
+  @override
+  String get successScreenTitle => 'You’re all set';
+
+  @override
+  String get successPaymentConfirmed => 'Payment received';
+
+  @override
+  String get successStripeConfirmedShort =>
+      'Your bank authorized this purchase. We’re completing your top-up now.';
+
+  @override
+  String get receiptTitle => 'Receipt';
+
+  @override
+  String get receiptOrderRef => 'Order reference';
+
+  @override
+  String get receiptPaymentStatus => 'Payment';
+
+  @override
+  String get receiptFulfillmentStatus => 'Top-up status';
+
+  @override
+  String get receiptWhatNextTitle => 'What happens next';
+
+  @override
+  String get receiptWhatNextBody =>
+      'We’ll send credit to the operator network you selected. Most top-ups finish within a few minutes. This screen stays available in your recent orders.';
+
+  @override
+  String get successViewOrders => 'View recent orders';
+
+  @override
+  String get successBackHome => 'Back to home';
+
+  @override
+  String get trustSecurePayment => 'Secure payment';
+
+  @override
+  String get trustEncrypted => 'Encrypted checkout';
+
+  @override
+  String get trustTransparentPricing => 'Clear pricing';
+
+  @override
+  String get trustLiveTracking => 'Live tracking';
+
+  @override
+  String get timelineTitle => 'Order progress';
+
+  @override
+  String get timelinePayment => 'Payment received';
+
+  @override
+  String get timelinePreparing => 'Preparing your top-up';
+
+  @override
+  String get timelineSending => 'Sending to operator';
+
+  @override
+  String get timelineDelivered => 'Delivered to line';
+
+  @override
+  String get trackingHeadlineDelivered => 'Credit is on its way';
+
+  @override
+  String get trackingBodyDelivered =>
+      'Your payment is secure and the carrier is applying credit to the number you chose. You’ll see a confirmation reference when the network finishes.';
+
+  @override
+  String get trackingHeadlineNeedsHelp => 'We couldn’t finish this top-up';
+
+  @override
+  String get trackingBodyFailedCalm =>
+      'Your payment went through safely — nothing was lost. Our team can review this order and help complete delivery. Save your order reference if you contact support.';
+
+  @override
+  String get trackingHeadlineRetrying => 'Taking another path to deliver';
+
+  @override
+  String get trackingBodyRetrying =>
+      'Sometimes networks need a moment. We’re retrying delivery automatically so you don’t have to do anything yet.';
+
+  @override
+  String get trackingHeadlineSending => 'Sending credit now';
+
+  @override
+  String get trackingBodySending =>
+      'Your package is moving to the mobile operator. This usually completes quickly.';
+
+  @override
+  String get trackingHeadlinePreparing => 'Preparing your top-up';
+
+  @override
+  String get trackingBodyPreparing =>
+      'Your payment is confirmed. We’re lining up delivery to the correct network and number.';
+
+  @override
+  String get trackingHeadlinePaymentConfirming => 'Confirming your payment';
+
+  @override
+  String get trackingBodyPaymentConfirming =>
+      'Your bank is finishing authorization. Sit tight — delivery will begin right after confirmation.';
+
+  @override
+  String get trackingHeadlinePaymentReceived => 'Payment secured';
+
+  @override
+  String get trackingBodyPaymentReceived =>
+      'Stripe confirmed your payment. The next steps happen automatically on our side.';
+
+  @override
+  String get trackingHeadlineCatchingUp => 'Almost there';
+
+  @override
+  String get trackingBodyCatchingUp =>
+      'We’re syncing the latest status. Your payment is recorded — check back in a minute or open recent orders.';
+
+  @override
+  String get trackingHeadlineSignIn => 'Sign in to see live status';
+
+  @override
+  String get trackingBodySignIn =>
+      'Your payment is on file. Sign in to refresh delivery details whenever you like.';
+
+  @override
+  String get paymentSafeBanner =>
+      'Your payment is protected. Charges are processed by Stripe — we never store your card.';
+
+  @override
+  String get cancelScreenTitle => 'Checkout paused';
+
+  @override
+  String get cancelScreenLead => 'No worries — you can try again anytime.';
+
+  @override
+  String get cancelScreenBody =>
+      'Nothing was charged. When you’re ready, return to your order and continue with secure checkout.';
+
+  @override
+  String get cancelBackHome => 'Back to home';
+
+  @override
+  String get ordersScreenTitle => 'Recent orders';
+
+  @override
+  String get ordersEmptyTitle => 'No orders yet';
+
+  @override
+  String get ordersEmptyBody =>
+      'After you complete a top-up, a receipt appears here on this device so you can track delivery.';
+
+  @override
+  String get ordersEmptyBodySignedIn =>
+      'When you complete a top-up while signed in, your receipts stay with your account and sync here. You can still see device-only drafts from before sign-in.';
+
+  @override
+  String get ordersSourceAccount => 'Synced';
+
+  @override
+  String get ordersSourceDevice => 'This device';
+
+  @override
+  String get ordersCloudRefreshFailed =>
+      'We couldn’t reach your account orders. Showing what’s saved on this device.';
+
+  @override
+  String get ordersDetailTitle => 'Order details';
+
+  @override
+  String get ordersSectionLive => 'Current status';
+
+  @override
+  String get ordersSectionRecord => 'Receipt';
+
+  @override
+  String get ordersCopyReference => 'Copy reference';
+
+  @override
+  String get ordersReferenceCopied => 'Reference copied';
+
+  @override
+  String get trackingHeadlineCancelled => 'This order was cancelled';
+
+  @override
+  String get trackingBodyCancelled =>
+      'No charge was completed for this order. You can start a new top-up anytime.';
+
+  @override
+  String ordersLastUpdated(String time) {
+    return 'Updated $time';
+  }
+
+  @override
+  String get orderStatusDelivered => 'Delivered';
+
+  @override
+  String get orderStatusInProgress => 'In progress';
+
+  @override
+  String get orderStatusRetrying => 'Retrying';
+
+  @override
+  String get orderStatusFailed => 'Needs attention';
+
+  @override
+  String get orderStatusPaymentPending => 'Confirming payment';
+
+  @override
+  String get orderStatusCancelled => 'Cancelled';
+
+  @override
+  String get orderStatusSending => 'Sending';
+
+  @override
+  String get orderStatusPreparing => 'Preparing';
+
+  @override
+  String get hubTileOrdersTitle => 'Recent orders';
+
+  @override
+  String get hubTileOrdersSub => 'Receipts · synced when signed in';
+
+  @override
+  String get receiptPaymentPaid => 'Paid';
+
+  @override
+  String get receiptPaymentPending => 'Confirming';
+
+  @override
+  String get receiptFulfillmentDone => 'Sent';
+
+  @override
+  String get receiptFulfillmentProgress => 'Processing';
+
+  @override
+  String get receiptCarrierRef => 'Carrier reference';
+
+  @override
+  String get rechargeFailureCalmTitle => 'Checkout didn’t complete';
+
+  @override
+  String get rechargeFailureCalmBody =>
+      'Nothing was charged. Check your connection and try again — your details are still here.';
+
+  @override
+  String get checkoutTrustCallout =>
+      'You’ll complete payment on a secure Stripe page. Your card never passes through our servers.';
+
+  @override
+  String get loyaltyHubTitle => 'Family recognition';
+
+  @override
+  String get loyaltyHubSubtitle =>
+      'Earn points from completed top-ups. No games or drawings — just transparent activity you control.';
+
+  @override
+  String get loyaltyLifetimePoints => 'Lifetime points';
+
+  @override
+  String get loyaltyMonthPoints => 'This month';
+
+  @override
+  String get loyaltyMonthRank => 'Monthly placement';
+
+  @override
+  String get loyaltyGroupPoints => 'Family group points';
+
+  @override
+  String get loyaltyGroupRank => 'Group placement';
+
+  @override
+  String get loyaltyLeaderboardTab => 'Leaderboard';
+
+  @override
+  String get loyaltyYouTab => 'You & family';
+
+  @override
+  String get loyaltyTopGroups => 'Top groups';
+
+  @override
+  String get loyaltyTopMembers => 'Top participants';
+
+  @override
+  String get loyaltyRecognitionBand => 'Recognition band';
+
+  @override
+  String get loyaltyProgressClimb =>
+      'Move up the leaderboard with qualifying orders — never random chance.';
+
+  @override
+  String get loyaltyLegalFootnote =>
+      'Points are based on successful orders only. There is no lottery, sweepstakes, or prize game.';
+
+  @override
+  String get loyaltyCreateGroup => 'Create family group';
+
+  @override
+  String get loyaltyJoinGroup => 'Join with invite code';
+
+  @override
+  String get loyaltyInviteHint =>
+      'Owners can share the invite code from this screen. Keep it in trusted chats only.';
+
+  @override
+  String get loyaltyDissolveGroup => 'End group';
+
+  @override
+  String get loyaltyLeaveGroup => 'Leave group';
+
+  @override
+  String get loyaltyRefresh => 'Refresh';
+
+  @override
+  String get hubTileLoyaltyTitle => 'Family recognition';
+
+  @override
+  String get hubTileLoyaltySub => 'Points · leaderboard · invites';
+
+  @override
+  String loyaltyDaysLeft(int days) {
+    return '$days days left this month';
+  }
+
+  @override
+  String loyaltyPointsToRankAhead(int points, int rank) {
+    return '$points pts to tie #$rank';
+  }
+
+  @override
+  String loyaltyRanksToTier(int ranks, String tier) {
+    return '$ranks ranks to reach $tier';
+  }
+
+  @override
+  String loyaltyYouPlacement(String label) {
+    return '$label this month';
+  }
+
+  @override
+  String get loyaltyTightBehind =>
+      'The field behind you is close — steady orders help hold your place.';
+
+  @override
+  String loyaltyChasingPack(int rank, int pts) {
+    return '#$rank trails by $pts pts';
+  }
+
+  @override
+  String get loyaltyProgressYourMonthTitle => 'Your monthly momentum';
+
+  @override
+  String get loyaltyProgressGroupTitle => 'Family monthly momentum';
+
+  @override
+  String get loyaltyProgressTierTitle => 'Tier runway';
+
+  @override
+  String get loyaltyProgressRankTitle => 'Closing on the rank ahead';
+
+  @override
+  String loyaltyGroupBoardGap(int pts) {
+    return '$pts pts to move up vs top groups';
+  }
+
+  @override
+  String loyaltyYourShareOfFamily(int pct) {
+    return 'Your share of this month\'s family points: $pct%';
+  }
+
+  @override
+  String get loyaltySoloFamilyMonth =>
+      'You\'re setting the pace for your family\'s month.';
+
+  @override
+  String get loyaltyCarryingMost =>
+      'You\'re carrying most of this month\'s family activity.';
+
+  @override
+  String get loyaltyAchievementsHeading => 'Milestones';
+
+  @override
+  String get loyaltyAchFirstOrderTitle => 'First qualifying order';
+
+  @override
+  String get loyaltyAchFirstOrderSub =>
+      'Recognition starts with one completed top-up.';
+
+  @override
+  String get loyaltyAchCenturyTitle => '100 lifetime points';
+
+  @override
+  String get loyaltyAchCenturySub =>
+      'Consistency adds up — thank you for staying with us.';
+
+  @override
+  String get loyaltyAchGroupTitle => 'Family orbit';
+
+  @override
+  String get loyaltyAchGroupSub =>
+      'Your family group crossed a visibility milestone together.';
+
+  @override
+  String get loyaltyRankBadge => 'Rank';
+
+  @override
+  String get notifOrderPaymentTitle => 'Payment secured';
+
+  @override
+  String get notifOrderPaymentBody =>
+      'Your top-up is confirmed. We’re preparing delivery now.';
+
+  @override
+  String get notifOrderPreparingTitle => 'Preparing your top-up';
+
+  @override
+  String get notifOrderPreparingBody =>
+      'We’re aligning delivery with the network you selected.';
+
+  @override
+  String get notifOrderSendingTitle => 'Sending to the operator';
+
+  @override
+  String get notifOrderSendingBody =>
+      'Credit is on the way — most finish within a few minutes.';
+
+  @override
+  String get notifOrderDeliveredTitle => 'Delivered';
+
+  @override
+  String get notifOrderDeliveredBody =>
+      'Your line should show the top-up. Tap to view your receipt.';
+
+  @override
+  String get notifOrderRetryingTitle => 'Taking another moment';
+
+  @override
+  String get notifOrderRetryingBody =>
+      'The network asked for a retry — we’re handling it for you.';
+
+  @override
+  String get notifOrderFailedTitle => 'We’re here to help';
+
+  @override
+  String get notifOrderFailedBody =>
+      'Your payment stayed protected. Open the order for calm next steps.';
+
+  @override
+  String get notifInboxTitle => 'Updates';
+
+  @override
+  String get notifInboxEmpty =>
+      'You’re all caught up. We’ll let you know when something changes.';
+
+  @override
+  String get notifHubTooltip => 'Notifications';
+
+  @override
+  String get notifLoyaltyRankUpTitle => 'You moved up';
+
+  @override
+  String get notifLoyaltyRankUpBody =>
+      'Your monthly standing improved — see Family recognition.';
+
+  @override
+  String get notifLoyaltyRankDownTitle => 'Rankings shifted';
+
+  @override
+  String get notifLoyaltyRankDownBody =>
+      'Others moved ahead this month — steady activity keeps you in the race.';
+
+  @override
+  String get notifLoyaltyMilestoneTitle => 'Points milestone';
+
+  @override
+  String get notifLoyaltyMilestoneBody =>
+      'You crossed a recognition milestone — open Family recognition.';
+
+  @override
+  String get notifLoyaltyMonthUrgencyTitle => 'Month closing soon';
+
+  @override
+  String get notifLoyaltyMonthUrgencyBody =>
+      'Just a few days left to firm up this month’s placement.';
+
+  @override
+  String get notifMarkAllRead => 'Mark all read';
+
+  @override
+  String get helpCenterTitle => 'Help center';
+
+  @override
+  String get helpCenterSubtitle =>
+      'Straight answers about payments, delivery, and your orders — in plain language.';
+
+  @override
+  String get helpSectionPaymentTitle => 'Payment safety';
+
+  @override
+  String get helpSectionPaymentBody =>
+      'Checkout runs on Stripe’s secure page. Zora-Walat never sees or stores your full card number. If a charge appears, your bank authorized it — we only complete the top-up you confirmed.';
+
+  @override
+  String get helpSectionDeliveryTitle => 'Delivery timing';
+
+  @override
+  String get helpSectionDeliveryBody =>
+      'Most Afghan mobile top-ups finish within a few minutes. Operator networks occasionally need extra time. Pull to refresh on your order — status updates as soon as our partners report back.';
+
+  @override
+  String get helpSectionRetryTitle => 'Retries and short delays';
+
+  @override
+  String get helpSectionRetryBody =>
+      'When a network asks for another attempt, our systems retry automatically. You don’t need to pay again. If an order stays unusual longer than expected, your payment record stays safe while we work with the operator.';
+
+  @override
+  String get helpSectionTrackingTitle => 'Order tracking';
+
+  @override
+  String get helpSectionTrackingBody =>
+      'Recent orders show the same stages you’d expect from a carrier: payment confirmed, preparation, handoff to the operator, then delivered. Anything that needs your attention is labeled clearly — never hidden in technical jargon.';
+
+  @override
+  String get helpSectionLoyaltyTitle => 'Rewards and family points';
+
+  @override
+  String get helpSectionLoyaltyBody =>
+      'Successful top-ups earn recognition points for you and optional family groups. There’s no random drawing — placement reflects real activity you can see on the leaderboard.';
+
+  @override
+  String get helpSectionContactTitle => 'Contact and next steps';
+
+  @override
+  String get helpSectionContactBody =>
+      'Open any order and tap “Copy for support” to grab a professional summary (order reference, network, masked number, statuses, and time). Share that with whoever assists you — it’s the fastest way to get precise help without exposing private details.';
+
+  @override
+  String get helpOpenLoyalty => 'Open family recognition';
+
+  @override
+  String get supportNeedHelp => 'Need help?';
+
+  @override
+  String get supportOpenHelpCenter => 'Help center';
+
+  @override
+  String get supportCopyPacket => 'Copy for support';
+
+  @override
+  String get supportPacketCopied => 'Support summary copied';
+
+  @override
+  String get supportPacketHeader => 'Zora-Walat — support summary';
+
+  @override
+  String get supportPacketOrderRef => 'Order reference';
+
+  @override
+  String get supportPacketRoute => 'Route';
+
+  @override
+  String get supportPacketRouteValue => 'Mobile top-up (airtime / data)';
+
+  @override
+  String get supportPacketRecipient => 'Recipient (masked)';
+
+  @override
+  String get supportPacketUpdated => 'Last updated';
+
+  @override
+  String get supportAssistRetryingTitle => 'We’re retrying automatically';
+
+  @override
+  String get supportAssistRetryingBody =>
+      'The operator network requested another delivery attempt. That’s common — our systems handle retries so you don’t have to start over or pay twice.';
+
+  @override
+  String get supportAssistRetryingNext =>
+      'Best next step: wait a few minutes, then pull down to refresh. You’ll see each update here.';
+
+  @override
+  String get supportAssistDelayedTitle => 'Still catching up';
+
+  @override
+  String get supportAssistDelayedBody =>
+      'This order is taking a bit longer than usual to sync or deliver. Your payment is already logged — nothing disappears when timing stretches.';
+
+  @override
+  String get supportAssistDelayedNext =>
+      'Best next step: refresh this screen, check recent orders, and sign in if prompted so live status can sync.';
+
+  @override
+  String get supportAssistFailedTitle => 'We’re reviewing with care';
+
+  @override
+  String get supportAssistFailedBody =>
+      'Delivery didn’t finish on the first path, but your payment stayed protected. Our team and partners can reconcile using your order reference — no need to panic or repeat payment.';
+
+  @override
+  String get supportAssistFailedNext =>
+      'Best next step: copy the support summary from this screen and share it when you reach out. Keep the app handy for updates.';
+
+  @override
+  String get supportAssistPaymentConfirmTitle => 'Payment still confirming';
+
+  @override
+  String get supportAssistPaymentConfirmBody =>
+      'Your bank or card network is finishing authorization. That can take a short moment. We don’t start delivery until payment is fully confirmed — your line isn’t charged twice.';
+
+  @override
+  String get supportAssistPaymentConfirmNext =>
+      'Best next step: stay on this screen briefly; if it lingers, refresh or check your recent orders after a minute.';
+
+  @override
+  String get supportAssistOperatorTitle => 'Waiting on operator confirmation';
+
+  @override
+  String get supportAssistOperatorBody =>
+      'Credit has left our side and is with the mobile operator. Most confirmations arrive quickly; some networks batch their acknowledgements.';
+
+  @override
+  String get supportAssistOperatorNext =>
+      'Best next step: give it a few minutes, refresh, then check the recipient’s balance on the network if needed.';
+
+  @override
+  String get supportAssistCancelledTitle => 'Order cancelled';
+
+  @override
+  String get supportAssistCancelledBody =>
+      'This session stopped before a successful charge. You can start a fresh top-up whenever you like — nothing here is stuck in limbo.';
+
+  @override
+  String get supportAssistCancelledNext =>
+      'Best next step: return to recharge, double-check the number, and complete checkout again if you still need airtime.';
+
+  @override
+  String get supportReassuranceFooter =>
+      'Payment safety and careful review stay on our side — you’ll always see honest status here.';
+
+  @override
+  String get supportOrderListHelpTooltip => 'Help';
+
+  @override
+  String get hubTileHelpTitle => 'Help & support';
+
+  @override
+  String get hubTileHelpSub => 'Guides · payment safety · copy order details';
+
+  @override
+  String get ordersDetailLoadingHint => 'Loading your receipt…';
+
+  @override
+  String get ordersEmptySupportLine =>
+      'Questions? Open Help & support from home for calm guidance.';
 }
