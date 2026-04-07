@@ -1,0 +1,9 @@
+/** Persisted on `PaymentCheckout.postPaymentIncidentStatus` (Phase 1). */
+export const POST_PAYMENT_INCIDENT_STATUS = Object.freeze({
+  NONE: 'NONE',
+  REFUND_REQUESTED_MANUAL: 'REFUND_REQUESTED_MANUAL',
+  REFUNDED: 'REFUNDED',
+  DISPUTED: 'DISPUTED',
+  CHARGEBACK_LOST: 'CHARGEBACK_LOST',
+  CHARGEBACK_WON: 'CHARGEBACK_WON',
+});

@@ -135,7 +135,7 @@ class _CtaRow extends StatelessWidget {
       builder: (context, c) {
         final row = c.maxWidth >= 420;
         final getStarted = FilledButton(
-          onPressed: () => context.go(AppRoutePaths.recharge),
+          onPressed: () => context.push(AppRoutePaths.signUp),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           ),

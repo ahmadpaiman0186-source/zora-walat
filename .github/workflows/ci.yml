@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: zw_phase1_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: server
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - name: Phase 1 money-path certification (migrate + unit + integration)
+        id: money_path
+        run: |
+          npm run db:migrate
+          npm run test:ci
+          echo "PHASE1_CI_MONEY_PATH_CERTIFIED=1" >> "$GITHUB_ENV"
+      - name: Launch readiness (post-certification)
+        run: npm run phase1:launch-readiness -- --strict --require-ci-money-path-certified
+      - name: Phase 1 money-path integrity summary
+        if: always()
+        run: |
+          if [ "${{ steps.money_path.outcome }}" = "success" ]; then
+            echo "## Phase 1 money-path integrity: PASS" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## Phase 1 money-path integrity: FAIL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: flutter test

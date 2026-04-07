@@ -27,20 +27,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'REPLACE_WEB_API_KEY',
-    appId: '1:000000000000:web:0000000000000000000000',
-    messagingSenderId: '000000000000',
-    projectId: 'replace-with-your-firebase-project',
-    authDomain: 'replace-with-your-firebase-project.firebaseapp.com',
-    storageBucket: 'replace-with-your-firebase-project.appspot.com',
+    apiKey: 'AIzaSyAqcluxHBlrIjv8HXUol00-gMpBoMgAeog',
+    appId: '1:1060511706874:web:ced4f3604b6389dd502343',
+    messagingSenderId: '1060511706874',
+    projectId: 'zora-walat-b90bb',
+    authDomain: 'zora-walat-b90bb.firebaseapp.com',
+    storageBucket: 'zora-walat-b90bb.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'REPLACE_ANDROID_API_KEY',
-    appId: '1:000000000000:android:0000000000000000000000',
-    messagingSenderId: '000000000000',
-    projectId: 'replace-with-your-firebase-project',
-    storageBucket: 'replace-with-your-firebase-project.appspot.com',
+    apiKey: 'AIzaSyA2xRoDw5A3_vLEWyV9OCMfHvx77IuZT1A',
+    appId: '1:1060511706874:android:18fe3367af33d866502343',
+    messagingSenderId: '1060511706874',
+    projectId: 'zora-walat-b90bb',
+    storageBucket: 'zora-walat-b90bb.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

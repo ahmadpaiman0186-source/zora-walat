@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/unauthorized_exception.dart';
+import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
@@ -31,6 +32,15 @@ enum _PaymentPhase {
 class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
   _PaymentPhase _phase = _PaymentPhase.idle;
   String? _errorMessage;
+  late String _senderCountry;
+
+  @override
+  void initState() {
+    super.initState();
+    _senderCountry = inferSenderCountryCodeFromLocale(
+      WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+    );
+  }
 
   String get _amountLabel {
     final a = widget.draft.amountUsd;
@@ -59,6 +69,7 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
     try {
       await paymentService.startCheckout(
         amountUsdCents: cents,
+        senderCountry: _senderCountry,
         currency: 'usd',
         operatorKey: widget.draft.operatorKey,
         recipientPhone: widget.draft.phoneE164Style,
@@ -271,9 +282,58 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                     color: t.colorScheme.outline,
                   ),
                 ),
+                const SizedBox(height: 10),
+                Text(
+                  l10n.rechargeReviewServerPricingNote,
+                  style: t.textTheme.bodySmall?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.35,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 const TrustStrip(compact: true),
                 const SizedBox(height: 20),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.checkoutCardRegionLabel,
+                    style: t.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: t.colorScheme.outline.withValues(alpha: 0.35),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _senderCountry,
+                      isExpanded: true,
+                      items: kPhase1SenderCountryCodes
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                '${kPhase1SenderCountryLabels[c] ?? c} ($c)',
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: _phase == _PaymentPhase.processing
+                          ? null
+                          : (v) {
+                              if (v != null) setState(() => _senderCountry = v);
+                            },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 _SummaryCard(
                   rows: [
                     _Row(l10n.recipientNumber, widget.draft.phoneE164Style),

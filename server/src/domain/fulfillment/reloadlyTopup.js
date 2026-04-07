@@ -227,11 +227,24 @@ function classifyTopupHttpFailure(status, json) {
  * Safe subset of a successful top-up JSON (no PINs, no balance details).
  * @param {object} json
  */
+/** Whitelisted cost-hint fields (no PII) — passed through when Reloadly returns them for reconciliation. */
+const RELOADLY_COST_HINT_KEYS = [
+  'wholesaleAmount',
+  'wholesalePrice',
+  'providerCost',
+  'cost',
+  'operatorCost',
+  'operatorAmountUSD',
+  'paidToOperatorUSD',
+  'pinCost',
+  'costUSD',
+];
+
 export function safeReloadlyTopupResponseSummary(json) {
   if (!json || typeof json !== 'object') {
     return {};
   }
-  return {
+  const base = {
     transactionId: json.transactionId != null ? Number(json.transactionId) : null,
     status: json.status != null ? String(json.status) : null,
     operatorTransactionId:
@@ -242,6 +255,16 @@ export function safeReloadlyTopupResponseSummary(json) {
     operatorName:
       json.operatorName != null ? String(json.operatorName).slice(0, 80) : null,
   };
+  for (const k of RELOADLY_COST_HINT_KEYS) {
+    const v = json[k];
+    if (v == null) continue;
+    if (typeof v === 'number' && Number.isFinite(v)) {
+      base[k] = v;
+    } else if (typeof v === 'string' && v.trim()) {
+      base[k] = v.trim().slice(0, 32);
+    }
+  }
+  return base;
 }
 
 /**

@@ -8,10 +8,7 @@ import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { assertTransition } from '../domain/orders/orderLifecycle.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
-import {
-  ensureQueuedFulfillmentAttempt,
-  scheduleFulfillmentProcessing,
-} from '../services/fulfillmentProcessingService.js';
+import { scheduleFulfillmentProcessing } from '../services/fulfillmentProcessingService.js';
 import {
   emitPaymentSuccessSideEffect,
   schedulePushSideEffect,
@@ -31,32 +28,21 @@ import {
   emitProviderDegradationAlert,
 } from '../lib/opsAlerts.js';
 import { logOpsEvent } from '../lib/opsLog.js';
+import { schedulePaymentCheckoutStripeFeeCapture } from '../services/paymentCheckoutStripeFeeService.js';
+import { applyPhase1CheckoutSessionCompleted } from '../services/phase1StripeCheckoutSessionCompleted.js';
+import {
+  applyPhase1ChargeRefunded,
+  applyPhase1DisputeCreated,
+} from '../services/phase1StripeChargeIncidents.js';
+import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
+import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
 
 const router = Router();
-
-const PAYMENT_PRE_SUCCESS = [
-  PAYMENT_CHECKOUT_STATUS.INITIATED,
-  PAYMENT_CHECKOUT_STATUS.PAYMENT_PENDING,
-  PAYMENT_CHECKOUT_STATUS.CHECKOUT_CREATED,
-];
 
 /** Generic responses — no Stripe or stack details to clients. */
 const ERR_INVALID = { error: 'Invalid request' };
 const ERR_UNAVAILABLE = { error: 'Service unavailable' };
-
-function stripePaymentIntentId(session) {
-  const pi = session.payment_intent;
-  if (typeof pi === 'string') return pi;
-  if (pi && typeof pi === 'object' && pi.id != null) return String(pi.id);
-  return null;
-}
-
-function stripeCustomerId(session) {
-  const c = session.customer;
-  if (typeof c === 'string') return c;
-  if (c && typeof c === 'object' && c.id != null) return String(c.id);
-  return null;
-}
 
 /**
  * Stripe webhook — raw body required for `constructEvent`.
@@ -89,13 +75,18 @@ router.post('/', async (req, res) => {
     return res.status(400).json(ERR_INVALID);
   }
 
-  req.log?.info({ eventType: event.type }, 'stripe webhook');
+  req.log?.info(
+    { eventType: event.type, traceId: req.traceId ?? null },
+    'stripe webhook',
+  );
 
   const stripeEventIdSuffix = safeSuffix(event.id, 8);
 
   let orderIdToScheduleFulfillment = null;
   /** Set when `checkout.session.completed` fails validation vs Stripe totals (possible misconfig or tamper). */
   let checkoutAmountMismatchOrderId = null;
+  /** PaymentIntent ids for async actual-fee reconciliation (non-blocking). */
+  const paymentIntentIdsForFeeCapture = [];
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -112,127 +103,36 @@ router.post('/', async (req, res) => {
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        const raw = session.metadata?.internalCheckoutId;
-        if (!raw) {
-          return;
-        }
-        if (!isLikelyPaymentCheckoutId(raw)) {
-          req.log?.warn(
-            { securityEvent: 'webhook_invalid_metadata_shape' },
-            'security',
-          );
-          return;
-        }
-        const row = await tx.paymentCheckout.findUnique({
-          where: { id: raw },
+        const r = await applyPhase1CheckoutSessionCompleted(tx, {
+          eventId: event.id,
+          session,
+          log: req.log,
         });
-        if (!row) {
-          req.log?.warn('stripe webhook: unknown checkout row');
-          return;
+        if (r.orderIdToScheduleFulfillment) {
+          orderIdToScheduleFulfillment = r.orderIdToScheduleFulfillment;
         }
-        if (row.userId == null) {
-          req.log?.warn(
-            { securityEvent: 'webhook_checkout_missing_user' },
-            'security',
-          );
-          return;
+        if (r.checkoutAmountMismatchOrderId) {
+          checkoutAmountMismatchOrderId = r.checkoutAmountMismatchOrderId;
         }
-
-        const total = session.amount_total;
-        const sessionCurrency = String(session.currency ?? 'usd').toLowerCase();
-        const rowCurrency = String(row.currency ?? 'usd').toLowerCase();
-        if (total == null) {
-          req.log?.warn('stripe webhook: missing amount_total');
-          return;
+        for (const pi of r.paymentIntentIdsForFeeCapture) {
+          paymentIntentIdsForFeeCapture.push(pi);
         }
-
-        if (total !== row.amountUsdCents || sessionCurrency !== rowCurrency) {
-          checkoutAmountMismatchOrderId = raw;
-          req.log?.error(
-            {
-              expectedCents: row.amountUsdCents,
-              stripeTotal: total,
-              expectedCurrency: rowCurrency,
-              stripeCurrency: sessionCurrency,
-            },
-            'stripe webhook: amount or currency mismatch',
-          );
-          if (row.orderStatus === ORDER_STATUS.PENDING) {
-            assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
-            await tx.paymentCheckout.updateMany({
-              where: {
-                id: raw,
-                orderStatus: ORDER_STATUS.PENDING,
-              },
-              data: {
-                orderStatus: ORDER_STATUS.FAILED,
-                status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
-                failedAt: new Date(),
-                failureReason: 'stripe_amount_currency_mismatch',
-              },
-            });
-            await writeOrderAudit(tx, {
-              event: 'order_status_changed',
-              payload: {
-                orderId: raw,
-                to: ORDER_STATUS.FAILED,
-                reason: 'amount_currency_mismatch',
-              },
-              ip: null,
-            });
-          }
-          return;
-        }
-
-        if (row.orderStatus !== ORDER_STATUS.PENDING) {
-          return;
-        }
-
-        assertTransition(row.orderStatus, ORDER_STATUS.PAID);
-
-        const piId = stripePaymentIntentId(session);
-        const custId = stripeCustomerId(session);
-
-        const updated = await tx.paymentCheckout.updateMany({
-          where: {
-            id: raw,
-            orderStatus: ORDER_STATUS.PENDING,
-            status: { in: PAYMENT_PRE_SUCCESS },
-          },
-          data: {
-            orderStatus: ORDER_STATUS.PAID,
-            status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
-            stripePaymentIntentId: piId,
-            stripeCustomerId: custId,
-            completedByWebhookEventId: event.id,
-            paidAt: new Date(),
-          },
-        });
-
-        if (updated.count === 0) {
-          return;
-        }
-
-        await writeOrderAudit(tx, {
-          event: 'order_status_changed',
-          payload: { orderId: raw, to: ORDER_STATUS.PAID },
-          ip: null,
-        });
-
-        await ensureQueuedFulfillmentAttempt(tx, raw);
-        await writeOrderAudit(tx, {
-          event: 'payment_completed',
-          payload: { orderId: raw },
-          ip: null,
-        });
-        // Async airtime: Reloadly/mock via `processFulfillmentForOrder` (same as POST /api/recharge/execute).
-        orderIdToScheduleFulfillment = raw;
         return;
       }
 
       if (event.type === 'payment_intent.succeeded') {
         const pi = event.data.object;
         await handleWebTopupPaymentIntentSucceeded(tx, event, pi, req.log);
+        const piId =
+          pi && typeof pi.id === 'string' && pi.id.startsWith('pi_')
+            ? pi.id
+            : null;
+        const topupMeta = pi?.metadata?.topup_order_id;
+        const isWebTopupOrderMeta =
+          typeof topupMeta === 'string' && /^tw_ord_[0-9a-f-]{36}$/i.test(topupMeta);
+        if (piId && !isWebTopupOrderMeta) {
+          paymentIntentIdsForFeeCapture.push(piId);
+        }
         return;
       }
 
@@ -279,9 +179,31 @@ router.post('/', async (req, res) => {
           payload: { orderId: raw, to: ORDER_STATUS.CANCELLED },
           ip: null,
         });
+        return;
+      }
+
+      if (event.type === 'charge.refunded') {
+        const charge = event.data.object;
+        await applyPhase1ChargeRefunded(tx, charge, event.id);
+        return;
+      }
+
+      if (event.type === 'charge.dispute.created') {
+        const dispute = event.data.object;
+        await applyPhase1DisputeCreated(tx, dispute, event.id, {
+          stripe,
+          log: req.log,
+        });
+        return;
       }
     });
 
+    bumpCounter('webhook_transaction_committed_total');
+    emitPhase1OperationalEvent('webhook_processed', {
+      stripeEventType: event.type,
+      traceId: req.traceId ?? null,
+      stripeEventIdSuffix,
+    });
     webTopupLog(req.log, 'info', 'webhook_processed', {
       stripeEventType: event.type,
       stripeEventIdSuffix,
@@ -289,6 +211,11 @@ router.post('/', async (req, res) => {
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       recordRetry('webhook_event_duplicate');
+      emitPhase1OperationalEvent('webhook_duplicate_replay', {
+        stripeEventType: event.type,
+        traceId: req.traceId ?? null,
+        stripeEventIdSuffix,
+      });
       webTopupLog(req.log, 'info', 'webhook_duplicate_ignored', {
         stripeEventType: event.type,
         stripeEventIdSuffix,
@@ -297,6 +224,22 @@ router.post('/', async (req, res) => {
       return res.json({ received: true });
     }
     bumpCounter('stripe_webhook_transaction_failed');
+    const failureClass = classifyTransactionFailure(e, {
+      surface: 'stripe_webhook',
+      stripeEventType: event.type,
+    });
+    const retryDirective = transactionRetryDirective(failureClass, { attempt: 0 });
+    emitPhase1OperationalEvent('webhook_transaction_failed', {
+      stripeEventType: event.type,
+      traceId: req.traceId ?? null,
+      stripeEventIdSuffix,
+      errName: e?.name,
+      prismaCode: e?.code,
+      transactionFailureClass: failureClass,
+      retryMaySchedule: retryDirective.mayScheduleRetry,
+      retryReason: retryDirective.reason,
+      retrySuggestedBackoffMs: retryDirective.suggestedBackoffMs,
+    });
     logOpsEvent({
       domain: 'stripe_webhook',
       event: 'webhook_transaction',
@@ -319,8 +262,17 @@ router.post('/', async (req, res) => {
     throw e;
   }
 
+  for (const piFeeId of new Set(paymentIntentIdsForFeeCapture)) {
+    schedulePaymentCheckoutStripeFeeCapture(piFeeId, req.log);
+  }
+
   if (orderIdToScheduleFulfillment) {
     recordPaymentCheckoutOutcome(true);
+    bumpCounter('checkout_paid_phase1_total');
+    emitPhase1OperationalEvent('checkout_paid', {
+      traceId: req.traceId ?? null,
+      orderIdSuffix: safeSuffix(orderIdToScheduleFulfillment, 10),
+    });
     logOpsEvent({
       domain: 'stripe_webhook',
       event: 'checkout.session.completed',

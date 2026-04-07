@@ -12,6 +12,7 @@
   "continueCta": "Continue",
   "rechargeReviewTitle": "Review",
   "rechargeReviewSubtitle": "Confirm these details before you pick a package.",
+  "rechargeReviewServerPricingNote": "Airtime only. The total in USD is locked by our server when checkout starts — you complete payment on Stripe’s secure page.",
   "continueToPlans": "Continue to plans",
   "rechargeReviewStripeHint": "Pay securely with Apple Pay / Google Pay or card. Your card details never touch our servers.",
   "paymentPayWithCard": "Pay {amount}",
@@ -42,7 +43,21 @@
   "loading": "Loading…",
   "processing": "Processing…",
   "rechargeTitle": "Mobile recharge",
-  "rechargeHero": "Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.",
+  "rechargeHero": "Send mobile airtime to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, Europe, UAE, or Türkiye.",
+  "phase1OnlyAirtimeSnack": "Phase 1: only mobile airtime is available.",
+  "phase1UsdSecureCheckout": "You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.",
+  "checkoutCardRegionLabel": "Your location (card)",
+  "checkoutPricingUsdServerNote": "Pricing is calculated in USD on our servers for your region.",
+  "telecomCheckoutAirtimeRowLabel": "Airtime",
+  "phase1ValidityDependsOnOperator": "How long credit stays usable depends on the operator — we show it here only when we have a verified value from pricing.",
+  "checkoutAirtimeAmountLine": "Send {amount} airtime",
+  "@checkoutAirtimeAmountLine": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "rechargeTrustLine": "USD pricing · Secure checkout · Afghanistan mobile",
   "recipientNumber": "Recipient number",
   "operator": "Operator",
@@ -115,6 +130,7 @@
   "operatorLabel": "Operator",
   "packageLabel": "Package",
   "totalUsd": "Total (USD)",
+  "checkoutUsdTotalFootnote": "Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.",
   "stripeSectionTitle": "Secure payment",
   "stripeKeyMissing": "Stripe publishable key not configured for this build.",
   "stripeKeyLoaded": "Card payments ready. Your server creates the PaymentIntent and returns the client secret.",
@@ -215,6 +231,7 @@
   "authAccountTileSignedOutSub": "Sign in for wallet and payments",
   "authGenericError": "Something went wrong. Please try again.",
   "authFillAllFields": "Enter your email and password.",
+  "authInvalidEmail": "Enter a valid email address.",
   "landingNavBrand": "Zora-Walat",
   "landingHeroTitle": "Send airtime to Afghanistan in seconds",
   "landingHeroSubtitle": "International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.",
@@ -247,6 +264,31 @@
   "receiptOrderRef": "Order reference",
   "receiptPaymentStatus": "Payment",
   "receiptFulfillmentStatus": "Top-up status",
+  "receiptTrustTitle": "Receipt",
+  "receiptTrustPaidUsd": "Paid (USD)",
+  "receiptTrustDeliveredValue": "Delivered value (USD)",
+  "receiptTrustStatus": "Status",
+  "receiptTrustUpdatedAt": "Last updated",
+  "receiptTrustPaidAt": "Payment time",
+  "receiptTrustFeeFinal": "Processing fee (final): {fee}",
+  "@receiptTrustFeeFinal": {
+    "placeholders": {
+      "fee": { "type": "String" }
+    }
+  },
+  "receiptTrustFeeEstimated": "Processing fee (estimated): {fee}",
+  "@receiptTrustFeeEstimated": {
+    "placeholders": {
+      "fee": { "type": "String" }
+    }
+  },
+  "receiptTrustFxNoteTitle": "Currency",
+  "receiptTrustDeliveryNoteTitle": "Delivery timing",
+  "orderTrustStatusProcessing": "Processing",
+  "orderTrustStatusDelivered": "Delivered",
+  "orderTrustStatusDelayed": "Delayed",
+  "orderTrustStatusFailed": "Failed",
+  "orderTrustStatusCancelled": "Cancelled",
   "receiptWhatNextTitle": "What happens next",
   "receiptWhatNextBody": "We’ll send credit to the operator network you selected. Most top-ups finish within a few minutes. This screen stays available in your recent orders.",
   "successViewOrders": "View recent orders",

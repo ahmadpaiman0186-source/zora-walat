@@ -48,6 +48,10 @@ class AppLocalizationsFa extends AppLocalizations {
       'قبل از انتخاب بسته، این موارد را تأیید کنید.';
 
   @override
+  String get rechargeReviewServerPricingNote =>
+      'فقط ایرتیم. مبلغ نهایی به دلار هنگام شروع checkout روی سرور قفل می‌شود — پرداخت در صفحهٔ امن Stripe انجام می‌شود.';
+
+  @override
   String get continueToPlans => 'ادامه به تعرفه‌ها';
 
   @override
@@ -125,7 +129,34 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get rechargeHero =>
-      'اعتبار یا بستهٔ دیتا را به شماره‌های افغانستان به دلار بفرستید. سریع، شفاف و قابل اعتماد برای کسانی که از آمریکا، کانادا، بریتانیا یا اروپا شارژ می‌کنند.';
+      'اعتبار موبایل (ایرتیم) را به شماره‌های افغانستان به دلار بفرستید. سریع، شفاف و قابل اعتماد برای کسانی که از آمریکا، کانادا، بریتانیا، اروپا، امارات یا ترکیه شارژ می‌کنند.';
+
+  @override
+  String get phase1OnlyAirtimeSnack =>
+      'فاز ۱: فقط شارژ ایرتیم موبایل در دسترس است.';
+
+  @override
+  String get phase1UsdSecureCheckout =>
+      'پرداخت به دلار در صفحهٔ امن Stripe انجام می‌شود. مبلغ نهایی قبل از برداشت از سرور ما تأیید می‌شود.';
+
+  @override
+  String get checkoutCardRegionLabel => 'موقعیت شما (کارت)';
+
+  @override
+  String get checkoutPricingUsdServerNote =>
+      'قیمت‌گذاری به دلار روی سرورهای ما برای منطقهٔ شما محاسبه می‌شود.';
+
+  @override
+  String get telecomCheckoutAirtimeRowLabel => 'اعتبار موبایل (ایرتیم)';
+
+  @override
+  String get phase1ValidityDependsOnOperator =>
+      'مدت اعتبار بسته به اپراتور است — فقط وقتی مقدار تأییدشده از قیمت‌گذاری داریم اینجا نشان می‌دهیم.';
+
+  @override
+  String checkoutAirtimeAmountLine(String amount) {
+    return 'ارسال $amount ایرتیم';
+  }
 
   @override
   String get rechargeTrustLine =>
@@ -294,6 +325,10 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get totalUsd => 'جمع (USD)';
+
+  @override
+  String get checkoutUsdTotalFootnote =>
+      'کسر به USD است. اگر کارت شما USD نیست، بانک ممکن است کارمزد تبدیل اضافه کند؛ تحت کنترل ما نیست.';
 
   @override
   String get stripeSectionTitle => 'پرداخت امن';
@@ -513,6 +548,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get authFillAllFields => 'ایمیل و رمز عبور را وارد کنید.';
 
   @override
+  String get authInvalidEmail => 'یک نشانی ایمیل معتبر وارد کنید.';
+
+  @override
   String get landingNavBrand => 'زوره‌ولت';
 
   @override
@@ -618,6 +656,55 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get receiptFulfillmentStatus => 'وضعیت شارژ';
+
+  @override
+  String get receiptTrustTitle => 'رسید';
+
+  @override
+  String get receiptTrustPaidUsd => 'پرداخت‌شده (دلار آمریکا)';
+
+  @override
+  String get receiptTrustDeliveredValue => 'ارزش تحویل‌شده (دلار آمریکا)';
+
+  @override
+  String get receiptTrustStatus => 'وضعیت';
+
+  @override
+  String get receiptTrustUpdatedAt => 'آخرین به‌روزرسانی';
+
+  @override
+  String get receiptTrustPaidAt => 'زمان پرداخت';
+
+  @override
+  String receiptTrustFeeFinal(String fee) {
+    return 'کارمزد پردازش (نهایی): $fee';
+  }
+
+  @override
+  String receiptTrustFeeEstimated(String fee) {
+    return 'کارمزد پردازش (برآوردی): $fee';
+  }
+
+  @override
+  String get receiptTrustFxNoteTitle => 'ارز';
+
+  @override
+  String get receiptTrustDeliveryNoteTitle => 'زمان تحویل';
+
+  @override
+  String get orderTrustStatusProcessing => 'در حال پردازش';
+
+  @override
+  String get orderTrustStatusDelivered => 'تحویل داده شد';
+
+  @override
+  String get orderTrustStatusDelayed => 'تأخیر';
+
+  @override
+  String get orderTrustStatusFailed => 'ناموفق';
+
+  @override
+  String get orderTrustStatusCancelled => 'لغو شد';
 
   @override
   String get receiptWhatNextTitle => 'قدم بعدی';

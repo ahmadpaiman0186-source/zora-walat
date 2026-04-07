@@ -63,6 +63,13 @@ function parseBps(raw, fallback) {
   return n;
 }
 
+/** Percent 0–100 (e.g. 4.5 for net margin target). */
+function parseMarginPercent(raw, fallback) {
+  const n = parseFloat(String(raw ?? '').trim());
+  if (!Number.isFinite(n) || n < 0 || n > 100) return fallback;
+  return n;
+}
+
 /**
  * JSON object: internal operatorKey (any case) → Reloadly numeric operator id string.
  * Example: `{"roshan":"12345","mtn":"67890"}`
@@ -145,6 +152,47 @@ export const env = {
   /** FX / tax as basis points of provider cost until per-jurisdiction rules exist. */
   pricingFxBps: parseBps(process.env.PRICING_FX_BPS, 0),
   pricingTaxBps: parseBps(process.env.PRICING_TAX_BPS, 0),
+
+  /**
+   * Phase 1 profit floor (percent of revenue after Stripe + landed COGS).
+   * Default 3% minimum, 4.5% target blend, 6% soft cap (see pricingEngine).
+   */
+  phase1MinMarginPercent: parseMarginPercent(
+    process.env.PHASE1_MIN_MARGIN_PERCENT,
+    3,
+  ),
+  phase1TargetMarginPercent: parseMarginPercent(
+    process.env.PHASE1_TARGET_MARGIN_PERCENT,
+    4.5,
+  ),
+  phase1MaxMarginPercent: parseMarginPercent(
+    process.env.PHASE1_MAX_MARGIN_PERCENT,
+    6,
+  ),
+  /** Reject checkouts whose final USD charge is below this (cents). Default $10. */
+  phase1MinCheckoutUsdCents: parseNonNegativeInt(
+    process.env.PHASE1_MIN_CHECKOUT_USD_CENTS,
+    1000,
+  ),
+  /** Advisory only (logs / admin); preferred floor when tuning catalog. Default $15. */
+  phase1RecommendedMinCheckoutUsdCents: parseNonNegativeInt(
+    process.env.PHASE1_RECOMMENDED_MIN_CHECKOUT_USD_CENTS,
+    1500,
+  ),
+  /** When true, allow orders below PHASE1_MIN_CHECKOUT_USD_CENTS (emergency; default false). */
+  phase1AllowBelowMinimumOrders:
+    process.env.PHASE1_ALLOW_BELOW_MINIMUM_ORDERS === 'true',
+
+  /** Stripe fee estimate vs actual: flag divergence if delta exceeds max(cents, ratio×estimate). */
+  financialTruthStripeFeeToleranceCents: parseNonNegativeInt(
+    process.env.FINANCIAL_TRUTH_STRIPE_FEE_TOLERANCE_CENTS,
+    50,
+  ),
+  /** Basis points of estimated fee (e.g. 1500 = 15%). */
+  financialTruthStripeFeeToleranceRatioBps: parseBps(
+    process.env.FINANCIAL_TRUTH_STRIPE_FEE_TOLERANCE_RATIO_BPS,
+    1500,
+  ),
   /**
    * Amount-only airtime: provider cost = round(faceCents * bps / 10000).
    * Default 9000 = 90% of face value treated as wholesale (configure from real quotes).
@@ -247,6 +295,13 @@ export const env = {
   ),
   /** Set `false` to disable the worker (detection/recovery); default on. */
   processingRecoveryEnabled: process.env.PROCESSING_RECOVERY_ENABLED !== 'false',
+  /**
+   * When true with `RELOADLY_SANDBOX=true` and `AIRTIME_PROVIDER=reloadly`, stuck-processing recovery
+   * will not auto-create a replacement attempt (`retry_new_attempt` → manual review). Reduces duplicate-send
+   * risk during first sandbox drills; leave false for normal staging once comfortable with recovery.
+   */
+  processingRecoverySandboxConservative:
+    process.env.PROCESSING_RECOVERY_SANDBOX_CONSERVATIVE === 'true',
   /** `manual_required_count_threshold_exceeded` when open manual-required rows ≥ this. */
   manualRequiredAlertCountThreshold: parsePositiveInt(
     process.env.MANUAL_REQUIRED_ALERT_COUNT_THRESHOLD,

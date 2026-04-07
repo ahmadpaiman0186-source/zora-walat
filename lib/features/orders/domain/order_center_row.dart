@@ -17,6 +17,15 @@ class OrderCenterRow {
     this.providerReferenceSuffix,
     required this.updatedAtIso,
     this.failureReason,
+    this.trustStatusKey,
+    this.trustStatusDetail,
+    this.paidUsd,
+    this.deliveredValueUsd,
+    this.processingFeeUsd,
+    this.processingFeeIsFinal,
+    this.transparencyFxNote,
+    this.transparencyDeliveryNote,
+    this.paidAtIso,
   });
 
   final String orderId;
@@ -39,6 +48,20 @@ class OrderCenterRow {
   /// Customer-safe message from server when present.
   final String? failureReason;
 
+  /// `processing` | `delivered` | `delayed` | `failed` | `cancelled` (account API).
+  final String? trustStatusKey;
+
+  /// Server-written explanation (English); shown under localized status title.
+  final String? trustStatusDetail;
+
+  final double? paidUsd;
+  final double? deliveredValueUsd;
+  final double? processingFeeUsd;
+  final bool? processingFeeIsFinal;
+  final String? transparencyFxNote;
+  final String? transparencyDeliveryNote;
+  final String? paidAtIso;
+
   factory OrderCenterRow.fromServerPayload(Map<String, dynamic> json) {
     final id = (json['orderReference'] ?? json['orderId']) as String? ?? '';
     final cents = json['amountUsdCents'];
@@ -47,6 +70,11 @@ class OrderCenterRow {
     final updated =
         (json['updatedAtIso'] as String?) ??
         _isoFromDynamic(json['updatedAt']);
+
+    final paidUsd = _doubleFromDynamic(json['paidUsd']);
+    final deliveredValueUsd = _doubleFromDynamic(json['deliveredValueUsd']);
+    final fee = _doubleFromDynamic(json['processingFeeUsd']);
+    final feeFinal = json['processingFeeIsFinal'] as bool?;
 
     return OrderCenterRow(
       orderId: id,
@@ -60,6 +88,15 @@ class OrderCenterRow {
       providerReferenceSuffix: json['providerReferenceSuffix'] as String?,
       updatedAtIso: updated ?? DateTime.now().toUtc().toIso8601String(),
       failureReason: json['failureReason'] as String?,
+      trustStatusKey: json['trustStatusKey'] as String?,
+      trustStatusDetail: json['trustStatusDetail'] as String?,
+      paidUsd: paidUsd,
+      deliveredValueUsd: deliveredValueUsd,
+      processingFeeUsd: fee,
+      processingFeeIsFinal: feeFinal,
+      transparencyFxNote: json['transparencyFxNote'] as String?,
+      transparencyDeliveryNote: json['transparencyDeliveryNote'] as String?,
+      paidAtIso: _isoFromDynamic(json['paidAt']),
     );
   }
 
@@ -85,6 +122,14 @@ class OrderCenterRow {
     if (v == null) return null;
     if (v is String) return v;
     return null;
+  }
+
+  static double? _doubleFromDynamic(Object? v) {
+    if (v == null) return null;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is num) return v.toDouble();
+    return double.tryParse('$v');
   }
 
   static String? _formatMoney(Object? centsRaw, String? currency) {

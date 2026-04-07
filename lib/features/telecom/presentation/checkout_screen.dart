@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/auth/unauthorized_exception.dart';
+import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/utils/afghan_phone_utils.dart';
@@ -25,10 +26,14 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _busy = false;
+  late String _senderCountry;
 
   @override
   void initState() {
     super.initState();
+    _senderCountry = inferSenderCountryCodeFromLocale(
+      WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _logCheckoutOpened());
   }
 
@@ -47,6 +52,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _pay() async {
     if (_busy) return;
+    if (widget.order.line != TelecomServiceLine.airtime) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.phase1OnlyAirtimeSnack)),
+      );
+      return;
+    }
     setState(() => _busy = true);
     final router = GoRouter.of(context);
     final paymentService = AppScope.of(context).paymentService;
@@ -59,6 +72,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       await paymentService.startCheckout(
         amountUsdCents: widget.order.finalUsdCents,
+        senderCountry: _senderCountry,
         currency: 'usd',
         operatorKey: widget.order.operator.apiKey,
         recipientPhone: widget.order.phone.raw,
@@ -141,6 +155,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               color: t.colorScheme.outline,
             ),
           ),
+          if (widget.order.line == TelecomServiceLine.airtime) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.checkoutAirtimeAmountLine(usd),
+              style: t.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.phase1ValidityDependsOnOperator,
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+                height: 1.35,
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           Card(
             margin: EdgeInsets.zero,
@@ -172,12 +203,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   _DetailRow(
                     icon: Icons.shopping_bag_outlined,
-                    label: l10n.packageLabel,
+                    label: o.line == TelecomServiceLine.airtime
+                        ? l10n.telecomCheckoutAirtimeRowLabel
+                        : l10n.packageLabel,
                     value: o.productTitle,
                     multiline: true,
                   ),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.checkoutCardRegionLabel,
+              style: t.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: t.colorScheme.outline.withValues(alpha: 0.35)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _senderCountry,
+                isExpanded: true,
+                items: kPhase1SenderCountryCodes
+                    .map(
+                      (c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(
+                          '${kPhase1SenderCountryLabels[c] ?? c} ($c)',
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _busy
+                    ? null
+                    : (v) {
+                        if (v != null) setState(() => _senderCountry = v);
+                      },
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.checkoutPricingUsdServerNote,
+            style: t.textTheme.bodySmall?.copyWith(
+              color: t.colorScheme.outline,
             ),
           ),
           const SizedBox(height: 20),
@@ -215,6 +294,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
+              l10n.checkoutUsdTotalFootnote,
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+              ),
             ),
           ),
           const SizedBox(height: 18),
@@ -267,6 +356,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       height: 1.4,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.15,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.phase1UsdSecureCheckout,
+                    style: t.textTheme.bodySmall?.copyWith(
+                      color: t.colorScheme.outline,
+                      height: 1.45,
                     ),
                   ),
                 ],

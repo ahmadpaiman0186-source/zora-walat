@@ -1,5 +1,6 @@
 import { prisma } from '../db.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
+import { getCanonicalPhase1OrderForUser } from '../services/canonicalPhase1OrderService.js';
 
 const publicSelect = {
   id: true,
@@ -92,4 +93,29 @@ export async function getOrderByStripeSession(req, res) {
     return res.status(404).json({ error: 'Not found' });
   }
   res.json({ order: toPublicOrder(row) });
+}
+
+/**
+ * Phase 1 MOBILE_TOPUP canonical read model (support / ops / finance).
+ * Auth: same as other `/api/orders/*` routes — JWT, owner-only (`userId` match).
+ */
+export async function getPhase1CanonicalOrder(req, res) {
+  const id = req.params.id;
+  if (!isLikelyPaymentCheckoutId(id)) {
+    return res.status(400).json({ error: 'Invalid order id' });
+  }
+  const userId = req.user.id;
+  req.log?.info?.(
+    {
+      traceId: req.traceId,
+      checkoutIdSuffix: id.slice(-10),
+      kind: 'phase1_canonical_read',
+    },
+    'phase1_canonical_order',
+  );
+  const phase1 = await getCanonicalPhase1OrderForUser(id, userId);
+  if (!phase1) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  res.json({ phase1Order: phase1 });
 }

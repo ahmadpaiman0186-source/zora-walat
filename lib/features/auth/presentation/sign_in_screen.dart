@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/firebase_backend_session_sync.dart';
 import '../../../core/di/app_scope.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/firebase_auth_service.dart';
 
-/// Email/password sign-in and register against `/auth/login` and `/auth/register`.
+/// Firebase email/password sign-in, then sync JWT for the Node API.
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -13,44 +16,41 @@ class SignInScreen extends StatefulWidget {
   State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab;
+class _SignInScreenState extends State<SignInScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _firebaseAuth = FirebaseAuthService();
   bool _busy = false;
   String? _error;
 
   @override
-  void initState() {
-    super.initState();
-    _tab = TabController(length: 2, vsync: this);
-    _tab.addListener(() {
-      if (_tab.indexIsChanging) return;
-      setState(() {
-        _error = null;
-      });
-    });
-  }
-
-  @override
   void dispose() {
-    _tab.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
   }
 
-  Future<void> _submit(bool register) async {
+  bool _validateEmail(String email, AppLocalizations l10n) {
+    final t = email.trim();
+    if (t.isEmpty) {
+      setState(() => _error = l10n.authFillAllFields);
+      return false;
+    }
+    final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t);
+    if (!ok) {
+      setState(() => _error = l10n.authInvalidEmail);
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     final email = _email.text.trim();
     final password = _password.text;
-    if (email.isEmpty || password.isEmpty) {
+    if (!_validateEmail(email, l10n)) return;
+    if (password.isEmpty) {
       setState(() => _error = l10n.authFillAllFields);
-      return;
-    }
-    if (register && password.length < 10) {
-      setState(() => _error = l10n.authRegisterPasswordHint);
       return;
     }
 
@@ -63,25 +63,39 @@ class _SignInScreenState extends State<SignInScreen>
     final session = AppScope.authSessionOf(context);
 
     try {
-      final pair = register
-          ? await authApi.register(email: email, password: password)
-          : await authApi.login(email: email, password: password);
-      await session.setTokens(
-        access: pair.accessToken,
-        refresh: pair.refreshToken,
-      );
+      await _firebaseAuth.signInWithEmailPassword(email: email, password: password);
+      try {
+        await syncBackendSessionAfterFirebaseSignIn(
+          authApi: authApi,
+          session: session,
+          email: email,
+          password: password,
+        );
+      } catch (e, st) {
+        await _firebaseAuth.signOut();
+        if (kDebugMode) {
+          debugPrint('backend sync after Firebase sign-in failed: $e');
+          debugPrint('$st');
+        }
+        final message = e is StateError
+            ? e.message
+            : (kDebugMode ? e.toString() : l10n.authGenericError);
+        if (!mounted) return;
+        setState(() => _error = message);
+        return;
+      }
       if (!mounted) return;
-      context.pop();
+      context.go(AppRoutePaths.hub);
+    } on FirebaseAuthServiceException catch (e) {
+      if (!mounted) return;
+      setState(() => _error = e.message);
     } catch (e, st) {
-      if (!mounted) return;
       if (kDebugMode) {
-        debugPrint('auth request failed: $e');
+        debugPrint('sign-in failed: $e');
         debugPrint('$st');
       }
-      final message = e is StateError
-          ? e.message
-          : (kDebugMode ? e.toString() : l10n.authGenericError);
-      setState(() => _error = message);
+      if (!mounted) return;
+      setState(() => _error = l10n.authGenericError);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -94,20 +108,13 @@ class _SignInScreenState extends State<SignInScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.authAccountTileTitle),
+        title: Text(l10n.authSignInTitle),
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => context.pop(),
-        ),
-        bottom: TabBar(
-          controller: _tab,
-          tabs: [
-            Tab(text: l10n.authSignInCta),
-            Tab(text: l10n.authRegisterTitle),
-          ],
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => context.canPop() ? context.pop() : context.go(AppRoutePaths.landing),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -137,25 +144,23 @@ class _SignInScreenState extends State<SignInScreen>
               decoration: InputDecoration(
                 labelText: l10n.authPasswordLabel,
                 border: const OutlineInputBorder(),
-                helperText: _tab.index == 1 ? l10n.authRegisterPasswordHint : null,
               ),
             ),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: _busy
-                  ? null
-                  : () => _submit(_tab.index == 1),
+              onPressed: _busy ? null : _submit,
               child: _busy
                   ? const SizedBox(
                       height: 22,
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
-                      _tab.index == 1
-                          ? l10n.authRegisterCta
-                          : l10n.authSignInCta,
-                    ),
+                  : Text(l10n.authSignInCta),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _busy ? null : () => context.push(AppRoutePaths.signUp),
+              child: Text(l10n.authSwitchToRegister),
             ),
           ],
         ),

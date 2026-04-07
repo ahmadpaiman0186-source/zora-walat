@@ -10,7 +10,6 @@ import { isCorsOriginAllowed } from './lib/corsPolicy.js';
 import { logCorsRejected } from './middleware/securityObservability.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
 import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
-import { httpLatencyMiddleware } from './middleware/httpLatencyMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import catalogRoutes from './routes/catalog.routes.js';
@@ -29,6 +28,7 @@ import topupOrderRoutes from './routes/topupOrder.routes.js';
 import opsRoutes from './routes/ops.routes.js';
 import marginRoutes from './routes/margin.routes.js';
 import referralRoutes from './routes/referral.routes.js';
+import supportRoutes from './routes/support.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import {
@@ -74,11 +74,16 @@ export function createApp() {
         'Authorization',
         'Idempotency-Key',
         'Stripe-Signature',
+        'X-Trace-Id',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
       ],
+      exposedHeaders: ['X-Trace-Id'],
     }),
   );
+
+  /** Correlation id for money-path logs (Stripe webhooks + JSON API). */
+  app.use(requestContextMiddleware);
 
   if (env.prelaunchLockdown) {
     app.use(attachMinimalRequestLogger(logger));
@@ -120,6 +125,7 @@ export function createApp() {
   app.use('/api/admin', apiIpLimiter, processingManualRoutes);
   app.use('/api/admin', apiIpLimiter, opsRoutes);
   app.use('/api/admin', apiIpLimiter, marginRoutes);
+  app.use('/api/admin', apiIpLimiter, supportRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

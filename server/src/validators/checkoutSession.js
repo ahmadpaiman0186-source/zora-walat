@@ -7,14 +7,19 @@ const operatorKeyEnum = z.enum([
   'afghanWireless',
 ]);
 
+const senderCountryEnum = z.enum(['US', 'CA', 'EU', 'AE', 'TR']);
+
 /**
  * Strict body: unknown fields rejected. Legacy `amount` (cents) accepted as alias for amountUsdCents.
+ * Phase 1: [senderCountry] is required — pricing risk buffer is resolved from SenderCountry config.
+ * Client must never be trusted for final USD amount; when [packageId] is set, amount fields are ignored for pricing.
  */
 export const checkoutSessionBodySchema = z
   .object({
     amountUsdCents: z.number().int().positive().max(500_000).optional(),
     amount: z.union([z.number(), z.string()]).optional(),
     currency: z.literal('usd').default('usd'),
+    senderCountry: senderCountryEnum,
     operatorKey: operatorKeyEnum.optional(),
     recipientPhone: z.string().min(3).max(40).optional(),
     packageId: z.string().min(1).max(128).optional(),
@@ -29,6 +34,7 @@ export const checkoutSessionBodySchema = z
     return {
       amountUsdCents: cents,
       currency: d.currency,
+      senderCountry: d.senderCountry,
       operatorKey: d.operatorKey,
       recipientPhone: d.recipientPhone,
       packageId: d.packageId,

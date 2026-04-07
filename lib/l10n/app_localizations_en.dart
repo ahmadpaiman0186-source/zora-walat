@@ -48,6 +48,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm these details before you pick a package.';
 
   @override
+  String get rechargeReviewServerPricingNote =>
+      'Airtime only. The total in USD is locked by our server when checkout starts — you complete payment on Stripe’s secure page.';
+
+  @override
   String get continueToPlans => 'Continue to plans';
 
   @override
@@ -125,7 +129,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rechargeHero =>
-      'Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.';
+      'Send mobile airtime to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, Europe, UAE, or Türkiye.';
+
+  @override
+  String get phase1OnlyAirtimeSnack =>
+      'Phase 1: only mobile airtime is available.';
+
+  @override
+  String get phase1UsdSecureCheckout =>
+      'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.';
+
+  @override
+  String get checkoutCardRegionLabel => 'Your location (card)';
+
+  @override
+  String get checkoutPricingUsdServerNote =>
+      'Pricing is calculated in USD on our servers for your region.';
+
+  @override
+  String get telecomCheckoutAirtimeRowLabel => 'Airtime';
+
+  @override
+  String get phase1ValidityDependsOnOperator =>
+      'How long credit stays usable depends on the operator — we show it here only when we have a verified value from pricing.';
+
+  @override
+  String checkoutAirtimeAmountLine(String amount) {
+    return 'Send $amount airtime';
+  }
 
   @override
   String get rechargeTrustLine =>
@@ -296,6 +327,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get totalUsd => 'Total (USD)';
+
+  @override
+  String get checkoutUsdTotalFootnote =>
+      'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
 
   @override
   String get stripeSectionTitle => 'Secure payment';
@@ -517,6 +552,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authFillAllFields => 'Enter your email and password.';
 
   @override
+  String get authInvalidEmail => 'Enter a valid email address.';
+
+  @override
   String get landingNavBrand => 'Zora-Walat';
 
   @override
@@ -622,6 +660,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiptFulfillmentStatus => 'Top-up status';
+
+  @override
+  String get receiptTrustTitle => 'Receipt';
+
+  @override
+  String get receiptTrustPaidUsd => 'Paid (USD)';
+
+  @override
+  String get receiptTrustDeliveredValue => 'Delivered value (USD)';
+
+  @override
+  String get receiptTrustStatus => 'Status';
+
+  @override
+  String get receiptTrustUpdatedAt => 'Last updated';
+
+  @override
+  String get receiptTrustPaidAt => 'Payment time';
+
+  @override
+  String receiptTrustFeeFinal(String fee) {
+    return 'Processing fee (final): $fee';
+  }
+
+  @override
+  String receiptTrustFeeEstimated(String fee) {
+    return 'Processing fee (estimated): $fee';
+  }
+
+  @override
+  String get receiptTrustFxNoteTitle => 'Currency';
+
+  @override
+  String get receiptTrustDeliveryNoteTitle => 'Delivery timing';
+
+  @override
+  String get orderTrustStatusProcessing => 'Processing';
+
+  @override
+  String get orderTrustStatusDelivered => 'Delivered';
+
+  @override
+  String get orderTrustStatusDelayed => 'Delayed';
+
+  @override
+  String get orderTrustStatusFailed => 'Failed';
+
+  @override
+  String get orderTrustStatusCancelled => 'Cancelled';
 
   @override
   String get receiptWhatNextTitle => 'What happens next';

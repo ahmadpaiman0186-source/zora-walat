@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'firebase_options.dart';
 import 'core/auth/auth_session.dart';
 // Backend REST base URL: [AppConfig.apiBaseUrl] in core/config/app_config.dart
 import 'core/config/app_config.dart';
@@ -26,6 +28,9 @@ import 'services/payment_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   if (!kIsWeb) {
     try {
       FirebaseMessaging.onBackgroundMessage(

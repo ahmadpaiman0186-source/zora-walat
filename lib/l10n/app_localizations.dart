@@ -172,6 +172,12 @@ abstract class AppLocalizations {
   /// **'Confirm these details before you pick a package.'**
   String get rechargeReviewSubtitle;
 
+  /// No description provided for @rechargeReviewServerPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime only. The total in USD is locked by our server when checkout starts — you complete payment on Stripe’s secure page.'**
+  String get rechargeReviewServerPricingNote;
+
   /// No description provided for @continueToPlans.
   ///
   /// In en, this message translates to:
@@ -313,8 +319,50 @@ abstract class AppLocalizations {
   /// No description provided for @rechargeHero.
   ///
   /// In en, this message translates to:
-  /// **'Send airtime or data to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, or Europe.'**
+  /// **'Send mobile airtime to Afghanistan numbers in USD. Fast, transparent, and built for trust when you top up from the US, Canada, UK, Europe, UAE, or Türkiye.'**
   String get rechargeHero;
+
+  /// No description provided for @phase1OnlyAirtimeSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase 1: only mobile airtime is available.'**
+  String get phase1OnlyAirtimeSnack;
+
+  /// No description provided for @phase1UsdSecureCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.'**
+  String get phase1UsdSecureCheckout;
+
+  /// No description provided for @checkoutCardRegionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your location (card)'**
+  String get checkoutCardRegionLabel;
+
+  /// No description provided for @checkoutPricingUsdServerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing is calculated in USD on our servers for your region.'**
+  String get checkoutPricingUsdServerNote;
+
+  /// No description provided for @telecomCheckoutAirtimeRowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime'**
+  String get telecomCheckoutAirtimeRowLabel;
+
+  /// No description provided for @phase1ValidityDependsOnOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'How long credit stays usable depends on the operator — we show it here only when we have a verified value from pricing.'**
+  String get phase1ValidityDependsOnOperator;
+
+  /// No description provided for @checkoutAirtimeAmountLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Send {amount} airtime'**
+  String checkoutAirtimeAmountLine(String amount);
 
   /// No description provided for @rechargeTrustLine.
   ///
@@ -621,6 +669,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total (USD)'**
   String get totalUsd;
+
+  /// No description provided for @checkoutUsdTotalFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.'**
+  String get checkoutUsdTotalFootnote;
 
   /// No description provided for @stripeSectionTitle.
   ///
@@ -1012,6 +1066,12 @@ abstract class AppLocalizations {
   /// **'Enter your email and password.'**
   String get authFillAllFields;
 
+  /// No description provided for @authInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get authInvalidEmail;
+
   /// No description provided for @landingNavBrand.
   ///
   /// In en, this message translates to:
@@ -1203,6 +1263,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Top-up status'**
   String get receiptFulfillmentStatus;
+
+  /// No description provided for @receiptTrustTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get receiptTrustTitle;
+
+  /// No description provided for @receiptTrustPaidUsd.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid (USD)'**
+  String get receiptTrustPaidUsd;
+
+  /// No description provided for @receiptTrustDeliveredValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered value (USD)'**
+  String get receiptTrustDeliveredValue;
+
+  /// No description provided for @receiptTrustStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get receiptTrustStatus;
+
+  /// No description provided for @receiptTrustUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated'**
+  String get receiptTrustUpdatedAt;
+
+  /// No description provided for @receiptTrustPaidAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment time'**
+  String get receiptTrustPaidAt;
+
+  /// No description provided for @receiptTrustFeeFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing fee (final): {fee}'**
+  String receiptTrustFeeFinal(String fee);
+
+  /// No description provided for @receiptTrustFeeEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing fee (estimated): {fee}'**
+  String receiptTrustFeeEstimated(String fee);
+
+  /// No description provided for @receiptTrustFxNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get receiptTrustFxNoteTitle;
+
+  /// No description provided for @receiptTrustDeliveryNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery timing'**
+  String get receiptTrustDeliveryNoteTitle;
+
+  /// No description provided for @orderTrustStatusProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing'**
+  String get orderTrustStatusProcessing;
+
+  /// No description provided for @orderTrustStatusDelivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get orderTrustStatusDelivered;
+
+  /// No description provided for @orderTrustStatusDelayed.
+  ///
+  /// In en, this message translates to:
+  /// **'Delayed'**
+  String get orderTrustStatusDelayed;
+
+  /// No description provided for @orderTrustStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get orderTrustStatusFailed;
+
+  /// No description provided for @orderTrustStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orderTrustStatusCancelled;
 
   /// No description provided for @receiptWhatNextTitle.
   ///

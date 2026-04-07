@@ -16,10 +16,13 @@ class PaymentService {
 
   /// Hosted Stripe Checkout: server resolves trusted amount (from [packageId] or allow-list).
   ///
+  /// [senderCountry] must be a Phase 1 region code (US, CA, EU, AE, TR) — drives server risk buffer.
   /// [operatorKey] + [recipientPhone] must both be set when either is provided.
   /// Requires a valid access token on [api] (same as wallet/recharge).
+  /// When [packageId] is set, [amountUsdCents] is not sent; the server prices from catalog only.
   Future<void> startCheckout({
     required int amountUsdCents,
+    required String senderCountry,
     String currency = 'usd',
     String? operatorKey,
     String? recipientPhone,
@@ -27,7 +30,10 @@ class PaymentService {
   }) async {
     final idempotencyKey = const Uuid().v4();
 
-    final body = <String, dynamic>{'currency': currency};
+    final body = <String, dynamic>{
+      'currency': currency,
+      'senderCountry': senderCountry,
+    };
     if (packageId == null) {
       body['amountUsdCents'] = amountUsdCents;
     }

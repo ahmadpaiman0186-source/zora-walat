@@ -37,11 +37,18 @@ import { logManualRequiredAlert } from '../lib/manualRequiredAlerts.js';
 import {
   recordFulfillmentRunStarted,
 } from '../lib/opsMetrics.js';
+import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { logOpsEvent } from '../lib/opsLog.js';
 import {
   buildMarginSnapshotForDeliveredOrder,
+  extractProviderCostUsdCentsFromResponse,
   recordMarginIntelAfterSnapshot,
   MARGIN_PROVIDER_COST_SOURCE,
 } from '../lib/marginIntelligence.js';
+import {
+  buildFulfillmentTruthSnapshot,
+  scheduleFinancialTruthRecompute,
+} from './financialTruthService.js';
 import { detectFailureConfidence } from '../domain/fulfillment/failureConfidence.js';
 import { FAILURE_CONFIDENCE } from '../constants/failureConfidence.js';
 import { isDbOrchestrationFragileError } from '../lib/dbOrchestrationError.js';
@@ -49,6 +56,13 @@ import {
   emitReloadlyFulfillmentEvent,
   reloadlyFulfillmentBaseFields,
 } from '../lib/reloadlyFulfillmentObservability.js';
+import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
+import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
+import {
+  classifyTransactionFailure,
+} from '../constants/transactionFailureClass.js';
+import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
+import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 
 function safeJson(obj) {
   try {
@@ -67,6 +81,10 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
     where: { orderId, attemptNumber: 1 },
   });
   if (existing) {
+    emitFortressIdempotencyNoop('FULFILLMENT_ATTEMPT_ONE_ALREADY_PRESENT', {
+      orderIdSuffix: String(orderId).slice(-12),
+      attemptIdSuffix: String(existing.id).slice(-12),
+    });
     return existing;
   }
   return tx.fulfillmentAttempt.create({
@@ -127,6 +145,16 @@ async function processFulfillmentForOrderInner(orderId) {
       return null;
     }
 
+    const gate = canOrderProceedToFulfillment(order, { lifecycle: 'PAID_ONLY' });
+    if (!gate.ok) {
+      emitFortressIdempotencyNoop('FULFILLMENT_GATE_BLOCKS_CLAIM', {
+        orderIdSuffix: String(orderId).slice(-12),
+        denial: gate.denial,
+        detail: gate.detail ?? null,
+      });
+      return null;
+    }
+
     const attempt = await tx.fulfillmentAttempt.findFirst({
       where: {
         orderId,
@@ -153,6 +181,28 @@ async function processFulfillmentForOrderInner(orderId) {
     }
 
     assertTransition(order.orderStatus, ORDER_STATUS.PROCESSING);
+    const payClaim = validatePaymentCheckoutStatusTransition(
+      order.status,
+      PAYMENT_CHECKOUT_STATUS.RECHARGE_PENDING,
+    );
+    if (!payClaim.ok) {
+      emitFortressIdempotencyNoop('PAYMENT_ROW_TRANSITION_DENIED_AT_CLAIM', {
+        orderIdSuffix: String(orderId).slice(-12),
+        denial: payClaim.denial,
+        detail: payClaim.detail ?? null,
+      });
+      await tx.fulfillmentAttempt.updateMany({
+        where: {
+          id: attempt.id,
+          status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        },
+        data: {
+          status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+          startedAt: null,
+        },
+      });
+      return null;
+    }
     const orderUpdate = await tx.paymentCheckout.updateMany({
       where: {
         id: orderId,
@@ -190,6 +240,20 @@ async function processFulfillmentForOrderInner(orderId) {
     return;
   }
 
+  logOpsEvent({
+    domain: 'fulfillment',
+    event: 'fulfillment_attempt_claimed',
+    outcome: 'processing',
+    orderId,
+    traceId: getTraceId(),
+    extra: { attemptNumber: phase1.attemptNumber },
+  });
+  emitPhase1OperationalEvent('fulfillment_attempt_started', {
+    traceId: getTraceId() ?? null,
+    orderIdSuffix: String(orderId).slice(-12),
+    attemptNumber: phase1.attemptNumber,
+  });
+
   const orderRow = await prisma.paymentCheckout.findUnique({
     where: { id: orderId },
   });
@@ -209,6 +273,21 @@ async function processFulfillmentForOrderInner(orderId) {
     providerOutcome = providerResult.outcome;
   } catch (err) {
     const { errorKind, failureCode } = classifyProviderError(err);
+    const failureClass = classifyTransactionFailure(err, { surface: 'provider' });
+    const retry = transactionRetryDirective(failureClass, { attempt: 0 });
+    logDeliveryEvent({
+      orderId,
+      phase: 'provider_io',
+      result: 'exception',
+      failureReason: failureCode,
+      detail: 'transaction_failure_classified',
+      meta: {
+        transactionFailureClass: failureClass,
+        retryMaySchedule: retry.mayScheduleRetry,
+        retryReason: retry.reason,
+        retrySuggestedBackoffMs: retry.suggestedBackoffMs,
+      },
+    });
     providerResult = {
       outcome: AIRTIME_OUTCOME.FAILURE,
       providerKey: resolveAirtimeProviderName(),
@@ -253,6 +332,21 @@ async function processFulfillmentForOrderInner(orderId) {
           pricingAmountOnlyProviderBps: env.pricingAmountOnlyProviderBps,
         });
 
+        const providerCostFromApi = extractProviderCostUsdCentsFromResponse(
+          providerResult.responseSummary,
+        );
+        const providerKeyLower = String(providerResult.providerKey ?? '').toLowerCase();
+        let providerCostTruthSource = 'locked_estimate';
+        if (providerCostFromApi != null) {
+          providerCostTruthSource = 'provider_api';
+        } else if (providerKeyLower === 'reloadly') {
+          providerCostTruthSource = 'unverified';
+        }
+        const fulfillmentTruthSnapshot = buildFulfillmentTruthSnapshot(
+          order,
+          providerResult,
+        );
+
         const done = await tx.paymentCheckout.updateMany({
           where: {
             id: orderId,
@@ -269,6 +363,11 @@ async function processFulfillmentForOrderInner(orderId) {
             marginNetUsdCents: snapshot.marginNetUsdCents,
             marginPercentBp: snapshot.marginPercentBp,
             marginCalculatedAt: new Date(),
+            providerCostActualUsdCents: providerCostFromApi ?? null,
+            providerCostTruthSource,
+            fulfillmentProviderReference: providerResult.providerReference ?? null,
+            fulfillmentProviderKey: providerResult.providerKey ?? null,
+            fulfillmentTruthSnapshot,
           },
         });
         if (done.count === 0) {
@@ -470,6 +569,14 @@ async function processFulfillmentForOrderInner(orderId) {
         env.marginLowRouteBp,
       );
       scheduleReferralEvaluationAfterDelivery(orderId, getTraceId());
+      scheduleFinancialTruthRecompute(orderId);
+      logOpsEvent({
+        domain: 'fulfillment',
+        event: 'fulfillment_delivered',
+        outcome: 'ok',
+        orderId: marginTelemetry.orderId,
+        traceId: getTraceId(),
+      });
     }
 
     schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
@@ -656,7 +763,35 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
  */
 export function scheduleFulfillmentProcessing(orderId, traceId) {
   setImmediate(() => {
-    processFulfillmentForOrder(orderId, { traceId }).catch((err) => {
+    (async () => {
+      const row = await prisma.paymentCheckout.findUnique({
+        where: { id: orderId },
+        select: {
+          orderStatus: true,
+          status: true,
+          productType: true,
+          currency: true,
+          amountUsdCents: true,
+          stripePaymentIntentId: true,
+          completedByWebhookEventId: true,
+          postPaymentIncidentStatus: true,
+        },
+      });
+      const gate = canOrderProceedToFulfillment(row, { lifecycle: 'PAID_ONLY' });
+      if (!gate.ok) {
+        emitFortressIdempotencyNoop('FULFILLMENT_SCHEDULE_SKIPPED_GATE', {
+          orderIdSuffix: String(orderId).slice(-12),
+          denial: gate.denial,
+        });
+        emitPhase1OperationalEvent('fulfillment_schedule_skipped', {
+          traceId: traceId ?? null,
+          orderIdSuffix: String(orderId).slice(-12),
+          denial: gate.denial,
+        });
+        return;
+      }
+      await processFulfillmentForOrder(orderId, { traceId });
+    })().catch((err) => {
       console.error('[fulfillment] processFulfillmentForOrder failed', orderId, err);
     });
   });

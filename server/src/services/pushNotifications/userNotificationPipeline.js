@@ -10,6 +10,7 @@ import {
   recordFulfillmentTerminalOutcome,
 } from '../../lib/opsMetrics.js';
 import { emitPushDegradationAlert } from '../../lib/opsAlerts.js';
+import { emitPhase1OperationalEvent } from '../../lib/phase1OperationalEvents.js';
 import { runWithTrace } from '../../lib/requestContext.js';
 
 /** @typedef {'payment_success' | 'delivered' | 'failed' | 'retrying' | 'loyalty'} NotificationKind */
@@ -327,12 +328,18 @@ export async function emitFulfillmentTerminalSideEffects(orderId) {
       await notifyLoyaltyMilestone(order.userId, orderId, grant.points);
     }
     recordFulfillmentTerminalOutcome('delivered');
+    emitPhase1OperationalEvent('fulfillment_delivered', {
+      orderIdSuffix: String(orderId).slice(-12),
+    });
     return;
   }
 
   if (order.orderStatus === ORDER_STATUS.FAILED) {
     await notifyFailed(order.userId, orderId);
     recordFulfillmentTerminalOutcome('failed');
+    emitPhase1OperationalEvent('fulfillment_failed', {
+      orderIdSuffix: String(orderId).slice(-12),
+    });
     return;
   }
   recordFulfillmentTerminalOutcome('noop');

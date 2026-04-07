@@ -1,4 +1,5 @@
 import { prisma } from '../db.js';
+import { env } from '../config/env.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
@@ -146,6 +147,92 @@ function providerRefSuffix(ref) {
   return `…${s.slice(-10)}`;
 }
 
+/**
+ * @param {{ fulfillmentTruthSnapshot?: unknown }} order
+ * @returns {number | null}
+ */
+function deliveredValueUsdFromTruth(order) {
+  const truth = order.fulfillmentTruthSnapshot;
+  if (!truth || typeof truth !== 'object' || Array.isArray(truth)) return null;
+  const d = /** @type {Record<string, unknown>} */ (truth);
+  const v = d.deliveredAmountUsd ?? d.deliveredUsd ?? d.amountUsd;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  return null;
+}
+
+/**
+ * Customer-facing trust bucket (no raw enums in UI copy).
+ * @param {{ orderStatus?: string | null, paidAt?: Date | null, metadata?: unknown }} order
+ * @param {string} trackingStageKey
+ */
+function deriveCustomerTrustStatus(order, trackingStageKey) {
+  if (trackingStageKey === 'delivered') {
+    return {
+      trustStatusKey: 'delivered',
+      trustStatusDetail:
+        'Delivered — the carrier should credit this line shortly if not already visible.',
+    };
+  }
+  if (trackingStageKey === 'failed') {
+    return {
+      trustStatusKey: 'failed',
+      trustStatusDetail:
+        'This order did not complete. Any capture is handled per your payment method.',
+    };
+  }
+  if (trackingStageKey === 'cancelled') {
+    return {
+      trustStatusKey: 'cancelled',
+      trustStatusDetail: 'This order was cancelled before delivery.',
+    };
+  }
+
+  if (trackingStageKey === 'verifying') {
+    return {
+      trustStatusKey: 'processing',
+      trustStatusDetail:
+        'Confirming delivery with the carrier. You will see an update here when it is final.',
+    };
+  }
+
+  const paidAt = order.paidAt;
+  const timeoutMs = env.processingTimeoutMs ?? 600_000;
+  if (
+    paidAt instanceof Date &&
+    Date.now() - paidAt.getTime() > timeoutMs &&
+    (order.orderStatus === ORDER_STATUS.PAID ||
+      order.orderStatus === ORDER_STATUS.PROCESSING)
+  ) {
+    return {
+      trustStatusKey: 'delayed',
+      trustStatusDetail:
+        'Still processing — carriers occasionally take longer. We are not done yet.',
+    };
+  }
+
+  return {
+    trustStatusKey: 'processing',
+    trustStatusDetail:
+      'Processing your top-up with the carrier. Most complete within a few minutes.',
+  };
+}
+
+/**
+ * @param {{ stripeFeeActualUsdCents?: number | null, stripeFeeEstimateUsdCents?: number | null }} order
+ * @returns {{ feeUsd: number, feeIsFinal: boolean } | null}
+ */
+function stripeFeeDisplay(order) {
+  if (order.stripeFeeActualUsdCents != null) {
+    const c = Math.max(0, Math.floor(Number(order.stripeFeeActualUsdCents)));
+    return { feeUsd: c / 100, feeIsFinal: true };
+  }
+  if (order.stripeFeeEstimateUsdCents != null) {
+    const c = Math.max(0, Math.floor(Number(order.stripeFeeEstimateUsdCents)));
+    return { feeUsd: c / 100, feeIsFinal: false };
+  }
+  return null;
+}
+
 function friendlyFailureReason(orderFailureReason, attemptFailureReason) {
   const raw = String(orderFailureReason ?? attemptFailureReason ?? '').toLowerCase();
   if (!raw) return null;
@@ -189,6 +276,14 @@ function mapUserOrder({ order, latestAttempt }) {
       ? 'Confirming delivery'
       : fulfillmentStatusLabel(fulfillmentStatus);
 
+  const trust = deriveCustomerTrustStatus(order, trackingStageKey);
+  const paidUsd =
+    order.amountUsdCents != null && Number.isFinite(Number(order.amountUsdCents))
+      ? Math.max(0, Number(order.amountUsdCents)) / 100
+      : null;
+  const deliveredValueUsd = deliveredValueUsdFromTruth(order);
+  const feeDisp = stripeFeeDisplay(order);
+
   return {
     orderId: order.id,
     orderReference: order.id,
@@ -221,6 +316,17 @@ function mapUserOrder({ order, latestAttempt }) {
     /** Server is source of truth for account-linked orders. */
     dataSource: 'account',
     updatedAtIso: order.updatedAt.toISOString(),
+
+    trustStatusKey: trust.trustStatusKey,
+    trustStatusDetail: trust.trustStatusDetail,
+    paidUsd,
+    deliveredValueUsd,
+    processingFeeUsd: feeDisp ? feeDisp.feeUsd : null,
+    processingFeeIsFinal: feeDisp ? feeDisp.feeIsFinal : null,
+    transparencyFxNote:
+      'Charge is in USD. Your bank or wallet may show a converted amount or an international fee.',
+    transparencyDeliveryNote:
+      'Mobile airtime is usually applied within a few minutes; rare carrier delays can take longer.',
   };
 }
 
@@ -260,6 +366,9 @@ export async function listUserOrders({
       failedAt: true,
       cancelledAt: true,
       metadata: true,
+      fulfillmentTruthSnapshot: true,
+      stripeFeeEstimateUsdCents: true,
+      stripeFeeActualUsdCents: true,
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'desc' },
         take: 1,
@@ -314,6 +423,9 @@ export async function inspectUserOrder({ userId, id } = {}) {
       failedAt: true,
       cancelledAt: true,
       metadata: true,
+      fulfillmentTruthSnapshot: true,
+      stripeFeeEstimateUsdCents: true,
+      stripeFeeActualUsdCents: true,
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'desc' },
         take: 1,

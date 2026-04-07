@@ -261,6 +261,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               failedAtStep: tracking.stage == CustomerTrackingStage.failed,
             ),
             const SizedBox(height: 18),
+            OrderTrustReceiptCard(l10n: l10n, row: row),
+            const SizedBox(height: 18),
             OrderSituationAssistanceCard(l10n: l10n, tracking: tracking),
             if (tracking.paymentIsSafe &&
                 tracking.stage != CustomerTrackingStage.orderCancelled) ...[

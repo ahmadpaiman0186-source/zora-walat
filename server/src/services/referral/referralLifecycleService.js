@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../db.js';
+import { env } from '../../config/env.js';
 import { ORDER_STATUS } from '../../constants/orderStatus.js';
 import {
   REFERRAL_STATUS,

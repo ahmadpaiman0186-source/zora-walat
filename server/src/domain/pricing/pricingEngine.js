@@ -1,88 +1,54 @@
-import { getMarginRule } from './marginRules.js';
+import { env } from '../../config/env.js';
 import { getPricingFeeConfig } from './pricingConfig.js';
 import { centsToUsdNumber } from './money.js';
-import { isProductType } from './productTypes.js';
-
-/**
- * @typedef {object} PricingSuccess
- * @property {true} ok
- * @property {object} pricing
- * @property {import('./productTypes.js').ProductType} pricing.productType
- * @property {number} pricing.providerCost
- * @property {number} pricing.stripeFee
- * @property {number} pricing.fxCost
- * @property {number} pricing.taxCost
- * @property {number} pricing.totalCost
- * @property {number} pricing.appliedMarginPercent
- * @property {number} pricing.appliedProfitAbsolute
- * @property {number} pricing.finalPrice
- * @property {number} pricing.estimatedProfit
- * @property {string} pricing.currency
- * @property {number} pricing.finalPriceCents
- */
-
-/**
- * @typedef {object} PricingFailure
- * @property {false} ok
- * @property {string} code
- * @property {string} message
- */
+import { PRODUCT_TYPES } from './productTypes.js';
 
 /**
  * Stripe processing fee on the charged amount (integer cents).
- * @param {number} finalCents
- * @param {number} stripeBps
- * @param {number} stripeFixedCents
  */
 function stripeFeeCents(finalCents, stripeBps, stripeFixedCents) {
   return Math.round((finalCents * stripeBps) / 10000) + stripeFixedCents;
 }
 
 /**
- * Solve finalCents = cCents + targetProfit + stripeFee(finalCents).
- * @param {{ cCents: number, profitCents: number, stripeBps: number, stripeFixedCents: number }} p
+ * Landed COGS before Stripe: provider + buffers (fx/tax/risk on provider).
  */
-function solveFinalPriceCents(p) {
-  const { cCents, profitCents, stripeBps, stripeFixedCents } = p;
-  let f = cCents + profitCents + stripeFixedCents;
-  for (let i = 0; i < 32; i += 1) {
-    const fee = stripeFeeCents(f, stripeBps, stripeFixedCents);
-    const next = cCents + profitCents + fee;
-    if (next === f) return f;
-    f = next;
-  }
-  while (
-    f - stripeFeeCents(f, stripeBps, stripeFixedCents) <
-    cCents + profitCents
-  ) {
-    f += 1;
-  }
-  return f;
+function landedCogsCents(provider, fx, tax, risk) {
+  return provider + fx + tax + risk;
 }
 
 /**
+ * Net operating cents on the charge after Stripe fee and landed COGS.
+ */
+function netProfitCents(finalCents, landed, stripeBps, stripeFixed) {
+  return (
+    finalCents -
+    stripeFeeCents(finalCents, stripeBps, stripeFixed) -
+    landed
+  );
+}
+
+function marginBpFromNet(finalCents, netCents) {
+  if (finalCents <= 0) return 0;
+  return Math.floor((netCents * 10000) / finalCents);
+}
+
+/**
+ * Phase 1 mobile top-up only. Server-priced; never trust client amounts.
+ *
  * @param {object} input
- * @param {import('./productTypes.js').ProductType} input.productType
- * @param {number} input.providerCostCents Must be positive integer (USD cents).
- * @param {string} input.currency Only `usd` supported for now.
- * @returns {PricingSuccess | PricingFailure}
+ * @param {number} input.providerCostCents
+ * @param {number} input.riskBufferPercent Sender-country risk as % of provider cost.
+ * @param {string} [input.currency]
  */
 export function computeCheckoutPrice(input) {
-  const { productType, providerCostCents, currency } = input;
+  const { providerCostCents, riskBufferPercent, currency } = input;
 
-  if (currency !== 'usd') {
+  if (currency != null && currency !== 'usd') {
     return {
       ok: false,
       code: 'UNSUPPORTED_CURRENCY',
       message: 'Only usd is supported for checkout pricing',
-    };
-  }
-
-  if (!isProductType(productType)) {
-    return {
-      ok: false,
-      code: 'INVALID_PRODUCT_TYPE',
-      message: 'Unknown productType',
     };
   }
 
@@ -95,82 +61,130 @@ export function computeCheckoutPrice(input) {
   }
 
   const fees = getPricingFeeConfig();
-  const fxCostCents = Math.round((providerCostCents * fees.fxBps) / 10000);
-  const taxCostCents = Math.round((providerCostCents * fees.taxBps) / 10000);
-  /** Cost base for margin % (excludes Stripe; Stripe solved on final charge). */
-  const cCents = providerCostCents + fxCostCents + taxCostCents;
+  const fxOnlyCents = Math.round((providerCostCents * fees.fxBps) / 10000);
+  const taxCents = Math.round((providerCostCents * fees.taxBps) / 10000);
+  /** Persisted as fx_buffer: regulatory/tax + FX cushion (see pricingSnapshot for split). */
+  const fxBufferCents = fxOnlyCents + taxCents;
 
-  const rule = getMarginRule(productType);
-  const pctProfitCents = Math.ceil((cCents * rule.marginPercent) / 100);
-  const targetProfitCents = Math.max(pctProfitCents, rule.minimumProfitCents);
+  const riskPct =
+    typeof riskBufferPercent === 'number' && Number.isFinite(riskBufferPercent)
+      ? Math.max(0, riskBufferPercent)
+      : 0;
+  const riskBufferCents = Math.round((providerCostCents * riskPct) / 100);
 
-  let finalCents = solveFinalPriceCents({
-    cCents,
-    profitCents: targetProfitCents,
-    stripeBps: fees.stripeFeeBps,
-    stripeFixedCents: fees.stripeFixedCents,
-  });
-
-  let stripeComponentCents = stripeFeeCents(
-    finalCents,
-    fees.stripeFeeBps,
-    fees.stripeFixedCents,
+  const landed = landedCogsCents(
+    providerCostCents,
+    fxOnlyCents,
+    taxCents,
+    riskBufferCents,
   );
 
-  let totalCostCents =
-    providerCostCents + stripeComponentCents + fxCostCents + taxCostCents;
-  let estimatedProfitCents = finalCents - totalCostCents;
+  const minBp = Math.round(env.phase1MinMarginPercent * 100);
+  const targetBp = Math.round(env.phase1TargetMarginPercent * 100);
 
-  /** Integer-cent rounding on Stripe fee can shave 1¢ off net profit — bump charge until safe. */
-  for (let guard = 0; guard < 500; guard += 1) {
-    if (
-      finalCents > totalCostCents &&
-      estimatedProfitCents >= rule.minimumProfitCents
-    ) {
-      break;
+  const minCheckout = env.phase1MinCheckoutUsdCents;
+  const allowSubMin = env.phase1AllowBelowMinimumOrders;
+
+  const stripeBps = fees.stripeFeeBps;
+  const stripeFixed = fees.stripeFixedCents;
+
+  const minFloor = Math.max(
+    minCheckout,
+    landed +
+      stripeFeeCents(minCheckout, stripeBps, stripeFixed) +
+      1,
+  );
+
+  /**
+   * Smallest final charge such that net margin (bp) >= [floorBp].
+   */
+  function bestFinalAtOrAbove(floorBp, startCents) {
+    const cap = Math.max(startCents * 50, landed + 500_000);
+    for (let finalC = startCents; finalC <= cap; finalC += 1) {
+      const net = netProfitCents(finalC, landed, stripeBps, stripeFixed);
+      const bp = marginBpFromNet(finalC, net);
+      if (bp >= floorBp) {
+        return { finalCents: finalC, netCents: net, marginBp: bp };
+      }
     }
-    finalCents += 1;
-    stripeComponentCents = stripeFeeCents(
-      finalCents,
-      fees.stripeFeeBps,
-      fees.stripeFixedCents,
-    );
-    totalCostCents =
-      providerCostCents + stripeComponentCents + fxCostCents + taxCostCents;
-    estimatedProfitCents = finalCents - totalCostCents;
+    return null;
   }
 
-  if (finalCents <= totalCostCents) {
+  let picked =
+    bestFinalAtOrAbove(targetBp, minFloor) ?? bestFinalAtOrAbove(minBp, minFloor);
+
+  if (!picked) {
     return {
       ok: false,
-      code: 'PRICE_AT_OR_BELOW_COST',
-      message: 'Computed price would not cover all costs',
+      code: 'MARGIN_BELOW_FLOOR',
+      message:
+        'Checkout rejected: projected margin below minimum threshold',
     };
   }
 
-  if (estimatedProfitCents < rule.minimumProfitCents) {
+  let { finalCents, netCents, marginBp } = picked;
+
+  if (!allowSubMin && finalCents < minCheckout) {
     return {
       ok: false,
-      code: 'PROFIT_BELOW_MINIMUM',
-      message: 'Computed profit is below the minimum safe threshold',
+      code: 'CHECKOUT_BELOW_MINIMUM',
+      message: `Checkout rejected: minimum order is $${(minCheckout / 100).toFixed(2)} USD`,
+    };
+  }
+
+  const stripeComponentCents = stripeFeeCents(
+    finalCents,
+    stripeBps,
+    stripeFixed,
+  );
+
+  const additiveTargetProfit =
+    finalCents -
+    providerCostCents -
+    stripeComponentCents -
+    fxBufferCents -
+    riskBufferCents;
+
+  const verifyNet = netProfitCents(
+    finalCents,
+    landed,
+    stripeBps,
+    stripeFixed,
+  );
+  if (verifyNet < 0 || marginBpFromNet(finalCents, verifyNet) < minBp) {
+    return {
+      ok: false,
+      code: 'MARGIN_BELOW_FLOOR',
+      message:
+        'Checkout rejected: projected margin below minimum threshold',
     };
   }
 
   return {
     ok: true,
     pricing: {
-      productType,
+      productType: PRODUCT_TYPES.MOBILE_TOPUP,
       providerCost: centsToUsdNumber(providerCostCents),
       stripeFee: centsToUsdNumber(stripeComponentCents),
-      fxCost: centsToUsdNumber(fxCostCents),
-      taxCost: centsToUsdNumber(taxCostCents),
-      totalCost: centsToUsdNumber(totalCostCents),
-      appliedMarginPercent: rule.marginPercent,
-      appliedProfitAbsolute: centsToUsdNumber(targetProfitCents),
+      fxCost: centsToUsdNumber(fxBufferCents),
+      taxCost: centsToUsdNumber(0),
+      totalCost: centsToUsdNumber(
+        providerCostCents + stripeComponentCents + fxBufferCents + riskBufferCents,
+      ),
+      appliedMarginPercent: marginBp / 100,
+      appliedProfitAbsolute: centsToUsdNumber(additiveTargetProfit),
       finalPrice: centsToUsdNumber(finalCents),
-      estimatedProfit: centsToUsdNumber(estimatedProfitCents),
+      estimatedProfit: centsToUsdNumber(netCents),
       currency: 'usd',
       finalPriceCents: finalCents,
+      providerCostCents,
+      fxBufferCents,
+      riskBufferCents,
+      stripeFeeEstimateCents: stripeComponentCents,
+      targetProfitCents: additiveTargetProfit,
+      projectedNetMarginBp: marginBp,
+      taxBufferCents: taxCents,
+      fxOnlyCents,
     },
   };
 }

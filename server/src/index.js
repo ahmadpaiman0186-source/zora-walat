@@ -3,6 +3,7 @@ import { prisma } from './db.js';
 import { env } from './config/env.js';
 import { validateWebTopupFulfillmentProviderConfigOrExit } from './config/webTopupFulfillmentStartup.js';
 import { logProductionReloadlyConsistencyWarnings } from './config/productionReloadlyGuard.js';
+import { assertProductionMoneyPathSafetyOrExit } from './config/productionSafetyGates.js';
 import {
   getAirtimeReloadlyDiagnosticsSnapshot,
   validateAirtimeReloadlyConfigOrExit,
@@ -36,23 +37,31 @@ if (jwtAccess.length < 32 || jwtRefresh.length < 32) {
 validateWebTopupFulfillmentProviderConfigOrExit();
 validateAirtimeReloadlyConfigOrExit();
 logProductionReloadlyConsistencyWarnings();
+assertProductionMoneyPathSafetyOrExit();
 
 const webTopupProviderId = String(env.webTopupFulfillmentProvider ?? 'mock')
   .trim()
   .toLowerCase();
+const airtimeProviderId = String(env.airtimeProvider ?? 'mock')
+  .trim()
+  .toLowerCase();
+const reloadlyAirtimeOrWebtopup =
+  webTopupProviderId === 'reloadly' || airtimeProviderId === 'reloadly';
+
 webTopupLog(undefined, 'info', 'provider_config_validated', {
   webTopupFulfillmentProvider: webTopupProviderId,
+  airtimeProvider: airtimeProviderId,
   reloadlyCredentialsPresent:
-    webTopupProviderId !== 'reloadly' || isReloadlyConfigured(),
-  reloadlySandboxMode:
-    webTopupProviderId === 'reloadly' ? env.reloadlySandbox : null,
+    !reloadlyAirtimeOrWebtopup || isReloadlyConfigured(),
+  /** Topups API audience: sandbox host when true (shared by airtime + web top-up adapters). */
+  reloadlySandboxMode: reloadlyAirtimeOrWebtopup ? env.reloadlySandbox : null,
   airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
   launchSubsystems: getLaunchSubsystemSnapshot(),
 });
 if (process.env.NODE_ENV !== 'test') {
   console.log(
-    `[startup] provider_config_validated provider=${webTopupProviderId}` +
-      (webTopupProviderId === 'reloadly'
+    `[startup] provider_config_validated webtopup=${webTopupProviderId} airtime=${airtimeProviderId}` +
+      (reloadlyAirtimeOrWebtopup
         ? ` reloadly_creds=${isReloadlyConfigured() ? 'present' : 'missing'} sandbox=${env.reloadlySandbox}`
         : ''),
   );
@@ -81,12 +90,6 @@ if (env.prelaunchLockdown) {
 }
 
 if (env.nodeEnv === 'production') {
-  if (process.env.DEV_CHECKOUT_AUTH_BYPASS === 'true') {
-    console.error(
-      '[fatal] DEV_CHECKOUT_AUTH_BYPASS must not be enabled in production (TEMP TEST MODE)',
-    );
-    process.exit(1);
-  }
   const dbUrl = String(env.databaseUrl ?? '').trim();
   if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
     console.error(

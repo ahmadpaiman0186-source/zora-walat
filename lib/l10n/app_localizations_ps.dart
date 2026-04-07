@@ -47,6 +47,10 @@ class AppLocalizationsPs extends AppLocalizations {
   String get rechargeReviewSubtitle => 'د بسته غوره کولو دمخه دا تایید کړئ.';
 
   @override
+  String get rechargeReviewServerPricingNote =>
+      'یوازې اېرټایم. ټولټال په USD کې د چک‌اوټ پیل کې زموږ سرور تاییدوي — تادیه په Stripe امن پاڼه کېږي.';
+
+  @override
   String get continueToPlans => 'مخته — تعرفې';
 
   @override
@@ -123,7 +127,34 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get rechargeHero =>
-      'په USD کې اېرټایم یا ډیټا افغان شمېرو ته ولېږئ. چټک، روښانه او د باور وړ — له امریکا، کانادا، برتانیا یا اروپا څخه.';
+      'په USD کې د افغان موبایل اېرټایم ولېږئ. چټک، روښانه او د باور وړ — له امریکا، کانادا، برتانیا، اروپا، اماراتو یا ترکیې څخه.';
+
+  @override
+  String get phase1OnlyAirtimeSnack =>
+      'فاز ۱: یوازې د موبایل اېرټایم شتون لري.';
+
+  @override
+  String get phase1UsdSecureCheckout =>
+      'تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.';
+
+  @override
+  String get checkoutCardRegionLabel => 'ستاسو ځای (کارت)';
+
+  @override
+  String get checkoutPricingUsdServerNote =>
+      'بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.';
+
+  @override
+  String get telecomCheckoutAirtimeRowLabel => 'موبایل اېرټایم';
+
+  @override
+  String get phase1ValidityDependsOnOperator =>
+      'د اعتبار موده د اپراتور پورې اړه لري — یوازې هغه وخت دلته ښیو چې له بیې څخه تایید شوی مقدار ولرو.';
+
+  @override
+  String checkoutAirtimeAmountLine(String amount) {
+    return '$amount اېرټایم ولېږئ';
+  }
 
   @override
   String get rechargeTrustLine => 'USD نرخونه · خوندي تادیه · افغان موبایل';
@@ -291,6 +322,10 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get totalUsd => 'ټول (USD)';
+
+  @override
+  String get checkoutUsdTotalFootnote =>
+      'په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.';
 
   @override
   String get stripeSectionTitle => 'خوندي تادیه';
@@ -508,6 +543,9 @@ class AppLocalizationsPs extends AppLocalizations {
   String get authFillAllFields => 'بریښنالیک او پټنوم ولیکئ.';
 
   @override
+  String get authInvalidEmail => 'اعتباری بریښنالیک ولیکئ.';
+
+  @override
   String get landingNavBrand => 'زوره‌ولت';
 
   @override
@@ -612,6 +650,55 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get receiptFulfillmentStatus => 'د ټاپ‌آپ حالت';
+
+  @override
+  String get receiptTrustTitle => 'رسید';
+
+  @override
+  String get receiptTrustPaidUsd => 'ورکړل شوی (USD)';
+
+  @override
+  String get receiptTrustDeliveredValue => 'سپارل شوې بيه (USD)';
+
+  @override
+  String get receiptTrustStatus => 'حالت';
+
+  @override
+  String get receiptTrustUpdatedAt => 'وروستی تازه‌کول';
+
+  @override
+  String get receiptTrustPaidAt => 'د تادیې وخت';
+
+  @override
+  String receiptTrustFeeFinal(String fee) {
+    return 'پروسس فیس (پای): $fee';
+  }
+
+  @override
+  String receiptTrustFeeEstimated(String fee) {
+    return 'پروسس فیس (اندازه): $fee';
+  }
+
+  @override
+  String get receiptTrustFxNoteTitle => 'اسعار';
+
+  @override
+  String get receiptTrustDeliveryNoteTitle => 'د سپارلو وخت';
+
+  @override
+  String get orderTrustStatusProcessing => 'پروسس کې';
+
+  @override
+  String get orderTrustStatusDelivered => 'سپارل شوی';
+
+  @override
+  String get orderTrustStatusDelayed => 'ناوخته';
+
+  @override
+  String get orderTrustStatusFailed => 'پاتې شوی';
+
+  @override
+  String get orderTrustStatusCancelled => 'لغو شوی';
 
   @override
   String get receiptWhatNextTitle => 'راتلونکی ګام';

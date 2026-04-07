@@ -8,7 +8,7 @@ import { PRODUCT_TYPES } from './productTypes.js';
 
 /**
  * Future: pass { country, operatorKey, providerId } to select wholesale rows.
- * @typedef {{ productType: import('./productTypes.js').ProductType, providerCostCents: number, faceValueCents: number }} CatalogQuote
+ * @typedef {{ productType: import('./productTypes.js').Phase1ProductType, providerCostCents: number, faceValueCents: number }} CatalogQuote
  */
 
 /**
@@ -21,8 +21,17 @@ export function resolveCatalogQuoteByPackageId(packageId) {
 
   const mock = MOCK_PACKAGE_ECONOMICS[pid];
   if (mock) {
+    if (
+      mock.productType === PRODUCT_TYPES.DATA_BUNDLE ||
+      mock.productType === 'data_bundle'
+    ) {
+      return null;
+    }
+    if (mock.productType === PRODUCT_TYPES.INTERNATIONAL_CALL_WEEKLY) {
+      return null;
+    }
     return {
-      productType: mock.productType,
+      productType: PRODUCT_TYPES.MOBILE_TOPUP,
       providerCostCents: mock.providerUsdCents,
       faceValueCents: mock.faceValueUsdCents,
     };
@@ -34,7 +43,7 @@ export function resolveCatalogQuoteByPackageId(packageId) {
       return null;
     }
     return {
-      productType: PRODUCT_TYPES.AIRTIME,
+      productType: PRODUCT_TYPES.MOBILE_TOPUP,
       providerCostCents: sku.providerUsdCents,
       faceValueCents: sku.retailUsdCents,
     };
@@ -42,13 +51,8 @@ export function resolveCatalogQuoteByPackageId(packageId) {
 
   const dataRetail = getDataPackageRetailUsdCents(pid);
   if (dataRetail != null) {
-    const provider = getDataPackageProviderCostUsdCents(pid);
-    if (provider == null) return null;
-    return {
-      productType: PRODUCT_TYPES.DATA_BUNDLE,
-      providerCostCents: provider,
-      faceValueCents: dataRetail,
-    };
+    void getDataPackageProviderCostUsdCents;
+    return null;
   }
 
   return null;
@@ -61,7 +65,7 @@ export function resolveCatalogQuoteByPackageId(packageId) {
  */
 export function resolveAmountOnlyAirtimeQuote(amountCents, providerBpsOfFace) {
   return {
-    productType: PRODUCT_TYPES.AIRTIME,
+    productType: PRODUCT_TYPES.MOBILE_TOPUP,
     providerCostCents: Math.round((amountCents * providerBpsOfFace) / 10000),
     faceValueCents: amountCents,
   };

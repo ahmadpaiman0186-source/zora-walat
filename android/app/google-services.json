@@ -1,14 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "firebase_url": "https://replace-with-your-firebase-project.firebaseio.com",
-    "project_id": "replace-with-your-firebase-project",
-    "storage_bucket": "replace-with-your-firebase-project.appspot.com"
+    "project_number": "1060511706874",
+    "project_id": "zora-walat-b90bb",
+    "storage_bucket": "zora-walat-b90bb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:1060511706874:android:18fe3367af33d866502343",
         "android_client_info": {
           "package_name": "com.example.zora_walat"
         }
@@ -16,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "replace-with-android-api-key-from-firebase-console"
+          "current_key": "AIzaSyA2xRoDw5A3_vLEWyV9OCMfHvx77IuZT1A"
         }
       ],
       "services": {

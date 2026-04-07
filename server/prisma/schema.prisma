@@ -161,6 +161,18 @@ model VelocityWindow {
   @@unique([phoneHash, windowHour])
 }
 
+/// Configurable sender region (US, CA, EU, AE, TR) — risk buffer for Phase 1 pricing only.
+model SenderCountry {
+  code                String   @id
+  displayName         String
+  enabled             Boolean  @default(true)
+  /// Percent of provider cost (e.g. 1.25 = 1.25%).
+  riskBufferPercent   Float    @default(0)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
 /// Server-authoritative Stripe Checkout attempt (idempotency + webhook lifecycle).
 /// `status`: legacy Stripe row state (INITIATED → CHECKOUT_CREATED → …).
 /// `orderStatus`: canonical business lifecycle (PENDING → PAID → PROCESSING → FULFILLED | FAILED | CANCELLED).
@@ -173,6 +185,38 @@ model PaymentCheckout {
   status                  String
   amountUsdCents          Int
   currency                String   @default("usd")
+  /// ISO sender region for analytics & risk buffer (Phase 1: US | CA | EU | AE | TR).
+  senderCountryCode       String?
+  /// Phase 1 active product: `mobile_topup` only. Future: `data_package`, `calling_credit`.
+  productType             String   @default("mobile_topup")
+  /// Locked at checkout creation from pricing engine (USD cents).
+  providerCostUsdCents          Int?
+  stripeFeeEstimateUsdCents     Int?
+  stripeFeeActualUsdCents       Int?
+  fxBufferUsdCents              Int?
+  riskBufferUsdCents            Int?
+  targetProfitUsdCents          Int?
+  /// Net margin on revenue, basis points (300 = 3.00%).
+  projectedNetMarginBp          Int?
+  /// Margin using **locked** provider cost + **actual** Stripe fee (when fee captured).
+  actualNetMarginBp             Int?
+  /// Best-known margin bp: actual provider cost when available, else locked; actual Stripe fee when available, else estimate.
+  refinedActualNetMarginBp      Int?
+  financialTruthComputedAt      DateTime?
+  /// Wholesale/settlement cost in USD cents when provider response exposes it (else null).
+  providerCostActualUsdCents    Int?
+  /// provider_api | locked_estimate | unverified
+  providerCostTruthSource       String?
+  fulfillmentProviderReference  String?
+  fulfillmentProviderKey        String?
+  /// Sanitized fulfillment proof (refs, operator hints, safe provider fields).
+  fulfillmentTruthSnapshot      Json?
+  /// JSON array of anomaly code strings (e.g. LOW_MARGIN, STRIPE_AMOUNT_MISMATCH).
+  financialAnomalyCodes         Json?
+  /// Gross amount from Stripe BalanceTransaction (cents); for reconciliation vs amountUsdCents.
+  stripeBalanceTransactionAmountCents Int?
+  /// Full pricing breakdown JSON for audit (immutable snapshot).
+  pricingSnapshot               Json?
   operatorKey             String?
   recipientNational       String?
   packageId               String?
@@ -201,6 +245,12 @@ model PaymentCheckout {
   marginNetUsdCents            Int?
   marginPercentBp              Int?
   marginCalculatedAt           DateTime?
+  /// Phase 1 post-payment incident (manual + optional future webhooks). See `postPaymentIncidentStatus.js`.
+  postPaymentIncidentStatus    String?
+  postPaymentIncidentNotes     String?   @db.Text
+  postPaymentIncidentUpdatedAt DateTime?
+  /// How incident was tied to checkout (`REFUND_*`, `DISPUTE_*` constants). See `postPaymentIncidentMapSource.js`.
+  postPaymentIncidentMapSource String?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

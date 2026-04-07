@@ -332,6 +332,13 @@ export async function sendTopup({ phone, operatorId, amount, countryCode, custom
 /**
  * Paid checkout → Reloadly top-up (uses {@link sendTopup}).
  *
+ * **Idempotency / duplicate-send:** `customIdentifier` is `${orderId}_a${attemptNumber}` (stable per DB
+ * attempt). Reloadly HTTP 409 → `reloadly_topup_duplicate` (logged; not silent success). A *new* attempt
+ * number uses a *new* key → a second provider send is possible by design (human-approved recovery only).
+ * **Residual risk:** transport success at Reloadly with no persisted HTTP body locally → reconciler/ops
+ * must verify in dashboard before approving a replacement attempt; use `PROCESSING_RECOVERY_SANDBOX_CONSERVATIVE=true`
+ * during first sandbox drills to block auto `retry_new_attempt`.
+ *
  * @param {import('@prisma/client').PaymentCheckout} order
  * @param {{ attemptNumber?: number, attemptId?: string, traceId?: string | null, log?: import('pino').Logger }} [fulfillmentCtx]
  */

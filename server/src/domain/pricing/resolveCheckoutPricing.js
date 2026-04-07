@@ -5,16 +5,16 @@ import {
   resolveAmountOnlyAirtimeQuote,
 } from './catalogResolver.js';
 import { ALLOWED_CHECKOUT_USD_CENTS } from '../../lib/allowedCheckout.js';
+import { PRODUCT_TYPES } from './productTypes.js';
 
 /**
- * Server-only checkout pricing: never trust client-supplied amounts for packages.
- * Amount-only path: allowed preset list → airtime wholesale from env ratio.
+ * Server-only checkout pricing: never trust client-supplied amounts.
  *
- * @param {{ packageId?: string | null, amountUsdCents?: number | null }} input
- * @returns {import('./pricingEngine.js').PricingSuccess | import('./pricingEngine.js').PricingFailure | { ok: false, code: string, message: string }}
+ * @param {{ packageId?: string | null, amountUsdCents?: number | null, riskBufferPercent: number }} input
+ * @returns {import('./pricingEngine.js').PricingLineSuccess | import('./pricingEngine.js').PricingLineFailure | { ok: false, code: string, message: string }}
  */
 export function resolveCheckoutPricing(input) {
-  const { packageId, amountUsdCents } = input;
+  const { packageId, amountUsdCents, riskBufferPercent } = input;
 
   if (packageId != null && String(packageId).trim()) {
     const quote = resolveCatalogQuoteByPackageId(String(packageId).trim());
@@ -25,10 +25,17 @@ export function resolveCheckoutPricing(input) {
         message: 'Unknown packageId',
       };
     }
+    if (quote.productType !== PRODUCT_TYPES.MOBILE_TOPUP) {
+      return {
+        ok: false,
+        code: 'PHASE1_PRODUCT_DISABLED',
+        message: 'This product is not available in Phase 1',
+      };
+    }
     return computeCheckoutPrice({
-      productType: quote.productType,
       providerCostCents: quote.providerCostCents,
       currency: 'usd',
+      riskBufferPercent,
     });
   }
 
@@ -53,8 +60,8 @@ export function resolveCheckoutPricing(input) {
     env.pricingAmountOnlyProviderBps,
   );
   return computeCheckoutPrice({
-    productType: q.productType,
     providerCostCents: q.providerCostCents,
     currency: 'usd',
+    riskBufferPercent,
   });
 }

@@ -21,11 +21,37 @@ export function validateAirtimeReloadlyConfigOrExit() {
 export function getAirtimeReloadlyDiagnosticsSnapshot() {
   const provider = env.airtimeProvider;
   const credsPresent = isReloadlyConfigured();
+  const map = env.reloadlyOperatorMap && typeof env.reloadlyOperatorMap === 'object' ? env.reloadlyOperatorMap : {};
+  const reloadlyOperatorMapConfiguredCount = Object.values(map).filter(
+    (v) => String(v ?? '').trim() !== '',
+  ).length;
+  const reloadlyAirtimeSandboxActive = provider === 'reloadly' && env.reloadlySandbox === true;
+
   return {
     airtimeProvider: provider,
     reloadlySandbox: env.reloadlySandbox,
     reloadlyCredentialsPresent: credsPresent,
     reloadlyTopupsAudienceConfigured: Boolean(String(env.reloadlyBaseUrl ?? '').trim()),
     mockFallbackExplicitlyAllowed: env.reloadlyAllowUnavailableMockFallback === true,
+    reloadlyOperatorMapConfiguredCount,
+    /**
+     * Runbook-oriented signals for first controlled sandbox drill (`GET /ready`). No secrets.
+     */
+    sandboxExecutionReadiness: {
+      reloadlyAirtimeSandboxActive,
+      operatorMappingSatisfied: provider !== 'reloadly' || reloadlyOperatorMapConfiguredCount > 0,
+      prelaunchLockdownBlocksCheckoutFlow: env.prelaunchLockdown === true,
+      processingRecoveryWorkerEnabled: env.processingRecoveryEnabled === true,
+      processingRecoveryPollMs: env.processingRecoveryPollMs,
+      conservativeSandboxRecoverySuppressionEnabled: env.processingRecoverySandboxConservative === true,
+      /** When true, paid checkout / execute may be unavailable — set false before drill. */
+      drillLikelyBlockedByPrelaunch: env.prelaunchLockdown === true,
+      /** When true with poll > 0, auto recovery may run during observation — prefer poll 0 for first drill. */
+      drillNoiseFromAutoRecovery:
+        reloadlyAirtimeSandboxActive &&
+        env.processingRecoveryEnabled &&
+        env.processingRecoveryPollMs > 0 &&
+        !env.processingRecoverySandboxConservative,
+    },
   };
 }

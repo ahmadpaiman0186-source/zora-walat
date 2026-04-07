@@ -161,6 +161,23 @@ class _SuccessScreenState extends State<SuccessScreen> {
         );
   }
 
+  /// Hero icon: payment secured vs full delivery — avoid a global “verified” checkmark while still verifying.
+  static IconData _heroIconForPaymentStage(CustomerTrackingStage s) {
+    switch (s) {
+      case CustomerTrackingStage.delivered:
+        return Icons.verified_rounded;
+      case CustomerTrackingStage.verifying:
+      case CustomerTrackingStage.retrying:
+        return Icons.hourglass_top_rounded;
+      case CustomerTrackingStage.failed:
+        return Icons.support_agent_rounded;
+      case CustomerTrackingStage.orderCancelled:
+        return Icons.cancel_outlined;
+      default:
+        return Icons.payments_rounded;
+    }
+  }
+
   static String _storageKeyFor(CustomerTrackingStage s) {
     switch (s) {
       case CustomerTrackingStage.delivered:
@@ -240,7 +257,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
                     ),
                   ),
                   child: Icon(
-                    Icons.verified_rounded,
+                    _heroIconForPaymentStage(tracking.stage),
                     size: 44,
                     color: cs.primary,
                   ),
@@ -317,7 +334,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.receiptWhatNextBody,
+                tracking.stage == CustomerTrackingStage.verifying
+                    ? l10n.trackingBodyVerifying
+                    : l10n.receiptWhatNextBody,
                 style: t.textTheme.bodyMedium?.copyWith(
                   color: cs.outline,
                   height: 1.45,

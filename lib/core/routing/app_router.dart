@@ -20,6 +20,7 @@ import '../../features/telecom/domain/telecom_order.dart';
 import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
+import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/loyalty/presentation/loyalty_hub_screen.dart';
 import '../../features/referral/presentation/referral_center_screen.dart';
 import '../../features/notifications/presentation/notification_inbox_screen.dart';
@@ -39,6 +40,7 @@ abstract final class AppRoutePaths {
   static const telecom = '/telecom';
   static const checkout = '/checkout';
   static const signIn = '/sign-in';
+  static const signUp = '/sign-up';
   static const paymentSuccess = '/success';
   static const paymentCancel = '/cancel';
   static const orders = '/orders';
@@ -134,6 +136,11 @@ GoRouter createAppRouter() {
         path: AppRoutePaths.signIn,
         name: 'signIn',
         builder: (context, state) => const SignInScreen(),
+      ),
+      GoRoute(
+        path: AppRoutePaths.signUp,
+        name: 'signUp',
+        builder: (context, state) => const SignUpScreen(),
       ),
       GoRoute(
         path: AppRoutePaths.paymentSuccess,

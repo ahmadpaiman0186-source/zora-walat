@@ -74,6 +74,26 @@ export function recordFulfillmentRunStarted() {
   bumpCounter('fulfillment_run_started');
 }
 
+/** Phase 1 financial anomaly codes persisted on PaymentCheckout (count for ops dashboards). */
+export function recordPhase1FinancialAnomalyCodes(codes) {
+  if (!Array.isArray(codes) || codes.length === 0) return;
+  bumpCounter('phase1_financial_anomaly_order_total');
+  for (const c of codes) {
+    if (typeof c !== 'string' || !c.trim()) continue;
+    bumpCounter(`phase1_anomaly_${String(c).replace(/[^A-Z0-9_]/gi, '_').slice(0, 48)}`);
+  }
+}
+
+export function recordPhase1StuckSignalObserved(signal) {
+  if (typeof signal !== 'string' || !signal.trim()) return;
+  bumpCounter('phase1_stuck_signal_total');
+  bumpCounter(`phase1_stuck_${String(signal).replace(/[^A-Z0-9_]/gi, '_').slice(0, 64)}`);
+}
+
+export function recordCheckoutSessionCreated() {
+  bumpCounter('checkout_session_created_total');
+}
+
 /**
  * Retry / idempotency signals (volumes for capacity planning — not failure windows).
  * @param {'webhook_event_duplicate' | 'webtop_fulfillment_retry' | string} kind

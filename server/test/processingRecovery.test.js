@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { classifyStuckRecovery } from '../src/services/processingRecoveryService.js';
+import {
+  applySandboxRetrySuppressionPolicy,
+  classifyStuckRecovery,
+} from '../src/services/processingRecoveryService.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../src/constants/fulfillmentAttemptStatus.js';
 
 function att(overrides) {
@@ -61,5 +64,38 @@ test('classifyStuckRecovery: Reloadly pending proof → manual_review (no duplic
       }),
     ),
     'manual_review',
+  );
+});
+
+test('applySandboxRetrySuppressionPolicy: pass-through when conservative flag off', () => {
+  assert.deepEqual(
+    applySandboxRetrySuppressionPolicy('retry_new_attempt', {
+      processingRecoverySandboxConservative: false,
+      reloadlySandbox: true,
+      airtimeProvider: 'reloadly',
+    }),
+    { path: 'retry_new_attempt', manualReviewOverride: null },
+  );
+});
+
+test('applySandboxRetrySuppressionPolicy: manual_review when sandbox drill trio', () => {
+  const r = applySandboxRetrySuppressionPolicy('retry_new_attempt', {
+    processingRecoverySandboxConservative: true,
+    reloadlySandbox: true,
+    airtimeProvider: 'reloadly',
+  });
+  assert.equal(r.path, 'manual_review');
+  assert.equal(r.manualReviewOverride?.reason, 'sandbox_auto_retry_suppressed');
+  assert.equal(r.manualReviewOverride?.classification, 'sandbox_duplicate_send_guard');
+});
+
+test('applySandboxRetrySuppressionPolicy: non-retry paths unchanged', () => {
+  assert.deepEqual(
+    applySandboxRetrySuppressionPolicy('manual_review', {
+      processingRecoverySandboxConservative: true,
+      reloadlySandbox: true,
+      airtimeProvider: 'reloadly',
+    }),
+    { path: 'manual_review', manualReviewOverride: null },
   );
 });

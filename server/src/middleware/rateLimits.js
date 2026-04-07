@@ -81,6 +81,58 @@ export const authenticatedApiLimiter = rateLimit({
   handler: rateLimitHandler,
 });
 
+/**
+ * Post-payment fulfillment kick (`POST /api/recharge/execute`) — tighter than generic wallet/recharge.
+ * Prevents aggressive client polling from hammering DB + worker scheduling.
+ */
+/**
+ * Staff-only privileged APIs (`/api/admin/ops/*`, support full-trace) — per staff user + IP.
+ */
+export const staffPrivilegedLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 90 : 400,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id;
+    return uid ? `staff_priv:${uid}:${ip}` : `staff_priv:${ip}`;
+  },
+  message: { error: 'Too many staff requests; slow down.' },
+  handler: rateLimitHandler,
+});
+
+/**
+ * Canonical Phase 1 truth reads — stricter than general order list.
+ */
+export const phase1TruthReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 36 : 160,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id;
+    return uid ? `${ip}:phase1:${uid}` : ip;
+  },
+  message: { error: 'Too many order truth requests; try again later.' },
+  handler: rateLimitHandler,
+});
+
+export const rechargeExecuteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 45 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id;
+    return uid ? `${ip}:${uid}` : ip;
+  },
+  message: { error: 'Too many fulfillment refresh attempts; try again shortly.' },
+  handler: rateLimitHandler,
+});
+
 /** Public catalog reads — own limiter instance so buckets are not shared with `/api/*`. */
 export const catalogLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

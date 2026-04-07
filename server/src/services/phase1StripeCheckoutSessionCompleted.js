@@ -1,0 +1,254 @@
+import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
+import { ORDER_STATUS } from '../constants/orderStatus.js';
+import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
+import { assertTransition } from '../domain/orders/orderLifecycle.js';
+import { writeOrderAudit } from './orderAuditService.js';
+import { ensureQueuedFulfillmentAttempt } from './fulfillmentProcessingService.js';
+import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
+import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
+
+const PAYMENT_PRE_SUCCESS = [
+  PAYMENT_CHECKOUT_STATUS.INITIATED,
+  PAYMENT_CHECKOUT_STATUS.PAYMENT_PENDING,
+  PAYMENT_CHECKOUT_STATUS.CHECKOUT_CREATED,
+];
+
+export function stripeSessionPaymentIntentId(session) {
+  const pi = session.payment_intent;
+  if (typeof pi === 'string') return pi;
+  if (pi && typeof pi === 'object' && pi.id != null) return String(pi.id);
+  return null;
+}
+
+export function stripeSessionCustomerId(session) {
+  const c = session.customer;
+  if (typeof c === 'string') return c;
+  if (c && typeof c === 'object' && c.id != null) return String(c.id);
+  return null;
+}
+
+/**
+ * Apply Phase 1 `checkout.session.completed` inside an existing transaction (after StripeWebhookEvent row created).
+ * Idempotent on order row when not PENDING / already paid.
+ *
+ * @param {import('@prisma/client').Prisma.TransactionClient} tx
+ * @param {object} opts
+ * @param {string} opts.eventId Stripe `evt_…`
+ * @param {object} opts.session Stripe Checkout Session payload
+ * @param {{ warn?: Function, error?: Function }} [opts.log]
+ * @returns {Promise<{ orderIdToScheduleFulfillment: string | null, checkoutAmountMismatchOrderId: string | null, paymentIntentIdsForFeeCapture: string[] }>}
+ */
+export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session, log }) {
+  let orderIdToScheduleFulfillment = null;
+  let checkoutAmountMismatchOrderId = null;
+  const paymentIntentIdsForFeeCapture = [];
+
+  const raw = session.metadata?.internalCheckoutId;
+  if (!raw) {
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+  if (!isLikelyPaymentCheckoutId(raw)) {
+    log?.warn?.(
+      { securityEvent: 'webhook_invalid_metadata_shape' },
+      'security',
+    );
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  const row = await tx.paymentCheckout.findUnique({
+    where: { id: raw },
+  });
+  if (!row) {
+    log?.warn?.('stripe webhook: unknown checkout row');
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+  if (row.userId == null) {
+    log?.warn?.(
+      { securityEvent: 'webhook_checkout_missing_user' },
+      'security',
+    );
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  const total = session.amount_total;
+  const sessionCurrency = String(session.currency ?? 'usd').toLowerCase();
+  const rowCurrency = String(row.currency ?? 'usd').toLowerCase();
+  if (total == null) {
+    log?.warn?.('stripe webhook: missing amount_total');
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  if (total !== row.amountUsdCents || sessionCurrency !== rowCurrency) {
+    checkoutAmountMismatchOrderId = raw;
+    log?.error?.(
+      {
+        expectedCents: row.amountUsdCents,
+        stripeTotal: total,
+        expectedCurrency: rowCurrency,
+        stripeCurrency: sessionCurrency,
+      },
+      'stripe webhook: amount or currency mismatch',
+    );
+    if (row.orderStatus === ORDER_STATUS.PENDING) {
+      const payTrans = validatePaymentCheckoutStatusTransition(
+        row.status,
+        PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+      );
+      if (!payTrans.ok) {
+        log?.error?.(
+          {
+            fortressDenial: payTrans.denial,
+            detail: payTrans.detail,
+            orderIdSuffix: String(raw).slice(-12),
+          },
+          'phase1 webhook: payment row transition denied (mismatch fail path)',
+        );
+        return {
+          orderIdToScheduleFulfillment,
+          checkoutAmountMismatchOrderId,
+          paymentIntentIdsForFeeCapture,
+        };
+      }
+      assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
+      await tx.paymentCheckout.updateMany({
+        where: {
+          id: raw,
+          orderStatus: ORDER_STATUS.PENDING,
+        },
+        data: {
+          orderStatus: ORDER_STATUS.FAILED,
+          status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+          failedAt: new Date(),
+          failureReason: 'stripe_amount_currency_mismatch',
+        },
+      });
+      await writeOrderAudit(tx, {
+        event: 'order_status_changed',
+        payload: {
+          orderId: raw,
+          to: ORDER_STATUS.FAILED,
+          reason: 'amount_currency_mismatch',
+        },
+        ip: null,
+      });
+    }
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  if (row.orderStatus !== ORDER_STATUS.PENDING) {
+    if (
+      row.orderStatus === ORDER_STATUS.PAID ||
+      row.orderStatus === ORDER_STATUS.PROCESSING
+    ) {
+      emitFortressIdempotencyNoop('CHECKOUT_SESSION_REPLAY_AFTER_PAID', {
+        orderIdSuffix: String(raw).slice(-12),
+        orderStatus: row.orderStatus,
+      });
+    }
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  assertTransition(row.orderStatus, ORDER_STATUS.PAID);
+
+  const payToSucceeded = validatePaymentCheckoutStatusTransition(
+    row.status,
+    PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+  );
+  if (!payToSucceeded.ok) {
+    log?.error?.(
+      {
+        fortressDenial: payToSucceeded.denial,
+        detail: payToSucceeded.detail,
+        orderIdSuffix: String(raw).slice(-12),
+      },
+      'phase1 webhook: payment row transition denied (paid path)',
+    );
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  const piId = stripeSessionPaymentIntentId(session);
+  const custId = stripeSessionCustomerId(session);
+
+  const updated = await tx.paymentCheckout.updateMany({
+    where: {
+      id: raw,
+      orderStatus: ORDER_STATUS.PENDING,
+      status: { in: PAYMENT_PRE_SUCCESS },
+    },
+    data: {
+      orderStatus: ORDER_STATUS.PAID,
+      status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+      stripePaymentIntentId: piId,
+      stripeCustomerId: custId,
+      completedByWebhookEventId: eventId,
+      paidAt: new Date(),
+    },
+  });
+
+  if (updated.count === 0) {
+    emitFortressIdempotencyNoop('CHECKOUT_SESSION_PAID_TRANSITION_RACE', {
+      orderIdSuffix: String(raw).slice(-12),
+    });
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+
+  if (piId) {
+    paymentIntentIdsForFeeCapture.push(piId);
+  }
+
+  await writeOrderAudit(tx, {
+    event: 'order_status_changed',
+    payload: { orderId: raw, to: ORDER_STATUS.PAID },
+    ip: null,
+  });
+
+  await ensureQueuedFulfillmentAttempt(tx, raw);
+  await writeOrderAudit(tx, {
+    event: 'payment_completed',
+    payload: { orderId: raw },
+    ip: null,
+  });
+  orderIdToScheduleFulfillment = raw;
+
+  return {
+    orderIdToScheduleFulfillment,
+    checkoutAmountMismatchOrderId,
+    paymentIntentIdsForFeeCapture,
+  };
+}

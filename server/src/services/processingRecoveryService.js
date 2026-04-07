@@ -12,6 +12,7 @@ import { getTraceId, runWithTrace } from '../lib/requestContext.js';
 import { safeSuffix } from '../lib/webTopupObservability.js';
 import { logManualRequiredAlert } from '../lib/manualRequiredAlerts.js';
 import { mergeManualRequiredMetadata } from '../lib/manualRequiredMetadata.js';
+import { assertTransition } from '../domain/orders/orderLifecycle.js';
 import {
   detectLikelyFulfillmentSuccess,
   mergeLikelyDeliveryMetadata,
@@ -101,6 +102,36 @@ export function classifyStuckRecovery(processingAttempt) {
     return 'revert_paid';
   }
   return 'revert_paid';
+}
+
+/**
+ * First sandbox drill: optionally prevent automatic `retry_new_attempt` (new attempt number → new
+ * `customIdentifier` → possible second provider send) when Reloadly sandbox + airtime adapter + flag.
+ *
+ * @param {'revert_paid' | 'retry_new_attempt' | 'manual_review'} path
+ * @param {{ processingRecoverySandboxConservative?: boolean, reloadlySandbox?: boolean, airtimeProvider?: string }} [opts] — tests may override; production omits (uses `env`)
+ * @returns {{ path: 'revert_paid' | 'retry_new_attempt' | 'manual_review', manualReviewOverride: { reason: string, classification: string } | null }}
+ */
+export function applySandboxRetrySuppressionPolicy(path, opts = {}) {
+  if (path !== 'retry_new_attempt') {
+    return { path, manualReviewOverride: null };
+  }
+  const conservative =
+    opts.processingRecoverySandboxConservative !== undefined
+      ? opts.processingRecoverySandboxConservative
+      : env.processingRecoverySandboxConservative;
+  const sandbox = opts.reloadlySandbox !== undefined ? opts.reloadlySandbox : env.reloadlySandbox;
+  const airtime = opts.airtimeProvider !== undefined ? opts.airtimeProvider : env.airtimeProvider;
+  if (!conservative || !sandbox || airtime !== 'reloadly') {
+    return { path, manualReviewOverride: null };
+  }
+  return {
+    path: 'manual_review',
+    manualReviewOverride: {
+      reason: 'sandbox_auto_retry_suppressed',
+      classification: 'sandbox_duplicate_send_guard',
+    },
+  };
 }
 
 function mergeRecoveryMetadata(metadata, inc) {
@@ -387,12 +418,26 @@ async function recoverOneStuckOrder(orderId, traceId) {
       path = 'revert_paid';
     }
 
+    const suppression = applySandboxRetrySuppressionPolicy(path);
+    if (suppression.manualReviewOverride) {
+      logRecovery('sandbox_recovery_retry_suppressed', {
+        orderId,
+        traceId,
+        priorPath: 'retry_new_attempt',
+      });
+    }
+    path = suppression.path;
+    const manualReviewOverride = suppression.manualReviewOverride;
+
     if (path === 'manual_review') {
       const wasManualMr = Boolean(rec.manualRequired);
+      const reason = manualReviewOverride?.reason ?? 'provider_truth_uncertain_stuck';
+      const classification =
+        manualReviewOverride?.classification ?? 'reloadly_no_auto_recovery';
       const newMetaMr = mergeManualRequiredMetadata(order.metadata, {
-        reason: 'provider_truth_uncertain_stuck',
+        reason,
         traceId,
-        classification: 'reloadly_no_auto_recovery',
+        classification,
       });
       await tx.paymentCheckout.updateMany({
         where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
@@ -402,7 +447,7 @@ async function recoverOneStuckOrder(orderId, traceId) {
         event: 'processing_recovery_manual_required',
         payload: {
           orderId,
-          reason: 'provider_truth_uncertain_stuck',
+          reason,
           fulfillmentAttemptIdSuffix: safeSuffix(proc.id, 8),
         },
         ip: null,
@@ -410,12 +455,12 @@ async function recoverOneStuckOrder(orderId, traceId) {
       logRecovery('order_recovery_manual_required', {
         orderId,
         traceId,
-        reason: 'provider_truth_uncertain_stuck',
+        reason,
       });
       return {
         kind: 'manual',
         firstManualFlag: !wasManualMr,
-        manualReason: 'provider_truth_uncertain_stuck',
+        manualReason: reason,
       };
     }
 
@@ -530,6 +575,7 @@ async function recoverOneStuckOrder(orderId, traceId) {
       },
     });
 
+    assertTransition(ORDER_STATUS.PROCESSING, ORDER_STATUS.PAID);
     const o = await tx.paymentCheckout.updateMany({
       where: {
         id: orderId,

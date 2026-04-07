@@ -1,5 +1,5 @@
 import { AIRTIME_SKUS, getAirtimeSku } from './pricing.js';
-import { getDataPackageRetailUsdCents, allDataPackageRetailUsdCents } from './dataPackagePricing.js';
+import { getDataPackageRetailUsdCents } from './dataPackagePricing.js';
 import { MOCK_PACKAGE_ECONOMICS } from '../domain/pricing/packageCatalog.js';
 
 /** Operators accepted for checkout metadata (matches catalog + Flutter). */
@@ -10,26 +10,28 @@ export const OPERATOR_KEYS = [
   'afghanWireless',
 ];
 
-/** Mock package face values (USD cents) — must match `MOCK_PACKAGE_ECONOMICS`. */
+/** Mock package face values — Phase 1: mobile top-up only (excludes data mocks). */
 const MOCK_PACKAGE_FACE_CENTS = Object.fromEntries(
-  Object.entries(MOCK_PACKAGE_ECONOMICS).map(([k, v]) => [
-    k,
-    v.faceValueUsdCents,
-  ]),
+  Object.entries(MOCK_PACKAGE_ECONOMICS)
+    .filter(
+      ([, v]) =>
+        v.productType !== 'data_bundle' &&
+        v.productType !== 'data_package',
+    )
+    .map(([k, v]) => [k, v.faceValueUsdCents]),
 );
 
 function uniqueSorted(ints) {
   return [...new Set(ints)].sort((a, b) => a - b);
 }
 
-/** All cent amounts the server will accept for Checkout (no client trust beyond picking one of these). */
+/** All cent amounts the server will accept for amount-only Checkout (Phase 1: no data bundles). */
 export const ALLOWED_CHECKOUT_USD_CENTS = new Set(
   uniqueSorted([
     ...AIRTIME_SKUS.map((r) => r.retailUsdCents),
     ...Object.values(MOCK_PACKAGE_FACE_CENTS),
-    ...allDataPackageRetailUsdCents(),
-    // Flutter recharge home presets ($5–$25)
-    500, 1000, 1500, 2000, 2500,
+    // Amount-only presets (Phase 1: ≥ $10)
+    1000, 1500, 2000, 2500,
   ]),
 );
 
@@ -53,9 +55,8 @@ export function resolveTrustedAmountUsdCents({ packageId, amountUsdCents }) {
     if (sku) {
       return { ok: true, cents: sku.retailUsdCents, source: 'airtime_sku' };
     }
-    const dataCents = getDataPackageRetailUsdCents(pid);
-    if (dataCents != null) {
-      return { ok: true, cents: dataCents, source: 'data_package' };
+    if (getDataPackageRetailUsdCents(pid) != null) {
+      return { ok: false, error: 'Data packages are disabled in Phase 1' };
     }
     return { ok: false, error: 'Unknown packageId' };
   }

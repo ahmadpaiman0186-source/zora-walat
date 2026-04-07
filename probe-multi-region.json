@@ -1,0 +1,1156 @@
+﻿
+> zora-walat-api@1.0.0 fortress:concurrency-probe
+> node scripts/transaction-fortress-concurrency-probe.mjs
+
+[dotenv@17.3.1] injecting env (18) from .env -- tip: ≡ƒ¢í∩╕Å auth for agents: https://vestauth.com
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"ek8depjfm7","t":"2026-04-07T01:04:06.161Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.162Z","orderIdSuffix":"u7ek8depjfm7","attemptNumber":1,"traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"ekqz838i6z","t":"2026-04-07T01:04:06.180Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.180Z","orderIdSuffix":"u7ekqz838i6z","attemptNumber":1,"traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"ekay86xapd","t":"2026-04-07T01:04:06.193Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.193Z","orderIdSuffix":"u7ekay86xapd","attemptNumber":1,"traceId":"67baa70f-b76b-4193-867e-4a22a53ba418"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"ekkxhgst7u","t":"2026-04-07T01:04:06.242Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.242Z","orderIdSuffix":"u7ekkxhgst7u","attemptNumber":1,"traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"ekb1pn6bgn","t":"2026-04-07T01:04:06.279Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.279Z","orderIdSuffix":"u7ekb1pn6bgn","attemptNumber":1,"traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"ekx3xaraur","t":"2026-04-07T01:04:06.301Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.302Z","orderIdSuffix":"u7ekx3xaraur","attemptNumber":1,"traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"ekt54o1598","t":"2026-04-07T01:04:06.308Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.309Z","orderIdSuffix":"u7ekt54o1598","attemptNumber":1,"traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"ekbwxm47ql","t":"2026-04-07T01:04:06.320Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.320Z","orderIdSuffix":"u7ekbwxm47ql","attemptNumber":1,"traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"ek5lr640su","t":"2026-04-07T01:04:06.322Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.322Z","orderIdSuffix":"u7ek5lr640su","attemptNumber":1,"traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"ek1e7jipo6","t":"2026-04-07T01:04:06.329Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.329Z","orderIdSuffix":"u7ek1e7jipo6","attemptNumber":1,"traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"ek0tv22ti9","t":"2026-04-07T01:04:06.351Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.351Z","orderIdSuffix":"u7ek0tv22ti9","attemptNumber":1,"traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"ek744590pv","t":"2026-04-07T01:04:06.360Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.360Z","orderIdSuffix":"u7ek744590pv","attemptNumber":1,"traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"ekzm6bpc72","t":"2026-04-07T01:04:06.372Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.372Z","orderIdSuffix":"u7ekzm6bpc72","attemptNumber":1,"traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"ekytrnzuiw","t":"2026-04-07T01:04:06.387Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.387Z","orderIdSuffix":"u7ekytrnzuiw","attemptNumber":1,"traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"ek1wipilav","t":"2026-04-07T01:04:06.399Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.400Z","orderIdSuffix":"u7ek1wipilav","attemptNumber":1,"traceId":"045611fe-3592-40d6-93eb-de84ae70e421"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"ekk40hsftn","t":"2026-04-07T01:04:06.406Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.406Z","orderIdSuffix":"u7ekk40hsftn","attemptNumber":1,"traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"ekuqw7u4mr","t":"2026-04-07T01:04:06.408Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.409Z","orderIdSuffix":"u7ekuqw7u4mr","attemptNumber":1,"traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"ek4331az50","t":"2026-04-07T01:04:06.410Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.410Z","orderIdSuffix":"u7ek4331az50","attemptNumber":1,"traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"ekkyyd3wdp","t":"2026-04-07T01:04:06.424Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.425Z","orderIdSuffix":"u7ekkyyd3wdp","attemptNumber":1,"traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"ekb6gw0oht","t":"2026-04-07T01:04:06.434Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.435Z","orderIdSuffix":"u7ekb6gw0oht","attemptNumber":1,"traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"ek5za3ghmd","t":"2026-04-07T01:04:06.439Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.439Z","orderIdSuffix":"u7ek5za3ghmd","attemptNumber":1,"traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"ekg1d75c5o","t":"2026-04-07T01:04:06.441Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.441Z","orderIdSuffix":"u7ekg1d75c5o","attemptNumber":1,"traceId":"098a7035-8b76-429c-bd67-f126595ed285"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"ek855ic66g","t":"2026-04-07T01:04:06.443Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.444Z","orderIdSuffix":"u7ek855ic66g","attemptNumber":1,"traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"ekfzzrynpj","t":"2026-04-07T01:04:06.456Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.457Z","orderIdSuffix":"u7ekfzzrynpj","attemptNumber":1,"traceId":"801d2780-a425-442c-bbea-c514ea3a04f9"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"ek91eb81dc","t":"2026-04-07T01:04:06.460Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.460Z","orderIdSuffix":"u7ek91eb81dc","attemptNumber":1,"traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"ekrb0uoahv","t":"2026-04-07T01:04:06.468Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.468Z","orderIdSuffix":"u7ekrb0uoahv","attemptNumber":1,"traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"ek3u9dbqgk","t":"2026-04-07T01:04:06.470Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.470Z","orderIdSuffix":"u7ek3u9dbqgk","attemptNumber":1,"traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"ekajyhrkrr","t":"2026-04-07T01:04:06.471Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.472Z","orderIdSuffix":"u7ekajyhrkrr","attemptNumber":1,"traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"ekogsok1jc","t":"2026-04-07T01:04:06.487Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.487Z","orderIdSuffix":"u7ekogsok1jc","attemptNumber":1,"traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"ekyxeuyqj4","t":"2026-04-07T01:04:06.489Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.489Z","orderIdSuffix":"u7ekyxeuyqj4","attemptNumber":1,"traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"ekcllqdv8u","t":"2026-04-07T01:04:06.494Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.494Z","orderIdSuffix":"u7ekcllqdv8u","attemptNumber":1,"traceId":"0f730201-0445-403a-95c7-3748d3acf297"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"ekigxng9n4","t":"2026-04-07T01:04:06.495Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.495Z","orderIdSuffix":"u7ekigxng9n4","attemptNumber":1,"traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"ekv6nfuvrq","t":"2026-04-07T01:04:06.496Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.496Z","orderIdSuffix":"u7ekv6nfuvrq","attemptNumber":1,"traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"ekg31z5b4p","t":"2026-04-07T01:04:06.510Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.511Z","orderIdSuffix":"u7ekg31z5b4p","attemptNumber":1,"traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"ekv2bvj3ll","t":"2026-04-07T01:04:06.511Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.511Z","orderIdSuffix":"u7ekv2bvj3ll","attemptNumber":1,"traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"ek47du9pva","t":"2026-04-07T01:04:06.520Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.520Z","orderIdSuffix":"u7ek47du9pva","attemptNumber":1,"traceId":"087dfd9b-4074-4899-a911-31cf9410b347"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"ek7ff0atq3","t":"2026-04-07T01:04:06.522Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.522Z","orderIdSuffix":"u7ek7ff0atq3","attemptNumber":1,"traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"ek1nygrh9w","t":"2026-04-07T01:04:06.526Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.526Z","orderIdSuffix":"u7ek1nygrh9w","attemptNumber":1,"traceId":"7c386749-4edc-499c-b307-f00e7b6b3603"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"ek6xqg1962","t":"2026-04-07T01:04:06.541Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.542Z","orderIdSuffix":"u7ek6xqg1962","attemptNumber":1,"traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"ekdmwy31q2","t":"2026-04-07T01:04:06.542Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.542Z","orderIdSuffix":"u7ekdmwy31q2","attemptNumber":1,"traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"ek1xmk0cpn","t":"2026-04-07T01:04:06.545Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.545Z","orderIdSuffix":"u7ek1xmk0cpn","attemptNumber":1,"traceId":"b1127443-80b5-40be-98da-98cf4ec73072"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"ek2cu6lxxf","t":"2026-04-07T01:04:06.550Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.550Z","orderIdSuffix":"u7ek2cu6lxxf","attemptNumber":1,"traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"ekg2fn50rl","t":"2026-04-07T01:04:06.555Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.555Z","orderIdSuffix":"u7ekg2fn50rl","attemptNumber":1,"traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"ek76veqvl6","t":"2026-04-07T01:04:06.570Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.570Z","orderIdSuffix":"u7ek76veqvl6","attemptNumber":1,"traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"ek1ujsejbk","t":"2026-04-07T01:04:06.572Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.572Z","orderIdSuffix":"u7ek1ujsejbk","attemptNumber":1,"traceId":"2977971c-da19-4866-affa-1a271f6ac5fb"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"ekze6tvygj","t":"2026-04-07T01:04:06.574Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.574Z","orderIdSuffix":"u7ekze6tvygj","attemptNumber":1,"traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"ek5d8lnl7q","t":"2026-04-07T01:04:06.578Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.578Z","orderIdSuffix":"u7ek5d8lnl7q","attemptNumber":1,"traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"ekctsqk7ff","t":"2026-04-07T01:04:06.582Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.583Z","orderIdSuffix":"u7ekctsqk7ff","attemptNumber":1,"traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"ekqnv1x5y7","t":"2026-04-07T01:04:06.592Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.592Z","orderIdSuffix":"u7ekqnv1x5y7","attemptNumber":1,"traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"ek9e8l8bsa","t":"2026-04-07T01:04:06.595Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.595Z","orderIdSuffix":"u7ek9e8l8bsa","attemptNumber":1,"traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"ekh9drydbe","t":"2026-04-07T01:04:06.601Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.602Z","orderIdSuffix":"u7ekh9drydbe","attemptNumber":1,"traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"ekua4bwyju","t":"2026-04-07T01:04:06.603Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.603Z","orderIdSuffix":"u7ekua4bwyju","attemptNumber":1,"traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"ekpubcm731","t":"2026-04-07T01:04:06.606Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.607Z","orderIdSuffix":"u7ekpubcm731","attemptNumber":1,"traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"ek2vhmcxfr","t":"2026-04-07T01:04:06.619Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.619Z","orderIdSuffix":"u7ek2vhmcxfr","attemptNumber":1,"traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"eknt1vdv1u","t":"2026-04-07T01:04:06.621Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.621Z","orderIdSuffix":"u7eknt1vdv1u","attemptNumber":1,"traceId":"f567f08b-087c-4820-b906-14e49bb2860a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"ekgx5fw9qn","t":"2026-04-07T01:04:06.623Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.623Z","orderIdSuffix":"u7ekgx5fw9qn","attemptNumber":1,"traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"ekm380dw3x","t":"2026-04-07T01:04:06.627Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.627Z","orderIdSuffix":"u7ekm380dw3x","attemptNumber":1,"traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"ekg1cgjza6","t":"2026-04-07T01:04:06.632Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.633Z","orderIdSuffix":"u7ekg1cgjza6","attemptNumber":1,"traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"ekka6fc6vy","t":"2026-04-07T01:04:06.642Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.642Z","orderIdSuffix":"u7ekka6fc6vy","attemptNumber":1,"traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"ekyyrjuffv","t":"2026-04-07T01:04:06.646Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.646Z","orderIdSuffix":"u7ekyyrjuffv","attemptNumber":1,"traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"ek9uhld9n7","t":"2026-04-07T01:04:06.651Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.652Z","orderIdSuffix":"u7ek9uhld9n7","attemptNumber":1,"traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"ekroey0pvz","t":"2026-04-07T01:04:06.653Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.653Z","orderIdSuffix":"u7ekroey0pvz","attemptNumber":1,"traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"ekq1fclhcj","t":"2026-04-07T01:04:06.657Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.657Z","orderIdSuffix":"u7ekq1fclhcj","attemptNumber":1,"traceId":"59765e37-9cdc-402f-abee-2f98a233f827"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"ekp0kvib0v","t":"2026-04-07T01:04:06.667Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.667Z","orderIdSuffix":"u7ekp0kvib0v","attemptNumber":1,"traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"ek1hly3p0z","t":"2026-04-07T01:04:06.671Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.671Z","orderIdSuffix":"u7ek1hly3p0z","attemptNumber":1,"traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"ekwir6yxhy","t":"2026-04-07T01:04:06.673Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.674Z","orderIdSuffix":"u7ekwir6yxhy","attemptNumber":1,"traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"ekb6fv2831","t":"2026-04-07T01:04:06.676Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.676Z","orderIdSuffix":"u7ekb6fv2831","attemptNumber":1,"traceId":"2fc26d45-792b-4633-a09b-231a3de2166c"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"ek6ro6qb87","t":"2026-04-07T01:04:06.681Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.682Z","orderIdSuffix":"u7ek6ro6qb87","attemptNumber":1,"traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"ek6aet0sd2","t":"2026-04-07T01:04:06.689Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.690Z","orderIdSuffix":"u7ek6aet0sd2","attemptNumber":1,"traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"ekee5frx29","t":"2026-04-07T01:04:06.694Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.695Z","orderIdSuffix":"u7ekee5frx29","attemptNumber":1,"traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"ekhc3s055k","t":"2026-04-07T01:04:06.699Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.700Z","orderIdSuffix":"u7ekhc3s055k","attemptNumber":1,"traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"ekk8wpyrgb","t":"2026-04-07T01:04:06.704Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.704Z","orderIdSuffix":"u7ekk8wpyrgb","attemptNumber":1,"traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"ekfs06rgy2","t":"2026-04-07T01:04:06.708Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.708Z","orderIdSuffix":"u7ekfs06rgy2","attemptNumber":1,"traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"ek0fel9mkl","t":"2026-04-07T01:04:06.719Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.720Z","orderIdSuffix":"u7ek0fel9mkl","attemptNumber":1,"traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"ekh3f16ryw","t":"2026-04-07T01:04:06.721Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.721Z","orderIdSuffix":"u7ekh3f16ryw","attemptNumber":1,"traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"ekrebotxyw","t":"2026-04-07T01:04:06.726Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.727Z","orderIdSuffix":"u7ekrebotxyw","attemptNumber":1,"traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"ekblba637p","t":"2026-04-07T01:04:06.728Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.728Z","orderIdSuffix":"u7ekblba637p","attemptNumber":1,"traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"ekdxc4ezqw","t":"2026-04-07T01:04:06.736Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.736Z","orderIdSuffix":"u7ekdxc4ezqw","attemptNumber":1,"traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"eke0e20pz6","t":"2026-04-07T01:04:06.742Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.742Z","orderIdSuffix":"u7eke0e20pz6","attemptNumber":1,"traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"ektbc1x2hy","t":"2026-04-07T01:04:06.745Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.746Z","orderIdSuffix":"u7ektbc1x2hy","attemptNumber":1,"traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"ek9uwpwg8b","t":"2026-04-07T01:04:06.752Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.752Z","orderIdSuffix":"u7ek9uwpwg8b","attemptNumber":1,"traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"ek8u1zwg8w","t":"2026-04-07T01:04:06.753Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.753Z","orderIdSuffix":"u7ek8u1zwg8w","attemptNumber":1,"traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"ekhxkn7vx8","t":"2026-04-07T01:04:06.765Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.765Z","orderIdSuffix":"u7ekhxkn7vx8","attemptNumber":1,"traceId":"51890e38-f386-485f-acb8-002bee97bbed"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"ekn2lj0med","t":"2026-04-07T01:04:06.770Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.770Z","orderIdSuffix":"u7ekn2lj0med","attemptNumber":1,"traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"eks6curblt","t":"2026-04-07T01:04:06.772Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.772Z","orderIdSuffix":"u7eks6curblt","attemptNumber":1,"traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"ekn1h8roen","t":"2026-04-07T01:04:06.775Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.775Z","orderIdSuffix":"u7ekn1h8roen","attemptNumber":1,"traceId":"a823a664-2b41-4a3c-9dba-da8b47040790"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"ekukwac74s","t":"2026-04-07T01:04:06.777Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.777Z","orderIdSuffix":"u7ekukwac74s","attemptNumber":1,"traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"ek3xhuh045","t":"2026-04-07T01:04:06.786Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.787Z","orderIdSuffix":"u7ek3xhuh045","attemptNumber":1,"traceId":"a7532871-7216-4a04-8f0a-c2577481662c"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"ek576ml819","t":"2026-04-07T01:04:06.796Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.796Z","orderIdSuffix":"u7ek576ml819","attemptNumber":1,"traceId":"768b2764-f276-4137-a8dd-19cb77cc1873"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"ekyfohc4ho","t":"2026-04-07T01:04:06.801Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.801Z","orderIdSuffix":"u7ekyfohc4ho","attemptNumber":1,"traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"ek47abx27q","t":"2026-04-07T01:04:06.802Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.802Z","orderIdSuffix":"u7ek47abx27q","attemptNumber":1,"traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"ekgfcev8gx","t":"2026-04-07T01:04:06.804Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.804Z","orderIdSuffix":"u7ekgfcev8gx","attemptNumber":1,"traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"eksx5nwyka","t":"2026-04-07T01:04:06.809Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.809Z","orderIdSuffix":"u7eksx5nwyka","attemptNumber":1,"traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"ekv6v686l7","t":"2026-04-07T01:04:06.818Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.818Z","orderIdSuffix":"u7ekv6v686l7","attemptNumber":1,"traceId":"43df209f-b733-4f69-a196-a0dc462b9de5"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"ek3hqmztju","t":"2026-04-07T01:04:06.820Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.821Z","orderIdSuffix":"u7ek3hqmztju","attemptNumber":1,"traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"ekx76gf7u5","t":"2026-04-07T01:04:06.822Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.822Z","orderIdSuffix":"u7ekx76gf7u5","attemptNumber":1,"traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1"}
+{"deliveryLog":true,"traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"u7ek8depjfm7","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"u7ek8depjfm7","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"ekvlkuhamh","t":"2026-04-07T01:04:06.825Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.825Z","orderIdSuffix":"u7ekvlkuhamh","attemptNumber":1,"traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862"}
+{"deliveryLog":true,"traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"u7ekqz838i6z","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"u7ekqz838i6z","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"u7ekay86xapd","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"u7ekay86xapd","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"ek4uijo4xb","t":"2026-04-07T01:04:06.837Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.838Z","orderIdSuffix":"u7ek4uijo4xb","attemptNumber":1,"traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d"}
+{"deliveryLog":true,"traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"u7ekkxhgst7u","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"u7ekkxhgst7u","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"u7ekb1pn6bgn","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"u7ekb1pn6bgn","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"u7ekx3xaraur","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"u7ekx3xaraur","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"u7ekbwxm47ql","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"u7ekbwxm47ql","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"u7ekt54o1598","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"u7ekt54o1598","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"u7ek5lr640su","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"u7ek5lr640su","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"u7ek1e7jipo6","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"u7ek1e7jipo6","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"u7ek0tv22ti9","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"u7ek0tv22ti9","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"u7ek744590pv","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"u7ek744590pv","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"u7ekzm6bpc72","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"u7ekzm6bpc72","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"u7ekytrnzuiw","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"u7ekytrnzuiw","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"u7ek1wipilav","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"u7ek1wipilav","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"u7ekk40hsftn","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"u7ekk40hsftn","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"u7ekuqw7u4mr","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"u7ekuqw7u4mr","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"u7ek4331az50","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"u7ek4331az50","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"u7ekb6gw0oht","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"u7ekb6gw0oht","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"u7ekkyyd3wdp","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"u7ekkyyd3wdp","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"u7ek5za3ghmd","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"u7ek5za3ghmd","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"u7ek855ic66g","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"u7ek855ic66g","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"u7ekg1d75c5o","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"u7ekg1d75c5o","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"u7ekfzzrynpj","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"u7ekfzzrynpj","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"u7ekrb0uoahv","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"u7ekrb0uoahv","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"u7ek91eb81dc","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"u7ek91eb81dc","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"u7ek3u9dbqgk","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"u7ek3u9dbqgk","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"u7ekajyhrkrr","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"u7ekajyhrkrr","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"u7ekogsok1jc","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"u7ekogsok1jc","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"u7ekcllqdv8u","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"u7ekcllqdv8u","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"u7ekyxeuyqj4","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"u7ekyxeuyqj4","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"u7ekigxng9n4","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"u7ekigxng9n4","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"u7ekv6nfuvrq","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"u7ekv6nfuvrq","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"u7ekg31z5b4p","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"u7ekg31z5b4p","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"u7ekv2bvj3ll","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"u7ekv2bvj3ll","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"u7ek47du9pva","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"u7ek47du9pva","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"u7ek7ff0atq3","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"u7ek7ff0atq3","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"u7ek1nygrh9w","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"u7ek1nygrh9w","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"u7ek6xqg1962","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"u7ek6xqg1962","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"u7ek1xmk0cpn","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"u7ek1xmk0cpn","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"u7ekdmwy31q2","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"u7ekdmwy31q2","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"u7ek2cu6lxxf","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"u7ek2cu6lxxf","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"u7ekg2fn50rl","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"u7ekg2fn50rl","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"u7ek76veqvl6","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"u7ek76veqvl6","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"u7ekze6tvygj","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"u7ekze6tvygj","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"u7ek1ujsejbk","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"u7ek1ujsejbk","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"u7ek5d8lnl7q","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"u7ek5d8lnl7q","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"u7ekctsqk7ff","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"u7ekctsqk7ff","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"u7ekqnv1x5y7","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"u7ekqnv1x5y7","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"u7ek9e8l8bsa","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"u7ek9e8l8bsa","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"u7ekh9drydbe","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"u7ekh9drydbe","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"u7ekpubcm731","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"u7ekpubcm731","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"u7ekua4bwyju","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"u7ekua4bwyju","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"u7ek2vhmcxfr","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"u7ek2vhmcxfr","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"u7eknt1vdv1u","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"u7eknt1vdv1u","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"u7ekgx5fw9qn","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"u7ekgx5fw9qn","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"u7ekm380dw3x","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"u7ekm380dw3x","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"u7ekg1cgjza6","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"u7ekg1cgjza6","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"u7ekka6fc6vy","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"u7ekka6fc6vy","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"u7ekyyrjuffv","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"u7ekyyrjuffv","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"u7ek9uhld9n7","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"u7ek9uhld9n7","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"u7ekroey0pvz","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"u7ekroey0pvz","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"u7ekq1fclhcj","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"u7ekq1fclhcj","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"u7ekp0kvib0v","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"u7ekp0kvib0v","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"u7ekwir6yxhy","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"u7ekwir6yxhy","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"u7ek1hly3p0z","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"u7ek1hly3p0z","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"u7ekb6fv2831","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"u7ekb6fv2831","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"u7ek6ro6qb87","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"u7ek6ro6qb87","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"u7ek6aet0sd2","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"u7ek6aet0sd2","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"u7ekee5frx29","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"u7ekee5frx29","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"u7ekhc3s055k","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"u7ekhc3s055k","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"u7ekk8wpyrgb","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"u7ekk8wpyrgb","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"u7ekfs06rgy2","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"u7ekfs06rgy2","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"u7ek0fel9mkl","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"u7ek0fel9mkl","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"u7ekh3f16ryw","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"u7ekh3f16ryw","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"u7ekrebotxyw","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"u7ekrebotxyw","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"u7ekblba637p","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"u7ekblba637p","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"u7ekdxc4ezqw","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"u7ekdxc4ezqw","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"u7eke0e20pz6","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"u7eke0e20pz6","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"u7ektbc1x2hy","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"u7ektbc1x2hy","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"u7ek9uwpwg8b","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"u7ek9uwpwg8b","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"u7ekhxkn7vx8","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"u7ekhxkn7vx8","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"u7ek8u1zwg8w","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"u7ek8u1zwg8w","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"u7ekn2lj0med","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"u7ekn2lj0med","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"u7eks6curblt","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"u7eks6curblt","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"u7ekn1h8roen","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"u7ekn1h8roen","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"u7ek576ml819","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"u7ek576ml819","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"u7ek3xhuh045","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"u7ek3xhuh045","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"u7ekukwac74s","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"u7ekukwac74s","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"u7ekyfohc4ho","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"u7ekyfohc4ho","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"u7ek47abx27q","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"u7ek47abx27q","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"u7ekgfcev8gx","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"u7ekgfcev8gx","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"u7eksx5nwyka","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"u7eksx5nwyka","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"u7ekv6v686l7","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"u7ekv6v686l7","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"u7ek3hqmztju","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"u7ek3hqmztju","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"u7ekx76gf7u5","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"u7ekx76gf7u5","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"deliveryLog":true,"traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"u7ekvlkuhamh","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"u7ekvlkuhamh","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"ek1zptm70g","t":"2026-04-07T01:04:06.948Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.948Z","orderIdSuffix":"u7ek1zptm70g","attemptNumber":1,"traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87"}
+{"deliveryLog":true,"traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"u7ek4uijo4xb","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"u7ek4uijo4xb","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_attempt_claimed","outcome":"processing","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"ekfrffxgwl","t":"2026-04-07T01:04:06.952Z","extra":{"attemptNumber":1}}
+{"phase1Ops":true,"event":"fulfillment_attempt_started","t":"2026-04-07T01:04:06.952Z","orderIdSuffix":"u7ekfrffxgwl","attemptNumber":1,"traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"ek8depjfm7","t":"2026-04-07T01:04:06.974Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"ek8depjfm7","t":"2026-04-07T01:04:06.974Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+node.exe : {"marginIntel":true,"event":"low_margin_route_detected","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","or
+derIdSuffix":"ek8depjfm7","t":"2026-04-07T01:04:06.974Z","marginPercentBp":410,"thresholdBp":500}
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ({"marginIntel":...resholdBp":500}:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4","orderIdSuffix":"ek8depjfm7","t":"2026-04-07T01:04:06.975Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"ekqz838i6z","t":"2026-04-07T01:04:06.981Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"ekqz838i6z","t":"2026-04-07T01:04:06.982Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix
+":"ekqz838i6z","t":"2026-04-07T01:04:06.982Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2","orderIdSuffix":"ekqz838i6z","t":"2026-04-07T01:04:06.982Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"ekay86xapd","t":"2026-04-07T01:04:06.983Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"ekay86xapd","t":"2026-04-07T01:04:06.983Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix
+":"ekay86xapd","t":"2026-04-07T01:04:06.983Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418","orderIdSuffix":"ekay86xapd","t":"2026-04-07T01:04:06.983Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"ekkxhgst7u","t":"2026-04-07T01:04:06.991Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"ekkxhgst7u","t":"2026-04-07T01:04:06.991Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix
+":"ekkxhgst7u","t":"2026-04-07T01:04:06.991Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f","orderIdSuffix":"ekkxhgst7u","t":"2026-04-07T01:04:06.991Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"ekb1pn6bgn","t":"2026-04-07T01:04:06.994Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"ekb1pn6bgn","t":"2026-04-07T01:04:06.994Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix
+":"ekb1pn6bgn","t":"2026-04-07T01:04:06.994Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6","orderIdSuffix":"ekb1pn6bgn","t":"2026-04-07T01:04:06.994Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"ekx3xaraur","t":"2026-04-07T01:04:07.020Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"ekx3xaraur","t":"2026-04-07T01:04:07.020Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix
+":"ekx3xaraur","t":"2026-04-07T01:04:07.020Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc","orderIdSuffix":"ekx3xaraur","t":"2026-04-07T01:04:07.020Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"ekbwxm47ql","t":"2026-04-07T01:04:07.022Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"ekbwxm47ql","t":"2026-04-07T01:04:07.022Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix
+":"ekbwxm47ql","t":"2026-04-07T01:04:07.022Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9","orderIdSuffix":"ekbwxm47ql","t":"2026-04-07T01:04:07.023Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"ekt54o1598","t":"2026-04-07T01:04:07.023Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"ekt54o1598","t":"2026-04-07T01:04:07.023Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix
+":"ekt54o1598","t":"2026-04-07T01:04:07.023Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d","orderIdSuffix":"ekt54o1598","t":"2026-04-07T01:04:07.023Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"ek5lr640su","t":"2026-04-07T01:04:07.025Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"ek5lr640su","t":"2026-04-07T01:04:07.025Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix
+":"ek5lr640su","t":"2026-04-07T01:04:07.025Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc","orderIdSuffix":"ek5lr640su","t":"2026-04-07T01:04:07.026Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"ek1e7jipo6","t":"2026-04-07T01:04:07.035Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"ek1e7jipo6","t":"2026-04-07T01:04:07.035Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix
+":"ek1e7jipo6","t":"2026-04-07T01:04:07.035Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99","orderIdSuffix":"ek1e7jipo6","t":"2026-04-07T01:04:07.035Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"ek0tv22ti9","t":"2026-04-07T01:04:07.055Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"ek0tv22ti9","t":"2026-04-07T01:04:07.056Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix
+":"ek0tv22ti9","t":"2026-04-07T01:04:07.056Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a","orderIdSuffix":"ek0tv22ti9","t":"2026-04-07T01:04:07.056Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"ek744590pv","t":"2026-04-07T01:04:07.059Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"ek744590pv","t":"2026-04-07T01:04:07.059Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix
+":"ek744590pv","t":"2026-04-07T01:04:07.059Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5","orderIdSuffix":"ek744590pv","t":"2026-04-07T01:04:07.059Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"ekzm6bpc72","t":"2026-04-07T01:04:07.060Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"ekzm6bpc72","t":"2026-04-07T01:04:07.060Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix
+":"ekzm6bpc72","t":"2026-04-07T01:04:07.060Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb","orderIdSuffix":"ekzm6bpc72","t":"2026-04-07T01:04:07.060Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"ekytrnzuiw","t":"2026-04-07T01:04:07.062Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"ekytrnzuiw","t":"2026-04-07T01:04:07.062Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix
+":"ekytrnzuiw","t":"2026-04-07T01:04:07.062Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a","orderIdSuffix":"ekytrnzuiw","t":"2026-04-07T01:04:07.062Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"ek1wipilav","t":"2026-04-07T01:04:07.075Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"ek1wipilav","t":"2026-04-07T01:04:07.075Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix
+":"ek1wipilav","t":"2026-04-07T01:04:07.075Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"045611fe-3592-40d6-93eb-de84ae70e421","orderIdSuffix":"ek1wipilav","t":"2026-04-07T01:04:07.076Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"ekk40hsftn","t":"2026-04-07T01:04:07.091Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"ekk40hsftn","t":"2026-04-07T01:04:07.091Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix
+":"ekk40hsftn","t":"2026-04-07T01:04:07.091Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502","orderIdSuffix":"ekk40hsftn","t":"2026-04-07T01:04:07.092Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"ekuqw7u4mr","t":"2026-04-07T01:04:07.094Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"ekuqw7u4mr","t":"2026-04-07T01:04:07.094Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix
+":"ekuqw7u4mr","t":"2026-04-07T01:04:07.094Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0","orderIdSuffix":"ekuqw7u4mr","t":"2026-04-07T01:04:07.094Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"ek4331az50","t":"2026-04-07T01:04:07.095Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"ek4331az50","t":"2026-04-07T01:04:07.095Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix
+":"ek4331az50","t":"2026-04-07T01:04:07.095Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd","orderIdSuffix":"ek4331az50","t":"2026-04-07T01:04:07.095Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"ekb6gw0oht","t":"2026-04-07T01:04:07.103Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"ekb6gw0oht","t":"2026-04-07T01:04:07.103Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix
+":"ekb6gw0oht","t":"2026-04-07T01:04:07.103Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88","orderIdSuffix":"ekb6gw0oht","t":"2026-04-07T01:04:07.104Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"ekkyyd3wdp","t":"2026-04-07T01:04:07.116Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"ekkyyd3wdp","t":"2026-04-07T01:04:07.117Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix
+":"ekkyyd3wdp","t":"2026-04-07T01:04:07.117Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22","orderIdSuffix":"ekkyyd3wdp","t":"2026-04-07T01:04:07.118Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"ek5za3ghmd","t":"2026-04-07T01:04:07.131Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"ek5za3ghmd","t":"2026-04-07T01:04:07.131Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix
+":"ek5za3ghmd","t":"2026-04-07T01:04:07.131Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b","orderIdSuffix":"ek5za3ghmd","t":"2026-04-07T01:04:07.131Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"ek855ic66g","t":"2026-04-07T01:04:07.136Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"ek855ic66g","t":"2026-04-07T01:04:07.136Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix
+":"ek855ic66g","t":"2026-04-07T01:04:07.136Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b","orderIdSuffix":"ek855ic66g","t":"2026-04-07T01:04:07.136Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"ekfzzrynpj","t":"2026-04-07T01:04:07.137Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"ekfzzrynpj","t":"2026-04-07T01:04:07.137Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix
+":"ekfzzrynpj","t":"2026-04-07T01:04:07.137Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9","orderIdSuffix":"ekfzzrynpj","t":"2026-04-07T01:04:07.137Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"ekg1d75c5o","t":"2026-04-07T01:04:07.143Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"ekg1d75c5o","t":"2026-04-07T01:04:07.143Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix
+":"ekg1d75c5o","t":"2026-04-07T01:04:07.143Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"098a7035-8b76-429c-bd67-f126595ed285","orderIdSuffix":"ekg1d75c5o","t":"2026-04-07T01:04:07.143Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"ekrb0uoahv","t":"2026-04-07T01:04:07.154Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"ekrb0uoahv","t":"2026-04-07T01:04:07.154Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix
+":"ekrb0uoahv","t":"2026-04-07T01:04:07.154Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1","orderIdSuffix":"ekrb0uoahv","t":"2026-04-07T01:04:07.154Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"ek91eb81dc","t":"2026-04-07T01:04:07.169Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"ek91eb81dc","t":"2026-04-07T01:04:07.169Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix
+":"ek91eb81dc","t":"2026-04-07T01:04:07.169Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558","orderIdSuffix":"ek91eb81dc","t":"2026-04-07T01:04:07.169Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"ek3u9dbqgk","t":"2026-04-07T01:04:07.172Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"ek3u9dbqgk","t":"2026-04-07T01:04:07.172Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix
+":"ek3u9dbqgk","t":"2026-04-07T01:04:07.172Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a","orderIdSuffix":"ek3u9dbqgk","t":"2026-04-07T01:04:07.172Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"ekajyhrkrr","t":"2026-04-07T01:04:07.176Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"ekajyhrkrr","t":"2026-04-07T01:04:07.177Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix
+":"ekajyhrkrr","t":"2026-04-07T01:04:07.177Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44","orderIdSuffix":"ekajyhrkrr","t":"2026-04-07T01:04:07.177Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"ekogsok1jc","t":"2026-04-07T01:04:07.178Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"ekogsok1jc","t":"2026-04-07T01:04:07.178Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix
+":"ekogsok1jc","t":"2026-04-07T01:04:07.182Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db","orderIdSuffix":"ekogsok1jc","t":"2026-04-07T01:04:07.182Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"ekcllqdv8u","t":"2026-04-07T01:04:07.194Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"ekcllqdv8u","t":"2026-04-07T01:04:07.194Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix
+":"ekcllqdv8u","t":"2026-04-07T01:04:07.194Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"0f730201-0445-403a-95c7-3748d3acf297","orderIdSuffix":"ekcllqdv8u","t":"2026-04-07T01:04:07.194Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"ekyxeuyqj4","t":"2026-04-07T01:04:07.208Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"ekyxeuyqj4","t":"2026-04-07T01:04:07.208Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix
+":"ekyxeuyqj4","t":"2026-04-07T01:04:07.209Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8","orderIdSuffix":"ekyxeuyqj4","t":"2026-04-07T01:04:07.209Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"ekigxng9n4","t":"2026-04-07T01:04:07.213Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"ekigxng9n4","t":"2026-04-07T01:04:07.214Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix
+":"ekigxng9n4","t":"2026-04-07T01:04:07.214Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab","orderIdSuffix":"ekigxng9n4","t":"2026-04-07T01:04:07.215Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"ekv6nfuvrq","t":"2026-04-07T01:04:07.217Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"ekv6nfuvrq","t":"2026-04-07T01:04:07.217Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix
+":"ekv6nfuvrq","t":"2026-04-07T01:04:07.217Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b","orderIdSuffix":"ekv6nfuvrq","t":"2026-04-07T01:04:07.218Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"ekg31z5b4p","t":"2026-04-07T01:04:07.225Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"ekg31z5b4p","t":"2026-04-07T01:04:07.225Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix
+":"ekg31z5b4p","t":"2026-04-07T01:04:07.225Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc","orderIdSuffix":"ekg31z5b4p","t":"2026-04-07T01:04:07.226Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"ekv2bvj3ll","t":"2026-04-07T01:04:07.239Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"ekv2bvj3ll","t":"2026-04-07T01:04:07.239Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix
+":"ekv2bvj3ll","t":"2026-04-07T01:04:07.239Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26","orderIdSuffix":"ekv2bvj3ll","t":"2026-04-07T01:04:07.239Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"ek47du9pva","t":"2026-04-07T01:04:07.257Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"ek47du9pva","t":"2026-04-07T01:04:07.257Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix
+":"ek47du9pva","t":"2026-04-07T01:04:07.257Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"087dfd9b-4074-4899-a911-31cf9410b347","orderIdSuffix":"ek47du9pva","t":"2026-04-07T01:04:07.257Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"ek7ff0atq3","t":"2026-04-07T01:04:07.261Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"ek7ff0atq3","t":"2026-04-07T01:04:07.261Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix
+":"ek7ff0atq3","t":"2026-04-07T01:04:07.261Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57","orderIdSuffix":"ek7ff0atq3","t":"2026-04-07T01:04:07.261Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"ek1nygrh9w","t":"2026-04-07T01:04:07.265Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"ek1nygrh9w","t":"2026-04-07T01:04:07.265Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix
+":"ek1nygrh9w","t":"2026-04-07T01:04:07.265Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603","orderIdSuffix":"ek1nygrh9w","t":"2026-04-07T01:04:07.266Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"ek6xqg1962","t":"2026-04-07T01:04:07.275Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"ek6xqg1962","t":"2026-04-07T01:04:07.275Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix
+":"ek6xqg1962","t":"2026-04-07T01:04:07.275Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593","orderIdSuffix":"ek6xqg1962","t":"2026-04-07T01:04:07.275Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"ek1xmk0cpn","t":"2026-04-07T01:04:07.282Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"ek1xmk0cpn","t":"2026-04-07T01:04:07.282Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix
+":"ek1xmk0cpn","t":"2026-04-07T01:04:07.282Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"b1127443-80b5-40be-98da-98cf4ec73072","orderIdSuffix":"ek1xmk0cpn","t":"2026-04-07T01:04:07.283Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"ekdmwy31q2","t":"2026-04-07T01:04:07.299Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"ekdmwy31q2","t":"2026-04-07T01:04:07.299Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix
+":"ekdmwy31q2","t":"2026-04-07T01:04:07.299Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263","orderIdSuffix":"ekdmwy31q2","t":"2026-04-07T01:04:07.299Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"ek2cu6lxxf","t":"2026-04-07T01:04:07.300Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"ek2cu6lxxf","t":"2026-04-07T01:04:07.300Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix
+":"ek2cu6lxxf","t":"2026-04-07T01:04:07.300Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563","orderIdSuffix":"ek2cu6lxxf","t":"2026-04-07T01:04:07.300Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"ekg2fn50rl","t":"2026-04-07T01:04:07.305Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"ekg2fn50rl","t":"2026-04-07T01:04:07.305Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix
+":"ekg2fn50rl","t":"2026-04-07T01:04:07.305Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44","orderIdSuffix":"ekg2fn50rl","t":"2026-04-07T01:04:07.306Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"ek76veqvl6","t":"2026-04-07T01:04:07.314Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"ek76veqvl6","t":"2026-04-07T01:04:07.314Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix
+":"ek76veqvl6","t":"2026-04-07T01:04:07.315Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c","orderIdSuffix":"ek76veqvl6","t":"2026-04-07T01:04:07.315Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"ekze6tvygj","t":"2026-04-07T01:04:07.321Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"ekze6tvygj","t":"2026-04-07T01:04:07.321Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix
+":"ekze6tvygj","t":"2026-04-07T01:04:07.321Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da","orderIdSuffix":"ekze6tvygj","t":"2026-04-07T01:04:07.321Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"ek5d8lnl7q","t":"2026-04-07T01:04:07.334Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"ek5d8lnl7q","t":"2026-04-07T01:04:07.335Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix
+":"ek5d8lnl7q","t":"2026-04-07T01:04:07.335Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d","orderIdSuffix":"ek5d8lnl7q","t":"2026-04-07T01:04:07.335Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"ek1ujsejbk","t":"2026-04-07T01:04:07.339Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"ek1ujsejbk","t":"2026-04-07T01:04:07.339Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix
+":"ek1ujsejbk","t":"2026-04-07T01:04:07.339Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb","orderIdSuffix":"ek1ujsejbk","t":"2026-04-07T01:04:07.339Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"ekctsqk7ff","t":"2026-04-07T01:04:07.342Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"ekctsqk7ff","t":"2026-04-07T01:04:07.342Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix
+":"ekctsqk7ff","t":"2026-04-07T01:04:07.342Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473","orderIdSuffix":"ekctsqk7ff","t":"2026-04-07T01:04:07.343Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"ekqnv1x5y7","t":"2026-04-07T01:04:07.354Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"ekqnv1x5y7","t":"2026-04-07T01:04:07.354Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix
+":"ekqnv1x5y7","t":"2026-04-07T01:04:07.355Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605","orderIdSuffix":"ekqnv1x5y7","t":"2026-04-07T01:04:07.355Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"ek9e8l8bsa","t":"2026-04-07T01:04:07.361Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"ek9e8l8bsa","t":"2026-04-07T01:04:07.361Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix":"ek9e8l8bsa","t":"2026-04-07T01:04:07.361Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"ekh9drydbe","t":"2026-04-07T01:04:07.387Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"ekh9drydbe","t":"2026-04-07T01:04:07.387Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix":"ekh9drydbe","t":"2026-04-07T01:04:07.387Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"ekpubcm731","t":"2026-04-07T01:04:07.390Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"ekpubcm731","t":"2026-04-07T01:04:07.390Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix":"ekpubcm731","t":"2026-04-07T01:04:07.390Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"ekua4bwyju","t":"2026-04-07T01:04:07.392Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"ekua4bwyju","t":"2026-04-07T01:04:07.392Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix":"ekua4bwyju","t":"2026-04-07T01:04:07.392Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"ek2vhmcxfr","t":"2026-04-07T01:04:07.406Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"ek2vhmcxfr","t":"2026-04-07T01:04:07.406Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix":"ek2vhmcxfr","t":"2026-04-07T01:04:07.407Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"eknt1vdv1u","t":"2026-04-07T01:04:07.410Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"eknt1vdv1u","t":"2026-04-07T01:04:07.410Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix":"eknt1vdv1u","t":"2026-04-07T01:04:07.410Z"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5","orderIdSuffix
+":"ek9e8l8bsa","t":"2026-04-07T01:04:07.361Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af","orderIdSuffix
+":"ekh9drydbe","t":"2026-04-07T01:04:07.387Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845","orderIdSuffix
+":"ekpubcm731","t":"2026-04-07T01:04:07.390Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94","orderIdSuffix
+":"ekua4bwyju","t":"2026-04-07T01:04:07.392Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2","orderIdSuffix
+":"ek2vhmcxfr","t":"2026-04-07T01:04:07.406Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"f567f08b-087c-4820-b906-14e49bb2860a","orderIdSuffix
+":"eknt1vdv1u","t":"2026-04-07T01:04:07.410Z","marginPercentBp":410,"thresholdBp":500}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"ekgx5fw9qn","t":"2026-04-07T01:04:07.426Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"ekgx5fw9qn","t":"2026-04-07T01:04:07.426Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix
+":"ekgx5fw9qn","t":"2026-04-07T01:04:07.426Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee","orderIdSuffix":"ekgx5fw9qn","t":"2026-04-07T01:04:07.426Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"ekm380dw3x","t":"2026-04-07T01:04:07.428Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"ekm380dw3x","t":"2026-04-07T01:04:07.428Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix
+":"ekm380dw3x","t":"2026-04-07T01:04:07.428Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9","orderIdSuffix":"ekm380dw3x","t":"2026-04-07T01:04:07.428Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"ekg1cgjza6","t":"2026-04-07T01:04:07.434Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"ekg1cgjza6","t":"2026-04-07T01:04:07.434Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix
+":"ekg1cgjza6","t":"2026-04-07T01:04:07.434Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7","orderIdSuffix":"ekg1cgjza6","t":"2026-04-07T01:04:07.434Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"ekka6fc6vy","t":"2026-04-07T01:04:07.449Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"ekka6fc6vy","t":"2026-04-07T01:04:07.449Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix
+":"ekka6fc6vy","t":"2026-04-07T01:04:07.449Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3","orderIdSuffix":"ekka6fc6vy","t":"2026-04-07T01:04:07.449Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"ekyyrjuffv","t":"2026-04-07T01:04:07.451Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"ekyyrjuffv","t":"2026-04-07T01:04:07.451Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix
+":"ekyyrjuffv","t":"2026-04-07T01:04:07.451Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e","orderIdSuffix":"ekyyrjuffv","t":"2026-04-07T01:04:07.451Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"ek9uhld9n7","t":"2026-04-07T01:04:07.466Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"ek9uhld9n7","t":"2026-04-07T01:04:07.467Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix
+":"ek9uhld9n7","t":"2026-04-07T01:04:07.467Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86","orderIdSuffix":"ek9uhld9n7","t":"2026-04-07T01:04:07.467Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"ekroey0pvz","t":"2026-04-07T01:04:07.471Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"ekroey0pvz","t":"2026-04-07T01:04:07.471Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix
+":"ekroey0pvz","t":"2026-04-07T01:04:07.471Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d","orderIdSuffix":"ekroey0pvz","t":"2026-04-07T01:04:07.471Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"ekq1fclhcj","t":"2026-04-07T01:04:07.473Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"ekq1fclhcj","t":"2026-04-07T01:04:07.473Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix
+":"ekq1fclhcj","t":"2026-04-07T01:04:07.473Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"59765e37-9cdc-402f-abee-2f98a233f827","orderIdSuffix":"ekq1fclhcj","t":"2026-04-07T01:04:07.473Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"ekp0kvib0v","t":"2026-04-07T01:04:07.485Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"ekp0kvib0v","t":"2026-04-07T01:04:07.486Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix
+":"ekp0kvib0v","t":"2026-04-07T01:04:07.486Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f","orderIdSuffix":"ekp0kvib0v","t":"2026-04-07T01:04:07.486Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"ekwir6yxhy","t":"2026-04-07T01:04:07.489Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"ekwir6yxhy","t":"2026-04-07T01:04:07.489Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix
+":"ekwir6yxhy","t":"2026-04-07T01:04:07.489Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011","orderIdSuffix":"ekwir6yxhy","t":"2026-04-07T01:04:07.489Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"ek1hly3p0z","t":"2026-04-07T01:04:07.504Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"ek1hly3p0z","t":"2026-04-07T01:04:07.504Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix
+":"ek1hly3p0z","t":"2026-04-07T01:04:07.504Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6","orderIdSuffix":"ek1hly3p0z","t":"2026-04-07T01:04:07.504Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"ekb6fv2831","t":"2026-04-07T01:04:07.506Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"ekb6fv2831","t":"2026-04-07T01:04:07.506Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix
+":"ekb6fv2831","t":"2026-04-07T01:04:07.507Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c","orderIdSuffix":"ekb6fv2831","t":"2026-04-07T01:04:07.507Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"ek6ro6qb87","t":"2026-04-07T01:04:07.509Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"ek6ro6qb87","t":"2026-04-07T01:04:07.509Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix
+":"ek6ro6qb87","t":"2026-04-07T01:04:07.509Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a","orderIdSuffix":"ek6ro6qb87","t":"2026-04-07T01:04:07.509Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"ek6aet0sd2","t":"2026-04-07T01:04:07.522Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"ek6aet0sd2","t":"2026-04-07T01:04:07.522Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix
+":"ek6aet0sd2","t":"2026-04-07T01:04:07.522Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74","orderIdSuffix":"ek6aet0sd2","t":"2026-04-07T01:04:07.523Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"ekee5frx29","t":"2026-04-07T01:04:07.525Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"ekee5frx29","t":"2026-04-07T01:04:07.525Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix
+":"ekee5frx29","t":"2026-04-07T01:04:07.525Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640","orderIdSuffix":"ekee5frx29","t":"2026-04-07T01:04:07.525Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"ekhc3s055k","t":"2026-04-07T01:04:07.540Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"ekhc3s055k","t":"2026-04-07T01:04:07.540Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix
+":"ekhc3s055k","t":"2026-04-07T01:04:07.540Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf","orderIdSuffix":"ekhc3s055k","t":"2026-04-07T01:04:07.540Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"ekk8wpyrgb","t":"2026-04-07T01:04:07.541Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"ekk8wpyrgb","t":"2026-04-07T01:04:07.541Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix
+":"ekk8wpyrgb","t":"2026-04-07T01:04:07.541Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f","orderIdSuffix":"ekk8wpyrgb","t":"2026-04-07T01:04:07.541Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"ekfs06rgy2","t":"2026-04-07T01:04:07.544Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"ekfs06rgy2","t":"2026-04-07T01:04:07.544Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix
+":"ekfs06rgy2","t":"2026-04-07T01:04:07.545Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3","orderIdSuffix":"ekfs06rgy2","t":"2026-04-07T01:04:07.545Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"ek0fel9mkl","t":"2026-04-07T01:04:07.555Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"ek0fel9mkl","t":"2026-04-07T01:04:07.555Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix
+":"ek0fel9mkl","t":"2026-04-07T01:04:07.555Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f","orderIdSuffix":"ek0fel9mkl","t":"2026-04-07T01:04:07.556Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"ekh3f16ryw","t":"2026-04-07T01:04:07.558Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"ekh3f16ryw","t":"2026-04-07T01:04:07.558Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix
+":"ekh3f16ryw","t":"2026-04-07T01:04:07.558Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948","orderIdSuffix":"ekh3f16ryw","t":"2026-04-07T01:04:07.559Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"ekrebotxyw","t":"2026-04-07T01:04:07.570Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"ekrebotxyw","t":"2026-04-07T01:04:07.570Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix
+":"ekrebotxyw","t":"2026-04-07T01:04:07.570Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930","orderIdSuffix":"ekrebotxyw","t":"2026-04-07T01:04:07.570Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"ekblba637p","t":"2026-04-07T01:04:07.571Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"ekblba637p","t":"2026-04-07T01:04:07.571Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix
+":"ekblba637p","t":"2026-04-07T01:04:07.571Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4","orderIdSuffix":"ekblba637p","t":"2026-04-07T01:04:07.571Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"ekdxc4ezqw","t":"2026-04-07T01:04:07.573Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"ekdxc4ezqw","t":"2026-04-07T01:04:07.573Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix
+":"ekdxc4ezqw","t":"2026-04-07T01:04:07.573Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494","orderIdSuffix":"ekdxc4ezqw","t":"2026-04-07T01:04:07.573Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"eke0e20pz6","t":"2026-04-07T01:04:07.587Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"eke0e20pz6","t":"2026-04-07T01:04:07.588Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix
+":"eke0e20pz6","t":"2026-04-07T01:04:07.588Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7","orderIdSuffix":"eke0e20pz6","t":"2026-04-07T01:04:07.588Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"ektbc1x2hy","t":"2026-04-07T01:04:07.594Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"ektbc1x2hy","t":"2026-04-07T01:04:07.594Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix
+":"ektbc1x2hy","t":"2026-04-07T01:04:07.594Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291","orderIdSuffix":"ektbc1x2hy","t":"2026-04-07T01:04:07.594Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"ek9uwpwg8b","t":"2026-04-07T01:04:07.603Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"ek9uwpwg8b","t":"2026-04-07T01:04:07.603Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix
+":"ek9uwpwg8b","t":"2026-04-07T01:04:07.603Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477","orderIdSuffix":"ek9uwpwg8b","t":"2026-04-07T01:04:07.604Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"ekhxkn7vx8","t":"2026-04-07T01:04:07.604Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"ekhxkn7vx8","t":"2026-04-07T01:04:07.604Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix
+":"ekhxkn7vx8","t":"2026-04-07T01:04:07.604Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"51890e38-f386-485f-acb8-002bee97bbed","orderIdSuffix":"ekhxkn7vx8","t":"2026-04-07T01:04:07.604Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"ek8u1zwg8w","t":"2026-04-07T01:04:07.609Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"ek8u1zwg8w","t":"2026-04-07T01:04:07.609Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix
+":"ek8u1zwg8w","t":"2026-04-07T01:04:07.610Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6","orderIdSuffix":"ek8u1zwg8w","t":"2026-04-07T01:04:07.610Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"ekn2lj0med","t":"2026-04-07T01:04:07.623Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"ekn2lj0med","t":"2026-04-07T01:04:07.623Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix
+":"ekn2lj0med","t":"2026-04-07T01:04:07.623Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55","orderIdSuffix":"ekn2lj0med","t":"2026-04-07T01:04:07.624Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"eks6curblt","t":"2026-04-07T01:04:07.628Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"eks6curblt","t":"2026-04-07T01:04:07.630Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix
+":"eks6curblt","t":"2026-04-07T01:04:07.631Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9","orderIdSuffix":"eks6curblt","t":"2026-04-07T01:04:07.631Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"ekn1h8roen","t":"2026-04-07T01:04:07.637Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"ekn1h8roen","t":"2026-04-07T01:04:07.637Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix
+":"ekn1h8roen","t":"2026-04-07T01:04:07.637Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790","orderIdSuffix":"ekn1h8roen","t":"2026-04-07T01:04:07.638Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"ek576ml819","t":"2026-04-07T01:04:07.639Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"ek576ml819","t":"2026-04-07T01:04:07.639Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix
+":"ek576ml819","t":"2026-04-07T01:04:07.639Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873","orderIdSuffix":"ek576ml819","t":"2026-04-07T01:04:07.639Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"ek3xhuh045","t":"2026-04-07T01:04:07.645Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"ek3xhuh045","t":"2026-04-07T01:04:07.645Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix
+":"ek3xhuh045","t":"2026-04-07T01:04:07.645Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"a7532871-7216-4a04-8f0a-c2577481662c","orderIdSuffix":"ek3xhuh045","t":"2026-04-07T01:04:07.645Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"ekukwac74s","t":"2026-04-07T01:04:07.655Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"ekukwac74s","t":"2026-04-07T01:04:07.655Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix
+":"ekukwac74s","t":"2026-04-07T01:04:07.656Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a","orderIdSuffix":"ekukwac74s","t":"2026-04-07T01:04:07.656Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"ekyfohc4ho","t":"2026-04-07T01:04:07.661Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"ekyfohc4ho","t":"2026-04-07T01:04:07.661Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix
+":"ekyfohc4ho","t":"2026-04-07T01:04:07.662Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5","orderIdSuffix":"ekyfohc4ho","t":"2026-04-07T01:04:07.663Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"ek47abx27q","t":"2026-04-07T01:04:07.668Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"ek47abx27q","t":"2026-04-07T01:04:07.669Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix
+":"ek47abx27q","t":"2026-04-07T01:04:07.669Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864","orderIdSuffix":"ek47abx27q","t":"2026-04-07T01:04:07.669Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"ekgfcev8gx","t":"2026-04-07T01:04:07.674Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"ekgfcev8gx","t":"2026-04-07T01:04:07.674Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix
+":"ekgfcev8gx","t":"2026-04-07T01:04:07.674Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96","orderIdSuffix":"ekgfcev8gx","t":"2026-04-07T01:04:07.675Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"eksx5nwyka","t":"2026-04-07T01:04:07.685Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"eksx5nwyka","t":"2026-04-07T01:04:07.685Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix
+":"eksx5nwyka","t":"2026-04-07T01:04:07.685Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd","orderIdSuffix":"eksx5nwyka","t":"2026-04-07T01:04:07.685Z"}
+{"deliveryLog":true,"traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"u7ek1zptm70g","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"u7ek1zptm70g","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"ekv6v686l7","t":"2026-04-07T01:04:07.692Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"ekv6v686l7","t":"2026-04-07T01:04:07.692Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix
+":"ekv6v686l7","t":"2026-04-07T01:04:07.692Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5","orderIdSuffix":"ekv6v686l7","t":"2026-04-07T01:04:07.693Z"}
+{"deliveryLog":true,"traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"u7ekfrffxgwl","phase":"delivery_provider_invoke","result":"pending","failureReason":null,"detail":"adapter_start"}
+{"deliveryLog":true,"traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"u7ekfrffxgwl","phase":"delivery_provider_result","result":"ok","failureReason":null,"detail":null}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"ek3hqmztju","t":"2026-04-07T01:04:07.705Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"ek3hqmztju","t":"2026-04-07T01:04:07.705Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix
+":"ek3hqmztju","t":"2026-04-07T01:04:07.705Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738","orderIdSuffix":"ek3hqmztju","t":"2026-04-07T01:04:07.706Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"ekx76gf7u5","t":"2026-04-07T01:04:07.706Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"ekx76gf7u5","t":"2026-04-07T01:04:07.706Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix
+":"ekx76gf7u5","t":"2026-04-07T01:04:07.706Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1","orderIdSuffix":"ekx76gf7u5","t":"2026-04-07T01:04:07.707Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"ekvlkuhamh","t":"2026-04-07T01:04:07.921Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"ekvlkuhamh","t":"2026-04-07T01:04:07.922Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix
+":"ekvlkuhamh","t":"2026-04-07T01:04:07.922Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862","orderIdSuffix":"ekvlkuhamh","t":"2026-04-07T01:04:07.922Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"ek4uijo4xb","t":"2026-04-07T01:04:08.202Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"ek4uijo4xb","t":"2026-04-07T01:04:08.202Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix
+":"ek4uijo4xb","t":"2026-04-07T01:04:08.202Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d","orderIdSuffix":"ek4uijo4xb","t":"2026-04-07T01:04:08.202Z"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.291Z","orderIdSuffix":"u7ek8depjfm7","traceId":"ff8b4b44-296a-428a-94b1-0304f8d97db4"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ekqz838i6z","traceId":"691a521a-435b-4163-b1ff-be7107bfd5f2"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ekkxhgst7u","traceId":"0af364a8-e1f0-4ada-ab48-0b52e2e8063f"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ekx3xaraur","traceId":"adcab5dc-033a-4a56-96aa-8d8199ff88dc"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ekbwxm47ql","traceId":"cc0e38e3-6af6-4b9b-966a-594c03ea2fb9"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ekt54o1598","traceId":"9d95b1f9-d0a4-4249-bed2-8990c9c0777d"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ek5lr640su","traceId":"21ddf597-cd12-4fa1-8594-03cebb6c5bdc"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.292Z","orderIdSuffix":"u7ek1e7jipo6","traceId":"c2d5bcc2-df8d-4c01-92dc-3257bdef3c99"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ek0tv22ti9","traceId":"bec34ed3-c2aa-4a7f-814c-1603cc30e95a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ek744590pv","traceId":"5c52cb3e-d0fa-4153-ae81-450438112af5"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekzm6bpc72","traceId":"2c187983-3e87-4a86-b73a-00c35b2cdadb"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekytrnzuiw","traceId":"f17b9a8e-13ec-4d29-81cf-f72da7ab109a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ek1wipilav","traceId":"045611fe-3592-40d6-93eb-de84ae70e421"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekk40hsftn","traceId":"792ed46e-fe53-4ca3-b6e2-e75af357f502"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekuqw7u4mr","traceId":"b103ef7b-593c-4650-a967-86ba8aba0ae0"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ek4331az50","traceId":"bdde7655-6242-483c-b65b-c95a9cc623cd"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekb6gw0oht","traceId":"0276c31d-b2ae-4304-8dd5-b63ed0ff6e88"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.293Z","orderIdSuffix":"u7ekkyyd3wdp","traceId":"2a53e7e9-51da-4fe1-94ee-b11472394f22"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ek5za3ghmd","traceId":"4fb545f5-b9e5-4e79-b1ea-6a238ac3644b"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ek855ic66g","traceId":"6d4f8a2d-75fc-4832-950e-ad4b2f20466b"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekfzzrynpj","traceId":"801d2780-a425-442c-bbea-c514ea3a04f9"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekg1d75c5o","traceId":"098a7035-8b76-429c-bd67-f126595ed285"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekay86xapd","traceId":"67baa70f-b76b-4193-867e-4a22a53ba418"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekrb0uoahv","traceId":"1c499a74-1a86-4202-9e5c-9e065bb4e6e1"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekb1pn6bgn","traceId":"e65c31f6-31eb-4a15-a3af-f34653ce37b6"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ek91eb81dc","traceId":"6f5a377f-f7b9-4243-962e-b6faac9e1558"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ek3u9dbqgk","traceId":"c17f9882-bcb1-43ce-a5e1-d636bcc4518a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekajyhrkrr","traceId":"83c71fc2-2f86-484a-bfea-d987e3c61b44"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekcllqdv8u","traceId":"0f730201-0445-403a-95c7-3748d3acf297"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.294Z","orderIdSuffix":"u7ekogsok1jc","traceId":"2759d3cf-5449-4be6-ab4c-0e3d9c9c89db"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.295Z","orderIdSuffix":"u7ekyxeuyqj4","traceId":"5be07ca5-a5bf-4a4d-b9cc-dd834fc610e8"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.296Z","orderIdSuffix":"u7ekigxng9n4","traceId":"5dc25427-8659-4c75-ba2a-1ed25a8a8bab"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.297Z","orderIdSuffix":"u7ekv6nfuvrq","traceId":"53f8a2d5-75d6-479b-b8d0-e76283e9f87b"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.297Z","orderIdSuffix":"u7ekg31z5b4p","traceId":"4c0f93b8-3c2c-454a-a7f3-7d65107848dc"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ekv2bvj3ll","traceId":"cd97c265-f35b-4f00-b5e6-f8bd330fad26"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ek47du9pva","traceId":"087dfd9b-4074-4899-a911-31cf9410b347"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ek7ff0atq3","traceId":"16c1a903-f35a-4008-81c6-a1efe3e63d57"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ek1nygrh9w","traceId":"7c386749-4edc-499c-b307-f00e7b6b3603"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ek6xqg1962","traceId":"0538a76e-3517-46bc-8f14-b5c9fae6c593"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ek1xmk0cpn","traceId":"b1127443-80b5-40be-98da-98cf4ec73072"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.298Z","orderIdSuffix":"u7ekdmwy31q2","traceId":"bc3b4141-107f-44e7-b83e-6dad927dd263"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.299Z","orderIdSuffix":"u7ek2cu6lxxf","traceId":"992ac4f5-1e4e-45b7-87db-6c80d2e01563"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.299Z","orderIdSuffix":"u7ekg2fn50rl","traceId":"de66447f-eee2-47cf-aa1e-f3000b926f44"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.299Z","orderIdSuffix":"u7ek76veqvl6","traceId":"c30fabc3-be9c-4cd0-a82a-19a9e792921c"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.300Z","orderIdSuffix":"u7ekze6tvygj","traceId":"fc867c1d-8ea0-422a-a94a-2aee1d5297da"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.301Z","orderIdSuffix":"u7ek5d8lnl7q","traceId":"c38eb2e9-c6d3-4d51-901b-9a89c99b431d"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.301Z","orderIdSuffix":"u7ek1ujsejbk","traceId":"2977971c-da19-4866-affa-1a271f6ac5fb"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.302Z","orderIdSuffix":"u7ekctsqk7ff","traceId":"656aa3a4-3325-4b26-9f98-0ad96937a473"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.302Z","orderIdSuffix":"u7ekqnv1x5y7","traceId":"38d56cfa-12f0-4e44-9a88-e1ba781c0605"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.302Z","orderIdSuffix":"u7ek9e8l8bsa","traceId":"3435ba72-4752-48d1-a052-a5c7a4c278a5"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.302Z","orderIdSuffix":"u7ekh9drydbe","traceId":"aa5f0a80-2b1b-4bf8-86ab-477480f2b6af"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.302Z","orderIdSuffix":"u7ekpubcm731","traceId":"c94c7149-33cd-47af-90fb-c5b450d6d845"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.303Z","orderIdSuffix":"u7ekua4bwyju","traceId":"aa69dfe2-449d-4b40-93ae-7a5fdd04ee94"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.303Z","orderIdSuffix":"u7ek2vhmcxfr","traceId":"37b2db3b-a106-40b9-8399-44b7c3d28ed2"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.303Z","orderIdSuffix":"u7eknt1vdv1u","traceId":"f567f08b-087c-4820-b906-14e49bb2860a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.303Z","orderIdSuffix":"u7ekgx5fw9qn","traceId":"9f30bf12-807c-41bc-9be0-27675a8d8fee"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.303Z","orderIdSuffix":"u7ekm380dw3x","traceId":"eb9cb3d5-1337-4aab-b1f3-0d688d2311d9"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekg1cgjza6","traceId":"52e423e9-9214-44f2-81ef-6f41ee1fbbc7"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekka6fc6vy","traceId":"ae18fe1e-1d5c-4d08-b711-0435dfdf92a3"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekyyrjuffv","traceId":"901c516f-68ff-43be-812b-b9ab3757eb5e"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ek9uhld9n7","traceId":"c34ac3f9-2c75-4191-ba2e-e5c851087e86"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekroey0pvz","traceId":"7f273c39-fc3f-4924-967a-81e1d222b60d"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekq1fclhcj","traceId":"59765e37-9cdc-402f-abee-2f98a233f827"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekp0kvib0v","traceId":"e48a61ff-627b-4656-a2c2-ed1e5ee1a19f"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekwir6yxhy","traceId":"6f9cde52-d72f-4c09-951c-48fc3dc0a011"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ek1hly3p0z","traceId":"4bf23ba2-5b91-47f8-adb4-5413cd627ad6"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekb6fv2831","traceId":"2fc26d45-792b-4633-a09b-231a3de2166c"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ek6ro6qb87","traceId":"43f9b179-3c9e-4930-9858-ed5ef14e2b7a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ek6aet0sd2","traceId":"3743d835-4d3a-4189-884a-6efbf95dcd74"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekee5frx29","traceId":"0527f0bb-1db0-467b-a5da-bcf18af12640"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.304Z","orderIdSuffix":"u7ekhc3s055k","traceId":"acac9d1f-aa48-479d-aecb-9427f8961fdf"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.305Z","orderIdSuffix":"u7ekk8wpyrgb","traceId":"a436d60e-7419-41b2-ae30-c0782ffa6e3f"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.305Z","orderIdSuffix":"u7ekfs06rgy2","traceId":"31e4ea81-987f-466e-aad7-21f70c8c43e3"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.306Z","orderIdSuffix":"u7ek0fel9mkl","traceId":"aa838f61-86f0-4ed6-90d4-3eb2fd88711f"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.306Z","orderIdSuffix":"u7ekh3f16ryw","traceId":"766587d7-67c4-4a9e-bc6f-0380ce481948"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.306Z","orderIdSuffix":"u7ekrebotxyw","traceId":"383ebe09-3b39-4bfe-9870-fd56fd44e930"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ekblba637p","traceId":"837453ab-ae32-47d4-b9bc-bcb9f57ac4c4"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ekdxc4ezqw","traceId":"a97fcac7-16a9-4a4b-872d-1eb1272fd494"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7eke0e20pz6","traceId":"58ab2e76-68ab-449e-97cc-5e19d888aac7"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ektbc1x2hy","traceId":"b48df7b2-71d7-4dd1-9848-592cc93a3291"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ek9uwpwg8b","traceId":"02f1f20d-00c2-4520-bb07-8d2a3c6d4477"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ekhxkn7vx8","traceId":"51890e38-f386-485f-acb8-002bee97bbed"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ek8u1zwg8w","traceId":"a1260327-91bd-45be-a8ab-bc5d564633a6"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7ekn2lj0med","traceId":"f0bb9246-4b34-43d9-82a6-2ee414ce3b55"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.307Z","orderIdSuffix":"u7eks6curblt","traceId":"8c6a87e4-0a37-4f88-a1cb-12976f379fd9"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekn1h8roen","traceId":"a823a664-2b41-4a3c-9dba-da8b47040790"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ek576ml819","traceId":"768b2764-f276-4137-a8dd-19cb77cc1873"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekukwac74s","traceId":"39d070b2-9d90-4ae4-8e5d-4b28bf9f448a"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ek3xhuh045","traceId":"a7532871-7216-4a04-8f0a-c2577481662c"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekyfohc4ho","traceId":"fe2d4775-3e7b-413a-9abe-ca59f15ff8a5"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ek47abx27q","traceId":"6c3f0492-432d-4a91-8ec8-4d4e41b33864"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekgfcev8gx","traceId":"7e1b8c8a-f364-4dff-b36d-dc3b93957b96"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7eksx5nwyka","traceId":"640e79aa-f1a1-4b21-917d-ad3ceb28cbdd"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekv6v686l7","traceId":"43df209f-b733-4f69-a196-a0dc462b9de5"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ek3hqmztju","traceId":"af4fec1e-3651-4c14-bea1-0298e9fe5738"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.308Z","orderIdSuffix":"u7ekx76gf7u5","traceId":"49f3e3bf-0bf4-4587-b1d3-673327edafb1"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.309Z","orderIdSuffix":"u7ekvlkuhamh","traceId":"b94135e4-85cd-48a3-ac64-1af6d093c862"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.316Z","orderIdSuffix":"u7ek4uijo4xb","traceId":"baf764bb-afa1-4bb9-8b8e-830b58854a0d"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"ek1zptm70g","t":"2026-04-07T01:04:08.317Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"ek1zptm70g","t":"2026-04-07T01:04:08.317Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix
+":"ek1zptm70g","t":"2026-04-07T01:04:08.317Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87","orderIdSuffix":"ek1zptm70g","t":"2026-04-07T01:04:08.317Z"}
+{"marginIntel":true,"event":"margin_missing_provider_cost","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"ekfrffxgwl","t":"2026-04-07T01:04:08.319Z","marginProviderCostSource":"estimated_face_bps","sellCents":1000}
+{"marginIntel":true,"event":"margin_calculated","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"ekfrffxgwl","t":"2026-04-07T01:04:08.320Z","netCents":41,"marginPercentBp":410,"source":"estimated_face_bps"}
+{"marginIntel":true,"event":"low_margin_route_detected","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix
+":"ekfrffxgwl","t":"2026-04-07T01:04:08.320Z","marginPercentBp":410,"thresholdBp":500}
+{"opsLog":true,"domain":"fulfillment","event":"fulfillment_delivered","outcome":"ok","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8","orderIdSuffix":"ekfrffxgwl","t":"2026-04-07T01:04:08.320Z"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.337Z","orderIdSuffix":"u7ek1zptm70g","traceId":"1307a7ec-28fb-4dff-90fb-d04d2afbdd87"}
+{"phase1Ops":true,"event":"fulfillment_delivered","t":"2026-04-07T01:04:08.338Z","orderIdSuffix":"u7ekfrffxgwl","traceId":"cc838ca4-bd7f-40bf-94f8-c20d10c211e8"}
+{
+  "kind": "transaction_fortress_concurrency_probe",
+  "generatedAt": "2026-04-07T01:04:08.853Z",
+  "parameters": {
+    "distinctOrders": 100,
+    "multiRegion": true,
+    "senderCountryPlan": {
+      "US": 20,
+      "EU": 20,
+      "CA": 20,
+      "AE_arabRegion": 20,
+      "TR": 20
+    },
+    "parallelism": 100,
+    "sameOrderRaces": 0,
+    "mockProvider": "mock",
+    "loyaltyAutoGrantOnDelivery": "false"
+  },
+  "wallClockMs": 2247.383,
+  "invokeErrors": 0,
+  "distinctOrdersOutcome": {
+    "successFulFilledCount": 100,
+    "failedOrderCount": 0,
+    "stuckPaidCount": 0,
+    "stuckProcessingCount": 0,
+    "duplicateSucceededAttemptOrders": 0,
+    "ordersWithLifecycleViolations": 0,
+    "invalidTransitionProxyCount": 0,
+    "orderStatusHistogram": {
+      "FULFILLED": 100
+    }
+  },
+  "perRegion": {
+    "outcome": {
+      "US": {
+        "orders": 20,
+        "fulfilled": 20,
+        "failed": 0,
+        "stuckPaid": 0,
+        "stuckProcessing": 0,
+        "duplicateSucceededAttempts": 0,
+        "lifecycleViolations": 0,
+        "orderStatusHistogram": {
+          "FULFILLED": 20
+        },
+        "latencyMs": {
+          "n": 20,
+          "p50": 972.7176999999999,
+          "p95": 2247.0108000000005,
+          "p99": 2247.0108000000005
+        }
+      },
+      "EU": {
+        "orders": 20,
+        "fulfilled": 20,
+        "failed": 0,
+        "stuckPaid": 0,
+        "stuckProcessing": 0,
+        "duplicateSucceededAttempts": 0,
+        "lifecycleViolations": 0,
+        "orderStatusHistogram": {
+          "FULFILLED": 20
+        },
+        "latencyMs": {
+          "n": 20,
+          "p50": 1108.7965,
+          "p95": 1249.4632000000001,
+          "p99": 1249.4632000000001
+        }
+      },
+      "CA": {
+        "orders": 20,
+        "fulfilled": 20,
+        "failed": 0,
+        "stuckPaid": 0,
+        "stuckProcessing": 0,
+        "duplicateSucceededAttempts": 0,
+        "lifecycleViolations": 0,
+        "orderStatusHistogram": {
+          "FULFILLED": 20
+        },
+        "latencyMs": {
+          "n": 20,
+          "p50": 1268.0418000000002,
+          "p95": 1418.1391,
+          "p99": 1418.1391
+        }
+      },
+      "ARAB_AE": {
+        "orders": 20,
+        "fulfilled": 20,
+        "failed": 0,
+        "stuckPaid": 0,
+        "stuckProcessing": 0,
+        "duplicateSucceededAttempts": 0,
+        "lifecycleViolations": 0,
+        "orderStatusHistogram": {
+          "FULFILLED": 20
+        },
+        "latencyMs": {
+          "n": 20,
+          "p50": 1429.9241000000002,
+          "p95": 1498.2588,
+          "p99": 1498.2588
+        }
+      },
+      "TR": {
+        "orders": 20,
+        "fulfilled": 20,
+        "failed": 0,
+        "stuckPaid": 0,
+        "stuckProcessing": 0,
+        "duplicateSucceededAttempts": 0,
+        "lifecycleViolations": 0,
+        "orderStatusHistogram": {
+          "FULFILLED": 20
+        },
+        "latencyMs": {
+          "n": 20,
+          "p50": 1563.1361,
+          "p95": 2213.2391,
+          "p99": 2213.2391
+        }
+      }
+    }
+  },
+  "loyaltySideEffects": null,
+  "latencyMs": {
+    "perOrderInvoke": {
+      "n": 100,
+      "p50": 1294.0336,
+      "p95": 1603.8164000000002,
+      "p99": 2247.0108000000005
+    },
+    "sameOrderRaceWallMs": null
+  },
+  "sameOrderRace": {
+    "racesRun": 0,
+    "racesWithMoreThanOneProcessingAttempt": 0
+  },
+  "notes": {
+    "measuredOnThisRun": true,
+    "invalidTransitionCount": "No separate kernel counter; invalidTransitionProxyCount mirrors ordersWithLifecycleViolations on persisted rows."
+  }
+}

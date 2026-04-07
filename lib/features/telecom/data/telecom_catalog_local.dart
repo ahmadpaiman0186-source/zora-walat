@@ -7,11 +7,12 @@ import '../domain/product_tier.dart';
 /// Local product matrix. Replace with [TelecomService] HTTP responses in production.
 abstract final class TelecomCatalogLocal {
   static List<AirtimeOffer> airtimeFor(MobileOperator op) {
+    // Phase 1: minimum retail $10 — matches server AIRTIME_SKUS.
     return [
-      const _AirSpec(10, 500),
-      const _AirSpec(15, 750),
       const _AirSpec(25, 1000),
       const _AirSpec(50, 1500),
+      const _AirSpec(100, 2000),
+      const _AirSpec(125, 2500),
     ].map((s) {
       return AirtimeOffer(
         id: '${op.apiKey}_air_${s.minutes}m',

@@ -1,25 +1,13 @@
 /**
  * Single source of truth for airtime SKUs (must match app catalog).
- * Server validates PaymentIntent amount against these rows (anti-tamper).
+ * Phase 1: retail face value ≥ $10 USD (see PHASE1_MIN_CHECKOUT_USD_CENTS).
  */
 export const AIRTIME_SKUS = [
-  {
-    idSuffix: 'air_10m',
-    minutes: 10,
-    retailUsdCents: 500,
-    /** Wholesale — set from operator quotes / provider API. */
-    providerUsdCents: 440,
-  },
-  {
-    idSuffix: 'air_15m',
-    minutes: 15,
-    retailUsdCents: 750,
-    providerUsdCents: 660,
-  },
   {
     idSuffix: 'air_25m',
     minutes: 25,
     retailUsdCents: 1000,
+    /** Wholesale — set from operator quotes / provider API. */
     providerUsdCents: 880,
   },
   {
@@ -27,6 +15,18 @@ export const AIRTIME_SKUS = [
     minutes: 50,
     retailUsdCents: 1500,
     providerUsdCents: 1320,
+  },
+  {
+    idSuffix: 'air_100m',
+    minutes: 100,
+    retailUsdCents: 2000,
+    providerUsdCents: 1760,
+  },
+  {
+    idSuffix: 'air_125m',
+    minutes: 125,
+    retailUsdCents: 2500,
+    providerUsdCents: 2200,
   },
 ];
 

@@ -19,7 +19,8 @@ class RechargeScreen extends StatefulWidget {
 }
 
 class _RechargeScreenState extends State<RechargeScreen> {
-  static const List<double> _amountPresets = [5, 10, 15, 20, 25];
+  /// Phase 1: minimum server order $10 USD — presets start at $10.
+  static const List<double> _amountPresets = [10, 15, 20, 25];
 
   final _phone = TextEditingController();
   String _operator = 'roshan';

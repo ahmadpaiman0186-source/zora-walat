@@ -5,6 +5,7 @@ import { resolveRecipientFromBody } from '../services/recipient/recipientService
 import { getRechargeProvider } from '../services/providers/index.js';
 import { processFulfillmentForOrder } from '../services/fulfillmentProcessingService.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
+import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
 import { deriveCustomerTrackingStageForOrder } from '../services/transactionsService.js';
 
 export async function postQuote(req, res) {
@@ -129,6 +130,26 @@ export async function postExecute(req, res) {
   if (existing.orderStatus === ORDER_STATUS.CANCELLED) {
     return res.status(409).json({
       error: 'Order cancelled',
+      ...basePayload,
+    });
+  }
+
+  const gate = canOrderProceedToFulfillment(existing, {
+    lifecycle: 'PAID_OR_PROCESSING',
+  });
+  if (!gate.ok) {
+    req.log?.warn?.(
+      {
+        securityEvent: 'recharge_execute_gate_denied',
+        orderIdSuffix: orderId.slice(-12),
+        denial: gate.denial,
+      },
+      'security',
+    );
+    return res.status(409).json({
+      error: 'Fulfillment not authorized for current payment state',
+      fortressDenial: gate.denial,
+      fortressDetail: gate.detail ?? null,
       ...basePayload,
     });
   }

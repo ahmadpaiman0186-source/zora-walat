@@ -8,14 +8,23 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const serverRoot = dirname(fileURLToPath(import.meta.url));
+const dotenvQuiet =
+  String(process.env.FORTRESS_PROBE_QUIET ?? '')
+    .trim()
+    .toLowerCase() === 'true';
 const loaded = dotenv.config({
   path: join(serverRoot, '.env'),
   /** In development, prefer `server/.env` over inherited shell (stale DATABASE_URL). Production keeps platform env. */
   override: process.env.NODE_ENV !== 'production',
+  quiet: dotenvQuiet,
 });
 if (loaded.error) {
   console.warn('[dotenv]', loaded.error.message);
 }
 if (existsSync(join(serverRoot, '.env.local'))) {
-  dotenv.config({ path: join(serverRoot, '.env.local'), override: true });
+  dotenv.config({
+    path: join(serverRoot, '.env.local'),
+    override: true,
+    quiet: dotenvQuiet,
+  });
 }

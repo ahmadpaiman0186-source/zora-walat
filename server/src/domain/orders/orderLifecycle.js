@@ -24,7 +24,12 @@ const EDGES = new Map([
   [ORDER_STATUS.PAID, new Set([ORDER_STATUS.PROCESSING, ORDER_STATUS.FAILED])],
   [
     ORDER_STATUS.PROCESSING,
-    new Set([ORDER_STATUS.FULFILLED, ORDER_STATUS.FAILED]),
+    new Set([
+      ORDER_STATUS.FULFILLED,
+      ORDER_STATUS.FAILED,
+      /** Recovery / manual re-queue: release claim back to paid+queued-shaped work. */
+      ORDER_STATUS.PAID,
+    ]),
   ],
 ]);
 

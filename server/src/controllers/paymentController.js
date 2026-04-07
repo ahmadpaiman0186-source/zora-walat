@@ -34,6 +34,9 @@ import { prisma } from '../db.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { classifyCheckoutAbuseDistributed } from '../services/checkoutAbuseDetectorDistributed.js';
 import { deviceFingerprintHash } from '../lib/deviceFingerprint.js';
+import { logOpsEvent } from '../lib/opsLog.js';
+import { recordCheckoutSessionCreated } from '../lib/opsMetrics.js';
+import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 
 function normalizeClientBase(raw) {
   return String(raw ?? '').trim().replace(/\/$/, '');
@@ -119,20 +122,38 @@ export async function createCheckoutSession(req, res) {
     throw err;
   }
 
+  const sender = await prisma.senderCountry.findUnique({
+    where: { code: parsed.senderCountry },
+  });
+  if (!sender || !sender.enabled) {
+    return res.status(400).json({
+      error: 'Invalid or disabled sender country',
+      code: 'SENDER_COUNTRY_INVALID',
+    });
+  }
+
   const priced = resolveCheckoutPricing({
     packageId: parsed.packageId,
     amountUsdCents: parsed.amountUsdCents,
+    riskBufferPercent: sender.riskBufferPercent,
   });
   if (!priced.ok) {
     req.log?.warn(
       { securityEvent: 'checkout_pricing_rejected', code: priced.code },
       'security',
     );
+    const hard =
+      priced.code === 'MARGIN_BELOW_FLOOR'
+        ? 'Checkout rejected: projected margin below minimum threshold'
+        : priced.code === 'CHECKOUT_BELOW_MINIMUM'
+          ? priced.message
+          : null;
     return res.status(400).json({
       error:
-        env.nodeEnv === 'production'
+        hard ??
+        (env.nodeEnv === 'production'
           ? 'Checkout cannot be priced safely'
-          : priced.message,
+          : priced.message),
       code: priced.code,
     });
   }
@@ -173,6 +194,7 @@ export async function createCheckoutSession(req, res) {
   const fingerprint = checkoutRequestFingerprint({
     userId: authUserId,
     amountUsdCents: trustedCents,
+    senderCountryCode: parsed.senderCountry,
     operatorKey: parsed.operatorKey ?? null,
     recipientNational,
     packageId: parsed.packageId ?? null,
@@ -296,10 +318,12 @@ export async function createCheckoutSession(req, res) {
       fingerprint,
       userId: authUserId,
       amountUsdCents: trustedCents,
-      currency: parsed.currency,
+      currency: 'usd',
+      senderCountryCode: parsed.senderCountry,
       operatorKey: parsed.operatorKey ?? null,
       recipientNational,
       packageId: parsed.packageId ?? null,
+      pricing: priced.pricing,
     });
   } catch (e) {
     if (
@@ -327,8 +351,10 @@ export async function createCheckoutSession(req, res) {
         line_items: [
           {
             price_data: {
-              currency: parsed.currency,
-              product_data: { name: 'Zora Walat payment' },
+              currency: 'usd',
+              product_data: {
+                name: 'Afghanistan mobile top-up (USD)',
+              },
               unit_amount: trustedCents,
             },
             quantity: 1,
@@ -361,6 +387,20 @@ export async function createCheckoutSession(req, res) {
       { checkoutId: row.id, sessionId: session.id },
       'checkout session created',
     );
+    recordCheckoutSessionCreated();
+    emitPhase1OperationalEvent('checkout_session_created', {
+      traceId: req.traceId ?? null,
+      orderIdSuffix: safeSuffix(row.id, 10),
+      stripeSessionIdSuffix: String(session.id).slice(-12),
+    });
+    logOpsEvent({
+      domain: 'payment',
+      event: 'checkout_session_created',
+      outcome: 'ok',
+      orderId: row.id,
+      traceId: req.traceId,
+      extra: { stripeSessionIdSuffix: String(session.id).slice(-12) },
+    });
     return res.json({
       url: session.url,
       orderId: row.id,

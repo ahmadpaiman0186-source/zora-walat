@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import 'tabs/airtime_tab.dart';
-import 'tabs/data_packages_tab.dart';
-import 'tabs/international_placeholder_tab.dart';
 
+/// Phase 1: Afghanistan mobile top-up (USD) only. Data / calling tabs deferred.
 class TelecomHubScreen extends StatelessWidget {
   const TelecomHubScreen({super.key});
 
@@ -12,35 +11,23 @@ class TelecomHubScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    return DefaultTabController(
-      length: 3,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Material(
-            color: t.colorScheme.surface,
-            child: TabBar(
-              dividerColor: Colors.transparent,
-              labelStyle: t.textTheme.labelLarge,
-              tabs: [
-                Tab(text: l10n.tabAirtime),
-                Tab(text: l10n.tabDataPackages),
-                Tab(text: l10n.tabIntlCalling),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+          child: Text(
+            l10n.tabAirtime,
+            style: t.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const Expanded(
-            child: TabBarView(
-              physics: BouncingScrollPhysics(),
-              children: [
-                AirtimeTab(),
-                DataPackagesTab(),
-                InternationalPlaceholderTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+        const Expanded(
+          child: AirtimeTab(),
+        ),
+      ],
     );
   }
 }

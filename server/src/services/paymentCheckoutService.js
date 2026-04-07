@@ -63,11 +63,17 @@ export async function createInitiatedRow({
   userId,
   amountUsdCents,
   currency,
+  senderCountryCode,
   operatorKey,
   recipientNational,
   packageId,
   clientOrigin,
+  pricing,
 }) {
+  const meta = {
+    source: 'checkout_api',
+    phase: 'mobile_topup',
+  };
   return prisma.paymentCheckout.create({
     data: {
       idempotencyKey,
@@ -76,13 +82,38 @@ export async function createInitiatedRow({
       status: PAYMENT_CHECKOUT_STATUS.INITIATED,
       amountUsdCents,
       currency,
+      senderCountryCode: senderCountryCode ?? null,
+      productType: 'mobile_topup',
+      providerCostUsdCents: pricing?.providerCostCents ?? null,
+      stripeFeeEstimateUsdCents: pricing?.stripeFeeEstimateCents ?? null,
+      stripeFeeActualUsdCents: null,
+      fxBufferUsdCents: pricing?.fxBufferCents ?? null,
+      riskBufferUsdCents: pricing?.riskBufferCents ?? null,
+      targetProfitUsdCents: pricing?.targetProfitCents ?? null,
+      projectedNetMarginBp: pricing?.projectedNetMarginBp ?? null,
+      actualNetMarginBp: null,
+      pricingSnapshot: pricing
+        ? {
+            providerCostCents: pricing.providerCostCents,
+            fxBufferCents: pricing.fxBufferCents,
+            fxOnlyCents: pricing.fxOnlyCents,
+            taxBufferCents: pricing.taxBufferCents,
+            riskBufferCents: pricing.riskBufferCents,
+            stripeFeeEstimateCents: pricing.stripeFeeEstimateCents,
+            targetProfitCents: pricing.targetProfitCents,
+            projectedNetMarginBp: pricing.projectedNetMarginBp,
+            finalPriceCents: pricing.finalPriceCents,
+            formula:
+              'final = provider + stripe_fee(final) + fx_buffer + risk_buffer + target_profit (solved iteratively)',
+          }
+        : undefined,
       operatorKey,
       recipientNational,
       packageId,
       orderStatus: ORDER_STATUS.PENDING,
       provider: 'stripe',
       clientOrigin: clientOrigin ?? null,
-      metadata: { source: 'checkout_api' },
+      metadata: meta,
     },
     select: { id: true },
   });
