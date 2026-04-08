@@ -1,17 +1,10 @@
 /**
- * Integration tests use `TEST_DATABASE_URL`; services use `src/db.js` → `DATABASE_URL`.
- * Preload this file so both see the same database:
+ * Integration tests use the same rule as `npm run db:migrate:integration`:
+ * if `TEST_DATABASE_URL` is non-empty it becomes `DATABASE_URL` for the process — that DB must be fully migrated.
  *
+ * Preload:
  *   node --import ./test/integrations/preloadTestDatabaseUrl.mjs --test ...
  */
-import dotenv from 'dotenv';
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { applyIntegrationTestDatabaseEnv } from './testDatabaseResolution.mjs';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
-dotenv.config({ path: resolve(__dirname, '../../.env') });
-
-const t = String(process.env.TEST_DATABASE_URL ?? '').trim();
-if (t) {
-  process.env.DATABASE_URL = t;
-}
+applyIntegrationTestDatabaseEnv();

@@ -31,14 +31,31 @@ export function parseManualReviewFlags(metadata) {
     };
   }
   const m = /** @type {Record<string, unknown>} */ (metadata);
+  const pr =
+    m.processingRecovery &&
+    typeof m.processingRecovery === 'object' &&
+    !Array.isArray(m.processingRecovery)
+      ? /** @type {Record<string, unknown>} */ (m.processingRecovery)
+      : null;
+  const manualReviewRequired =
+    m.manualRequired === true || (pr != null && pr.manualRequired === true);
+  const manualReviewReason =
+    (pr && typeof pr.manualRequiredReason === 'string'
+      ? pr.manualRequiredReason
+      : null) ??
+    (typeof m.manualRequiredReason === 'string' ? m.manualRequiredReason : null);
+  const manualReviewClassification =
+    (pr && typeof pr.manualRequiredClassification === 'string'
+      ? pr.manualRequiredClassification
+      : null) ??
+    (typeof m.manualRequiredClassification === 'string'
+      ? m.manualRequiredClassification
+      : null);
+
   return {
-    manualReviewRequired: m.manualRequired === true,
-    manualReviewReason:
-      typeof m.manualRequiredReason === 'string' ? m.manualRequiredReason : null,
-    manualReviewClassification:
-      typeof m.manualRequiredClassification === 'string'
-        ? m.manualRequiredClassification
-        : null,
+    manualReviewRequired,
+    manualReviewReason,
+    manualReviewClassification,
   };
 }
 

@@ -1,0 +1,57 @@
+﻿{
+  "kind": "transaction_fortress_concurrency_probe",
+  "generatedAt": "2026-04-07T15:34:02.633Z",
+  "parameters": {
+    "distinctOrders": 10,
+    "multiRegion": false,
+    "senderCountryPlan": null,
+    "parallelism": 10,
+    "sameOrderRaces": 0,
+    "mockProvider": "mock",
+    "loyaltyAutoGrantOnDelivery": "true",
+    "useFulfillmentQueue": false,
+    "fulfillmentWorkerConcurrency": null,
+    "fulfillmentQueueDrain": null
+  },
+  "wallClockMs": 901.1924999999999,
+  "invokeErrors": 0,
+  "distinctOrdersOutcome": {
+    "successFulFilledCount": 10,
+    "failedOrderCount": 0,
+    "stuckPaidCount": 0,
+    "stuckProcessingCount": 0,
+    "duplicateSucceededAttemptOrders": 0,
+    "ordersWithMoreThanOneAttemptRow": 0,
+    "ordersWithLifecycleViolations": 0,
+    "coherenceViolationCount": 0,
+    "invalidTransitionProxyCount": 0,
+    "orderStatusHistogram": {
+      "FULFILLED": 10
+    }
+  },
+  "perRegion": null,
+  "loyaltySideEffects": {
+    "loyaltyPointsGrantRowsForProbeOrders": 10,
+    "loyaltyLedgerRowsForProbeUsers": 10
+  },
+  "latencyMs": {
+    "perOrderInvoke": {
+      "n": 10,
+      "p50": 677.0214000000001,
+      "p95": 897.4145999999998,
+      "p99": 897.4145999999998
+    },
+    "sameOrderRaceWallMs": null
+  },
+  "sameOrderRace": {
+    "racesRun": 0,
+    "racesWithMoreThanOneProcessingAttempt": 0,
+    "raceOrdersWithMoreThanOneAttemptRow": null,
+    "raceOrdersWithDuplicateSucceededAttempts": null,
+    "raceOrderFinalOrderStatusHistogram": null
+  },
+  "notes": {
+    "measuredOnThisRun": true,
+    "invalidTransitionCount": "No separate kernel counter; invalidTransitionProxyCount mirrors ordersWithLifecycleViolations on persisted rows."
+  }
+}

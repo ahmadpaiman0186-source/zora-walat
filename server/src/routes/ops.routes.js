@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import Redis from 'ioredis';
 
 import { prisma } from '../db.js';
 import { requireAuth, requireStaff } from '../middleware/authMiddleware.js';
@@ -8,17 +9,59 @@ import { getWebTopupMetricsSnapshot } from '../lib/webTopupObservability.js';
 import { safeSuffix } from '../lib/webTopupObservability.js';
 import { runReconciliationScan } from '../services/reconciliationService.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
+import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
 import { queryPhase1OperationalExceptionReport } from '../services/phase1OperationalReportService.js';
 import { getPhase1OpsHealthSnapshot } from '../services/phase1OpsAggregateService.js';
+import { getPhase1FulfillmentQueueMetrics } from '../queues/phase1FulfillmentQueueMetrics.js';
+import { env } from '../config/env.js';
+import { getPhase1FulfillmentQueue } from '../queues/phase1FulfillmentQueue.js';
+import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
 
 const router = Router();
 
+/**
+ * Infrastructure readiness (no auth). Mounted at `/ops/health` and `/api/admin/ops/health`.
+ */
+router.get('/health', async (req, res) => {
+  /** @type {{ server: string, db: string, redis: string, queue: string }} */
+  const payload = {
+    server: 'ok',
+    db: 'ok',
+    redis: 'skipped',
+    queue: isFulfillmentQueueEnabled() ? 'enabled' : 'disabled',
+  };
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+  } catch {
+    payload.db = 'error';
+  }
+  const redisUrl = String(process.env.REDIS_URL ?? env.redisUrl ?? '').trim();
+  if (redisUrl) {
+    const client = new Redis(redisUrl, {
+      maxRetriesPerRequest: 2,
+      connectTimeout: 4000,
+      enableReadyCheck: true,
+      lazyConnect: true,
+    });
+    try {
+      await client.connect();
+      await client.ping();
+      payload.redis = 'ok';
+    } catch {
+      payload.redis = 'error';
+    } finally {
+      client.disconnect();
+    }
+  }
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(payload);
+});
 /**
  * Phase 1 MOBILE_TOPUP operational exception snapshot (DB-backed).
  * Optional `?emitStuckSignals=1` bumps in-process stuck counters (default off).
  */
 router.get(
-  '/ops/phase1-report',
+  '/phase1-report',
   requireAuth,
   requireStaff,
   staffPrivilegedLimiter,
@@ -45,7 +88,7 @@ router.get(
  * Aggregated DB + in-process Phase 1 ops view (staff).
  */
 router.get(
-  '/ops/health',
+  '/phase1-aggregated-health',
   requireAuth,
   requireStaff,
   staffPrivilegedLimiter,
@@ -53,8 +96,8 @@ router.get(
     try {
       const snapshot = await getPhase1OpsHealthSnapshot();
       req.log?.info?.(
-        { traceId: req.traceId, kind: 'ops_health' },
-        'ops_health',
+        { traceId: req.traceId, kind: 'phase1_aggregated_ops_health' },
+        'phase1_aggregated_ops_health',
       );
       res.setHeader('Cache-Control', 'no-store');
       res.json(snapshot);
@@ -66,7 +109,7 @@ router.get(
 );
 
 router.get(
-  '/ops/summary',
+  '/summary',
   requireAuth,
   requireStaff,
   staffPrivilegedLimiter,
@@ -109,11 +152,29 @@ router.get(
   },
 );
 
+/** BullMQ Phase 1 fulfillment queue depth (staff) — overload visibility. */
+router.get(
+  '/fulfillment-queue',
+  requireAuth,
+  requireStaff,
+  staffPrivilegedLimiter,
+  async (req, res) => {
+    try {
+      const snapshot = await getPhase1FulfillmentQueueMetrics();
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(snapshot);
+    } catch (e) {
+      req.log?.error({ err: e }, 'fulfillment_queue_metrics_failed');
+      res.status(500).json({ error: 'Internal error' });
+    }
+  },
+);
+
 /**
  * Order-focused health slice for incident response (staff). Query: `?id=<paymentCheckoutId>`
  */
 router.get(
-  '/ops/order-health',
+  '/order-health',
   requireAuth,
   requireStaff,
   staffPrivilegedLimiter,
@@ -166,6 +227,34 @@ router.get(
         where: { userId: order.userId },
       });
 
+      /** @type {Record<string, unknown>} */
+      const queueHint = { fulfillmentQueueEnabled: env.fulfillmentQueueEnabled };
+      if (env.fulfillmentQueueEnabled) {
+        try {
+          const q = getPhase1FulfillmentQueue();
+          if (q) {
+            const job = await q.getJob(id);
+            queueHint.bullmqJobState =
+              job == null ? 'no_job_record' : await job.getState();
+          } else {
+            queueHint.bullmqJobState = 'queue_singleton_unavailable';
+          }
+        } catch (e) {
+          queueHint.bullmqJobError = String(e?.message ?? e).slice(0, 160);
+        }
+      }
+
+      const attempt0 = attempts[0] ?? null;
+      const stagingHint =
+        order.orderStatus === ORDER_STATUS.PAID &&
+        attempt0?.status === FULFILLMENT_ATTEMPT_STATUS.QUEUED
+          ? 'likely_queued_or_awaiting_worker'
+          : order.orderStatus === ORDER_STATUS.PROCESSING
+            ? 'active_processing_or_stuck_candidate'
+            : order.orderStatus === ORDER_STATUS.FAILED
+              ? 'terminal_failed'
+              : null;
+
       return res.json({
         orderRefSuffix: safeSuffix(order.id, 12),
         orderStatus: order.orderStatus,
@@ -188,6 +277,8 @@ router.get(
         })),
         serverNotificationsForOrder: notifCount,
         pushDevicesForUser: pushDevices,
+        stagingHint,
+        ...queueHint,
         processingRecovery:
           order.metadata &&
           typeof order.metadata === 'object' &&

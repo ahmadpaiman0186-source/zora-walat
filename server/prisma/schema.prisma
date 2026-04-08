@@ -356,8 +356,46 @@ model User {
   referralRewards    ReferralRewardTransaction[]
   referralLoyaltyFromInvites ReferralLoyaltyBonus[]
   loyaltyLedgerEntries     LoyaltyLedger[]
+  walletTopupIdempotencies  WalletTopupIdempotency[]
+  userWalletLedgerEntries   UserWalletLedgerEntry[]
 
   @@index([email])
+}
+
+/// Append-only movements for `UserWallet` (audit + future reconciliation). Balance reads stay on `UserWallet` in this phase.
+/// DB trigger blocks UPDATE/DELETE; use `referenceId` for external/operator correlation.
+model UserWalletLedgerEntry {
+  id                   String   @id @default(cuid())
+  /// Stable business id (UUID); immutable after insert.
+  referenceId          String   @unique
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  direction            String // CREDIT | DEBIT
+  reason               String // wallet_topup | wallet_topup_legacy | …
+  amountUsdCents       Int
+  currency             String   @default("USD")
+  balanceAfterUsdCents Int
+  /// Set for idempotent `POST /api/wallet/topup`; replays do not insert another row. Null for legacy no-key path (multiple rows allowed).
+  idempotencyKey       String?
+  /// Arbitrary JSON string (audit / product context).
+  metadataJson         String?
+  createdAt            DateTime @default(now())
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+}
+
+/// Replay-safe record for POST /api/wallet/topup when client sends Idempotency-Key (UUID).
+model WalletTopupIdempotency {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  idempotencyKey  String
+  amountUsdCents  Int
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
 }
 
 /// Append-only loyalty credits for audit / replay-safe totals (`sourceId` dedupes side effects).

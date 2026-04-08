@@ -1,5 +1,6 @@
 import { prisma } from '../db.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
+import { deriveCustomerFulfillmentView } from '../lib/customerVisibleOrderStatus.js';
 import { getCanonicalPhase1OrderForUser } from '../services/canonicalPhase1OrderService.js';
 
 const publicSelect = {
@@ -17,12 +18,18 @@ const publicSelect = {
   failedAt: true,
   cancelledAt: true,
   failureReason: true,
+  metadata: true,
   clientOrigin: true,
   createdAt: true,
   updatedAt: true,
 };
 
-function toPublicOrder(row) {
+/**
+ * @param {object} row
+ * @param {Pick<import('@prisma/client').FulfillmentAttempt, 'status' | 'failureReason'> | null} [latestAttempt]
+ */
+function toPublicOrder(row, latestAttempt = null) {
+  const customerVisible = deriveCustomerFulfillmentView(row, latestAttempt);
   return {
     id: row.id,
     orderStatus: row.orderStatus,
@@ -41,6 +48,7 @@ function toPublicOrder(row) {
     clientOrigin: row.clientOrigin,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    customerVisible,
   };
 }
 
@@ -68,12 +76,21 @@ export async function getOrderById(req, res) {
 
   const row = await prisma.paymentCheckout.findFirst({
     where: { id, userId },
-    select: publicSelect,
+    select: {
+      ...publicSelect,
+      fulfillmentAttempts: {
+        orderBy: { attemptNumber: 'desc' },
+        take: 1,
+        select: { status: true, failureReason: true },
+      },
+    },
   });
   if (!row) {
     return res.status(404).json({ error: 'Not found' });
   }
-  res.json({ order: toPublicOrder(row) });
+  const latest = row.fulfillmentAttempts?.[0] ?? null;
+  const { fulfillmentAttempts: _fa, ...rest } = row;
+  res.json({ order: toPublicOrder(rest, latest) });
 }
 
 const SESSION_ID_RE = /^cs_[a-zA-Z0-9]+$/;
@@ -87,12 +104,21 @@ export async function getOrderByStripeSession(req, res) {
 
   const row = await prisma.paymentCheckout.findFirst({
     where: { userId, stripeCheckoutSessionId: sessionId },
-    select: publicSelect,
+    select: {
+      ...publicSelect,
+      fulfillmentAttempts: {
+        orderBy: { attemptNumber: 'desc' },
+        take: 1,
+        select: { status: true, failureReason: true },
+      },
+    },
   });
   if (!row) {
     return res.status(404).json({ error: 'Not found' });
   }
-  res.json({ order: toPublicOrder(row) });
+  const latest = row.fulfillmentAttempts?.[0] ?? null;
+  const { fulfillmentAttempts: _fa, ...rest } = row;
+  res.json({ order: toPublicOrder(rest, latest) });
 }
 
 /**

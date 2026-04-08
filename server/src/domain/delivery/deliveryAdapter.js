@@ -13,7 +13,15 @@ function allowReloadlyUnavailableMockFallback() {
  * Provider routing: Reloadly sandbox/production vs mock. Orchestration stays upstream.
  *
  * @param {import('@prisma/client').PaymentCheckout} order
- * @param {{ attemptId?: string, attemptNumber?: number, traceId?: string | null, log?: import('pino').Logger }} [fulfillmentCtx]
+ * @param {{
+ *   attemptId?: string,
+ *   attemptNumber?: number,
+ *   traceId?: string | null,
+ *   log?: import('pino').Logger,
+ *   bullmqAttemptsMade?: number,
+ *   forceProviderInquiryBeforePost?: boolean,
+ *   attemptStartedAt?: Date | string | null,
+ * }} [fulfillmentCtx]
  */
 export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
   if (env.airtimeProvider === 'reloadly') {

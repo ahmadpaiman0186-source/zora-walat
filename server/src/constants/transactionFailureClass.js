@@ -26,6 +26,10 @@ export function classifyTransactionFailure(err, ctx = {}) {
       : '';
   const msg = String(err?.message ?? err ?? '').toLowerCase();
 
+  if (code === 'PROVIDER_CIRCUIT_OPEN' || code === 'PROVIDER_RATE_LIMIT_REGIME') {
+    return TRANSACTION_FAILURE_CLASS.TRANSIENT_PROVIDER;
+  }
+
   if (code === 'P2002') {
     return TRANSACTION_FAILURE_CLASS.PERMANENT_DUPLICATE_BLOCKED;
   }

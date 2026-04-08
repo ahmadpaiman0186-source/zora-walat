@@ -19,6 +19,7 @@ import {
   classifyProviderError,
   safeErrorDiagnostics,
 } from '../domain/fulfillment/classifyProviderError.js';
+import { normalizeFulfillmentProviderResult } from '../domain/fulfillment/providerResultNormalization.js';
 import {
   AUTO_RETRY_ENABLED,
   RETRY_POLICY_VERSION,
@@ -31,11 +32,15 @@ import {
 } from './pushNotifications/userNotificationPipeline.js';
 import { scheduleReferralEvaluationAfterDelivery } from './referral/referralLifecycleService.js';
 import { runWithTrace, getTraceId } from '../lib/requestContext.js';
+import { runWithCorrelation, mergeOrderAttemptIntoCorrelation } from '../lib/correlationContext.js';
+import { randomUUID } from 'node:crypto';
 import { mergeManualRequiredMetadata } from '../lib/manualRequiredMetadata.js';
 import { logFulfillmentIntegrityEvent } from './fulfillmentLikelySuccessService.js';
 import { logManualRequiredAlert } from '../lib/manualRequiredAlerts.js';
 import {
   recordFulfillmentRunStarted,
+  recordFulfillmentManualInterventionPath,
+  recordFulfillmentMoneyPathDurationMs,
 } from '../lib/opsMetrics.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 import { logOpsEvent } from '../lib/opsLog.js';
@@ -63,6 +68,8 @@ import {
 } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
+import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
+import { fulfillmentDbLimit } from '../lib/fulfillmentDbLimiter.js';
 
 function safeJson(obj) {
   try {
@@ -70,6 +77,24 @@ function safeJson(obj) {
   } catch {
     return '{}';
   }
+}
+
+function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
+  if (summary == null) return false;
+  let obj = summary;
+  if (typeof summary === 'string') {
+    try {
+      obj = JSON.parse(summary);
+    } catch {
+      return false;
+    }
+  }
+  if (!obj || typeof obj !== 'object') return false;
+  if (obj.failureCode === 'reloadly_topup_timeout') return true;
+  if (obj.failureCode === 'reloadly_topup_rate_limited') return true;
+  const httpStatus = obj.httpStatus;
+  if (httpStatus === 429 || httpStatus === '429') return true;
+  return false;
 }
 
 /**
@@ -102,14 +127,38 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
  * Claim PAID + QUEUED attempt → PROCESSING + order PAID → PROCESSING, then airtime provider adapter.
  * Safe under concurrency: `updateMany` claim is atomic; duplicate workers get count 0.
  * @param {string} orderId
- * @param {{ traceId?: string | null }} [opts]
+ * @param {{ traceId?: string | null, bullmqAttemptsMade?: number }} [opts]
  */
 export async function processFulfillmentForOrder(orderId, opts = {}) {
-  const traceId = opts.traceId ?? getTraceId();
-  return runWithTrace(traceId, () => processFulfillmentForOrderInner(orderId));
+  const traceId = opts.traceId ?? getTraceId() ?? randomUUID();
+  const requestId = opts.requestId ?? randomUUID();
+  const bullmqAttemptsMade =
+    opts.bullmqAttemptsMade != null && Number.isFinite(Number(opts.bullmqAttemptsMade))
+      ? Number(opts.bullmqAttemptsMade)
+      : 0;
+  return runWithTrace(traceId, () =>
+    runWithCorrelation(
+      {
+        traceId,
+        requestId,
+        orderId: String(orderId),
+        attemptId: null,
+        surface: 'worker',
+      },
+      () =>
+        fulfillmentDbLimit(() =>
+          processFulfillmentForOrderInner(orderId, { bullmqAttemptsMade }),
+        ),
+    ),
+  );
 }
 
-async function processFulfillmentForOrderInner(orderId) {
+async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
+  const bullmqAttemptsMade =
+    innerOpts.bullmqAttemptsMade != null && Number.isFinite(Number(innerOpts.bullmqAttemptsMade))
+      ? Number(innerOpts.bullmqAttemptsMade)
+      : 0;
+  /** Hot path: one pre-read for terminal fast-exit; claim + completion remain authoritative in transactions. */
   const peek = await prisma.paymentCheckout.findUnique({
     where: { id: orderId },
     select: { orderStatus: true },
@@ -240,6 +289,11 @@ async function processFulfillmentForOrderInner(orderId) {
     return;
   }
 
+  mergeOrderAttemptIntoCorrelation({
+    orderId,
+    attemptId: phase1.attemptId,
+  });
+
   logOpsEvent({
     domain: 'fulfillment',
     event: 'fulfillment_attempt_claimed',
@@ -261,17 +315,37 @@ async function processFulfillmentForOrderInner(orderId) {
     return;
   }
 
+  const attemptPeek = await prisma.fulfillmentAttempt.findUnique({
+    where: { id: phase1.attemptId },
+    select: { responseSummary: true, startedAt: true },
+  });
+  const forceProviderInquiryBeforePost =
+    String(env.airtimeProvider ?? '').toLowerCase() === 'reloadly' &&
+    fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(attemptPeek?.responseSummary);
+
   /** Delivery I/O runs outside DB transactions (timeouts / HTTP). */
   let providerResult;
   let providerOutcome = AIRTIME_OUTCOME.FAILURE;
+  const tDelivery = Date.now();
   try {
     providerResult = await executeDelivery(orderRow, {
       attemptId: phase1.attemptId,
       attemptNumber: phase1.attemptNumber,
       traceId: getTraceId(),
+      bullmqAttemptsMade,
+      forceProviderInquiryBeforePost,
+      attemptStartedAt: attemptPeek?.startedAt ?? null,
     });
     providerOutcome = providerResult.outcome;
   } catch (err) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      (err.code === 'PROVIDER_CIRCUIT_OPEN' || err.code === 'PROVIDER_RATE_LIMIT_REGIME')
+    ) {
+      recordFulfillmentMoneyPathDurationMs(Date.now() - tDelivery);
+      throw err;
+    }
     const { errorKind, failureCode } = classifyProviderError(err);
     const failureClass = classifyTransactionFailure(err, { surface: 'provider' });
     const retry = transactionRetryDirective(failureClass, { attempt: 0 });
@@ -299,6 +373,15 @@ async function processFulfillmentForOrderInner(orderId) {
     };
     providerOutcome = AIRTIME_OUTCOME.FAILURE;
   }
+  recordFulfillmentMoneyPathDurationMs(Date.now() - tDelivery);
+
+  providerResult = normalizeFulfillmentProviderResult(providerResult, {
+    orderId,
+  });
+  providerOutcome =
+    providerResult.outcome != null && providerResult.outcome !== ''
+      ? providerResult.outcome
+      : AIRTIME_OUTCOME.FAILURE;
 
   try {
     const marginTelemetry = await prisma.$transaction(async (tx) => {
@@ -458,6 +541,46 @@ async function processFulfillmentForOrderInner(orderId) {
           },
           ip: null,
         });
+        recordFulfillmentManualInterventionPath('provider_truth_uncertain');
+        return null;
+      }
+
+      if (providerResult.outcome === AIRTIME_OUTCOME.UNAVAILABLE) {
+        const resObj =
+          providerResult.responseSummary && typeof providerResult.responseSummary === 'object'
+            ? { ...providerResult.responseSummary }
+            : {};
+        resObj.normalizedOutcome = 'provider_unavailable';
+        await tx.fulfillmentAttempt.update({
+          where: { id: att.id },
+          data: {
+            status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+            provider: providerResult.providerKey ?? att.provider,
+            providerReference: providerResult.providerReference ?? null,
+            requestSummary: reqStr,
+            responseSummary: safeJson(resObj),
+          },
+        });
+        const newMeta = mergeManualRequiredMetadata(order.metadata, {
+          reason: 'provider_unavailable',
+          traceId: getTraceId(),
+          classification: 'provider_not_ready_or_misconfigured',
+          failureCode: providerResult.failureCode ?? null,
+        });
+        await tx.paymentCheckout.updateMany({
+          where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+          data: { metadata: newMeta },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_provider_unavailable',
+          payload: {
+            orderId,
+            attemptId: att.id,
+            failureCode: providerResult.failureCode ?? null,
+          },
+          ip: null,
+        });
+        recordFulfillmentManualInterventionPath('provider_unavailable');
         return null;
       }
 
@@ -516,49 +639,89 @@ async function processFulfillmentForOrderInner(orderId) {
           });
           return null;
         }
+
+        await tx.fulfillmentAttempt.update({
+          where: { id: att.id },
+          data: {
+            status: FULFILLMENT_ATTEMPT_STATUS.FAILED,
+            provider: providerResult.providerKey ?? att.provider,
+            providerReference: providerResult.providerReference ?? null,
+            requestSummary: reqStr,
+            responseSummary: resStr,
+            failureReason:
+              providerResult.failureCode ??
+              providerResult.errorKind ??
+              'airtime_provider_failure',
+            failedAt: new Date(),
+          },
+        });
+        await tx.paymentCheckout.updateMany({
+          where: {
+            id: orderId,
+            orderStatus: ORDER_STATUS.PROCESSING,
+          },
+          data: {
+            orderStatus: ORDER_STATUS.FAILED,
+            status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+            failedAt: new Date(),
+            failureReason:
+              providerResult.failureCode ?? 'airtime_provider_failure',
+          },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_failed',
+          payload: {
+            orderId,
+            attemptId: att.id,
+            errorKind: providerResult.errorKind ?? null,
+            retryPolicyVersion: RETRY_POLICY_VERSION,
+            retryable: isRetryableFulfillmentFailure(providerResult),
+            autoRetryEnabled: AUTO_RETRY_ENABLED,
+          },
+          ip: null,
+        });
+        return null;
       }
 
-      await tx.fulfillmentAttempt.update({
-        where: { id: att.id },
-        data: {
-          status: FULFILLMENT_ATTEMPT_STATUS.FAILED,
-          provider: providerResult.providerKey ?? att.provider,
-          providerReference: providerResult.providerReference ?? null,
-          requestSummary: reqStr,
-          responseSummary: resStr,
-          failureReason:
-            providerResult.failureCode ??
-            providerResult.errorKind ??
-            'airtime_provider_failure',
-          failedAt: new Date(),
-        },
-      });
-      await tx.paymentCheckout.updateMany({
-        where: {
-          id: orderId,
-          orderStatus: ORDER_STATUS.PROCESSING,
-        },
-        data: {
-          orderStatus: ORDER_STATUS.FAILED,
-          status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
-          failedAt: new Date(),
-          failureReason:
-            providerResult.failureCode ?? 'airtime_provider_failure',
-        },
-      });
-      await writeOrderAudit(tx, {
-        event: 'delivery_failed',
-        payload: {
-          orderId,
-          attemptId: att.id,
-          errorKind: providerResult.errorKind ?? null,
-          retryPolicyVersion: RETRY_POLICY_VERSION,
-          retryable: isRetryableFulfillmentFailure(providerResult),
-          autoRetryEnabled: AUTO_RETRY_ENABLED,
-        },
-        ip: null,
-      });
-      return null;
+      {
+        const resObj =
+          providerResult.responseSummary && typeof providerResult.responseSummary === 'object'
+            ? { ...providerResult.responseSummary }
+            : {};
+        resObj.normalizedOutcome = 'unknown_provider_outcome';
+        resObj.rawOutcome =
+          providerResult.outcome != null ? String(providerResult.outcome) : null;
+        await tx.fulfillmentAttempt.update({
+          where: { id: att.id },
+          data: {
+            status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+            provider: providerResult.providerKey ?? att.provider,
+            providerReference: providerResult.providerReference ?? null,
+            requestSummary: reqStr,
+            responseSummary: safeJson(resObj),
+          },
+        });
+        const newMeta = mergeManualRequiredMetadata(order.metadata, {
+          reason: 'unknown_provider_outcome',
+          traceId: getTraceId(),
+          classification: 'provider_response_shape_unexpected',
+        });
+        await tx.paymentCheckout.updateMany({
+          where: { id: orderId, orderStatus: ORDER_STATUS.PROCESSING },
+          data: { metadata: newMeta },
+        });
+        await writeOrderAudit(tx, {
+          event: 'delivery_unknown_outcome',
+          payload: {
+            orderId,
+            attemptId: att.id,
+            outcome: providerResult.outcome ?? null,
+          },
+          ip: null,
+        });
+        recordFulfillmentManualInterventionPath('unknown_provider_outcome');
+        return null;
+      }
     });
 
     if (marginTelemetry) {
@@ -753,6 +916,10 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
   for (const r of rows) {
     if (seen.has(r.orderId)) continue;
     seen.add(r.orderId);
+    if (env.fulfillmentQueueEnabled) {
+      const enq = await enqueuePhase1FulfillmentJob(r.orderId, null);
+      if (enq.ok) continue;
+    }
     await processFulfillmentForOrder(r.orderId);
   }
 }
@@ -789,6 +956,22 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
           denial: gate.denial,
         });
         return;
+      }
+      if (env.fulfillmentQueueEnabled) {
+        const enq = await enqueuePhase1FulfillmentJob(orderId, traceId);
+        if (enq.ok) {
+          emitPhase1OperationalEvent('fulfillment_enqueued', {
+            traceId: traceId ?? null,
+            orderIdSuffix: String(orderId).slice(-12),
+            queueJobId: enq.jobId,
+          });
+          return;
+        }
+        emitPhase1OperationalEvent('fulfillment_enqueue_failed_inline_fallback', {
+          traceId: traceId ?? null,
+          orderIdSuffix: String(orderId).slice(-12),
+          reason: enq.reason,
+        });
       }
       await processFulfillmentForOrder(orderId, { traceId });
     })().catch((err) => {

@@ -6,6 +6,7 @@ import {
   safeSuffix,
   webTopupLog,
 } from '../../lib/webTopupObservability.js';
+import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
 
 const TW_ORD = /^tw_ord_[0-9a-f-]{36}$/i;
 
@@ -77,6 +78,9 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       },
       data: { completedByStripeEventId: event.id },
     });
+    if (attachPaid.count === 0) {
+      recordMoneyPathOpsSignal('webtop_pi_paid_webhook_row_replay');
+    }
     webTopupLog(log, 'info', 'payment_succeeded', {
       applied: attachPaid.count >= 1,
       idempotent: attachPaid.count === 0,
@@ -191,6 +195,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
   });
 
   if (attachEventOnly.count >= 1) {
+    recordMoneyPathOpsSignal('webtop_pi_paid_webhook_event_attach_replay');
     webTopupLog(log, 'info', 'payment_succeeded', {
       applied: true,
       idempotent: true,

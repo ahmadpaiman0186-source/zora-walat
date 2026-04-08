@@ -30,6 +30,7 @@ export async function fulfillMockAirtime(order, meta = {}) {
     requestSummary,
     responseSummary: {
       mock: true,
+      outcome: AIRTIME_OUTCOME.SUCCESS,
       fulfilledAt: new Date().toISOString(),
     },
   };

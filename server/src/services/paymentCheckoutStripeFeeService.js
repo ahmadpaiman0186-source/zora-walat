@@ -3,6 +3,7 @@ import { getStripeClient } from './stripe.js';
 import { recomputeFinancialTruthForPaymentCheckout } from './financialTruthService.js';
 import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
+import { recordMoneyPathOpsSignal } from '../lib/opsMetrics.js';
 
 const MAX_ATTEMPTS = 6;
 const RETRY_DELAYS_MS = [0, 500, 2000, 5000, 15000, 45000];
@@ -142,6 +143,7 @@ export async function recordPaymentCheckoutStripeFee(
   }
 
   if (row.stripeFeeActualUsdCents != null) {
+    recordMoneyPathOpsSignal('phase1_stripe_fee_capture_idempotent_skip');
     return 'skip';
   }
 

@@ -21,6 +21,8 @@ import {
 } from '../lib/phase1MarginReconciliation.js';
 import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
 import { detectPhase1LifecycleIncoherence } from '../domain/orders/phase1LifecyclePolicy.js';
+import { buildPhase1ReconciliationHints } from '../lib/phase1ReconciliationHints.js';
+import { deriveCustomerFulfillmentView } from '../lib/customerVisibleOrderStatus.js';
 
 /**
  * Canonical Phase 1 (MOBILE_TOPUP) order read model for support / ops / finance.
@@ -173,6 +175,12 @@ export function toCanonicalPhase1OrderDto(checkout, latestAttempt, options = {})
 
   const lifecycleCoherenceViolations = detectPhase1LifecycleIncoherence(checkout);
 
+  const recentAttempts = Array.isArray(options.recentAttempts)
+    ? options.recentAttempts
+    : latestAttempt
+      ? [latestAttempt]
+      : [];
+
   return {
     schemaVersion: 1,
     checkoutId: checkout.id,
@@ -192,6 +200,13 @@ export function toCanonicalPhase1OrderDto(checkout, latestAttempt, options = {})
     checkoutChargeUsd,
     paymentStatus: checkout.status ?? PAYMENT_CHECKOUT_STATUS.INITIATED,
     lifecycleStatus: checkout.orderStatus ?? ORDER_STATUS.PENDING,
+    /**
+     * Customer-safe status bucket (no raw failure strings). Apps should prefer this over `lifecycleStatus` for UX.
+     * Internal diagnostic fields remain in `lifecycleSummary`, `failureReason`, `stuckSignals`, etc.
+     */
+    customerVisibleFulfillment: deriveCustomerFulfillmentView(checkout, latestAttempt),
+    /** Lightweight recon triage (durable questions + evidence ids); not a full reconciliation report. */
+    reconciliationHints: buildPhase1ReconciliationHints(checkout, recentAttempts),
     fulfillmentStatus,
     latestAttemptNumber,
     fulfillmentAttemptCount: attemptCount,
@@ -354,13 +369,15 @@ export async function getCanonicalPhase1OrderForStaff(checkoutId, options = {}) 
       _count: { select: { fulfillmentAttempts: true } },
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'desc' },
-        take: 1,
+        take: 25,
         select: {
+          id: true,
           status: true,
           provider: true,
           providerReference: true,
           attemptNumber: true,
           startedAt: true,
+          failureReason: true,
         },
       },
     },
@@ -370,9 +387,12 @@ export async function getCanonicalPhase1OrderForStaff(checkoutId, options = {}) 
   const attempts = row.fulfillmentAttempts;
   const latest = Array.isArray(attempts) && attempts.length > 0 ? attempts[0] : null;
 
-  const { fulfillmentAttempts: _a, _count, userId, ...checkout } = row;
+  const { fulfillmentAttempts: recentAttempts, _count, userId, ...checkout } = row;
   const attemptCount = _count?.fulfillmentAttempts ?? 0;
 
-  const dto = toCanonicalPhase1OrderDto(checkout, latest, { attemptCount });
+  const dto = toCanonicalPhase1OrderDto(checkout, latest, {
+    attemptCount,
+    recentAttempts: Array.isArray(recentAttempts) ? recentAttempts : [],
+  });
   return { ...dto, userId: userId ?? null };
 }

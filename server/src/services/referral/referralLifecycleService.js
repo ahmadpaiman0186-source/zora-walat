@@ -24,6 +24,8 @@ import {
   loyaltyLedgerReferralBonusRowId,
   loyaltyLedgerReferralBonusSourceId,
 } from '../../constants/loyaltyLedger.js';
+import { DEFAULT_WALLET_USD_CENTS } from '../../constants/walletConstants.js';
+import { USER_WALLET_LEDGER_REASON_REFERRAL_INVITER_PROMOTIONAL } from '../../constants/walletLedgerReasons.js';
 
 /** Monday 00:00 UTC */
 function startOfUtcWeek(d = new Date()) {
@@ -549,12 +551,11 @@ export async function processReferralForDeliveredOrder(orderId, opts = {}) {
       return { ok: true, reason: 'noop_terminal' };
     }
 
-    const DEFAULT_MAIN_CENTS = 10000;
     await tx.userWallet.upsert({
       where: { userId: referral.inviterUserId },
       create: {
         userId: referral.inviterUserId,
-        balanceUsdCents: DEFAULT_MAIN_CENTS,
+        balanceUsdCents: DEFAULT_WALLET_USD_CENTS,
         promotionalBalanceUsdCents: 0,
         currency: 'USD',
       },
@@ -565,6 +566,30 @@ export async function processReferralForDeliveredOrder(orderId, opts = {}) {
       where: { userId: referral.inviterUserId },
       data: {
         promotionalBalanceUsdCents: { increment: reward },
+      },
+    });
+
+    const walletAfter = await tx.userWallet.findUnique({
+      where: { userId: referral.inviterUserId },
+    });
+    await tx.userWalletLedgerEntry.create({
+      data: {
+        referenceId: randomUUID(),
+        userId: referral.inviterUserId,
+        direction: 'CREDIT',
+        reason: USER_WALLET_LEDGER_REASON_REFERRAL_INVITER_PROMOTIONAL,
+        amountUsdCents: reward,
+        currency: 'USD',
+        balanceAfterUsdCents: walletAfter?.balanceUsdCents ?? DEFAULT_WALLET_USD_CENTS,
+        idempotencyKey: `referral-reward:${referral.id}`,
+        metadataJson: JSON.stringify({
+          v: 1,
+          bucket: 'promotional',
+          referralId: referral.id,
+          orderId: order.id,
+          promotionalBalanceAfterUsdCents:
+            walletAfter?.promotionalBalanceUsdCents ?? reward,
+        }),
       },
     });
 

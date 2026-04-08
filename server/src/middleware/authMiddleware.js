@@ -5,7 +5,11 @@ import { loadUserForRequest } from '../services/authService.js';
 
 async function requireAuthAsync(req, res, next) {
   try {
-    // TEMP TEST MODE - remove before production (non-production only; see env.js)
+    /**
+     * TEMP — non-production only. Env-gated dev header bypass for routes using `requireAuth`
+     * (e.g. `/api/wallet/*`, `/auth/me`, checkout): same secret as Flutter `X-ZW-Dev-Checkout`.
+     * See `docs/WALLET_TOPUP_LOCAL_VERIFY.md`.
+     */
     if (
       env.nodeEnv !== 'production' &&
       env.devCheckoutAuthBypass &&

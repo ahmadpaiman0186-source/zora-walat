@@ -91,4 +91,20 @@ describe('classifyTransactionFailure', () => {
       TRANSACTION_FAILURE_CLASS.PERMANENT_DUPLICATE_BLOCKED,
     );
   });
+
+  it('maps PROVIDER_CIRCUIT_OPEN to transient provider', () => {
+    const e = { code: 'PROVIDER_CIRCUIT_OPEN', message: 'backoff' };
+    assert.equal(
+      classifyTransactionFailure(e, {}),
+      TRANSACTION_FAILURE_CLASS.TRANSIENT_PROVIDER,
+    );
+  });
+
+  it('maps PROVIDER_RATE_LIMIT_REGIME to transient provider', () => {
+    const e = { code: 'PROVIDER_RATE_LIMIT_REGIME', message: 'backoff' };
+    assert.equal(
+      classifyTransactionFailure(e, {}),
+      TRANSACTION_FAILURE_CLASS.TRANSIENT_PROVIDER,
+    );
+  });
 });

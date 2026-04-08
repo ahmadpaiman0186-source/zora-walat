@@ -41,6 +41,8 @@ export function buildSupportCorrelationChecklist(p) {
   return {
     apiOwnerPhase1Truth: `GET /api/orders/${id}/phase1-truth`,
     apiStaffOrderHealth: `GET /api/admin/ops/order-health?id=${encodeURIComponent(id)}`,
+    apiOpsInfraHealth: 'GET /ops/health (db/redis/queue flags)',
+    apiStaffPhase1AggregatedHealth: 'GET /api/admin/ops/phase1-aggregated-health',
     apiStaffSupportFullTrace: `GET /api/admin/support/order/${encodeURIComponent(id)}/full-trace`,
     apiStaffPhase1Report: 'GET /api/admin/ops/phase1-report',
     logSearch: 'Filter logs: phase1Ops JSON and X-Trace-Id from the checkout session',

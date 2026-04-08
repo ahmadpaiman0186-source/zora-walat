@@ -49,6 +49,7 @@ jobs:
         run: |
           if [ "${{ steps.money_path.outcome }}" = "success" ]; then
             echo "## Phase 1 money-path integrity: PASS" >> "$GITHUB_STEP_SUMMARY"
+            echo "Nightly mock fortress also runs via workflow \`nightly-fortress.yml\` (schedule + manual)." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "## Phase 1 money-path integrity: FAIL" >> "$GITHUB_STEP_SUMMARY"
           fi

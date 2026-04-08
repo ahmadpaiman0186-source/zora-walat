@@ -235,7 +235,7 @@ export async function queryPhase1OperationalExceptionReport(opts = {}) {
     marketReadiness,
     hints: {
       investigate:
-        'Use GET /api/admin/ops/order-health?id=<checkoutId>, GET /api/orders/:id/phase1-truth (owner), Stripe Dashboard (session / payment_intent), and logs filtered by X-Trace-Id + phase1Ops JSON.',
+        'Use GET /api/admin/ops/order-health?id=<checkoutId>, GET /api/admin/ops/phase1-aggregated-health (staff DB snapshot), GET /api/orders/:id/phase1-truth (owner), Stripe Dashboard (session / payment_intent), and logs filtered by X-Trace-Id + phase1Ops JSON.',
     },
   };
 }

@@ -39,7 +39,7 @@ export async function getPhase1OpsHealthSnapshot(opts = {}) {
   return {
     generatedAt: new Date().toISOString(),
     ok: true,
-    /** One-line hint for `/api/admin/ops/health` + `?phase1=1` summary consumers. */
+    /** One-line hint for `/api/admin/ops/phase1-aggregated-health` + `?phase1=1` summary consumers. */
     telemetryClassification:
       'phase1.db.* = authoritative PostgreSQL (cluster-wide). phase1.processSinceRestart.* = best-effort per Node process (restart resets; sum in your observability stack for multi-instance).',
     metricsAuthority: {

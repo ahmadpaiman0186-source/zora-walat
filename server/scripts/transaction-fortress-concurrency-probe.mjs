@@ -13,6 +13,13 @@
  *   FORTRESS_PROBE_AIRTIME_PROVIDER — default `mock` after bootstrap (overrides `.env` Reloadly for reproducible probes)
  *   FORTRESS_PROBE_LOYALTY_AUTO_GRANT — default `false` so probes don't require loyalty migrations (`LOYALTY_AUTO_GRANT_ON_DELIVERY`)
  *   FORTRESS_PROBE_MULTI_REGION — when `true`, runs exactly 100 orders: 20 each senderCountry US, EU, CA, AE (Arab), TR (uses seeded `SenderCountry` codes)
+ *
+ * Failure diagnosis: report includes `parameters.resolvedAirtimeProvider` (must be `mock` for
+ * provider-independent concurrency proof) and `distinctOrdersOutcome.failed*Histogram` keys.
+ * Mass `FAILED` with `reloadly_*` reasons indicates real provider outcomes, not queue races.
+ *
+ *   FORTRESS_PROBE_ALLOW_NON_MOCK — set `true` to run queue probe with Reloadly (non-deterministic).
+ *   Default: queue-mode probe expects `mock` so concurrency/lifecycle metrics stay provider-independent.
  */
 import { performance } from 'node:perf_hooks';
 import { randomUUID } from 'node:crypto';
@@ -31,6 +38,15 @@ dotenv.config({
   path: path.join(__probeDir, '..', '.env'),
   quiet: __probeQuiet,
 });
+
+/** Fortress 500+ recert: enqueue + in-process worker (requires REDIS_URL + worker deps). */
+if (
+  String(process.env.FORTRESS_PROBE_USE_FULFILLMENT_QUEUE ?? '')
+    .trim()
+    .toLowerCase() === 'true'
+) {
+  process.env.FULFILLMENT_QUEUE_ENABLED = 'true';
+}
 
 /** Silence fulfillment telemetry (`console.log` / `console.warn`); final report uses `process.stdout.write`. */
 if (__probeQuiet) {
@@ -63,6 +79,9 @@ const { FULFILLMENT_ATTEMPT_STATUS } = await import(
 );
 const { detectPhase1LifecycleIncoherence } = await import(
   '../src/domain/orders/phase1LifecyclePolicy.js'
+);
+const { resolveAirtimeProviderName } = await import(
+  '../src/domain/fulfillment/executeAirtimeFulfillment.js'
 );
 
 const dbUrl = String(
@@ -240,27 +259,105 @@ try {
   /** @type {Map<string, number[]>} */
   const latenciesMsByRegion = new Map();
   let invokeErrors = 0;
+  /** @type {{ ok: boolean, reason?: string, waiting?: number, active?: number, delayed?: number } | null} */
+  let fulfillmentQueueDrain = null;
+  /** @type {number | null} */
+  let fulfillmentWorkerConcurrencySnapshot = null;
+
+  const useFulfillmentQueue =
+    String(process.env.FORTRESS_PROBE_USE_FULFILLMENT_QUEUE ?? '')
+      .trim()
+      .toLowerCase() === 'true' && sameOrderRaces === 0;
+
+  const resolvedAirtimeForGate = resolveAirtimeProviderName();
+  const allowFortressNonMock =
+    String(process.env.FORTRESS_PROBE_ALLOW_NON_MOCK ?? '')
+      .trim()
+      .toLowerCase() === 'true';
+  if (useFulfillmentQueue && resolvedAirtimeForGate !== 'mock' && !allowFortressNonMock) {
+    process.stderr.write(
+      `${JSON.stringify({
+        error: 'fortress_queue_probe_requires_mock_airtime',
+        resolvedAirtimeProvider: resolvedAirtimeForGate,
+        hint: 'Set FORTRESS_PROBE_AIRTIME_PROVIDER=mock for provider-independent proof, or FORTRESS_PROBE_ALLOW_NON_MOCK=true to accept Reloadly outcomes.',
+      })}\n`,
+    );
+    process.exit(1);
+  }
 
   const wall0 = performance.now();
-  await runPool(orderIds, parallelism, async (oid) => {
-    const t0 = performance.now();
-    const regionLabel = orderIdToRegion.get(oid) ?? 'DEFAULT';
-    try {
-      await processFulfillmentForOrder(oid, {});
-    } catch {
-      invokeErrors += 1;
-    } finally {
-      const ms = performance.now() - t0;
-      latenciesMs.push(ms);
+  let wallMs;
+  if (useFulfillmentQueue) {
+    const { startPhase1FulfillmentWorker, stopPhase1FulfillmentWorker } =
+      await import('../src/queues/phase1FulfillmentWorker.js');
+    const { enqueuePhase1FulfillmentJob } = await import(
+      '../src/queues/phase1FulfillmentProducer.js'
+    );
+    const { waitForPhase1FulfillmentQueueDrained } = await import(
+      '../src/queues/phase1FulfillmentQueueDrain.js'
+    );
+    const { env: probeEnv } = await import('../src/config/env.js');
+    const { closePhase1FulfillmentQueue } = await import(
+      '../src/queues/phase1FulfillmentQueue.js'
+    );
+    if (!probeEnv.fulfillmentQueueEnabled) {
+      process.stderr.write(
+        `${JSON.stringify({
+          error:
+            'FORTRESS_PROBE_USE_FULFILLMENT_QUEUE requires FULFILLMENT_QUEUE_ENABLED=true and REDIS_URL',
+        })}\n`,
+      );
+      process.exit(1);
+    }
+    const { resolvePhase1FulfillmentWorkerConcurrency } = await import(
+      '../src/queues/phase1FulfillmentWorkerConcurrency.js'
+    );
+    fulfillmentWorkerConcurrencySnapshot =
+      resolvePhase1FulfillmentWorkerConcurrency();
+    startPhase1FulfillmentWorker();
+    for (const oid of orderIds) {
+      const r = await enqueuePhase1FulfillmentJob(oid, null);
+      if (!r.ok) invokeErrors += 1;
+    }
+    fulfillmentQueueDrain = await waitForPhase1FulfillmentQueueDrained({
+      timeoutMs: Math.min(1_800_000, Math.max(120_000, orderIds.length * 3000)),
+      pollMs: 250,
+    });
+    await stopPhase1FulfillmentWorker();
+    await closePhase1FulfillmentQueue();
+    wallMs = performance.now() - wall0;
+    const approx = wallMs / Math.max(1, orderIds.length);
+    for (const oid of orderIds) {
+      latenciesMs.push(approx);
       if (multiRegion) {
+        const regionLabel = orderIdToRegion.get(oid) ?? 'DEFAULT';
         if (!latenciesMsByRegion.has(regionLabel)) {
           latenciesMsByRegion.set(regionLabel, []);
         }
-        latenciesMsByRegion.get(regionLabel).push(ms);
+        latenciesMsByRegion.get(regionLabel).push(approx);
       }
     }
-  });
-  const wallMs = performance.now() - wall0;
+  } else {
+    await runPool(orderIds, parallelism, async (oid) => {
+      const t0 = performance.now();
+      const regionLabel = orderIdToRegion.get(oid) ?? 'DEFAULT';
+      try {
+        await processFulfillmentForOrder(oid, {});
+      } catch {
+        invokeErrors += 1;
+      } finally {
+        const ms = performance.now() - t0;
+        latenciesMs.push(ms);
+        if (multiRegion) {
+          if (!latenciesMsByRegion.has(regionLabel)) {
+            latenciesMsByRegion.set(regionLabel, []);
+          }
+          latenciesMsByRegion.get(regionLabel).push(ms);
+        }
+      }
+    });
+    wallMs = performance.now() - wall0;
+  }
 
   let sameOrderDupProcessing = 0;
   /** @type {number[]} */
@@ -356,6 +453,40 @@ try {
     }
   }
 
+  /** @type {Record<string, number>} */
+  const failedOrderFailureReasonHistogram = {};
+  /** @type {Record<string, number>} */
+  const failedAttemptFailureReasonHistogram = {};
+  if (failedFinalize > 0) {
+    const fo = await prisma.paymentCheckout.findMany({
+      where: { id: { in: orderIds }, orderStatus: ORDER_STATUS.FAILED },
+      select: { failureReason: true },
+    });
+    for (const r of fo) {
+      const k =
+        r.failureReason != null && String(r.failureReason).trim()
+          ? String(r.failureReason).slice(0, 160)
+          : '(null_or_empty)';
+      failedOrderFailureReasonHistogram[k] =
+        (failedOrderFailureReasonHistogram[k] ?? 0) + 1;
+    }
+    const fa = await prisma.fulfillmentAttempt.findMany({
+      where: {
+        orderId: { in: orderIds },
+        status: FULFILLMENT_ATTEMPT_STATUS.FAILED,
+      },
+      select: { failureReason: true },
+    });
+    for (const r of fa) {
+      const k =
+        r.failureReason != null && String(r.failureReason).trim()
+          ? String(r.failureReason).slice(0, 160)
+          : '(null_or_empty)';
+      failedAttemptFailureReasonHistogram[k] =
+        (failedAttemptFailureReasonHistogram[k] ?? 0) + 1;
+    }
+  }
+
   if (multiRegion) {
     for (const [label, arr] of latenciesMsByRegion) {
       if (perRegionOutcome[label]) {
@@ -435,7 +566,14 @@ try {
       parallelism,
       sameOrderRaces,
       mockProvider: String(process.env.AIRTIME_PROVIDER ?? 'mock'),
+      resolvedAirtimeProvider: resolveAirtimeProviderName(),
+      fortressProbeAirtimeEnv: String(
+        process.env.FORTRESS_PROBE_AIRTIME_PROVIDER ?? '',
+      ),
       loyaltyAutoGrantOnDelivery: String(process.env.LOYALTY_AUTO_GRANT_ON_DELIVERY ?? ''),
+      useFulfillmentQueue,
+      fulfillmentWorkerConcurrency: fulfillmentWorkerConcurrencySnapshot,
+      fulfillmentQueueDrain,
     },
     wallClockMs: wallMs,
     invokeErrors,
@@ -450,6 +588,8 @@ try {
       coherenceViolationCount: lifecycleViolationOrders,
       invalidTransitionProxyCount: lifecycleViolationOrders,
       orderStatusHistogram,
+      failedOrderFailureReasonHistogram,
+      failedAttemptFailureReasonHistogram,
     },
     perRegion: multiRegion ? { outcome: perRegionOutcome } : null,
     loyaltySideEffects: loyaltyOn

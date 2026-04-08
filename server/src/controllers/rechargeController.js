@@ -7,6 +7,9 @@ import { processFulfillmentForOrder } from '../services/fulfillmentProcessingSer
 import { writeOrderAudit } from '../services/orderAuditService.js';
 import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
 import { deriveCustomerTrackingStageForOrder } from '../services/transactionsService.js';
+import { env } from '../config/env.js';
+import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
+import { waitForPaymentCheckoutTerminal } from '../services/fulfillmentClientWait.js';
 
 export async function postQuote(req, res) {
   const recipient = await resolveRecipientFromBody(req.user.id, req.body);
@@ -154,7 +157,36 @@ export async function postExecute(req, res) {
     });
   }
 
-  await processFulfillmentForOrder(orderId, { traceId: req.traceId });
+  if (env.fulfillmentQueueEnabled) {
+    const enq = await enqueuePhase1FulfillmentJob(orderId, req.traceId);
+    if (enq.ok) {
+      const terminal = await waitForPaymentCheckoutTerminal(orderId, {
+        timeoutMs: env.fulfillmentClientExecuteWaitMs,
+      });
+      if (!terminal.ok) {
+        const mid = await prisma.paymentCheckout.findFirst({
+          where: { id: orderId, userId },
+          include: {
+            fulfillmentAttempts: { orderBy: { attemptNumber: 'desc' }, take: 1 },
+          },
+        });
+        return res.status(504).json({
+          error: 'Fulfillment still in progress — poll order status',
+          fulfillmentQueue: true,
+          ...(mid
+            ? {
+                order: publicOrderSlice(mid),
+                fulfillment: fulfillmentFromRow(mid),
+              }
+            : {}),
+        });
+      }
+    } else {
+      await processFulfillmentForOrder(orderId, { traceId: req.traceId });
+    }
+  } else {
+    await processFulfillmentForOrder(orderId, { traceId: req.traceId });
+  }
 
   const fresh = await prisma.paymentCheckout.findFirst({
     where: { id: orderId, userId },

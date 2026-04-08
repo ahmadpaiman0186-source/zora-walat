@@ -82,6 +82,85 @@ export const authenticatedApiLimiter = rateLimit({
 });
 
 /**
+ * POST /api/wallet/topup — **order in `wallet.routes.js`**:
+ * 1) {@link walletTopupPerMinuteLimiter} (1m velocity)
+ * 2) {@link walletTopupLimiter} (15m cap)
+ * 3) `authenticatedApiLimiter` applies to all `/api/wallet/*` earlier on the router.
+ *
+ * Replies include `code: wallet_topup_rate_limited` for typed client handling.
+ */
+function walletTopupRateLimitHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'wallet_topup_rate_limited',
+      path: req.path,
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+      userIdSuffix: req.user?.id?.slice(-8),
+      traceId: req.traceId,
+    },
+    'security',
+  );
+  res.status(options.statusCode).json({
+    code: 'wallet_topup_rate_limited',
+    error: 'Too many wallet top-up requests; try again later.',
+  });
+}
+
+export const walletTopupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: prod ? 40 : 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id;
+    return uid ? `wallet_topup:${ip}:${uid}` : `wallet_topup:${ip}`;
+  },
+  message: { error: 'Too many wallet top-up requests; try again later.' },
+  handler: walletTopupRateLimitHandler,
+});
+
+function walletTopupPerMinuteHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'wallet_topup_per_minute_limited',
+      path: req.path,
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+      userIdSuffix: req.user?.id?.slice(-8),
+      traceId: req.traceId,
+    },
+    'security',
+  );
+  res.status(options.statusCode).json({
+    code: 'wallet_topup_per_minute_limited',
+    error: 'Too many wallet top-ups per minute; try again shortly.',
+  });
+}
+
+/**
+ * Rolling 1-minute cap per user+IP on POST /api/wallet/topup (fraud/velocity).
+ * `WALLET_TOPUP_PER_MINUTE_MAX` overrides (see env.walletTopupPerMinuteMax).
+ */
+export const walletTopupPerMinuteLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: () => env.walletTopupPerMinuteMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const ip = clientIpKey(req);
+    const uid = req.user?.id;
+    return uid ? `wallet_topup_1m:${ip}:${uid}` : `wallet_topup_1m:${ip}`;
+  },
+  message: {
+    code: 'wallet_topup_per_minute_limited',
+    error: 'Too many wallet top-ups per minute; try again shortly.',
+  },
+  handler: walletTopupPerMinuteHandler,
+});
+
+/**
  * Post-payment fulfillment kick (`POST /api/recharge/execute`) — tighter than generic wallet/recharge.
  * Prevents aggressive client polling from hammering DB + worker scheduling.
  */

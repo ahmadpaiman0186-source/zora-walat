@@ -1,5 +1,6 @@
 import { env } from './env.js';
 import { getAirtimeReloadlyDiagnosticsSnapshot } from './airtimeReloadlyStartup.js';
+import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
 
 /**
  * Safe, secret-free view of launch-sensitive subsystems (health checks / startup logs).
@@ -22,5 +23,9 @@ export function getLaunchSubsystemSnapshot() {
       String(process.env.REFERRAL_ENABLED ?? '').trim() !== ''
         ? String(process.env.REFERRAL_ENABLED).trim()
         : null,
+    fulfillmentQueueEnabled: isFulfillmentQueueEnabled(),
+    metricsPrometheusEnabled: env.metricsPrometheusEnabled,
+    metricsRedisAggregation: env.metricsRedisAggregation,
+    instanceId: env.instanceId,
   };
 }

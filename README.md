@@ -31,6 +31,8 @@ Flutter client + Node.js API for mobile recharge (Afghanistan-focused), with Str
 
 Details and env variables: **`server/.env.example`** and **`server/README.md`**.
 
+**Integration tests:** from **`server/`**, `npm run test:integration` needs PostgreSQL with **all Prisma migrations applied** on the effective URL: **`TEST_DATABASE_URL`** (if set in env / `.env`) **replaces `DATABASE_URL`** for those tests — stderr line **`[zw-integration] Effective DB: …`** shows which. Migrate it with **`npm run db:migrate:integration`**. See **`server/README.md`** if wallet tests fail with a missing-table error.
+
 ## Flutter / Dart docs
 
 - [Flutter documentation](https://docs.flutter.dev/)

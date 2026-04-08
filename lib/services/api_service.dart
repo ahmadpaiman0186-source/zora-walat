@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/auth/auth_session.dart';
@@ -63,7 +64,9 @@ class ApiService {
     try {
       final decoded = jsonDecode(res.body);
       if (decoded is Map && decoded['error'] != null) {
-        return '$prefix ${res.statusCode}: ${decoded['error']}';
+        final code = decoded['code'];
+        final extra = code != null ? ' (code: $code)' : '';
+        return '$prefix ${res.statusCode}: ${decoded['error']}$extra';
       }
     } catch (_) {
       /* use raw body below */
@@ -209,8 +212,21 @@ class ApiService {
     return WalletBalance.fromJson(map);
   }
 
+  /// `POST /api/wallet/topup` with fresh UUID v4 per logical top-up attempt.
+  ///
+  /// When the API has `REQUIRE_WALLET_TOPUP_IDEMPOTENCY_KEY=true`, missing/invalid header → 400
+  /// (`code`: `wallet_topup_idempotency_required` | `wallet_topup_idempotency_invalid`). Same key +
+  /// same amount replays safely (`idempotentReplay` in JSON). Same key + different amount → 409
+  /// (`code`: `wallet_topup_idempotency_conflict`). Amount above `WALLET_TOPUP_MAX_USD_CENTS` → 400
+  /// (`code`: `wallet_topup_amount_out_of_range`). Top-up burst limits → 429 (`wallet_topup_rate_limited`,
+  /// `wallet_topup_per_minute_limited`). Rare invariant failure → 500 (`wallet_ledger_invariant_violation`).
   Future<WalletBalance> topup(double amountUsd) async {
-    final res = await _postAuthed('/api/wallet/topup', {'amount': amountUsd});
+    final idem = const Uuid().v4();
+    final res = await postAuthedWithExtraHeaders(
+      '/api/wallet/topup',
+      body: {'amount': amountUsd},
+      extraHeaders: {'Idempotency-Key': idem},
+    );
     if (res.statusCode == 403) {
       throw StateError(
         kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Topup', res),
@@ -220,10 +236,7 @@ class ApiService {
       throw StateError(_httpErrorMessage('Topup', res));
     }
     final map = jsonDecode(res.body) as Map<String, dynamic>;
-    return WalletBalance(
-      balance: (map['balance'] as num).toDouble(),
-      currency: map['currency'] as String? ?? 'USD',
-    );
+    return WalletBalance.fromJson(map);
   }
 
   /// Alias for [topup] — `POST /api/wallet/topup` with `{ amount }`.

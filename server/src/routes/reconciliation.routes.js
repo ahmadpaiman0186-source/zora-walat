@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { runReconciliationScan } from '../services/reconciliationService.js';
+import { runPhase1MoneyFulfillmentReconciliationScan } from '../services/phase1MoneyFulfillmentReconciliationEngine.js';
 import { reconcileWebTopupOrder } from '../services/topupOrder/webTopupReconcileService.js';
 import { isValidTopupOrderId } from '../services/topupOrder/topupOrderService.js';
 
@@ -11,6 +12,27 @@ const router = Router();
 /**
  * Read-only reconciliation report (admin). Does not mutate orders.
  */
+/**
+ * Phase 1 PaymentCheckout ↔ fulfillment divergence (foundation engine; read-only).
+ */
+router.get(
+  '/reconciliation/phase1-fulfillment',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const raw = parseInt(String(req.query.limit ?? '50'), 10);
+    const limit = Number.isFinite(raw) ? Math.min(500, Math.max(1, raw)) : 50;
+    const paidIdle = parseInt(String(req.query.paidIdleMs ?? '120000'), 10);
+    const paidIdleMs = Number.isFinite(paidIdle) ? Math.min(3_600_000, Math.max(10_000, paidIdle)) : 120_000;
+    const report = await runPhase1MoneyFulfillmentReconciliationScan({
+      limit,
+      paidIdleMs,
+    });
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).json(report);
+  }),
+);
+
 router.get(
   '/reconciliation',
   requireAuth,

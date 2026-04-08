@@ -22,7 +22,12 @@ import {
   recordPaymentCheckoutOutcome,
   bumpCounter,
   recordRetry,
+  recordMoneyPathOpsSignal,
 } from '../lib/opsMetrics.js';
+import {
+  isStripeWebhookEventShadowAck,
+  setStripeWebhookEventShadowAck,
+} from '../services/moneyPathRedisRegistry.js';
 import {
   evaluateRollingAlerts,
   emitProviderDegradationAlert,
@@ -79,6 +84,12 @@ router.post('/', async (req, res) => {
     { eventType: event.type, traceId: req.traceId ?? null },
     'stripe webhook',
   );
+
+  if (await isStripeWebhookEventShadowAck(event.id)) {
+    recordMoneyPathOpsSignal('stripe_webhook_shadow_fast_ack');
+    recordRetry('webhook_event_duplicate_redis_shadow');
+    return res.json({ received: true });
+  }
 
   const stripeEventIdSuffix = safeSuffix(event.id, 8);
 
@@ -199,6 +210,13 @@ router.post('/', async (req, res) => {
     });
 
     bumpCounter('webhook_transaction_committed_total');
+    void setStripeWebhookEventShadowAck(event.id).then((r) => {
+      if (r?.ok === true) {
+        recordMoneyPathOpsSignal('stripe_webhook_shadow_set_ok');
+      } else {
+        recordMoneyPathOpsSignal('stripe_webhook_shadow_set_unavailable');
+      }
+    });
     emitPhase1OperationalEvent('webhook_processed', {
       stripeEventType: event.type,
       traceId: req.traceId ?? null,
@@ -211,6 +229,10 @@ router.post('/', async (req, res) => {
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       recordRetry('webhook_event_duplicate');
+      recordMoneyPathOpsSignal('stripe_webhook_db_idempotent_replay');
+      void setStripeWebhookEventShadowAck(event.id).then((r) => {
+        if (r?.ok === true) recordMoneyPathOpsSignal('stripe_webhook_shadow_repaired_after_p2002');
+      });
       emitPhase1OperationalEvent('webhook_duplicate_replay', {
         stripeEventType: event.type,
         traceId: req.traceId ?? null,

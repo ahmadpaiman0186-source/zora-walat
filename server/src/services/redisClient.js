@@ -1,4 +1,8 @@
 import { env } from '../config/env.js';
+import {
+  recordRedisClientConnectFailure,
+  recordRedisCommandFailure,
+} from '../lib/redisDegradeSignals.js';
 
 let client = null;
 let clientPromise = null;
@@ -62,6 +66,7 @@ export async function withRedis(fn) {
     const value = await fn(c);
     return { ok: true, value };
   } catch {
+    recordRedisCommandFailure();
     return { ok: false, error: 'redis_command_failed' };
   }
 }

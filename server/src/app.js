@@ -11,6 +11,7 @@ import { logCorsRejected } from './middleware/securityObservability.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
 import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
+import apiRoutes from './routes/index.js';
 import paymentRoutes from './routes/payment.routes.js';
 import catalogRoutes from './routes/catalog.routes.js';
 import walletRoutes from './routes/wallet.routes.js';
@@ -29,6 +30,7 @@ import opsRoutes from './routes/ops.routes.js';
 import marginRoutes from './routes/margin.routes.js';
 import referralRoutes from './routes/referral.routes.js';
 import supportRoutes from './routes/support.routes.js';
+import fulfillmentDlqRoutes from './routes/fulfillmentDlq.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import {
@@ -75,10 +77,11 @@ export function createApp() {
         'Idempotency-Key',
         'Stripe-Signature',
         'X-Trace-Id',
+        'X-Request-Id',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
       ],
-      exposedHeaders: ['X-Trace-Id'],
+      exposedHeaders: ['X-Trace-Id', 'X-Request-Id'],
     }),
   );
 
@@ -107,6 +110,10 @@ export function createApp() {
 
   app.use(express.json({ limit: '32kb', strict: true }));
 
+  /** Prefix-only liveness (`GET /api/health`); other `/api/*` mounts follow. */
+  app.use('/api', apiRoutes);
+
+  /** Root liveness (`GET /health`), readiness (`GET /ready`), Prometheus (`GET /metrics`). */
   app.use(healthRoutes);
   app.use('/auth', authLimiter, authRoutes);
   app.use(paymentRoutes);
@@ -120,10 +127,13 @@ export function createApp() {
   app.use('/api/referral', apiIpLimiter, referralRoutes);
   app.use('/api/notifications', apiIpLimiter, notificationsRoutes);
   app.use('/api/admin', apiIpLimiter, reconciliationRoutes);
+  app.use('/api/admin', apiIpLimiter, fulfillmentDlqRoutes);
   app.use('/api/admin', apiIpLimiter, webTopupFulfillmentAdminRoutes);
   app.use('/api/admin', apiIpLimiter, adminOrdersRoutes);
   app.use('/api/admin', apiIpLimiter, processingManualRoutes);
-  app.use('/api/admin', apiIpLimiter, opsRoutes);
+  /** Ops/metrics JSON: legacy `/ops` and admin-prefixed `/api/admin/ops` (same router). */
+  app.use('/ops', apiIpLimiter, opsRoutes);
+  app.use('/api/admin/ops', apiIpLimiter, opsRoutes);
   app.use('/api/admin', apiIpLimiter, marginRoutes);
   app.use('/api/admin', apiIpLimiter, supportRoutes);
 

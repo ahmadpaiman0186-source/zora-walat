@@ -7,6 +7,7 @@ import {
   mergeReloadlyOperatorMaps,
   RELOADLY_OPERATOR_ID_DEFAULTS,
 } from './reloadlyOperatorIdDefaults.js';
+import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
 
 function parseList(raw, fallback) {
   const s = String(raw ?? '').trim();
@@ -143,6 +144,29 @@ export const env = {
    */
   prelaunchLockdown: prelaunchLockdownEnv,
 
+  /**
+   * When true: `POST /api/wallet/topup` rejects requests without `Idempotency-Key` (UUID).
+   * Recommended for scale / production; off by default for older clients.
+   */
+  requireWalletTopupIdempotencyKey:
+    process.env.REQUIRE_WALLET_TOPUP_IDEMPOTENCY_KEY === 'true',
+
+  /**
+   * Recon: PROCESSING + Reloadly pre-HTTP arm timestamp older than this → possible crash between arm and commit.
+   * Default 10 minutes.
+   */
+  phase1ReconPreHttpArmedStaleMs: parsePositiveInt(
+    process.env.PHASE1_RECON_PRE_HTTP_ARMED_STALE_MS,
+    600_000,
+  ),
+
+  /** Scale gate: require cluster-wide metrics when Prometheus + fulfillment queue are on. */
+  scaleGateRequireRedisMetricsAggregation:
+    process.env.SCALE_GATE_REQUIRE_REDIS_METRICS_AGGREGATION !== 'false',
+
+  /** Scale gate: disallow mock airtime unless explicitly allowed for gated envs. */
+  scaleGateAllowMockAirtime: process.env.SCALE_GATE_ALLOW_MOCK_AIRTIME === 'true',
+
   /** Stripe fee: percent of charged amount + fixed cents (US cards; tune per account). */
   pricingStripeFeeBps: parseBps(process.env.PRICING_STRIPE_FEE_BPS, 290),
   pricingStripeFixedCents: parseNonNegativeInt(
@@ -222,6 +246,65 @@ export const env = {
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
     30_000,
+  ),
+  /**
+   * When true, skip Reloadly GET /reports/transactions inquiry before a retrying provider POST.
+   * Emergency / tests only — increases duplicate-send risk on timeouts.
+   */
+  reloadlyInquiryBeforeRetryDisabled:
+    process.env.RELOADLY_INQUIRY_BEFORE_RETRY_DISABLED === 'true',
+  /**
+   * When true, do not open the Reloadly sliding-window circuit breaker (default: breaker enabled).
+   */
+  reloadlyCircuitBreakerDisabled:
+    process.env.RELOADLY_CIRCUIT_BREAKER_DISABLED === 'true',
+  /** Sliding window (ms) for Reloadly provider circuit breaker sampling. */
+  fulfillmentProviderCircuitWindowMs: parsePositiveInt(
+    process.env.FULFILLMENT_PROVIDER_CIRCUIT_WINDOW_MS,
+    60_000,
+  ),
+  /** Minimum samples in window before circuit may open. */
+  fulfillmentProviderCircuitMinSamples: parsePositiveInt(
+    process.env.FULFILLMENT_PROVIDER_CIRCUIT_MIN_SAMPLES,
+    12,
+  ),
+  /** Failure ratio in window above which circuit opens (default 0.15 = 15%). */
+  fulfillmentProviderCircuitFailureRatio: (() => {
+    const n = parseFloat(
+      String(process.env.FULFILLMENT_PROVIDER_CIRCUIT_FAILURE_RATIO ?? '0.15').trim(),
+    );
+    if (!Number.isFinite(n) || n <= 0 || n >= 1) return 0.15;
+    return n;
+  })(),
+  /** Max report pages (50 rows each) scanned when matching customIdentifier (unfiltered fallback). */
+  reloadlyTransactionInquiryMaxPages: parsePositiveInt(
+    process.env.RELOADLY_TRANSACTION_INQUIRY_MAX_PAGES,
+    5,
+  ),
+  /** Max Redis LIST entries for distributed Reloadly circuit samples. */
+  reloadlyCircuitRedisListMax: parsePositiveInt(
+    process.env.RELOADLY_CIRCUIT_REDIS_LIST_MAX,
+    300,
+  ),
+  /** Minimum HTTP 429-class samples in window to enter soft rate-limit backoff regime. */
+  reloadlyCircuitRateLimitSoftMin: parsePositiveInt(
+    process.env.RELOADLY_CIRCUIT_RATE_LIMIT_SOFT_MIN,
+    4,
+  ),
+  /** TTL for idempotency registry entries (seconds). */
+  reloadlyIdempotencyRegistryTtlSeconds: parsePositiveInt(
+    process.env.RELOADLY_IDEMPOTENCY_REGISTRY_TTL_SECONDS,
+    604800,
+  ),
+  /** Redis marker TTL when a Reloadly POST may still be in-flight at provider (seconds). */
+  reloadlyTopupInFlightTtlSeconds: parsePositiveInt(
+    process.env.RELOADLY_TOPUP_IN_FLIGHT_TTL_SECONDS,
+    600,
+  ),
+  /** DB `startedAt`/`in-flight` recency window for stalled-verification hold (ms). */
+  reloadlyStalledVerificationRecentMs: parsePositiveInt(
+    process.env.RELOADLY_STALLED_VERIFICATION_RECENT_MS,
+    300_000,
   ),
   /** Redis for production anti-abuse state (checkout/session). Optional; fail-safe fallback. */
   redisUrl: String(process.env.REDIS_URL ?? '').trim(),
@@ -436,7 +519,91 @@ export const env = {
    * Falls back to JWT_ACCESS_SECRET when unset.
    */
   referralPrivacySalt: String(process.env.REFERRAL_PRIVACY_SALT ?? '').trim(),
+
+  /** BullMQ worker concurrency per worker process (bounds parallel heavy fulfillment). */
+  fulfillmentWorkerConcurrency: parsePositiveInt(
+    process.env.FULFILLMENT_WORKER_CONCURRENCY,
+    32,
+  ),
+  fulfillmentJobMaxAttempts: parsePositiveInt(
+    process.env.FULFILLMENT_JOB_MAX_ATTEMPTS,
+    8,
+  ),
+  fulfillmentJobBackoffMs: parsePositiveInt(
+    process.env.FULFILLMENT_JOB_BACKOFF_MS,
+    2000,
+  ),
+  /** Client `postExecute` wait for terminal `orderStatus` when queue mode is on. */
+  fulfillmentClientExecuteWaitMs: parsePositiveInt(
+    process.env.FULFILLMENT_CLIENT_EXECUTE_WAIT_MS,
+    120_000,
+  ),
+
+  /**
+   * When true, `GET /metrics` exposes in-process counters as Prometheus text (see `prometheusTextFormat.js`).
+   * Default off — enable on staging/prod scrapers only.
+   */
+  metricsPrometheusEnabled: process.env.METRICS_PROMETHEUS_ENABLED === 'true',
+
+  /**
+   * When true, counters + histograms also aggregate in Redis (`redisMetricsAggregator.js`) for multi-replica scrape.
+   * Requires REDIS_URL. Recommended in production when `METRICS_PROMETHEUS_ENABLED=true`.
+   */
+  metricsRedisAggregation: process.env.METRICS_REDIS_AGGREGATION === 'true',
+
+  /**
+   * Logical instance id for logs / future metrics (`INSTANCE_ID` or HOSTNAME).
+   */
+  instanceId: String(
+    process.env.INSTANCE_ID || process.env.HOSTNAME || 'single',
+  ).slice(0, 128),
 };
+
+/**
+ * Single top-up credit cap (USD cents). Read at access time so tests can clamp without module reload.
+ * Default 1_000_000 ($10,000). Production should set explicitly (e.g. 50000 = $500).
+ */
+Object.defineProperty(env, 'walletTopupMaxUsdCents', {
+  enumerable: true,
+  configurable: true,
+  get() {
+    const n = parseInt(
+      String(process.env.WALLET_TOPUP_MAX_USD_CENTS ?? '1000000').trim(),
+      10,
+    );
+    if (!Number.isFinite(n) || n < 1) return 1_000_000;
+    return n;
+  },
+});
+
+/**
+ * Max authenticated wallet top-up HTTP requests per rolling minute per user+IP.
+ * Read at access time for integration tests.
+ */
+Object.defineProperty(env, 'walletTopupPerMinuteMax', {
+  enumerable: true,
+  configurable: true,
+  get() {
+    const raw = String(process.env.WALLET_TOPUP_PER_MINUTE_MAX ?? '').trim();
+    if (raw) {
+      const n = parseInt(raw, 10);
+      if (Number.isFinite(n) && n >= 1) return n;
+    }
+    return nodeEnv === 'production' ? 12 : 40;
+  },
+});
+
+/**
+ * When true, post-topup **main balance** vs main-balance ledger reasons mismatch throws
+ * (true today for `balanceUsdCents` writers in this repo; see `walletLedgerReasons.js`).
+ */
+Object.defineProperty(env, 'walletStrictLedgerVerify', {
+  enumerable: true,
+  configurable: true,
+  get() {
+    return process.env.WALLET_STRICT_LEDGER_VERIFY === 'true';
+  },
+});
 
 /**
  * Read at access time so tests / scripts can set `process.env.AIRTIME_PROVIDER` after `dotenv` loads.
@@ -447,6 +614,18 @@ Object.defineProperty(env, 'airtimeProvider', {
   configurable: true,
   get() {
     return String(process.env.AIRTIME_PROVIDER ?? 'mock').trim().toLowerCase();
+  },
+});
+
+/**
+ * Phase 1 `PaymentCheckout` airtime fulfillment via BullMQ (`phase1-fulfillment-v1`).
+ * Requires `FULFILLMENT_QUEUE_ENABLED=true` and `REDIS_URL`.
+ */
+Object.defineProperty(env, 'fulfillmentQueueEnabled', {
+  enumerable: true,
+  configurable: true,
+  get() {
+    return isFulfillmentQueueEnabled();
   },
 });
 

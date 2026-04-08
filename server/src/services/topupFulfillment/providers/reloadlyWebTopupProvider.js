@@ -9,6 +9,12 @@ import {
   RELOADLY_WEBTOPUP_ENABLED_PRODUCT,
 } from '../../../domain/fulfillment/reloadlyWebTopupFulfillment.js';
 import { getReloadlyAccessTokenCached } from '../../reloadlyAuthService.js';
+import {
+  getProviderOutcomeRegistryEntry,
+  setProviderOutcomeRegistryEntry,
+  PROVIDER_OUTCOME_REGISTRY_SCOPE,
+} from '../../providerOutcomeRegistry.js';
+import { recordMoneyPathOpsSignal } from '../../../lib/opsMetrics.js';
 
 /** @typedef {import('./topupProviderTypes.js').TopupFulfillmentRequest} TopupFulfillmentRequest */
 /** @typedef {import('./topupProviderTypes.js').TopupFulfillmentResult} TopupFulfillmentResult */
@@ -57,6 +63,28 @@ export class ReloadlyWebTopupProvider {
       return mapReloadlyWebTopupBuildFailureToFulfillmentResult(built);
     }
 
+    const cid = String(built.body.customIdentifier ?? '').trim();
+    const reg = await getProviderOutcomeRegistryEntry(
+      PROVIDER_OUTCOME_REGISTRY_SCOPE.WEBTOP_RELOADLY,
+      cid,
+    );
+    if (reg?.airtimeOutcome === 'SUCCESS' && reg.providerReference) {
+      recordMoneyPathOpsSignal('webtop_reloadly_registry_hit_success');
+      return {
+        outcome: 'succeeded',
+        providerReference: reg.providerReference,
+      };
+    }
+    if (reg?.airtimeOutcome === 'PENDING_VERIFICATION' && reg.providerReference) {
+      recordMoneyPathOpsSignal('webtop_reloadly_registry_hit_pending');
+      return {
+        outcome: 'pending_verification',
+        providerReference: reg.providerReference,
+        errorCode: 'reloadly_pending_confirmation',
+        errorMessageSafe: 'Reloadly still processing (registry)',
+      };
+    }
+
     const sendResult = await this._sendTopup({
       accessToken: tokenResult.accessToken,
       sandbox: env.reloadlySandbox,
@@ -65,6 +93,22 @@ export class ReloadlyWebTopupProvider {
       baseUrl: env.reloadlyBaseUrl,
     });
 
-    return mapReloadlyTopupSendResultToFulfillmentResult(sendResult);
+    const fr = mapReloadlyTopupSendResultToFulfillmentResult(sendResult);
+
+    if (fr.outcome === 'succeeded' && fr.providerReference) {
+      await setProviderOutcomeRegistryEntry(PROVIDER_OUTCOME_REGISTRY_SCOPE.WEBTOP_RELOADLY, cid, {
+        airtimeOutcome: 'SUCCESS',
+        providerReference: fr.providerReference,
+        source: 'webtop_reloadly_post',
+      });
+    } else if (fr.outcome === 'pending_verification' && fr.providerReference) {
+      await setProviderOutcomeRegistryEntry(PROVIDER_OUTCOME_REGISTRY_SCOPE.WEBTOP_RELOADLY, cid, {
+        airtimeOutcome: 'PENDING_VERIFICATION',
+        providerReference: fr.providerReference,
+        source: 'webtop_reloadly_post_pending',
+      });
+    }
+
+    return fr;
   }
 }

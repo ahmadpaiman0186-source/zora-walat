@@ -2,7 +2,11 @@ import { Router } from 'express';
 import * as wallet from '../controllers/walletController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
-import { authenticatedApiLimiter } from '../middleware/rateLimits.js';
+import {
+  authenticatedApiLimiter,
+  walletTopupLimiter,
+  walletTopupPerMinuteLimiter,
+} from '../middleware/rateLimits.js';
 import { blockMoneyRoutesIfPrelaunch } from '../middleware/prelaunchMoneyBlock.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
@@ -14,6 +18,8 @@ router.use(authenticatedApiLimiter);
 router.get('/balance', asyncHandler(wallet.getBalance));
 router.post(
   '/topup',
+  walletTopupPerMinuteLimiter,
+  walletTopupLimiter,
   requireJsonContentType,
   blockMoneyRoutesIfPrelaunch,
   asyncHandler(wallet.postTopup),

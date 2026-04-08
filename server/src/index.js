@@ -4,6 +4,8 @@ import { env } from './config/env.js';
 import { validateWebTopupFulfillmentProviderConfigOrExit } from './config/webTopupFulfillmentStartup.js';
 import { logProductionReloadlyConsistencyWarnings } from './config/productionReloadlyGuard.js';
 import { assertProductionMoneyPathSafetyOrExit } from './config/productionSafetyGates.js';
+import { logLaunchDisciplineWarnings } from './config/launchConfigGuards.js';
+import { assertCriticalLaunchConfigOrExit } from './config/criticalConfigValidation.js';
 import {
   getAirtimeReloadlyDiagnosticsSnapshot,
   validateAirtimeReloadlyConfigOrExit,
@@ -20,6 +22,7 @@ import { stripeKeyStatusLog } from './services/stripe.js';
 import { processPendingPaidOrders } from './services/fulfillmentProcessingService.js';
 import { runProcessingRecoveryTick } from './services/processingRecoveryService.js';
 import { processWebTopupFulfillmentJobs } from './services/topupFulfillment/webtopFulfillmentJob.js';
+import { startPhase1FulfillmentWorker } from './queues/phase1FulfillmentWorker.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -38,6 +41,8 @@ validateWebTopupFulfillmentProviderConfigOrExit();
 validateAirtimeReloadlyConfigOrExit();
 logProductionReloadlyConsistencyWarnings();
 assertProductionMoneyPathSafetyOrExit();
+assertCriticalLaunchConfigOrExit();
+logLaunchDisciplineWarnings();
 
 const webTopupProviderId = String(env.webTopupFulfillmentProvider ?? 'mock')
   .trim()
@@ -169,6 +174,22 @@ app.listen(env.port, async () => {
     console.log('[pre-launch] PRELAUNCH_LOCKDOWN active — money routes return 503; strict CORS');
   }
   console.log(stripeKeyStatusLog());
+
+  if (env.fulfillmentQueueEnabled) {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.NODE_ENV !== 'test'
+    ) {
+      startPhase1FulfillmentWorker();
+      console.log(
+        '[fulfillment-queue] embedded BullMQ worker started (non-production)',
+      );
+    } else {
+      console.log(
+        '[fulfillment-queue] FULFILLMENT_QUEUE_ENABLED — run `npm run worker:fulfillment` in a separate process (production)',
+      );
+    }
+  }
 
   if (process.env.NODE_ENV !== 'test') {
     try {
