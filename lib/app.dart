@@ -54,7 +54,7 @@ class ZoraWalatApp extends StatefulWidget {
 
 class _ZoraWalatAppState extends State<ZoraWalatApp> {
   /// Single instance so locale changes do not replace [GoRouter] and dispose routes.
-  late final GoRouter _router = createAppRouter();
+  late final GoRouter _router = createAppRouter(authSession: widget.authSession);
   late final NotificationPushCoordinator _push = NotificationPushCoordinator(
     api: widget.apiService,
     hub: widget.notificationHub,

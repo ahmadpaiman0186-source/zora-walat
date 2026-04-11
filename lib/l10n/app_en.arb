@@ -115,7 +115,7 @@
   "telecomHomeSubtitle": "Afghanistan mobile · USD checkout · Secure payments",
   "aboutTitle": "About Zora-Walat",
   "aboutBody": "Pricing is shown in USD. Card payments are processed securely; airtime and data are delivered through your configured carrier integrations.",
-  "aboutDevHint": "Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.",
+  "aboutDevHint": "Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.",
   "tabAirtime": "Airtime",
   "tabDataPackages": "Data packages",
   "tabIntlCalling": "Int'l calling",
@@ -232,6 +232,34 @@
   "authGenericError": "Something went wrong. Please try again.",
   "authFillAllFields": "Enter your email and password.",
   "authInvalidEmail": "Enter a valid email address.",
+  "authEmailRequired": "Enter your email address.",
+  "authOtpEmailIntro": "Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.",
+  "authOtpEmailHelp": "Use the same email address you use for your Zora-Walat account.",
+  "authOtpContinueCta": "Send code",
+  "authOtpCodeTitle": "Enter code",
+  "authOtpCheckEmail": "Check your inbox",
+  "authOtpCodeLabel": "Verification code",
+  "authOtpVerifyCta": "Verify code",
+  "authOtpCodeRequired": "Enter the 6-digit verification code.",
+  "authOtpInvalidOrExpired": "That code is invalid or has expired. Request a new code and try again.",
+  "authOtpTooManyAttempts": "Too many attempts. Please wait a moment before trying again.",
+  "authNetworkRetry": "Network error. Check your connection and try again.",
+  "authOtpRequestSuccess": "If the account is eligible, a verification code has been sent.",
+  "authOtpResendReady": "You can request a new code now.",
+  "authOtpResendCta": "Resend code",
+  "authOtpChangeEmail": "Use a different email",
+  "authOtpCodeHelp": "We sent a 6-digit code to {email}. Enter it below to continue.",
+  "@authOtpCodeHelp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "authOtpResendIn": "You can resend a code in {seconds}s.",
+  "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "landingNavBrand": "Zora-Walat",
   "landingHeroTitle": "Send airtime to Afghanistan in seconds",
   "landingHeroSubtitle": "International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.",

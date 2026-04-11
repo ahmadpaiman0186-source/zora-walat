@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../services/firebase_auth_service.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/language_sheet.dart';
@@ -90,9 +89,6 @@ class MainHomeScreen extends StatelessWidget {
                           );
                     } catch (_) {}
                   }
-                  try {
-                    await FirebaseAuthService().signOut();
-                  } catch (_) {}
                   await auth.clear();
                 } else if (context.mounted) {
                   context.push(AppRoutePaths.signIn);

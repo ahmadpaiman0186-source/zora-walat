@@ -197,6 +197,34 @@
   "authGenericError": "ستونزه رامنځته شوه. بیا هڅه وکړئ.",
   "authFillAllFields": "بریښنالیک او پټنوم ولیکئ.",
   "authInvalidEmail": "اعتباری بریښنالیک ولیکئ.",
+  "authEmailRequired": "خپل بریښنالیک ولیکئ.",
+  "authOtpEmailIntro": "خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.",
+  "authOtpEmailHelp": "هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.",
+  "authOtpContinueCta": "کوډ ولېږه",
+  "authOtpCodeTitle": "کوډ داخل کړئ",
+  "authOtpCheckEmail": "خپل انباکس وګورئ",
+  "authOtpCodeLabel": "د تایید کوډ",
+  "authOtpVerifyCta": "کوډ تایید کړئ",
+  "authOtpCodeRequired": "۶ عددي تاییدي کوډ ولیکئ.",
+  "authOtpInvalidOrExpired": "دا کوډ ناسم دی یا موده یې تېره شوې ده. نوی کوډ وغواړئ او بیا هڅه وکړئ.",
+  "authOtpTooManyAttempts": "ډېرې هڅې شوې دي. مهرباني وکړئ لږ تم شئ او بیا هڅه وکړئ.",
+  "authNetworkRetry": "د شبکې ستونزه. خپله اړیکه وګورئ او بیا هڅه وکړئ.",
+  "authOtpRequestSuccess": "که حساب وړ وي، د تایید کوډ استول شوی دی.",
+  "authOtpResendReady": "اوس کولی شئ نوی کوډ وغواړئ.",
+  "authOtpResendCta": "کوډ بیا ولېږه",
+  "authOtpChangeEmail": "بل بریښنالیک وکاروئ",
+  "authOtpCodeHelp": "{email} ته ۶ عددي کوډ لېږل شوی دی. د دوام لپاره یې لاندې داخل کړئ.",
+  "@authOtpCodeHelp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "authOtpResendIn": "تاسو کولی شئ په {seconds} ثانیو کې کوډ بیا وغواړئ.",
+  "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "landingNavBrand": "زوره‌ولت",
   "landingHeroTitle": "افغانستان ته په ثانیو کې ایئرټایم واستوئ",
   "landingHeroSubtitle": "د افغان شمېرو لپاره نړیوال موبایل ټاپ‌آپ — د هغو کورنیو لپاره چې په چټک او باوري لار اړتیا لري.",
