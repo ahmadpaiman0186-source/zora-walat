@@ -41,6 +41,22 @@ import {
 } from './middleware/rateLimits.js';
 import authRoutes from './routes/auth.routes.js';
 
+/**
+ * First line of defense for operators: proves the request matched `/webhooks/stripe`
+ * (before rate limit and raw-body parsing). If this prints but `stripeWebhook.routes.js`
+ * does not, check rate limiting; if neither prints, the POST is not reaching this process
+ * (wrong URL/port, WSL-vs-Windows loopback, firewall, different API instance).
+ */
+function logStripeWebhookIngress(req, res, next) {
+  const sig = req.headers['stripe-signature'];
+  const hasSig = typeof sig === 'string' && sig.length > 0;
+  const cl = req.headers['content-length'];
+  console.log(
+    `[stripe-webhook] ingress ${req.method} ${req.originalUrl} stripe-signature=${hasSig ? 'present' : 'absent'} content-length=${cl ?? 'unset'}`,
+  );
+  next();
+}
+
 function corsOrigin(origin, callback) {
   if (!origin) return callback(null, true);
   if (isCorsOriginAllowed(origin)) return callback(null, true);
@@ -101,8 +117,13 @@ export function createApp() {
 
   app.use(logCorsRejected);
 
+  /**
+   * Stripe webhooks need the raw body for signature verification — this mount MUST stay
+   * before global express.json(). Handler: ./routes/stripeWebhook.routes.js
+   */
   app.use(
     '/webhooks/stripe',
+    logStripeWebhookIngress,
     stripeWebhookLimiter,
     express.raw({ type: 'application/json', limit: '256kb' }),
     stripeWebhookRouter,
@@ -116,6 +137,7 @@ export function createApp() {
   /** Root liveness (`GET /health`), readiness (`GET /ready`), Prometheus (`GET /metrics`). */
   app.use(healthRoutes);
   app.use('/auth', authLimiter, authRoutes);
+  app.use('/api/auth', authLimiter, authRoutes);
   app.use(paymentRoutes);
   app.use('/api/topup-orders', topupOrderRoutes);
   app.use('/catalog', catalogLimiter, catalogRoutes);
