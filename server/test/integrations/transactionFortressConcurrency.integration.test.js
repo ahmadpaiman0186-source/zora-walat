@@ -1,7 +1,7 @@
 /**
- * Concurrency + idempotency guards (PostgreSQL). Requires TEST_DATABASE_URL.
+ * Concurrency + idempotency guards (PostgreSQL). Requires migrated PostgreSQL.
  * Run with: node --import ./test/integrations/preloadTestDatabaseUrl.mjs --test …
- * so `src/db.js` and this file share the same `DATABASE_URL`.
+ * so `src/db.js` and this file share the same effective `DATABASE_URL`.
  */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -20,7 +20,7 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
 }
 
-const dbUrl = process.env.TEST_DATABASE_URL;
+const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 describe('Transaction fortress concurrency (integration)', { skip: !runIntegration }, () => {
@@ -34,8 +34,7 @@ describe('Transaction fortress concurrency (integration)', { skip: !runIntegrati
   const eventIds = [];
 
   before(async () => {
-    const url = String(process.env.DATABASE_URL ?? process.env.TEST_DATABASE_URL ?? '').trim();
-    prisma = new PrismaClient({ datasourceUrl: url });
+    prisma = new PrismaClient({ datasourceUrl: dbUrl });
     await prisma.$connect();
   });
 

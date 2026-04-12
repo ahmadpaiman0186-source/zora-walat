@@ -1,6 +1,7 @@
 /**
- * Live-like Phase 1 money path (PostgreSQL + services). Requires TEST_DATABASE_URL.
- * CI sets TEST_DATABASE_URL to a migrated DB.
+ * Live-like Phase 1 money path (PostgreSQL + services). Requires migrated PostgreSQL.
+ * Run with `--import ./test/integrations/preloadTestDatabaseUrl.mjs` so `DATABASE_URL` is the effective URL
+ * (`TEST_DATABASE_URL` when set, else `DATABASE_URL` from .env). In CI, `TEST_DATABASE_URL` must be set.
  */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -21,7 +22,8 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for Phase 1 money-path integration tests');
 }
 
-const dbUrl = process.env.TEST_DATABASE_URL;
+/** After preload, `DATABASE_URL` is the effective integration URL. */
+const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 function checkoutSessionFixture(checkoutId, overrides = {}) {

@@ -583,7 +583,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDevHint.
   ///
   /// In en, this message translates to:
-  /// **'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.'**
+  /// **'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.'**
   String get aboutDevHint;
 
   /// No description provided for @tabAirtime.
@@ -1071,6 +1071,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid email address.'**
   String get authInvalidEmail;
+
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address.'**
+  String get authEmailRequired;
+
+  /// No description provided for @authOtpEmailIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.'**
+  String get authOtpEmailIntro;
+
+  /// No description provided for @authOtpEmailHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the same email address you use for your Zora-Walat account.'**
+  String get authOtpEmailHelp;
+
+  /// No description provided for @authOtpContinueCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get authOtpContinueCta;
+
+  /// No description provided for @authOtpCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code'**
+  String get authOtpCodeTitle;
+
+  /// No description provided for @authOtpCheckEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox'**
+  String get authOtpCheckEmail;
+
+  /// No description provided for @authOtpCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get authOtpCodeLabel;
+
+  /// No description provided for @authOtpVerifyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get authOtpVerifyCta;
+
+  /// No description provided for @authOtpCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit verification code.'**
+  String get authOtpCodeRequired;
+
+  /// No description provided for @authOtpInvalidOrExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is invalid or has expired. Request a new code and try again.'**
+  String get authOtpInvalidOrExpired;
+
+  /// No description provided for @authOtpTooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait a moment before trying again.'**
+  String get authOtpTooManyAttempts;
+
+  /// No description provided for @authNetworkRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Check your connection and try again.'**
+  String get authNetworkRetry;
+
+  /// No description provided for @authOtpRequestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'If the account is eligible, a verification code has been sent.'**
+  String get authOtpRequestSuccess;
+
+  /// No description provided for @authOtpResendReady.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request a new code now.'**
+  String get authOtpResendReady;
+
+  /// No description provided for @authOtpResendCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authOtpResendCta;
+
+  /// No description provided for @authOtpChangeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get authOtpChangeEmail;
+
+  /// No description provided for @authOtpCodeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}. Enter it below to continue.'**
+  String authOtpCodeHelp(Object email);
+
+  /// No description provided for @authOtpResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can resend a code in {seconds}s.'**
+  String authOtpResendIn(Object seconds);
 
   /// No description provided for @landingNavBrand.
   ///

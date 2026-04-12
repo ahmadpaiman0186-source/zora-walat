@@ -551,6 +551,70 @@ class AppLocalizationsFa extends AppLocalizations {
   String get authInvalidEmail => 'یک نشانی ایمیل معتبر وارد کنید.';
 
   @override
+  String get authEmailRequired => 'نشانی ایمیل خود را وارد کنید.';
+
+  @override
+  String get authOtpEmailIntro =>
+      'نشانی ایمیل خود را وارد کنید تا در صورت واجد شرایط بودن حساب، یک کد ۶ رقمی ورود برای شما ارسال شود.';
+
+  @override
+  String get authOtpEmailHelp =>
+      'از همان ایمیلی استفاده کنید که برای حساب زوره‌ولت خود دارید.';
+
+  @override
+  String get authOtpContinueCta => 'ارسال کد';
+
+  @override
+  String get authOtpCodeTitle => 'ورود کد';
+
+  @override
+  String get authOtpCheckEmail => 'صندوق ایمیل خود را بررسی کنید';
+
+  @override
+  String get authOtpCodeLabel => 'کد تأیید';
+
+  @override
+  String get authOtpVerifyCta => 'تأیید کد';
+
+  @override
+  String get authOtpCodeRequired => 'کد تأیید ۶ رقمی را وارد کنید.';
+
+  @override
+  String get authOtpInvalidOrExpired =>
+      'این کد نامعتبر است یا منقضی شده. یک کد تازه درخواست کرده و دوباره تلاش کنید.';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'تلاش‌های زیادی انجام شده است. لطفاً کمی صبر کرده و دوباره امتحان کنید.';
+
+  @override
+  String get authNetworkRetry =>
+      'خطای شبکه. اتصال خود را بررسی کرده و دوباره تلاش کنید.';
+
+  @override
+  String get authOtpRequestSuccess =>
+      'اگر حساب واجد شرایط باشد، کد تأیید ارسال شده است.';
+
+  @override
+  String get authOtpResendReady => 'اکنون می‌توانید یک کد تازه درخواست کنید.';
+
+  @override
+  String get authOtpResendCta => 'ارسال دوباره کد';
+
+  @override
+  String get authOtpChangeEmail => 'استفاده از ایمیل دیگر';
+
+  @override
+  String authOtpCodeHelp(Object email) {
+    return 'یک کد ۶ رقمی به $email فرستاده شد. برای ادامه آن را در پایین وارد کنید.';
+  }
+
+  @override
+  String authOtpResendIn(Object seconds) {
+    return 'می‌توانید تا $seconds ثانیه دیگر کد را دوباره بفرستید.';
+  }
+
+  @override
   String get landingNavBrand => 'زوره‌ولت';
 
   @override

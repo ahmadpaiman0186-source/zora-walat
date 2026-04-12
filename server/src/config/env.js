@@ -314,6 +314,12 @@ export const env = {
     2_000,
   ),
   /**
+   * When literal `true` and `REDIS_URL` is set: money-adjacent HTTP rate limiters use Redis
+   * (`rate-limit-redis`) so limits are shared across Node instances. On connection failure,
+   * startup falls back to in-memory limits and logs a warning.
+   */
+  rateLimitUseRedis: process.env.RATE_LIMIT_USE_REDIS === 'true',
+  /**
    * Internal operatorKey → Reloadly numeric operator id (server-only).
    * Defaults: `reloadlyOperatorIdDefaults.js`; overridden by `RELOADLY_OPERATOR_MAP_JSON` per key.
    * @type {Record<string, string>}

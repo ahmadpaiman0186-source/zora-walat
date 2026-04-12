@@ -61,7 +61,7 @@ Future<void> main() async {
   final authApiService = AuthApiService(client: httpClient, baseUrl: apiBase);
   final apiService = ApiService(
     client: httpClient,
-    baseUrl: apiBase,
+    baseUrlOverride: apiBase,
     authSession: authSession,
     authApi: authApiService,
   );

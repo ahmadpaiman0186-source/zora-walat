@@ -23,6 +23,7 @@ import { processPendingPaidOrders } from './services/fulfillmentProcessingServic
 import { runProcessingRecoveryTick } from './services/processingRecoveryService.js';
 import { processWebTopupFulfillmentJobs } from './services/topupFulfillment/webtopFulfillmentJob.js';
 import { startPhase1FulfillmentWorker } from './queues/phase1FulfillmentWorker.js';
+import { logReloadlyEnvQualityWarningsIfDev } from './lib/reloadlyEnvQuality.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -70,6 +71,7 @@ if (process.env.NODE_ENV !== 'test') {
         ? ` reloadly_creds=${isReloadlyConfigured() ? 'present' : 'missing'} sandbox=${env.reloadlySandbox}`
         : ''),
   );
+  logReloadlyEnvQualityWarningsIfDev();
 }
 
 if (env.prelaunchLockdown) {
@@ -145,11 +147,7 @@ if (env.nodeEnv === 'production') {
       '[warn] DATABASE_URL should be postgres:// or postgresql:// (SQLite is no longer supported)',
     );
   }
-  if (!env.stripeWebhookSecret) {
-    console.warn(
-      '[warn] STRIPE_WEBHOOK_SECRET unset — set it to verify checkout.session.completed webhooks',
-    );
-  }
+  // STRIPE_WEBHOOK_SECRET guidance: server/bootstrap.js (non-test) + docs/STRIPE_LOCAL_WEBHOOK_FLOW.md
 }
 
 if (env.nodeEnv === 'production') {
@@ -168,7 +166,18 @@ if (env.nodeEnv === 'production') {
 const app = createApp();
 
 app.listen(env.port, async () => {
+  console.log(
+    `[startup] node pid=${process.pid} — match this to netstat LISTENING PID for port ${env.port}`,
+  );
+  console.log(
+    `[startup] listening on port ${env.port} (all interfaces; use http://127.0.0.1:${env.port})`,
+  );
   console.log(`Server running on http://127.0.0.1:${env.port}`);
+  console.log(`Webhook endpoint: POST http://127.0.0.1:${env.port}/webhooks/stripe`);
+  const wh = String(process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
+  console.log(
+    `[startup] stripe_webhook_secret=${wh ? (wh.startsWith('whsec_') ? `configured (whsec_, len=${wh.length})` : `present but bad_prefix (len=${wh.length})`) : 'MISSING'}`,
+  );
   console.log(`[zora-walat-api] ${env.nodeEnv}`);
   if (env.prelaunchLockdown) {
     console.log('[pre-launch] PRELAUNCH_LOCKDOWN active — money routes return 503; strict CORS');

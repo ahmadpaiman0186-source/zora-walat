@@ -282,7 +282,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDevHint =>
-      'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.';
+      'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.';
 
   @override
   String get tabAirtime => 'Airtime';
@@ -553,6 +553,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authInvalidEmail => 'Enter a valid email address.';
+
+  @override
+  String get authEmailRequired => 'Enter your email address.';
+
+  @override
+  String get authOtpEmailIntro =>
+      'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.';
+
+  @override
+  String get authOtpEmailHelp =>
+      'Use the same email address you use for your Zora-Walat account.';
+
+  @override
+  String get authOtpContinueCta => 'Send code';
+
+  @override
+  String get authOtpCodeTitle => 'Enter code';
+
+  @override
+  String get authOtpCheckEmail => 'Check your inbox';
+
+  @override
+  String get authOtpCodeLabel => 'Verification code';
+
+  @override
+  String get authOtpVerifyCta => 'Verify code';
+
+  @override
+  String get authOtpCodeRequired => 'Enter the 6-digit verification code.';
+
+  @override
+  String get authOtpInvalidOrExpired =>
+      'That code is invalid or has expired. Request a new code and try again.';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'Too many attempts. Please wait a moment before trying again.';
+
+  @override
+  String get authNetworkRetry =>
+      'Network error. Check your connection and try again.';
+
+  @override
+  String get authOtpRequestSuccess =>
+      'If the account is eligible, a verification code has been sent.';
+
+  @override
+  String get authOtpResendReady => 'You can request a new code now.';
+
+  @override
+  String get authOtpResendCta => 'Resend code';
+
+  @override
+  String get authOtpChangeEmail => 'Use a different email';
+
+  @override
+  String authOtpCodeHelp(Object email) {
+    return 'We sent a 6-digit code to $email. Enter it below to continue.';
+  }
+
+  @override
+  String authOtpResendIn(Object seconds) {
+    return 'You can resend a code in ${seconds}s.';
+  }
 
   @override
   String get landingNavBrand => 'Zora-Walat';

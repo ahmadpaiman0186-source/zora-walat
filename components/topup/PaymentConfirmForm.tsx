@@ -41,7 +41,8 @@ export function PaymentConfirmForm({
     await Promise.resolve(onSuccess());
   };
 
-  const disabled = !stripe || submitting;
+  /** Require Elements mounted — otherwise submit is a silent no-op. */
+  const disabled = !stripe || !elements || submitting;
 
   return (
     <form className={styles.stripeForm} onSubmit={handleSubmit}>

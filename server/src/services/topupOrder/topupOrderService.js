@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { FULFILLMENT_STATUS, PAYMENT_STATUS } from '../../domain/topupOrder/statuses.js';
-import { getValidatedStripeSecretKey } from '../../config/stripeEnv.js';
+import { isStripeKeyAllowedForWebTopupCharges } from '../../config/stripeEnv.js';
 import { computeTopupOrderPayloadHash, sanitizeBoundedString } from '../../lib/topupOrderPayload.js';
 import { getStripeClient } from '../stripe.js';
 import { prisma } from '../../db.js';
@@ -214,10 +214,9 @@ export async function markTopupOrderPaidFromStripe(
     throw err;
   }
 
-  const secret = getValidatedStripeSecretKey();
-  if (!secret || !secret.startsWith('sk_test_')) {
-    const err = new Error('stripe_not_test');
-    err.code = 'stripe_not_test';
+  if (!isStripeKeyAllowedForWebTopupCharges()) {
+    const err = new Error('stripe_key_mode');
+    err.code = 'stripe_key_mode';
     throw err;
   }
   const stripe = getStripeClient();

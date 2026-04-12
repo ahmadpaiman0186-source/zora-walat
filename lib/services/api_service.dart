@@ -20,15 +20,15 @@ const String _kBffApiKey = String.fromEnvironment(
 class ApiService {
   ApiService({
     required this.client,
-    String? baseUrl,
+    String? baseUrlOverride,
     AuthSession? authSession,
     AuthApiService? authApi,
   })  : _session = authSession,
         _authApi = authApi,
         baseUrl = _normalizeBase(
-          (baseUrl == null || baseUrl.trim().isEmpty)
+          (baseUrlOverride == null || baseUrlOverride.trim().isEmpty)
               ? AppConfig.apiBaseUrl
-              : baseUrl,
+              : baseUrlOverride,
         );
 
   final http.Client client;
@@ -38,8 +38,16 @@ class ApiService {
 
   static String _normalizeBase(String raw) {
     final t = raw.trim();
-    if (t.isEmpty) return AppConfig.apiBaseUrl;
+    if (t.isEmpty) return '';
     return t.replaceAll(RegExp(r'/+$'), '');
+  }
+
+  void _requireConfiguredBaseUrl() {
+    if (baseUrl.isEmpty) {
+      throw StateError(
+        'API base URL is not configured. Set --dart-define=API_BASE_URL=https://your-api-host.example',
+      );
+    }
   }
 
   Uri _u(String path) => Uri.parse('$baseUrl$path');
@@ -102,6 +110,7 @@ class ApiService {
   }
 
   Future<http.Response> _getAuthed(String path) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var res = await client.get(
       _u(path),
@@ -122,6 +131,7 @@ class ApiService {
   }
 
   Future<http.Response> _postAuthed(String path, Object body) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var res = await client.post(
       _u(path),
@@ -149,6 +159,7 @@ class ApiService {
     required Map<String, dynamic> body,
     Map<String, String> extraHeaders = const {},
   }) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var headers = {
       ..._jsonHeadersBearer(token),
@@ -185,6 +196,7 @@ class ApiService {
     required String devSecret,
     Map<String, String> extraHeaders = const {},
   }) async {
+    _requireConfiguredBaseUrl();
     final headers = {
       'Content-Type': 'application/json',
       'X-ZW-Dev-Checkout': devSecret,

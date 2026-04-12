@@ -15,7 +15,7 @@ class _RecordingApiService extends ApiService {
     required super.client,
     required super.authSession,
     required super.authApi,
-  }) : super(baseUrl: 'http://127.0.0.1:9');
+  }) : super(baseUrlOverride: 'https://stub.test');
 
   Map<String, dynamic>? lastCheckoutBody;
 

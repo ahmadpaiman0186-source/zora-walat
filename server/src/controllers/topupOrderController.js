@@ -206,6 +206,7 @@ export async function postMarkTopupOrderPaid(req, res) {
     }
     if (
       code === 'stripe_not_test' ||
+      code === 'stripe_key_mode' ||
       code === 'stripe_missing' ||
       code === 'invalid_pi' ||
       code === 'pi_currency' ||

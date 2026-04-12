@@ -334,9 +334,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                tracking.stage == CustomerTrackingStage.verifying
-                    ? l10n.trackingBodyVerifying
-                    : l10n.receiptWhatNextBody,
+                _whatNextBody(l10n, tracking),
                 style: t.textTheme.bodyMedium?.copyWith(
                   color: cs.outline,
                   height: 1.45,
@@ -372,6 +370,34 @@ class _SuccessScreenState extends State<SuccessScreen> {
     if (s == null || s.isEmpty) return null;
     if (s.length <= 24) return s;
     return '${s.substring(0, 10)}…${s.substring(s.length - 8)}';
+  }
+
+  /// “What next” must track fulfillment state, not only payment — avoids generic copy while top-up is pending.
+  static String _whatNextBody(
+    AppLocalizations l10n,
+    CustomerOrderTracking tracking,
+  ) {
+    switch (tracking.stage) {
+      case CustomerTrackingStage.verifying:
+        return l10n.trackingBodyVerifying;
+      case CustomerTrackingStage.retrying:
+        return l10n.trackingBodyRetrying;
+      case CustomerTrackingStage.paymentReceived:
+        return l10n.trackingBodyPaymentReceived;
+      case CustomerTrackingStage.delayed:
+        return l10n.trackingBodyCatchingUp;
+      case CustomerTrackingStage.failed:
+        return l10n.trackingBodyFailedCalm;
+      case CustomerTrackingStage.orderCancelled:
+        return l10n.trackingBodyCancelled;
+      case CustomerTrackingStage.preparingTopup:
+      case CustomerTrackingStage.sendingToOperator:
+        return l10n.receiptWhatNextBody;
+      case CustomerTrackingStage.delivered:
+        return l10n.trackingBodyDelivered;
+      case CustomerTrackingStage.paymentConfirming:
+        return l10n.trackingBodyPaymentConfirming;
+    }
   }
 }
 

@@ -28,6 +28,11 @@ class PaymentService {
     String? recipientPhone,
     String? packageId,
   }) async {
+    if (api.baseUrl.isEmpty) {
+      throw StateError(
+        'API base URL is not configured. Set --dart-define=API_BASE_URL=https://your-api-host.example',
+      );
+    }
     final idempotencyKey = const Uuid().v4();
 
     final body = <String, dynamic>{

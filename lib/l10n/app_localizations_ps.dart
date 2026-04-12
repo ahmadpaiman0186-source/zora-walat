@@ -546,6 +546,70 @@ class AppLocalizationsPs extends AppLocalizations {
   String get authInvalidEmail => 'اعتباری بریښنالیک ولیکئ.';
 
   @override
+  String get authEmailRequired => 'خپل بریښنالیک ولیکئ.';
+
+  @override
+  String get authOtpEmailIntro =>
+      'خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.';
+
+  @override
+  String get authOtpEmailHelp =>
+      'هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.';
+
+  @override
+  String get authOtpContinueCta => 'کوډ ولېږه';
+
+  @override
+  String get authOtpCodeTitle => 'کوډ داخل کړئ';
+
+  @override
+  String get authOtpCheckEmail => 'خپل انباکس وګورئ';
+
+  @override
+  String get authOtpCodeLabel => 'د تایید کوډ';
+
+  @override
+  String get authOtpVerifyCta => 'کوډ تایید کړئ';
+
+  @override
+  String get authOtpCodeRequired => '۶ عددي تاییدي کوډ ولیکئ.';
+
+  @override
+  String get authOtpInvalidOrExpired =>
+      'دا کوډ ناسم دی یا موده یې تېره شوې ده. نوی کوډ وغواړئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'ډېرې هڅې شوې دي. مهرباني وکړئ لږ تم شئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authNetworkRetry =>
+      'د شبکې ستونزه. خپله اړیکه وګورئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authOtpRequestSuccess =>
+      'که حساب وړ وي، د تایید کوډ استول شوی دی.';
+
+  @override
+  String get authOtpResendReady => 'اوس کولی شئ نوی کوډ وغواړئ.';
+
+  @override
+  String get authOtpResendCta => 'کوډ بیا ولېږه';
+
+  @override
+  String get authOtpChangeEmail => 'بل بریښنالیک وکاروئ';
+
+  @override
+  String authOtpCodeHelp(Object email) {
+    return '$email ته ۶ عددي کوډ لېږل شوی دی. د دوام لپاره یې لاندې داخل کړئ.';
+  }
+
+  @override
+  String authOtpResendIn(Object seconds) {
+    return 'تاسو کولی شئ په $seconds ثانیو کې کوډ بیا وغواړئ.';
+  }
+
+  @override
   String get landingNavBrand => 'زوره‌ولت';
 
   @override

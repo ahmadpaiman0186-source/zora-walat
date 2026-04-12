@@ -2,7 +2,10 @@ import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 
 import { getStripeClient } from '../services/stripe.js';
-import { getValidatedStripeSecretKey } from '../config/stripeEnv.js';
+import {
+  getValidatedStripeSecretKey,
+  isStripeKeyAllowedForWebTopupCharges,
+} from '../config/stripeEnv.js';
 import { env } from '../config/env.js';
 import {
   checkoutSessionBodySchema,
@@ -413,15 +416,23 @@ export async function createCheckoutSession(req, res) {
 }
 
 /**
- * POST /create-payment-intent — test/dev helper for embedded Payment Element flows.
- * Requires a standard Stripe **test** secret key (sk_test_…). Live keys are rejected.
+ * POST /create-payment-intent — embedded Payment Element (Next.js marketing checkout).
+ * Test keys work in any NODE_ENV; live keys only when NODE_ENV=production.
  */
 export async function createTestPaymentIntent(req, res) {
-  const secret = getValidatedStripeSecretKey();
-  if (!secret || !secret.startsWith('sk_test_')) {
+  if (!getValidatedStripeSecretKey()) {
+    return res.status(503).json({
+      error:
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
+    });
+  }
+  if (!isStripeKeyAllowedForWebTopupCharges()) {
+    const mode = process.env.NODE_ENV || 'development';
     return res.status(403).json({
       error:
-        'Test PaymentIntent is available only with a Stripe test secret key (sk_test_…).',
+        mode === 'production'
+          ? 'Stripe key mode is not valid for embedded checkout in this deployment.'
+          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for embedded checkout.',
     });
   }
 

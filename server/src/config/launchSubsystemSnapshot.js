@@ -1,12 +1,14 @@
 import { env } from './env.js';
 import { getAirtimeReloadlyDiagnosticsSnapshot } from './airtimeReloadlyStartup.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
+import { getHttpRateLimitSnapshot } from '../lib/rateLimitRedisInit.js';
 
 /**
  * Safe, secret-free view of launch-sensitive subsystems (health checks / startup logs).
  */
 export function getLaunchSubsystemSnapshot() {
   return {
+    httpRateLimit: getHttpRateLimitSnapshot(),
     prelaunchLockdown: env.prelaunchLockdown,
     nodeEnv: env.nodeEnv,
     airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),

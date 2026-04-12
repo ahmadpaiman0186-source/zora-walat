@@ -1,19 +1,21 @@
 /// **Flutter → Node API:** base URL for all REST calls (`ApiService`, `AuthApiService`, etc.).
 ///
-/// **Source of truth** for the backend origin:
-/// - Default: `http://127.0.0.1:8787` (matches server `PORT` default).
-/// - Override at build/run: `--dart-define=API_BASE_URL=https://your-api.example`
+/// **Source of truth:** compile-time `API_BASE_URL` (matches Next.js `NEXT_PUBLIC_API_URL` intent).
+/// - Production / CI: `--dart-define=API_BASE_URL=https://api.yourdomain.com` (must be a **public**
+///   API host — not behind Vercel deployment SSO).
+/// - Local: `--dart-define=API_BASE_URL=http://127.0.0.1:8787`
 ///
-/// Do not scatter other base URLs; import [AppConfig] or pass the same string from [main].
+/// Default is empty so release builds do not silently call a stale or protected hostname.
 abstract final class AppConfig {
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:8787',
+    defaultValue: '',
   );
 
   /// Debug-only full URL string; HTTP calls use [ApiService] paths relative to [apiBaseUrl].
   static String get createCheckoutSessionUrl {
     final base = apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+    if (base.isEmpty) return '';
     return '$base/create-checkout-session';
   }
 }

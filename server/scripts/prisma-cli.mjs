@@ -10,6 +10,8 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const serverRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+/** Avoid Stripe webhook operator noise during schema-only tooling (`npm run db:validate`, etc.). */
+process.env.ZW_PRISMA_CLI = '1';
 await import(pathToFileURL(path.join(serverRoot, 'bootstrap.js')).href);
 
 const prismaCli = path.join(serverRoot, 'node_modules', 'prisma', 'build', 'index.js');

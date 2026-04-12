@@ -1,3 +1,5 @@
+# Server job: postgres + redis services + integration migrate + test:ci.
+# Local parity: server/docs/CI_VERIFICATION.md and npm run verify:ci-local
 name: CI
 
 on:
@@ -22,12 +24,23 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     defaults:
       run:
         working-directory: server
     env:
+      CI: "true"
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
+      REDIS_URL: redis://localhost:6379/0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,10 +49,13 @@ jobs:
           cache: npm
           cache-dependency-path: server/package-lock.json
       - run: npm ci
-      - name: Phase 1 money-path certification (migrate + unit + integration)
+      - name: Integration preflight + migrate (effective TEST_DATABASE_URL)
+        run: |
+          npm run test:integration:preflight
+          npm run db:migrate:integration
+      - name: Phase 1 money-path certification (unit + integration)
         id: money_path
         run: |
-          npm run db:migrate
           npm run test:ci
           echo "PHASE1_CI_MONEY_PATH_CERTIFIED=1" >> "$GITHUB_ENV"
       - name: Launch readiness (post-certification)
@@ -49,6 +65,7 @@ jobs:
         run: |
           if [ "${{ steps.money_path.outcome }}" = "success" ]; then
             echo "## Phase 1 money-path integrity: PASS" >> "$GITHUB_STEP_SUMMARY"
+            echo "Preflight: \`npm run test:integration:preflight\` | Migrate: \`npm run db:migrate:integration\` | Tests: \`npm run test:ci\`" >> "$GITHUB_STEP_SUMMARY"
             echo "Nightly mock fortress also runs via workflow \`nightly-fortress.yml\` (schedule + manual)." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "## Phase 1 money-path integrity: FAIL" >> "$GITHUB_STEP_SUMMARY"

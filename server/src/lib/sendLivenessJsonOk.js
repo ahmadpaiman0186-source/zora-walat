@@ -1,6 +1,6 @@
 /**
- * Shared liveness response for `GET /health` and `GET /api/health`.
- * Same JSON contract everywhere; no I/O (safe for LB health checks).
+ * Shared liveness response for public `GET /health` and `GET /api/health`.
+ * Same JSON contract on both paths; no I/O (safe for LB health checks).
  * @param {import('express').Response} res
  */
 export function sendLivenessJsonOk(res) {

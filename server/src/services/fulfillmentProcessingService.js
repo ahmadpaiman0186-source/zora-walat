@@ -185,6 +185,19 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
   }
 
   recordFulfillmentRunStarted();
+  if (process.env.NODE_ENV !== 'test') {
+    const tid = getTraceId();
+    console.log(
+      JSON.stringify({
+        fulfillmentOrchestration: true,
+        t: new Date().toISOString(),
+        event: 'fulfillment_claim_attempt',
+        orderIdSuffix: String(orderId).slice(-12),
+        bullmqAttempt: bullmqAttemptsMade,
+        traceIdSuffix: tid ? String(tid).slice(-10) : null,
+      }),
+    );
+  }
 
   const phase1 = await prisma.$transaction(async (tx) => {
     const order = await tx.paymentCheckout.findUnique({

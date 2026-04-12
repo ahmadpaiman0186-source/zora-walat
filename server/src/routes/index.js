@@ -5,9 +5,9 @@ import { sendLivenessJsonOk } from '../lib/sendLivenessJsonOk.js';
 /**
  * API-prefix router mounted at `/api` from `app.js`.
  *
- * `GET /api/health` duplicates the root `GET /health` contract intentionally
- * (some proxies and clients only allow `/api/*`). Deep readiness stays on
- * root `GET /ready` and `GET → /metrics` (see `health.routes.js`).
+ * `GET /api/health` — JSON `{ status: 'ok' }` (see `sendLivenessJsonOk`).
+ * Root `GET /health` serves the same JSON contract from `health.routes.js`.
+ * Readiness: root `GET /ready`; metrics: `GET /metrics`.
  */
 const router = Router();
 

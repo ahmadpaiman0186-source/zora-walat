@@ -1,19 +1,46 @@
 import { Router } from 'express';
 
-import { prisma } from '../db.js';
-import { env } from '../config/env.js';
-import { getWebTopupMetricsSnapshot } from '../lib/webTopupObservability.js';
-import { getOpsMetricsSnapshot } from '../lib/opsMetrics.js';
-import { renderPrometheusTextFromOps } from '../lib/prometheusTextFormat.js';
-import { getWebTopupFulfillmentStuckSummary } from '../services/webtopStuckOrders.js';
-import { getTopupProviderCircuitSnapshot } from '../services/topupFulfillment/topupProviderCircuit.js';
-import { getAirtimeReloadlyDiagnosticsSnapshot } from '../config/airtimeReloadlyStartup.js';
-import { getLaunchSubsystemSnapshot } from '../config/launchSubsystemSnapshot.js';
 import { sendLivenessJsonOk } from '../lib/sendLivenessJsonOk.js';
 
 const router = Router();
 
-function walletTopupContractSnapshot() {
+async function getHealthDeps() {
+  const [
+    { prisma },
+    { env },
+    { getWebTopupMetricsSnapshot },
+    { getOpsMetricsSnapshot },
+    { renderPrometheusTextFromOps },
+    { getWebTopupFulfillmentStuckSummary },
+    { getTopupProviderCircuitSnapshot },
+    { getAirtimeReloadlyDiagnosticsSnapshot },
+    { getLaunchSubsystemSnapshot },
+  ] = await Promise.all([
+    import('../db.js'),
+    import('../config/env.js'),
+    import('../lib/webTopupObservability.js'),
+    import('../lib/opsMetrics.js'),
+    import('../lib/prometheusTextFormat.js'),
+    import('../services/webtopStuckOrders.js'),
+    import('../services/topupFulfillment/topupProviderCircuit.js'),
+    import('../config/airtimeReloadlyStartup.js'),
+    import('../config/launchSubsystemSnapshot.js'),
+  ]);
+
+  return {
+    prisma,
+    env,
+    getWebTopupMetricsSnapshot,
+    getOpsMetricsSnapshot,
+    renderPrometheusTextFromOps,
+    getWebTopupFulfillmentStuckSummary,
+    getTopupProviderCircuitSnapshot,
+    getAirtimeReloadlyDiagnosticsSnapshot,
+    getLaunchSubsystemSnapshot,
+  };
+}
+
+function walletTopupContractSnapshot(env) {
   return {
     requireIdempotencyKey: env.requireWalletTopupIdempotencyKey,
     idempotencyKeyFormat: 'uuid_v4',
@@ -66,18 +93,24 @@ function walletTopupContractSnapshot() {
   };
 }
 
-/** Liveness — process up (safe behind LB without hitting DB). */
+/** Liveness — must stay public, JSON, and free of optional service dependencies. */
+router.get('/', (_req, res) => {
+  sendLivenessJsonOk(res);
+});
+
+/** Liveness — must stay public, JSON, and free of optional service dependencies. */
 router.get('/health', (_req, res) => {
   sendLivenessJsonOk(res);
 });
 
 /** Prometheus scrape (opt-in via METRICS_PROMETHEUS_ENABLED=true). */
 router.get('/metrics', async (_req, res, next) => {
-  if (!env.metricsPrometheusEnabled) {
-    res.status(404).setHeader('Cache-Control', 'no-store').end();
-    return;
-  }
   try {
+    const { env, renderPrometheusTextFromOps } = await getHealthDeps();
+    if (!env.metricsPrometheusEnabled) {
+      res.status(404).setHeader('Cache-Control', 'no-store').end();
+      return;
+    }
     res.setHeader('Cache-Control', 'no-store');
     res.type('text/plain; version=0.0.4; charset=utf-8');
     const body = await renderPrometheusTextFromOps();
@@ -93,6 +126,16 @@ router.get('/metrics', async (_req, res, next) => {
  */
 router.get('/ready', async (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  const {
+    prisma,
+    env,
+    getWebTopupMetricsSnapshot,
+    getOpsMetricsSnapshot,
+    getWebTopupFulfillmentStuckSummary,
+    getTopupProviderCircuitSnapshot,
+    getAirtimeReloadlyDiagnosticsSnapshot,
+    getLaunchSubsystemSnapshot,
+  } = await getHealthDeps();
   /** @type {{ database?: string, webTopupPersistence?: string }} */
   const checks = {};
   try {
@@ -104,7 +147,7 @@ router.get('/ready', async (_req, res) => {
     return res.status(503).json({
       status: 'unavailable',
       checks,
-      walletTopupContract: walletTopupContractSnapshot(),
+      walletTopupContract: walletTopupContractSnapshot(env),
       webTopupMetrics: getWebTopupMetricsSnapshot(),
       opsMetrics: getOpsMetricsSnapshot(),
     });
@@ -117,7 +160,7 @@ router.get('/ready', async (_req, res) => {
     return res.status(503).json({
       status: 'unavailable',
       checks,
-      walletTopupContract: walletTopupContractSnapshot(),
+      walletTopupContract: walletTopupContractSnapshot(env),
       webTopupMetrics: getWebTopupMetricsSnapshot(),
       opsMetrics: getOpsMetricsSnapshot(),
     });
@@ -159,7 +202,7 @@ router.get('/ready', async (_req, res) => {
     status: 'ready',
     checks,
     /** Runtime API contract hints (not a substitute for `npm run gate:check`). */
-    walletTopupContract: walletTopupContractSnapshot(),
+    walletTopupContract: walletTopupContractSnapshot(env),
     webTopupMetrics: getWebTopupMetricsSnapshot(),
     opsMetrics: getOpsMetricsSnapshot(),
     paymentCheckoutByOrderStatus24h,

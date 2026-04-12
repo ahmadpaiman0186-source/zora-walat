@@ -26,7 +26,8 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for webhook chaos integration tests');
 }
 
-const dbUrl = process.env.TEST_DATABASE_URL;
+/** After preload + registerChaosWebhookEnv, effective URL is in DATABASE_URL. */
+const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () => {

@@ -3,7 +3,14 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { useLocale } from '@/components/i18n/localeContext';
@@ -28,9 +35,10 @@ import type { ProductType } from '@/topup/catalog';
 
 import { OrderSuccessPanel } from './OrderSuccessPanel';
 import { PaymentConfirmForm } from './PaymentConfirmForm';
+import { CHECKOUT_FETCH_TIMEOUT_MS, fetchWithTimeout } from './apiFetch';
 import styles from './ZoraWalatTopUp.module.css';
 
-const defaultApiBase = 'http://127.0.0.1:8787';
+const STRIPE_RETURN_PENDING_KEY = 'zw_stripe_return_pending';
 
 function formatUsd(cents: number, locale: UiLocale): string {
   const tag =
@@ -102,9 +110,7 @@ export function ZoraWalatTopUp() {
     paymentIntentId: string | null;
   }>({ orderId: null, updateToken: null, paymentIntentId: null });
 
-  const apiBase = (
-    process.env.NEXT_PUBLIC_API_URL ?? defaultApiBase
-  ).replace(/\/+$/, '');
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '');
 
   const operatorChoices = useMemo(
     () => operatorsForDestination(countryTo, productType),
@@ -181,6 +187,11 @@ export function ZoraWalatTopUp() {
       setErrorMessage(m.error.stripeInit);
       return;
     }
+    if (!apiBase) {
+      setStep('error');
+      setErrorMessage(m.error.configApi);
+      return;
+    }
 
     setStep('loading_intent');
     checkoutContextRef.current = {
@@ -191,7 +202,9 @@ export function ZoraWalatTopUp() {
     try {
       const sessionKey = getOrCreateCheckoutSessionKey();
       const idempotencyKey = crypto.randomUUID();
-      const createRes = await fetch(`${apiBase}/api/topup-orders`, {
+      const createRes = await fetchWithTimeout(
+        `${apiBase}/api/topup-orders`,
+        {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +224,9 @@ export function ZoraWalatTopUp() {
           amountCents,
           currency: 'usd',
         }),
-      });
+        },
+        CHECKOUT_FETCH_TIMEOUT_MS,
+      );
       const createData: unknown = await createRes.json().catch(() => ({}));
       if (!createRes.ok) {
         const msg =
@@ -250,14 +265,18 @@ export function ZoraWalatTopUp() {
       checkoutContextRef.current.updateToken = resolvedToken;
       saveTopupUpdateToken(created.order.id, resolvedToken);
 
-      const res = await fetch(`${apiBase}/create-payment-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: amountCents,
-          orderId: created.order.id,
-        }),
-      });
+      const res = await fetchWithTimeout(
+        `${apiBase}/create-payment-intent`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: amountCents,
+            orderId: created.order.id,
+          }),
+        },
+        CHECKOUT_FETCH_TIMEOUT_MS,
+      );
       const data: unknown = await res.json().catch(() => ({}));
 
       if (!res.ok) {
@@ -301,7 +320,8 @@ export function ZoraWalatTopUp() {
       setStep('checkout');
     } catch (e) {
       console.error('[checkout] create order / payment-intent failed', e);
-      setErrorMessage(m.error.network);
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      setErrorMessage(aborted ? m.error.requestTimeout : m.error.network);
       setStep('error');
     }
   }, [
@@ -310,8 +330,10 @@ export function ZoraWalatTopUp() {
     countryFrom,
     countryTo,
     digits,
+    m.error.configApi,
     m.error.configStripe,
     m.error.network,
+    m.error.requestTimeout,
     m.error.noSecret,
     m.error.stripeInit,
     m.error.orderCreate,
@@ -334,9 +356,13 @@ export function ZoraWalatTopUp() {
       setErrorMessage(m.error.orderFinalize);
       return;
     }
+    if (!apiBase) {
+      setErrorMessage(m.error.configApi);
+      return;
+    }
     const sessionKey = getOrCreateCheckoutSessionKey();
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${apiBase}/api/topup-orders/${encodeURIComponent(ctx.orderId)}/mark-paid`,
         {
           method: 'POST',
@@ -347,6 +373,7 @@ export function ZoraWalatTopUp() {
             sessionKey,
           }),
         },
+        CHECKOUT_FETCH_TIMEOUT_MS,
       );
       const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -371,9 +398,159 @@ export function ZoraWalatTopUp() {
       setStep('success');
     } catch (e) {
       console.error('[checkout] mark-paid failed', e);
-      setErrorMessage(m.error.orderFinalize);
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      setErrorMessage(aborted ? m.error.requestTimeout : m.error.orderFinalize);
     }
-  }, [apiBase, m.error.orderFinalize]);
+  }, [apiBase, m.error.configApi, m.error.orderFinalize, m.error.requestTimeout]);
+
+  const processingStripeReturnRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      const clientSecret = url.searchParams.get('payment_intent_client_secret');
+      const redirectStatus = url.searchParams.get('redirect_status');
+      const paymentIntentId = url.searchParams.get('payment_intent');
+      if (!clientSecret || !redirectStatus || !paymentIntentId) return;
+      sessionStorage.setItem(
+        STRIPE_RETURN_PENDING_KEY,
+        JSON.stringify({
+          clientSecret,
+          redirectStatus,
+          paymentIntentId,
+        }),
+      );
+      url.searchParams.delete('payment_intent_client_secret');
+      url.searchParams.delete('redirect_status');
+      url.searchParams.delete('payment_intent');
+      const qs = url.searchParams.toString();
+      window.history.replaceState(
+        {},
+        '',
+        `${url.pathname}${qs ? `?${qs}` : ''}${url.hash}`,
+      );
+    } catch (e) {
+      console.error('[checkout] capture stripe return url failed', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = sessionStorage.getItem(STRIPE_RETURN_PENDING_KEY);
+    if (!raw) return;
+    if (!stripePublishableKey || !stripePromise) return;
+    if (!apiBase) {
+      sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      setErrorMessage(m.error.configApi);
+      setStep('error');
+      return;
+    }
+    if (processingStripeReturnRef.current) return;
+    processingStripeReturnRef.current = true;
+
+    type ReturnPayload = {
+      clientSecret: string;
+      redirectStatus: string;
+      paymentIntentId: string;
+    };
+    let payload: ReturnPayload;
+    try {
+      payload = JSON.parse(raw) as ReturnPayload;
+    } catch {
+      sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      processingStripeReturnRef.current = false;
+      return;
+    }
+
+    setStep('loading_intent');
+    setErrorMessage(null);
+
+    void (async () => {
+      try {
+        const stripe = await stripePromise;
+        if (!stripe) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.stripeInit);
+          setStep('error');
+          return;
+        }
+        const { error, paymentIntent } = await stripe.retrievePaymentIntent(
+          payload.clientSecret,
+        );
+        if (error || !paymentIntent) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(error?.message ?? m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        const piMeta = paymentIntent as {
+          metadata?: Record<string, string> | null | undefined;
+        };
+        const orderIdMeta = piMeta.metadata?.topup_order_id;
+        const orderId =
+          typeof orderIdMeta === 'string' && orderIdMeta.length > 0
+            ? orderIdMeta
+            : null;
+        if (!orderId) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        const updateToken = getTopupUpdateToken(orderId);
+        if (!updateToken) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        checkoutContextRef.current = {
+          orderId,
+          updateToken,
+          paymentIntentId: paymentIntent.id,
+        };
+
+        const succeeded =
+          payload.redirectStatus === 'succeeded' &&
+          paymentIntent.status === 'succeeded';
+
+        if (!succeeded) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(
+            payload.redirectStatus === 'failed'
+              ? m.error.paymentRedirectFailed
+              : m.error.orderFinalize,
+          );
+          setStep('error');
+          return;
+        }
+
+        await finalizePaidOrder();
+        sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      } catch (e) {
+        console.error('[checkout] stripe return finalize failed', e);
+        sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+        setErrorMessage(m.error.network);
+        setStep('error');
+      } finally {
+        processingStripeReturnRef.current = false;
+      }
+    })();
+  }, [
+    apiBase,
+    finalizePaidOrder,
+    m.error.configApi,
+    m.error.network,
+    m.error.orderFinalize,
+    m.error.paymentRedirectFailed,
+    m.error.stripeInit,
+    stripePromise,
+    stripePublishableKey,
+  ]);
 
   const busyIntent = step === 'loading_intent';
   const showContinue =

@@ -54,9 +54,14 @@ const ERR_UNAVAILABLE = { error: 'Service unavailable' };
  * Production: `STRIPE_WEBHOOK_SECRET` is required at process startup (see `src/index.js`).
  */
 router.post('/', async (req, res) => {
+  console.log('📬 WEBHOOK: Stripe route hit');
+
   const stripe = getStripeClient();
   const secret = env.stripeWebhookSecret;
   if (!stripe || !secret) {
+    console.error(
+      '❌ WEBHOOK ERROR: Stripe client or STRIPE_WEBHOOK_SECRET not configured. Run: stripe listen --forward-to http://127.0.0.1:8787/webhooks/stripe — then paste whsec_ into server/.env as STRIPE_WEBHOOK_SECRET, save the file, restart the server.',
+    );
     req.log?.warn(
       { securityEvent: 'webhook_not_configured' },
       'security',
@@ -66,18 +71,25 @@ router.post('/', async (req, res) => {
 
   const sig = req.headers['stripe-signature'];
   if (!sig || typeof sig !== 'string') {
+    console.error('❌ WEBHOOK ERROR:', 'Missing or invalid Stripe-Signature header');
     return res.status(400).json(ERR_INVALID);
   }
 
   let event;
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, secret);
-  } catch {
+  } catch (err) {
+    console.error('❌ WEBHOOK ERROR:', err?.message ?? String(err));
     req.log?.warn(
       { securityEvent: 'stripe_webhook_signature_invalid' },
       'security',
     );
-    return res.status(400).json(ERR_INVALID);
+    return res.status(400).send(`Webhook Error: ${err?.message ?? 'Invalid signature'}`);
+  }
+
+  console.log('✅ WEBHOOK RECEIVED:', event.type);
+  if (event.type === 'payment_intent.succeeded') {
+    console.log('💰 PAYMENT SUCCESS:', event.data.object?.id);
   }
 
   req.log?.info(

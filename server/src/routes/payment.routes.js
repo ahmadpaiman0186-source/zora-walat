@@ -15,7 +15,7 @@ import { blockMoneyRoutesIfPrelaunch } from '../middleware/prelaunchMoneyBlock.j
 
 const router = Router();
 
-/** Test-mode Stripe PaymentIntent for Next.js / tooling (sk_test_ only). */
+/** Embedded PaymentIntent for Next.js web top-up (test keys any env; live keys prod only). */
 router.post(
   '/create-payment-intent',
   apiIpLimiter,

@@ -118,12 +118,17 @@ export const en = {
   },
   error: {
     configStripe: 'Missing publishable key in environment.',
+    configApi:
+      'Payment API URL is not configured. Set NEXT_PUBLIC_API_URL for this deployment.',
     stripeInit: 'Payment SDK could not load.',
     network: 'Cannot reach the API. Is the server running?',
+    requestTimeout: 'The payment API took too long to respond. Try again.',
     noSecret: 'No client secret returned.',
     orderCreate: 'Could not create your order. Check the API and try again.',
     orderFinalize:
       'Payment went through but we could not finalize the order. Note your PaymentIntent and contact support.',
+    paymentRedirectFailed:
+      'Your bank did not confirm the payment. You can try again or use another card.',
   },
 };
 
