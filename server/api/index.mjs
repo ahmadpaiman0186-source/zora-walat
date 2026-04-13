@@ -1,7 +1,9 @@
 /**
  * Vercel serverless entry: Express app without `listen()`.
- * Do not import `../src/index.js` here (that starts TCP + embedded worker).
+ * Request handling must match the long-running API runtime; background work belongs
+ * to the dedicated worker lifecycle, not the HTTP process.
  */
+import '../src/runtime/registerServerlessRuntime.js';
 import { sendLivenessJsonOk } from '../src/lib/sendLivenessJsonOk.js';
 
 let cachedHandler = null;
@@ -15,11 +17,11 @@ async function getHandler() {
     notifyServerlessHealthTest('bootstrap_import');
     await import('../bootstrap.js');
     notifyServerlessHealthTest('app_graph_import');
-    const [{ createApp }, { default: serverless }] = await Promise.all([
-      import('../src/app.js'),
+    const [{ createValidatedApp }, { default: serverless }] = await Promise.all([
+      import('../src/index.js'),
       import('serverless-http'),
     ]);
-    const app = createApp();
+    const app = createValidatedApp();
     cachedHandler = serverless(app, {
       /**
        * Prisma / Redis clients keep sockets open. In serverless we want the response to flush

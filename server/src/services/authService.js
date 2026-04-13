@@ -10,6 +10,7 @@ import {
 } from '../lib/authCrypto.js';
 import { signAccessToken } from './authTokenService.js';
 import { env } from '../config/env.js';
+import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { ensureUserReferralCode } from './referral/referralCodeService.js';
 
 const BCRYPT_ROUNDS = 12;
@@ -129,7 +130,9 @@ export async function registerUser({ email, password }) {
     };
   } catch (e) {
     if (e?.code === 'P2002') {
-      throw new HttpError(400, 'Invalid request');
+      throw new HttpError(409, 'Account already exists', {
+        code: AUTH_ERROR_CODE.AUTH_EMAIL_EXISTS,
+      });
     }
     throw e;
   }
@@ -140,11 +143,15 @@ export async function loginUser({ email, password }) {
     where: { email: email.toLowerCase() },
   });
   if (!user || !user.isActive) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   const tokens = await issueTokenPair(user);
   return {
@@ -299,22 +306,30 @@ export async function verifyEmailOtp({ email, otp }) {
   if (!challenge) {
     recordOtpCounter('verify_missing_total');
     logOtpEvent('warn', 'otp_verify_missing', { emailHash });
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   if (challenge.consumedAt) {
     recordOtpCounter('verify_consumed_total');
     logOtpEvent('warn', 'otp_verify_consumed', { emailHash });
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   if (challenge.lockedUntil && challenge.lockedUntil > now) {
     recordOtpCounter('verify_locked_total');
     logOtpEvent('warn', 'otp_verify_locked', { emailHash });
-    throw new HttpError(429, 'Too many attempts; try again later.');
+    throw new HttpError(429, 'Too many attempts; try again later.', {
+      code: AUTH_ERROR_CODE.AUTH_OTP_LOCKED,
+    });
   }
   if (challenge.expiresAt <= now) {
     recordOtpCounter('verify_expired_total');
     logOtpEvent('warn', 'otp_verify_expired', { emailHash });
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
 
   const providedHash = otpHashFor(normalizedEmail, otp);
@@ -336,14 +351,18 @@ export async function verifyEmailOtp({ email, otp }) {
         emailHash,
         attemptsCount: nextAttempts,
       });
-      throw new HttpError(429, 'Too many attempts; try again later.');
+      throw new HttpError(429, 'Too many attempts; try again later.', {
+        code: AUTH_ERROR_CODE.AUTH_OTP_LOCKED,
+      });
     }
     recordOtpCounter('verify_mismatch_total');
     logOtpEvent('warn', 'otp_verify_mismatch', {
       emailHash,
       attemptsCount: nextAttempts,
     });
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
 
   const user = await prisma.user.findUnique({
@@ -351,7 +370,9 @@ export async function verifyEmailOtp({ email, otp }) {
   });
   if (!user || !user.isActive) {
     logOtpEvent('warn', 'otp_verify_missing_user', { emailHash });
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
 
   const tokens = await prisma.$transaction(async (tx) => {
@@ -381,11 +402,15 @@ export async function refreshSession(rawRefresh) {
     existing.revokedAt ||
     existing.expiresAt < new Date()
   ) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+    });
   }
   const user = existing.user;
   if (!user.isActive) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+    });
   }
 
   const rawNew = generateRefreshTokenRaw();
@@ -400,7 +425,9 @@ export async function refreshSession(rawRefresh) {
       data: { revokedAt: new Date() },
     });
     if (revoked.count === 0) {
-      throw new HttpError(401, 'Authentication required');
+      throw new HttpError(401, 'Authentication required', {
+        code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+      });
     }
     await tx.refreshToken.create({
       data: {
@@ -423,7 +450,9 @@ export async function refreshSession(rawRefresh) {
 
 export async function logoutRefreshToken(rawRefresh) {
   if (!rawRefresh) {
-    throw new HttpError(400, 'Invalid request');
+    throw new HttpError(400, 'Invalid request', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_REQUEST,
+    });
   }
   const tokenHash = refreshTokenStorageHash(rawRefresh);
   const existing = await prisma.refreshToken.findUnique({

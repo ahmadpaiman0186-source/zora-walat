@@ -24,6 +24,7 @@ import {
   validateAfghanMobileNational,
 } from '../lib/phone.js';
 import { originHostnameForLog } from '../lib/corsPolicy.js';
+import { resolveCheckoutClientBase } from '../lib/checkoutClientBase.js';
 import { checkoutRequestFingerprint } from '../lib/checkoutFingerprint.js';
 import {
   findReusableCheckout,
@@ -40,10 +41,7 @@ import { deviceFingerprintHash } from '../lib/deviceFingerprint.js';
 import { logOpsEvent } from '../lib/opsLog.js';
 import { recordCheckoutSessionCreated } from '../lib/opsMetrics.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
-
-function normalizeClientBase(raw) {
-  return String(raw ?? '').trim().replace(/\/$/, '');
-}
+import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
 
 export async function createCheckoutSession(req, res) {
   const authUserId = req.user?.id;
@@ -59,38 +57,27 @@ export async function createCheckoutSession(req, res) {
     });
   }
 
-  let clientBase;
-  if (env.nodeEnv === 'production') {
-    clientBase = normalizeClientBase(env.clientUrl);
-    if (!clientBase) {
-      return res.status(500).json({
-        error:
-          'CLIENT_URL must be set in production for Stripe Checkout redirects.',
-      });
-    }
-  } else {
-    const origin = req.headers.origin;
-    req.log?.info(
-      { originHost: origin ? originHostnameForLog(origin) : null },
-      'checkout origin',
-    );
-    if (!origin) {
-      return res.status(400).json({ error: 'Missing origin' });
-    }
-    const normalized = normalizeClientBase(origin);
-    if (!normalized) {
-      return res.status(400).json({ error: 'Missing origin' });
-    }
-    try {
-      const u = new URL(normalized);
-      if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-        return res.status(400).json({ error: 'Invalid Origin URL scheme.' });
-      }
-    } catch {
-      return res.status(400).json({ error: 'Invalid Origin header.' });
-    }
-    clientBase = normalized;
+  const origin = req.headers.origin;
+  const clientBaseResolution = resolveCheckoutClientBase({
+    nodeEnv: env.nodeEnv,
+    clientUrl: env.clientUrl,
+    origin,
+  });
+  req.log?.info(
+    {
+      originHost: origin ? originHostnameForLog(origin) : null,
+      checkoutClientBaseSource: clientBaseResolution.ok
+        ? clientBaseResolution.source
+        : 'unresolved',
+    },
+    'checkout client base',
+  );
+  if (!clientBaseResolution.ok) {
+    return res.status(clientBaseResolution.status).json({
+      error: clientBaseResolution.error,
+    });
   }
+  const clientBase = clientBaseResolution.clientBase;
 
   const idemRaw = req.get('idempotency-key');
   const idemParsed = idempotencyKeyHeaderSchema.safeParse(idemRaw);
@@ -101,6 +88,7 @@ export async function createCheckoutSession(req, res) {
     );
     return res.status(400).json({
       error: 'Idempotency-Key header required (UUID v4)',
+      moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
     });
   }
   const idempotencyKey = idemParsed.data;
@@ -252,6 +240,7 @@ export async function createCheckoutSession(req, res) {
       );
       return res.status(429).json({
         error: 'Too many checkout attempts; please wait.',
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
         abuse: {
           severity: abuse.severity,
           reasonCode: abuse.reasonCode,
@@ -307,10 +296,16 @@ export async function createCheckoutSession(req, res) {
         url: reused.url,
         orderId: reused.id,
         orderReference: reused.id,
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
       });
     }
   } catch (e) {
-    if (e.status) return res.status(e.status).json({ error: e.message });
+    if (e.status) {
+      return res.status(e.status).json({
+        error: e.message,
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+      });
+    }
     throw e;
   }
 
@@ -339,9 +334,15 @@ export async function createCheckoutSession(req, res) {
         existing.requestFingerprint === fingerprint &&
         existing.stripeCheckoutUrl
       ) {
-        return res.json({ url: existing.stripeCheckoutUrl });
+        return res.json({
+          url: existing.stripeCheckoutUrl,
+          moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
+        });
       }
-      return res.status(409).json({ error: 'Checkout already in progress' });
+      return res.status(409).json({
+        error: 'Checkout already in progress',
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+      });
     }
     throw e;
   }
@@ -408,6 +409,7 @@ export async function createCheckoutSession(req, res) {
       url: session.url,
       orderId: row.id,
       orderReference: row.id,
+      moneyPathOutcome: MONEY_PATH_OUTCOME.ACCEPTED,
     });
   } catch (e) {
     await markCheckoutFailed(row.id);
@@ -460,6 +462,22 @@ export async function createTestPaymentIntent(req, res) {
     throw e;
   }
 
+  const idemParsed = idempotencyKeyHeaderSchema.safeParse(
+    req.get('idempotency-key'),
+  );
+  if (!idemParsed.success) {
+    req.log?.warn(
+      { securityEvent: 'payment_intent_idempotency_key_invalid' },
+      'security',
+    );
+    return res.status(400).json({
+      error: 'Idempotency-Key header required (UUID v4)',
+      code: 'payment_intent_idempotency_required',
+      moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+    });
+  }
+  const idempotencyKey = idemParsed.data;
+
   const amountCents = parsed.amount ?? 500;
 
   let metadata = { source: 'zora_walat_next_test' };
@@ -497,12 +515,18 @@ export async function createTestPaymentIntent(req, res) {
 
   let pi;
   try {
-    pi = await stripe.paymentIntents.create({
-      amount: amountCents,
-      currency: 'usd',
-      automatic_payment_methods: { enabled: true },
-      metadata,
-    });
+    pi = await stripe.paymentIntents.create(
+      {
+        amount: amountCents,
+        currency: 'usd',
+        automatic_payment_methods: { enabled: true },
+        metadata: {
+          ...metadata,
+          request_idempotency_key: idempotencyKey,
+        },
+      },
+      { idempotencyKey },
+    );
   } catch (err) {
     webTopupLog(req.log, 'warn', 'payment_intent_failed', {
       amountCents,
@@ -539,6 +563,7 @@ export async function createTestPaymentIntent(req, res) {
     paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     amountCents,
     hasTopupOrder: Boolean(parsed.orderId),
+    idempotencyKeySuffix: safeSuffix(idempotencyKey, 8),
     orderIdSuffix:
       parsed.orderId != null && parsed.orderId !== ''
         ? String(parsed.orderId).slice(-8)
@@ -548,5 +573,6 @@ export async function createTestPaymentIntent(req, res) {
   return res.status(200).json({
     clientSecret: pi.client_secret,
     paymentIntentId: pi.id,
+    moneyPathOutcome: MONEY_PATH_OUTCOME.ACCEPTED,
   });
 }

@@ -24,7 +24,23 @@ function isJsonBodyParseError(err) {
 
 export function errorHandler(err, req, res, _next) {
   if (err instanceof HttpError) {
-    return res.status(err.status).json({ error: err.message });
+    if (err.operationalClass) {
+      req.log?.info?.(
+        {
+          httpError: true,
+          status: err.status,
+          code: err.code ?? null,
+          operationalClass: err.operationalClass,
+          traceId: req.traceId ?? null,
+        },
+        'http_error',
+      );
+    }
+    return res.status(err.status).json({
+      success: false,
+      message: err.message,
+      code: err.code ?? null,
+    });
   }
 
   if (isJsonBodyParseError(err)) {

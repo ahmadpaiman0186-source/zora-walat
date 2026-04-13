@@ -51,8 +51,16 @@ function logStripeWebhookIngress(req, res, next) {
   const sig = req.headers['stripe-signature'];
   const hasSig = typeof sig === 'string' && sig.length > 0;
   const cl = req.headers['content-length'];
-  console.log(
-    `[stripe-webhook] ingress ${req.method} ${req.originalUrl} stripe-signature=${hasSig ? 'present' : 'absent'} content-length=${cl ?? 'unset'}`,
+  req.log?.info?.(
+    {
+      stripeWebhookIngress: true,
+      method: req.method,
+      path: req.originalUrl,
+      stripeSignature: hasSig ? 'present' : 'absent',
+      contentLength: cl ?? null,
+      traceId: req.traceId ?? null,
+    },
+    'stripe_webhook_ingress',
   );
   next();
 }
@@ -94,6 +102,7 @@ export function createApp() {
         'Stripe-Signature',
         'X-Trace-Id',
         'X-Request-Id',
+        'X-ZW-Ops-Token',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
       ],
@@ -136,7 +145,6 @@ export function createApp() {
 
   /** Root liveness (`GET /health`), readiness (`GET /ready`), Prometheus (`GET /metrics`). */
   app.use(healthRoutes);
-  app.use('/auth', authLimiter, authRoutes);
   app.use('/api/auth', authLimiter, authRoutes);
   app.use(paymentRoutes);
   app.use('/api/topup-orders', topupOrderRoutes);

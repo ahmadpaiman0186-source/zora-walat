@@ -67,6 +67,7 @@ import {
   classifyTransactionFailure,
 } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
+import { operationalClassFromTransactionFailure } from '../lib/operationalErrorClass.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
 import { fulfillmentDbLimit } from '../lib/fulfillmentDbLimiter.js';
@@ -100,27 +101,55 @@ function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
 /**
  * Create a queued fulfillment attempt (idempotent if attempt #1 already exists).
  * Called inside the Stripe webhook transaction after order → PAID.
+ *
+ * PostgreSQL aborts the whole transaction on a unique violation unless the failing
+ * statement is isolated (savepoint). A naive create + catch(P2002) + findFirst breaks
+ * with 25P02. We: (1) findFirst to skip duplicate inserts in the same tx; (2) wrap
+ * create in SAVEPOINT so concurrent insert races recover cleanly.
  */
 export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
-  const existing = await tx.fulfillmentAttempt.findFirst({
+  const already = await tx.fulfillmentAttempt.findFirst({
     where: { orderId, attemptNumber: 1 },
   });
-  if (existing) {
+  if (already) {
+    emitFortressIdempotencyNoop('FULFILLMENT_ATTEMPT_ONE_ALREADY_PRESENT', {
+      orderIdSuffix: String(orderId).slice(-12),
+      attemptIdSuffix: String(already.id).slice(-12),
+    });
+    return already;
+  }
+
+  await tx.$executeRawUnsafe('SAVEPOINT ensure_queued_fulfillment_attempt');
+
+  try {
+    const created = await tx.fulfillmentAttempt.create({
+      data: {
+        orderId,
+        attemptNumber: 1,
+        status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+        provider: resolveAirtimeProviderName(),
+        requestSummary: JSON.stringify({ phase: 'queued' }),
+      },
+    });
+    await tx.$executeRawUnsafe('RELEASE SAVEPOINT ensure_queued_fulfillment_attempt');
+    return created;
+  } catch (error) {
+    await tx.$executeRawUnsafe('ROLLBACK TO SAVEPOINT ensure_queued_fulfillment_attempt');
+    if (error?.code !== 'P2002') {
+      throw error;
+    }
+    const existing = await tx.fulfillmentAttempt.findFirst({
+      where: { orderId, attemptNumber: 1 },
+    });
+    if (!existing) {
+      throw error;
+    }
     emitFortressIdempotencyNoop('FULFILLMENT_ATTEMPT_ONE_ALREADY_PRESENT', {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(existing.id).slice(-12),
     });
     return existing;
   }
-  return tx.fulfillmentAttempt.create({
-    data: {
-      orderId,
-      attemptNumber: 1,
-      status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
-      provider: resolveAirtimeProviderName(),
-      requestSummary: JSON.stringify({ phase: 'queued' }),
-    },
-  });
 }
 
 /**
@@ -744,6 +773,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         marginTelemetry.usedApiCost,
         env.marginLowRouteBp,
       );
+      /** Test-only: simulates post-commit follow-up failure (integration proofs). */
+      if (process.env.ZW_TEST_INJECT_POST_COMMIT_FOLLOWUP_THROW === 'true') {
+        throw new Error('zw_test_post_commit_followup');
+      }
       scheduleReferralEvaluationAfterDelivery(orderId, getTraceId());
       scheduleFinancialTruthRecompute(orderId);
       logOpsEvent({
@@ -761,6 +794,46 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     const traceId = getTraceId();
 
     if (providerOutcome === AIRTIME_OUTCOME.SUCCESS) {
+      const orderSnap = await prisma.paymentCheckout.findUnique({
+        where: { id: orderId },
+        select: { orderStatus: true, metadata: true },
+      });
+
+      /**
+       * Delivery row already committed (FULFILLED) but margin/referral/financial hooks failed after commit.
+       * Not silent: audit + integrity event — operators reconcile side effects; money row is not "undone".
+       */
+      if (orderSnap?.orderStatus === ORDER_STATUS.FULFILLED) {
+        await writeOrderAudit(prisma, {
+          event: 'delivery_post_commit_followup_failed',
+          payload: {
+            orderId,
+            attemptId: phase1.attemptId,
+            errorClass: err?.name ?? 'Error',
+            message: String(err?.message ?? err).slice(0, 500),
+          },
+          ip: null,
+        });
+        logFulfillmentIntegrityEvent('fulfillment_post_commit_followup_failed', {
+          orderId,
+          traceId,
+          severity: 'ERROR',
+          extra: {
+            attemptIdSuffix: String(phase1.attemptId).slice(-8),
+            note:
+              'FULFILLED committed; post-commit follow-up (margin intel / referral / financial recompute) failed',
+          },
+        });
+        logManualRequiredAlert({
+          event: 'manual_required_detected',
+          severity: 'WARN',
+          traceId,
+          orderId,
+          extra: { classification: 'post_commit_followup_failed' },
+        });
+        return;
+      }
+
       await prisma.$transaction(async (tx) => {
         const orderNow = await tx.paymentCheckout.findUnique({
           where: { id: orderId },
@@ -940,9 +1013,14 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
 /**
  * @param {string} orderId
  * @param {string | null | undefined} traceId from HTTP/webhook request when known
+ *
+ * **Single fulfillment I/O path:** when the queue is off, enqueue fails, or enqueue returns
+ * `ok: false`, the next step is exactly one `processFulfillmentForOrder` call — same function the
+ * BullMQ worker invokes. No parallel remediation engine; recovery (`processingRecoveryService`)
+ * relies on this for bounded re-dispatch after `revert_paid` / `retry_new_attempt`.
  */
 export function scheduleFulfillmentProcessing(orderId, traceId) {
-  setImmediate(() => {
+  const im = setImmediate(() => {
     (async () => {
       const row = await prisma.paymentCheckout.findUnique({
         where: { id: orderId },
@@ -988,9 +1066,41 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
       }
       await processFulfillmentForOrder(orderId, { traceId });
     })().catch((err) => {
-      console.error('[fulfillment] processFulfillmentForOrder failed', orderId, err);
+      const failureClass = classifyTransactionFailure(err, {
+        surface: 'fulfillment_schedule',
+      });
+      const retryDirective = transactionRetryDirective(failureClass, { attempt: 0 });
+      const operationalClass = operationalClassFromTransactionFailure(failureClass);
+      emitPhase1OperationalEvent('fulfillment_schedule_async_failed', {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        errName: err?.name,
+        errMessage: String(err?.message ?? err).slice(0, 300),
+        transactionFailureClass: failureClass,
+        operationalClass,
+        retryMaySchedule: retryDirective.mayScheduleRetry,
+        retryReason: retryDirective.reason,
+      });
+      logOpsEvent({
+        domain: 'fulfillment_schedule',
+        event: 'async_schedule_failed',
+        outcome: 'error',
+        orderId,
+        traceId,
+        extra: {
+          transactionFailureClass: failureClass,
+          operationalClass,
+        },
+      });
     });
   });
+  if (
+    String(process.env.ZW_INTEGRATION_TEST ?? '').trim() === '1' &&
+    im &&
+    typeof im.unref === 'function'
+  ) {
+    im.unref();
+  }
 }
 
 /** Explicit entry point for paid → processing → provider → terminal state. */

@@ -68,13 +68,17 @@ class ApiService {
           'Authorization': 'Bearer $bearer',
       };
 
+  /// Prefers `{ message, code }` (HttpError); falls back to `{ error }`.
   static String _httpErrorMessage(String prefix, http.Response res) {
     try {
       final decoded = jsonDecode(res.body);
-      if (decoded is Map && decoded['error'] != null) {
-        final code = decoded['code'];
-        final extra = code != null ? ' (code: $code)' : '';
-        return '$prefix ${res.statusCode}: ${decoded['error']}$extra';
+      if (decoded is Map) {
+        final text = decoded['message'] ?? decoded['error'];
+        if (text != null) {
+          final code = decoded['code'];
+          final extra = code != null ? ' (code: $code)' : '';
+          return '$prefix ${res.statusCode}: $text$extra';
+        }
       }
     } catch (_) {
       /* use raw body below */

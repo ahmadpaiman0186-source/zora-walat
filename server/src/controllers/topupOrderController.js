@@ -12,6 +12,7 @@ import {
   markTopupOrderPaidFromStripe,
   isValidTopupOrderId,
 } from '../services/topupOrder/topupOrderService.js';
+import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
 import {
   idempotencyKeyHeaderSchema,
   topupOrderCreateSchema,
@@ -29,9 +30,9 @@ function zodDetails(e) {
 
 function parseIdempotencyKey(req) {
   const raw = req.get('Idempotency-Key');
-  if (raw == null || typeof raw !== 'string') return null;
+  if (raw == null || typeof raw !== 'string') return false;
   const t = raw.trim();
-  if (!t) return null;
+  if (!t) return false;
   const r = idempotencyKeyHeaderSchema.safeParse(t);
   if (!r.success) return false;
   return t;
@@ -41,9 +42,13 @@ export async function postCreateTopupOrder(req, res) {
   const idem = parseIdempotencyKey(req);
   if (idem === false) {
     webTopupLog(req.log, 'warn', 'suspicious_request_detected', {
-      kind: 'invalid_idempotency_header',
+      kind: 'missing_or_invalid_idempotency_header',
     });
-    return res.status(400).json({ error: 'Invalid Idempotency-Key header' });
+    return res.status(400).json({
+      error: 'Idempotency-Key header required (UUID v4)',
+      code: 'topup_order_idempotency_required',
+      moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+    });
   }
 
   let parsed;
@@ -76,6 +81,7 @@ export async function postCreateTopupOrder(req, res) {
       order: result.order,
       updateToken: result.updateToken,
       sessionKey: result.sessionKey,
+      moneyPathOutcome: result.moneyPathOutcome,
       ...(result.idempotentReplay ? { idempotentReplay: true } : {}),
     });
   } catch (e) {
@@ -85,6 +91,7 @@ export async function postCreateTopupOrder(req, res) {
       });
       return res.status(409).json({
         error: 'Idempotency key reused with a different payload',
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
       });
     }
     webTopupLog(req.log, 'error', 'order_create_failed', {
@@ -139,6 +146,17 @@ export async function listTopupOrders(req, res) {
 }
 
 export async function postMarkTopupOrderPaid(req, res) {
+  if (!env.webtopupClientMarkPaidEnabled) {
+    webTopupLog(req.log, 'warn', 'suspicious_request_detected', {
+      kind: 'webtopup_client_mark_paid_blocked',
+    });
+    return res.status(403).json({
+      code: 'webtopup_client_mark_paid_disabled',
+      error:
+        'Client mark-paid is disabled for this deployment. Confirm payment via Stripe webhooks, or set WEBTOPUP_CLIENT_MARK_PAID_ENABLED=true (non-production default allows this path).',
+    });
+  }
+
   const id = req.params.id;
   if (!isValidTopupOrderId(id)) {
     return res.status(400).json({ error: 'Invalid order id' });

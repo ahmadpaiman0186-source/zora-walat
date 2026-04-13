@@ -485,6 +485,20 @@ export const env = {
    */
   webtopupFailsim: String(process.env.WEBTOPUP_FAILSIM ?? '').trim().toLowerCase(),
 
+  /**
+   * Client `POST …/mark-paid` (poll Stripe then transition row). Duplicates webhook authority — risky in prod.
+   * Default: true in non-production, false in production (Stripe webhooks are canonical).
+   * Set WEBTOPUP_CLIENT_MARK_PAID_ENABLED=true to allow in production (debug / proxy only).
+   */
+  webtopupClientMarkPaidEnabled: (() => {
+    const raw = String(process.env.WEBTOPUP_CLIENT_MARK_PAID_ENABLED ?? '')
+      .trim()
+      .toLowerCase();
+    if (raw === 'true') return true;
+    if (raw === 'false') return false;
+    return nodeEnv !== 'production';
+  })(),
+
   /** USD cents per 1 loyalty point (e.g. 100 → $1.00 = 1 point). */
   loyaltyPointsUsdBasisCents: parsePositiveInt(
     process.env.LOYALTY_POINTS_USD_BASIS_CENTS,

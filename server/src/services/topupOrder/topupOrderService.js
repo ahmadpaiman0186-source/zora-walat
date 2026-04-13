@@ -14,6 +14,7 @@ import {
   verifyUpdateToken,
 } from './topupOrderRepository.js';
 import { recordWebTopupOrderVelocitySignals } from '../webtopVelocitySignals.js';
+import { MONEY_PATH_OUTCOME } from '../../constants/moneyPathOutcome.js';
 
 /** @typedef {import('./topupOrderTypes.js').TopupOrderRecord} TopupOrderRecord */
 
@@ -112,6 +113,9 @@ export async function createTopupOrder(rawInput, idempotencyKey) {
     updateToken,
     sessionKey: record.sessionKey,
     idempotentReplay,
+    moneyPathOutcome: idempotentReplay
+      ? MONEY_PATH_OUTCOME.REPLAYED
+      : MONEY_PATH_OUTCOME.ACCEPTED,
   };
 }
 

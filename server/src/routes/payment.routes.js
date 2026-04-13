@@ -18,6 +18,7 @@ const router = Router();
 /** Embedded PaymentIntent for Next.js web top-up (test keys any env; live keys prod only). */
 router.post(
   '/create-payment-intent',
+  blockMoneyRoutesIfPrelaunch,
   apiIpLimiter,
   topupPaymentIntentLimiter,
   requireJsonContentType,
