@@ -8,8 +8,12 @@ import { writeOrderAudit } from '../services/orderAuditService.js';
 import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
 import { deriveCustomerTrackingStageForOrder } from '../services/transactionsService.js';
 import { env } from '../config/env.js';
+import { RECHARGE_ERROR_CODE } from '../constants/apiContractCodes.js';
 import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { waitForPaymentCheckoutTerminal } from '../services/fulfillmentClientWait.js';
+import { assertRechargeOrderCreateRiskOrThrow } from '../services/risk/assertRechargeOrderRisk.js';
+import { normalizeAfghanNational } from '../lib/phone.js';
 
 export async function postQuote(req, res) {
   const recipient = await resolveRecipientFromBody(req.user.id, req.body);
@@ -25,9 +29,21 @@ export async function postQuote(req, res) {
 export async function postOrder(req, res) {
   const { packageId } = req.body || {};
   if (!packageId) {
-    return res.status(400).json({ error: 'packageId is required' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('packageId is required', RECHARGE_ERROR_CODE.PACKAGE_REQUIRED),
+      );
   }
   const recipient = await resolveRecipientFromBody(req.user.id, req.body);
+  const national = normalizeAfghanNational(req.body?.phone);
+  await assertRechargeOrderCreateRiskOrThrow({
+    userId: req.user.id,
+    packageId: String(packageId),
+    recipientNational: national ?? '',
+    log: req.log,
+    traceId: req.traceId ?? null,
+  });
   const provider = getRechargeProvider();
   const out = provider.createOrder({
     recipient,
@@ -88,7 +104,11 @@ function publicOrderSlice(row) {
 export async function postExecute(req, res) {
   const raw = req.body?.orderId;
   if (raw == null || typeof raw !== 'string' || !isLikelyPaymentCheckoutId(raw.trim())) {
-    return res.status(400).json({ error: 'Invalid orderId' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid orderId', RECHARGE_ERROR_CODE.INVALID_ORDER_ID),
+      );
   }
   const orderId = raw.trim();
   const userId = req.user.id;
@@ -104,7 +124,9 @@ export async function postExecute(req, res) {
   });
 
   if (!existing) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', RECHARGE_ERROR_CODE.NOT_FOUND));
   }
 
   await writeOrderAudit(prisma, {
@@ -125,14 +147,17 @@ export async function postExecute(req, res) {
 
   if (existing.orderStatus === ORDER_STATUS.PENDING) {
     return res.status(409).json({
-      error: 'Payment not confirmed yet',
+      ...clientErrorBody(
+        'Payment not confirmed yet',
+        RECHARGE_ERROR_CODE.PAYMENT_PENDING,
+      ),
       ...basePayload,
     });
   }
 
   if (existing.orderStatus === ORDER_STATUS.CANCELLED) {
     return res.status(409).json({
-      error: 'Order cancelled',
+      ...clientErrorBody('Order cancelled', RECHARGE_ERROR_CODE.ORDER_CANCELLED),
       ...basePayload,
     });
   }
@@ -150,7 +175,10 @@ export async function postExecute(req, res) {
       'security',
     );
     return res.status(409).json({
-      error: 'Fulfillment not authorized for current payment state',
+      ...clientErrorBody(
+        'Fulfillment not authorized for current payment state',
+        RECHARGE_ERROR_CODE.FULFILLMENT_NOT_AUTHORIZED,
+      ),
       fortressDenial: gate.denial,
       fortressDetail: gate.detail ?? null,
       ...basePayload,
@@ -171,7 +199,10 @@ export async function postExecute(req, res) {
           },
         });
         return res.status(504).json({
-          error: 'Fulfillment still in progress — poll order status',
+          ...clientErrorBody(
+            'Fulfillment still in progress — poll order status',
+            RECHARGE_ERROR_CODE.FULFILLMENT_TIMEOUT,
+          ),
           fulfillmentQueue: true,
           ...(mid
             ? {
@@ -199,7 +230,9 @@ export async function postExecute(req, res) {
   });
 
   if (!fresh) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', RECHARGE_ERROR_CODE.NOT_FOUND));
   }
 
   return res.json({

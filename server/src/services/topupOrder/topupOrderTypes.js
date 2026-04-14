@@ -1,6 +1,7 @@
 /**
  * @typedef {object} TopupOrderRecord
  * @property {string} id
+ * @property {string | null} userId
  * @property {string} sessionKey
  * @property {string} originCountry
  * @property {string} destinationCountry

@@ -2,6 +2,7 @@ import {
   FULFILLMENT_STATUS,
   PAYMENT_STATUS,
 } from '../../domain/topupOrder/statuses.js';
+import { assertWebTopupPaymentTransition } from '../../domain/topupOrder/webtopupStateMachine.js';
 import {
   safeSuffix,
   webTopupLog,
@@ -113,17 +114,24 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       stripeCurrency: cur,
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    await tx.webTopupOrder.updateMany({
-      where: {
-        id: orderId,
-        paymentStatus: PAYMENT_STATUS.PENDING,
-      },
-      data: {
-        paymentStatus: PAYMENT_STATUS.FAILED,
-        fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
-        paymentIntentId: pi.id,
-      },
-    });
+    const curFail = assertWebTopupPaymentTransition(
+      row.paymentStatus,
+      PAYMENT_STATUS.FAILED,
+      'webhook',
+    );
+    if (curFail.ok) {
+      await tx.webTopupOrder.updateMany({
+        where: {
+          id: orderId,
+          paymentStatus: PAYMENT_STATUS.PENDING,
+        },
+        data: {
+          paymentStatus: PAYMENT_STATUS.FAILED,
+          fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
+          paymentIntentId: pi.id,
+        },
+      });
+    }
     webTopupLog(log, 'info', 'payment_failed', {
       source: 'webhook',
       orderIdSuffix: orderId.slice(-8),
@@ -141,21 +149,44 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       stripeAmount: amt,
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    await tx.webTopupOrder.updateMany({
-      where: {
-        id: orderId,
-        paymentStatus: PAYMENT_STATUS.PENDING,
-      },
-      data: {
-        paymentStatus: PAYMENT_STATUS.FAILED,
-        fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
-        paymentIntentId: pi.id,
-      },
-    });
+    const failTrans = assertWebTopupPaymentTransition(
+      row.paymentStatus,
+      PAYMENT_STATUS.FAILED,
+      'webhook',
+    );
+    if (failTrans.ok) {
+      await tx.webTopupOrder.updateMany({
+        where: {
+          id: orderId,
+          paymentStatus: PAYMENT_STATUS.PENDING,
+        },
+        data: {
+          paymentStatus: PAYMENT_STATUS.FAILED,
+          fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
+          paymentIntentId: pi.id,
+        },
+      });
+    }
     webTopupLog(log, 'info', 'payment_failed', {
       source: 'webhook',
       orderIdSuffix: orderId.slice(-8),
       reason: 'amount_mismatch',
+    });
+    return;
+  }
+
+  const pendingToPaid = assertWebTopupPaymentTransition(
+    row.paymentStatus,
+    PAYMENT_STATUS.PAID,
+    'webhook',
+  );
+  if (!pendingToPaid.ok) {
+    webTopupLog(log, 'warn', 'payment_succeeded', {
+      applied: false,
+      mismatchReason: 'forbidden_payment_transition',
+      orderIdSuffix: orderId.slice(-8),
+      fromStatus: row.paymentStatus,
+      paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
     return;
   }
@@ -235,6 +266,24 @@ export async function handleWebTopupPaymentIntentFailed(tx, pi, log) {
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
     return;
+  }
+
+  if (row) {
+    const toFailed = assertWebTopupPaymentTransition(
+      row.paymentStatus,
+      PAYMENT_STATUS.FAILED,
+      'webhook',
+    );
+    if (!toFailed.ok) {
+      webTopupLog(log, 'warn', 'payment_failed', {
+        applied: false,
+        reason: 'forbidden_payment_transition',
+        orderIdSuffix: orderId.slice(-8),
+        fromStatus: row.paymentStatus,
+        paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+      });
+      return;
+    }
   }
 
   const n = await tx.webTopupOrder.updateMany({

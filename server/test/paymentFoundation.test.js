@@ -79,8 +79,15 @@ describe('payment route prelaunch guardrails', () => {
       .send({ amount: 500 });
 
     assert.equal(res.status, 503);
-    assert.deepEqual(res.body, {
-      error: 'Service temporarily unavailable (pre-launch)',
-    });
+    assert.equal(res.body?.success, false);
+    assert.equal(res.body?.code, 'prelaunch_lockdown');
+    assert.equal(
+      res.body?.message,
+      'Service temporarily unavailable (pre-launch)',
+    );
+    assert.equal(
+      res.body?.error,
+      'Service temporarily unavailable (pre-launch)',
+    );
   });
 });

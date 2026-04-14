@@ -54,9 +54,12 @@ model TopupOrder {
 
 /// Next.js marketing checkout top-up (session-scoped, Payment Element + webhook lifecycle).
 /// Distinct from legacy `TopupOrder` (Reloadly / operator pipeline).
+/// Optional `userId`: set when order is created with a valid Bearer token (account binding for support/reconciliation).
 model WebTopupOrder {
   id                      String    @id
   sessionKey              String
+  userId                  String?
+  user                    User?     @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
   /// Optional client idempotency key (header). Replays with same key return the same order.
   idempotencyKey          String?   @unique
   /// sha256 hex of canonical create payload — must match on idempotent replay.
@@ -103,6 +106,7 @@ model WebTopupOrder {
   updatedAt               DateTime  @updatedAt
 
   @@index([sessionKey, createdAt])
+  @@index([userId, createdAt])
   @@index([paymentStatus, createdAt])
   @@index([fulfillmentStatus, createdAt])
   @@index([phoneAnalyticsHash])
@@ -330,6 +334,8 @@ model User {
   passwordHash  String
   /// Application values: "user" | "admin" | "operator" | "viewer" (staff roles for /api/admin/*).
   role          String   @default("user")
+  /// Set when email ownership is proven (e.g. OTP verify). Null = never verified.
+  emailVerifiedAt DateTime?
   /// Increment to invalidate all outstanding access JWTs (password change / global revoke).
   tokenVersion  Int      @default(0)
   isActive      Boolean  @default(true)
@@ -358,6 +364,7 @@ model User {
   loyaltyLedgerEntries     LoyaltyLedger[]
   walletTopupIdempotencies  WalletTopupIdempotency[]
   userWalletLedgerEntries   UserWalletLedgerEntry[]
+  webTopupOrders            WebTopupOrder[]
 
   @@index([email])
 }

@@ -139,6 +139,31 @@ export const env = {
   accessTokenTtlSec: parsePositiveInt(process.env.ACCESS_TOKEN_TTL, 900),
   /** Refresh token TTL (seconds). */
   refreshTokenTtlSec: parsePositiveInt(process.env.REFRESH_TOKEN_TTL, 604800),
+
+  /** Email OTP challenge — TTL for a single code (seconds). */
+  authOtpTtlSec: parsePositiveInt(process.env.AUTH_OTP_TTL_SEC, 300),
+  authOtpResendCooldownSec: parsePositiveInt(
+    process.env.AUTH_OTP_RESEND_COOLDOWN_SEC,
+    60,
+  ),
+  authOtpRequestWindowSec: parsePositiveInt(
+    process.env.AUTH_OTP_REQUEST_WINDOW_SEC,
+    600,
+  ),
+  authOtpMaxRequestsPerWindow: parsePositiveInt(
+    process.env.AUTH_OTP_MAX_REQUESTS_PER_WINDOW,
+    3,
+  ),
+  authOtpMaxVerifyAttempts: parsePositiveInt(
+    process.env.AUTH_OTP_MAX_VERIFY_ATTEMPTS,
+    5,
+  ),
+  authOtpLockSec: parsePositiveInt(process.env.AUTH_OTP_LOCK_SEC, 600),
+  authOtpStaleRetentionSec: parsePositiveInt(
+    process.env.AUTH_OTP_STALE_RETENTION_SEC,
+    86400,
+  ),
+
   /**
    * When true: money routes return 503; strict CORS; minimal access logs; extra startup checks.
    */

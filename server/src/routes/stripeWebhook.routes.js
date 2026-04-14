@@ -42,12 +42,10 @@ import {
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
+import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 const router = Router();
-
-/** Generic responses — no Stripe or stack details to clients. */
-const ERR_INVALID = { error: 'Invalid request' };
-const ERR_UNAVAILABLE = { error: 'Service unavailable' };
 
 /**
  * Stripe webhook — raw body required for `constructEvent`.
@@ -66,13 +64,24 @@ router.post('/', async (req, res) => {
       { securityEvent: 'webhook_not_configured' },
       'security',
     );
-    return res.status(503).json(ERR_UNAVAILABLE);
+    return res
+      .status(503)
+      .json(
+        clientErrorBody(
+          'Service unavailable',
+          API_CONTRACT_CODE.INTERNAL_ERROR,
+        ),
+      );
   }
 
   const sig = req.headers['stripe-signature'];
   if (!sig || typeof sig !== 'string') {
     console.error('❌ WEBHOOK ERROR:', 'Missing or invalid Stripe-Signature header');
-    return res.status(400).json(ERR_INVALID);
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid request', API_CONTRACT_CODE.VALIDATION_ERROR),
+      );
   }
 
   let event;

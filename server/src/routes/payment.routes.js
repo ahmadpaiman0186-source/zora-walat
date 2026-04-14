@@ -7,10 +7,12 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   apiIpLimiter,
   checkoutAuthenticatedLimiter,
-  topupPaymentIntentLimiter,
+  paymentIntentEndpointLimiter,
 } from '../middleware/rateLimits.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
+import { requireEmailVerified } from '../middleware/requireEmailVerified.js';
+import { optionalAuth } from '../middleware/optionalAuth.js';
 import { blockMoneyRoutesIfPrelaunch } from '../middleware/prelaunchMoneyBlock.js';
 
 const router = Router();
@@ -20,8 +22,9 @@ router.post(
   '/create-payment-intent',
   blockMoneyRoutesIfPrelaunch,
   apiIpLimiter,
-  topupPaymentIntentLimiter,
+  paymentIntentEndpointLimiter,
   requireJsonContentType,
+  optionalAuth,
   asyncHandler(createTestPaymentIntent),
 );
 
@@ -29,6 +32,7 @@ router.post(
   '/create-checkout-session',
   requireJsonContentType,
   requireAuth,
+  requireEmailVerified,
   blockMoneyRoutesIfPrelaunch,
   checkoutAuthenticatedLimiter,
   asyncHandler(createCheckoutSession),

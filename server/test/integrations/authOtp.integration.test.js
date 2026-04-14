@@ -3,12 +3,14 @@
  * Requires migrated PostgreSQL via DATABASE_URL / TEST_DATABASE_URL preload.
  */
 import assert from 'node:assert/strict';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { after, afterEach, before, describe, it } from 'node:test';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
+import { AUTH_ERROR_CODE } from '../../src/constants/authErrors.js';
 import { HttpError } from '../../src/lib/httpError.js';
+import { otpHashFor } from '../../src/services/identity/otpChallengeService.js';
 import {
   cleanupStaleAuthOtpChallengesForTests,
   requestEmailOtp,
@@ -88,6 +90,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
 
     const first = await requestEmailOtp({ email }, { sendOtp });
     assert.deepEqual(first, {
+      success: true,
       ok: true,
       message: 'If the account is eligible, an OTP email will be sent.',
     });
@@ -139,7 +142,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     await prisma.authOtpChallenge.create({
       data: {
         email,
-        otpHash: createHash('sha256').update(`${email}:${otp}`).digest('hex'),
+        otpHash: otpHashFor(email, otp),
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         resendAfter: new Date(Date.now() + 60 * 1000),
         attemptsCount: 0,
@@ -150,7 +153,10 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     for (let attempt = 1; attempt <= 4; attempt += 1) {
       await assert.rejects(
         () => verifyEmailOtp({ email, otp: '000000' }),
-        (error) => error instanceof HttpError && error.status === 401,
+        (error) =>
+          error instanceof HttpError &&
+          error.status === 401 &&
+          error.code === AUTH_ERROR_CODE.AUTH_OTP_INVALID,
       );
       const challenge = await readChallenge(email);
       assert.equal(challenge?.attemptsCount, attempt);
@@ -182,7 +188,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     await prisma.authOtpChallenge.create({
       data: {
         email,
-        otpHash: createHash('sha256').update(`${email}:${otp}`).digest('hex'),
+        otpHash: otpHashFor(email, otp),
         expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         resendAfter: new Date(Date.now() + 60 * 1000),
         attemptsCount: 0,
@@ -194,16 +200,20 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     assert.equal(typeof verified.accessToken, 'string');
     assert.equal(typeof verified.refreshToken, 'string');
     assert.equal(verified.user.email, email);
+    assert.equal(verified.user.emailVerified, true);
     assert.equal(countMetric('verify_success_total'), 1);
 
     const challenge = await readChallenge(email);
-    assert.equal(challenge, null);
+    assert.ok(challenge?.consumedAt instanceof Date);
 
     await assert.rejects(
       () => verifyEmailOtp({ email, otp }),
-      (error) => error instanceof HttpError && error.status === 401,
+      (error) =>
+        error instanceof HttpError &&
+        error.status === 401 &&
+        error.code === AUTH_ERROR_CODE.AUTH_OTP_REPLAY,
     );
-    assert.equal(countMetric('verify_missing_total'), 1);
+    assert.equal(countMetric('verify_consumed_total'), 1);
   });
 
   it('rejects expired OTPs', async () => {
@@ -212,7 +222,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     await prisma.authOtpChallenge.create({
       data: {
         email,
-        otpHash: createHash('sha256').update(`${email}:111111`).digest('hex'),
+        otpHash: otpHashFor(email, '111111'),
         expiresAt: new Date(Date.now() - 60_000),
         resendAfter: new Date(Date.now() - 30_000),
         attemptsCount: 0,
@@ -222,9 +232,23 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
 
     await assert.rejects(
       () => verifyEmailOtp({ email, otp: '111111' }),
-      (error) => error instanceof HttpError && error.status === 401,
+      (error) =>
+        error instanceof HttpError &&
+        error.status === 401 &&
+        error.code === AUTH_ERROR_CODE.AUTH_OTP_EXPIRED,
     );
     assert.equal(countMetric('verify_expired_total'), 1);
+  });
+
+  it('rejects verify with no active challenge', async () => {
+    const email = await makeUser('otp-none');
+    await assert.rejects(
+      () => verifyEmailOtp({ email, otp: '123456' }),
+      (error) =>
+        error instanceof HttpError &&
+        error.status === 401 &&
+        error.code === AUTH_ERROR_CODE.AUTH_OTP_NOT_FOUND,
+    );
   });
 
   it('cleans up stale OTP challenges opportunistically', async () => {
@@ -247,7 +271,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     await prisma.authOtpChallenge.create({
       data: {
         email,
-        otpHash: createHash('sha256').update(`${email}:222222`).digest('hex'),
+        otpHash: otpHashFor(email, '222222'),
         expiresAt: staleAt,
         resendAfter: staleAt,
         attemptsCount: 0,
@@ -260,9 +284,7 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     await prisma.authOtpChallenge.create({
       data: {
         email: staleConsumedEmail,
-        otpHash: createHash('sha256')
-          .update(`${staleConsumedEmail}:333333`)
-          .digest('hex'),
+        otpHash: otpHashFor(staleConsumedEmail, '333333'),
         expiresAt: new Date(now.getTime() + 5 * 60 * 1000),
         resendAfter: new Date(now.getTime() - 60 * 1000),
         attemptsCount: 0,

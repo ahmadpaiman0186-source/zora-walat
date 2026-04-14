@@ -5,6 +5,7 @@ import { prisma } from '../db.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
 import * as userWalletService from '../services/wallet/userWalletService.js';
 import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 const uuidSchema = z.string().uuid();
 
@@ -50,9 +51,11 @@ export async function postTopup(req, res) {
         ip: req.ip ? String(req.ip).slice(0, 64) : null,
       });
       return res.status(400).json({
-        code: 'wallet_topup_idempotency_required',
+        ...clientErrorBody(
+          'Idempotency-Key header required (UUID v4)',
+          'wallet_topup_idempotency_required',
+        ),
         moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
-        error: 'Idempotency-Key header required (UUID v4)',
       });
     }
 
@@ -123,12 +126,13 @@ export async function postTopup(req, res) {
         ip: req.ip ? String(req.ip).slice(0, 64) : null,
       });
       return res.status(409).json({
-        code: 'wallet_topup_idempotency_conflict',
-        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
-        error:
+        ...clientErrorBody(
           env.nodeEnv === 'production'
             ? 'Conflict'
             : 'Idempotency-Key reused with different amount',
+          'wallet_topup_idempotency_conflict',
+        ),
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
       });
     }
     if (
@@ -138,12 +142,13 @@ export async function postTopup(req, res) {
     ) {
       recordMoneyPathOpsSignal('wallet_topup_ledger_invariant_http');
       return res.status(500).json({
-        code: 'wallet_ledger_invariant_violation',
-        moneyPathOutcome: MONEY_PATH_OUTCOME.TERMINAL_FAILURE,
-        error:
+        ...clientErrorBody(
           env.nodeEnv === 'production'
             ? 'Internal error'
             : err.message || 'Ledger balance invariant failed',
+          'wallet_ledger_invariant_violation',
+        ),
+        moneyPathOutcome: MONEY_PATH_OUTCOME.TERMINAL_FAILURE,
       });
     }
     if (
@@ -164,18 +169,21 @@ export async function postTopup(req, res) {
         ip: req.ip ? String(req.ip).slice(0, 64) : null,
       });
       return res.status(400).json({
-        code: 'wallet_topup_amount_out_of_range',
-        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
-        error:
+        ...clientErrorBody(
           env.nodeEnv === 'production'
             ? 'Invalid amount'
             : `Amount exceeds maximum (${env.walletTopupMaxUsdCents} USD cents)`,
+          'wallet_topup_amount_out_of_range',
+        ),
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
       });
     }
     const msg =
       env.nodeEnv === 'production'
         ? 'Invalid request'
         : err.message || 'Topup failed';
-    return res.status(400).json({ error: msg });
+    return res
+      .status(400)
+      .json(clientErrorBody(msg, 'wallet_topup_request_invalid'));
   }
 }

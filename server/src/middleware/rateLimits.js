@@ -8,6 +8,10 @@
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 import { env } from '../config/env.js';
+import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
+import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
+import { RISK_REASON_CODE } from '../constants/riskErrors.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { rateLimitRedisStore } from '../lib/rateLimitRedisInit.js';
 
 /**
@@ -40,10 +44,58 @@ function rateLimitHandler(req, res, _next, options) {
       path: req.path,
       limit: options.limit ?? options.max,
       clientIp: req.ip,
+      contractCode: API_CONTRACT_CODE.RATE_LIMITED,
     },
     'security',
   );
-  res.status(options.statusCode).json(options.message);
+  const raw = options.message;
+  const msg =
+    typeof raw === 'object' && raw && 'error' in raw
+      ? String(/** @type {{ error?: string }} */ (raw).error)
+      : typeof raw === 'string'
+        ? raw
+        : 'Too many requests; try again later.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, API_CONTRACT_CODE.RATE_LIMITED));
+}
+
+function authRateLimitHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'rate_limit_exceeded',
+      path: req.path,
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+      code: AUTH_ERROR_CODE.AUTH_RATE_LIMITED,
+    },
+    'security',
+  );
+  res.status(options.statusCode).json(
+    clientErrorBody(
+      'Too many authentication attempts; try again later.',
+      AUTH_ERROR_CODE.AUTH_RATE_LIMITED,
+    ),
+  );
+}
+
+function authOtpRateLimitHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'rate_limit_exceeded',
+      path: req.path,
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+    },
+    'security',
+  );
+  const msg =
+    typeof options.message === 'object' && options.message?.error
+      ? String(options.message.error)
+      : 'Too many requests; try again later.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, RISK_REASON_CODE.RATE_LIMITED));
 }
 
 function stripeWebhookRateLimitHandler(req, res, next, options) {
@@ -126,10 +178,13 @@ function walletTopupRateLimitHandler(req, res, _next, options) {
     },
     'security',
   );
-  res.status(options.statusCode).json({
-    code: 'wallet_topup_rate_limited',
-    error: 'Too many wallet top-up requests; try again later.',
-  });
+  const msg =
+    typeof options.message === 'object' && options.message?.error
+      ? String(options.message.error)
+      : 'Too many wallet top-up requests; try again later.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, 'wallet_topup_rate_limited'));
 }
 
 export const walletTopupLimiter = rateLimitWithOptionalRedis('wallet_topup_15m', {
@@ -158,10 +213,13 @@ function walletTopupPerMinuteHandler(req, res, _next, options) {
     },
     'security',
   );
-  res.status(options.statusCode).json({
-    code: 'wallet_topup_per_minute_limited',
-    error: 'Too many wallet top-ups per minute; try again shortly.',
-  });
+  const msg =
+    typeof options.message === 'object' && options.message?.error
+      ? String(options.message.error)
+      : 'Too many wallet top-ups per minute; try again shortly.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, 'wallet_topup_per_minute_limited'));
 }
 
 /**
@@ -276,30 +334,114 @@ export const authLimiter = rateLimitWithOptionalRedis('auth_15m', {
   legacyHeaders: false,
   keyGenerator: (req) => clientIpKey(req),
   message: { error: 'Too many authentication attempts; try again later.' },
-  handler: rateLimitHandler,
+  handler: authRateLimitHandler,
 });
 
-/** OTP email issuance — per IP. Per-email throttling is enforced in persistence logic. */
-export const emailOtpRequestLimiter = rateLimitWithOptionalRedis('auth_otp_req_10m', {
-  windowMs: 10 * 60 * 1000,
-  max: prod ? 10 : 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => clientIpKey(req),
-  message: { error: 'Too many OTP requests; try again later.' },
-  handler: rateLimitHandler,
-});
+function riskPaymentIntentRateLimitHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'risk_rate_limit_exceeded',
+      route: 'create_payment_intent',
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+    },
+    'security',
+  );
+  const msg = 'Too many payment intents; try again later.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, RISK_REASON_CODE.RATE_LIMITED));
+}
 
-/** OTP verification — per IP. Per-email attempt caps are enforced in persistence logic. */
-export const emailOtpVerifyLimiter = rateLimitWithOptionalRedis('auth_otp_verify_10m', {
-  windowMs: 10 * 60 * 1000,
-  max: prod ? 30 : 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => clientIpKey(req),
-  message: { error: 'Too many OTP verification attempts; try again later.' },
-  handler: rateLimitHandler,
-});
+function riskRechargeOrderCreateHandler(req, res, _next, options) {
+  req.log?.warn(
+    {
+      securityEvent: 'risk_rate_limit_exceeded',
+      route: 'recharge_order_create',
+      limit: options.limit ?? options.max,
+      clientIp: req.ip,
+      userIdSuffix: req.user?.id?.slice(-8),
+    },
+    'security',
+  );
+  const msg = 'Too many recharge checkout attempts; try again later.';
+  res
+    .status(options.statusCode)
+    .json(clientErrorBody(msg, RISK_REASON_CODE.RATE_LIMITED));
+}
+
+/** OTP request — dedicated bucket; {@link RISK_REASON_CODE.RATE_LIMITED} on exceed. */
+export const otpRequestEndpointLimiter = rateLimitWithOptionalRedis(
+  'auth_otp_req_endpoint_10m',
+  {
+    windowMs: 10 * 60 * 1000,
+    max: prod ? 10 : 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => clientIpKey(req),
+    message: { error: 'Too many OTP requests; try again later.' },
+    handler: authOtpRateLimitHandler,
+  },
+);
+
+/** OTP verify — dedicated bucket. */
+export const otpVerifyEndpointLimiter = rateLimitWithOptionalRedis(
+  'auth_otp_verify_endpoint_10m',
+  {
+    windowMs: 10 * 60 * 1000,
+    max: prod ? 30 : 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => clientIpKey(req),
+    message: { error: 'Too many OTP verification attempts; try again later.' },
+    handler: authOtpRateLimitHandler,
+  },
+);
+
+/** @deprecated Use {@link otpRequestEndpointLimiter} */
+export const emailOtpRequestLimiter = otpRequestEndpointLimiter;
+
+/** @deprecated Use {@link otpVerifyEndpointLimiter} */
+export const emailOtpVerifyLimiter = otpVerifyEndpointLimiter;
+
+/**
+ * Embedded PaymentIntent — dedicated Redis prefix; {@link RISK_REASON_CODE.RATE_LIMITED} on exceed.
+ */
+export const paymentIntentEndpointLimiter = rateLimitWithOptionalRedis(
+  'risk_topup_pi_15m',
+  {
+    windowMs: 15 * 60 * 1000,
+    max: prod ? 60 : 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => clientIpKey(req),
+    message: { error: 'Too many payment intents; try again later.' },
+    handler: riskPaymentIntentRateLimitHandler,
+  },
+);
+
+/** @deprecated Use {@link paymentIntentEndpointLimiter} */
+export const topupPaymentIntentLimiter = paymentIntentEndpointLimiter;
+
+/**
+ * Authenticated recharge checkout creation — per user + IP (after requireAuth).
+ */
+export const rechargeOrderCreateLimiter = rateLimitWithOptionalRedis(
+  'recharge_order_create_15m',
+  {
+    windowMs: 15 * 60 * 1000,
+    max: prod ? 25 : 80,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      const ip = clientIpKey(req);
+      const uid = req.user?.id;
+      return uid ? `recharge_ord_create:${ip}:${uid}` : `recharge_ord_create:${ip}`;
+    },
+    message: { error: 'Too many recharge checkout attempts; try again later.' },
+    handler: riskRechargeOrderCreateHandler,
+  },
+);
 
 /** Stripe webhook ingress — high ceiling; still bounded for abuse. */
 export const stripeWebhookLimiter = rateLimitWithOptionalRedis('stripe_webhook_15m', {
@@ -349,20 +491,6 @@ export const topupOrderMarkPaidLimiter = rateLimitWithOptionalRedis(
     legacyHeaders: false,
     keyGenerator: (req) => clientIpKey(req),
     message: { error: 'Too many payment updates; try again later.' },
-    handler: rateLimitHandler,
-  },
-);
-
-/** Test PaymentIntent creation (Next.js checkout). */
-export const topupPaymentIntentLimiter = rateLimitWithOptionalRedis(
-  'topup_pi_15m',
-  {
-    windowMs: 15 * 60 * 1000,
-    max: prod ? 60 : 200,
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: (req) => clientIpKey(req),
-    message: { error: 'Too many payment intents; try again later.' },
     handler: rateLimitHandler,
   },
 );

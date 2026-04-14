@@ -9,8 +9,17 @@ import {
   topupOrderSessionBurstLimiter,
 } from '../middleware/rateLimits.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
+import { optionalAuth } from '../middleware/optionalAuth.js';
 
+/** Money-path policy table: `src/constants/moneyRoutePolicy.js`. */
 const router = Router();
+
+router.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+
+router.use(asyncHandler(optionalAuth));
 
 router.post(
   '/',

@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/auth/auth_session.dart';
+import '../core/auth/email_verification_required_exception.dart';
 import '../core/auth/unauthorized_exception.dart';
 import '../core/config/app_config.dart';
 import '../models/recharge_package.dart';
@@ -15,6 +16,25 @@ const String _kBffApiKey = String.fromEnvironment(
   'BFF_API_KEY',
   defaultValue: '',
 );
+
+const String _kAuthVerificationRequiredCode = 'auth_verification_required';
+
+void _throwIfEmailVerificationRequired(http.Response res) {
+  if (res.statusCode != 403) return;
+  try {
+    final decoded = jsonDecode(res.body);
+    if (decoded is Map && decoded['code'] == _kAuthVerificationRequiredCode) {
+      throw EmailVerificationRequiredException(
+        decoded['message']?.toString() ?? 'Email verification required',
+        errorCode: _kAuthVerificationRequiredCode,
+      );
+    }
+  } on EmailVerificationRequiredException {
+    rethrow;
+  } catch (_) {
+    /* not JSON or wrong shape */
+  }
+}
 
 /// HTTP client for the Node API (`/api/wallet`, `/api/recharge`, authenticated checkout).
 class ApiService {
@@ -131,6 +151,7 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
@@ -154,6 +175,7 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
@@ -190,6 +212,7 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
@@ -217,6 +240,7 @@ class ApiService {
   Future<WalletBalance> getBalance() async {
     final res = await _getAuthed('/api/wallet/balance');
     if (res.statusCode == 403) {
+      _throwIfEmailVerificationRequired(res);
       throw StateError(
         kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Balance', res),
       );
@@ -244,6 +268,7 @@ class ApiService {
       extraHeaders: {'Idempotency-Key': idem},
     );
     if (res.statusCode == 403) {
+      _throwIfEmailVerificationRequired(res);
       throw StateError(
         kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Topup', res),
       );

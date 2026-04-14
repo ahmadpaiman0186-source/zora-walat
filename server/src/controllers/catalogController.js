@@ -1,5 +1,6 @@
 import { listAirtimeForOperator } from '../lib/pricing.js';
 import { prisma } from '../db.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 const ALLOWED = ['roshan', 'mtn', 'etisalat', 'afghanWireless'];
 
@@ -26,7 +27,9 @@ export function getAirtimeCatalog(req, res) {
       { securityEvent: 'catalog_invalid_operator' },
       'security',
     );
-    return res.status(400).json({ error: 'Invalid operator' });
+    return res
+      .status(400)
+      .json(clientErrorBody('Invalid operator', 'catalog_invalid_operator'));
   }
   return res.json({ items: listAirtimeForOperator(operator) });
 }

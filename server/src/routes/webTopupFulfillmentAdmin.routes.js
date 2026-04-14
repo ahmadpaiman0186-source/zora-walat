@@ -1,5 +1,8 @@
 import { Router } from 'express';
 
+import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import {
   requireAuth,
   requireStaff,
@@ -32,6 +35,14 @@ const router = Router();
  */
 async function respondWithRunbook(res, status, json, ctx) {
   const { orderId, log } = ctx || {};
+  const errText = typeof json.error === 'string' ? json.error : 'Request failed';
+  const codeStr =
+    typeof json.code === 'string' && json.code.length > 0
+      ? json.code
+      : API_CONTRACT_CODE.INTERNAL_ERROR;
+  const base = clientErrorBody(errText, codeStr, {
+    nextAction: json.nextAction,
+  });
   if (orderId && log) {
     try {
       const d = await getWebTopupFulfillmentDiagnostics(orderId, log, {
@@ -40,7 +51,7 @@ async function respondWithRunbook(res, status, json, ctx) {
       });
       if (d.ok) {
         return res.status(status).json({
-          ...json,
+          ...base,
           summary: d.summary,
           runbook: d.runbook,
         });
@@ -49,7 +60,7 @@ async function respondWithRunbook(res, status, json, ctx) {
       /* diagnostics unavailable */
     }
   }
-  return res.status(status).json(json);
+  return res.status(status).json(base);
 }
 
 /**
@@ -61,7 +72,7 @@ async function handleFulfillmentError(err, res, ctx) {
   const e = /** @type {{ code?: string; message?: string }} */ (err);
   const c = e?.code;
   if (c === FULFILLMENT_SERVICE_CODE.ORDER_NOT_FOUND) {
-    return res.status(404).json({ error: 'Not found', code: c });
+    return res.status(404).json(clientErrorBody('Not found', c));
   }
   if (c === FULFILLMENT_SERVICE_CODE.FULFILLMENT_SUSPENDED) {
     return respondWithRunbook(
@@ -171,7 +182,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     if (!isValidTopupOrderId(orderId)) {
-      return res.status(400).json({ error: 'Invalid order id' });
+      return res.status(400).json(staffApiErrorBody('Invalid order id', 400));
     }
     const actor = /** @type {{ id: string, email: string, role: string }} */ (
       req.user
@@ -225,7 +236,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     if (!isValidTopupOrderId(orderId)) {
-      return res.status(400).json({ error: 'Invalid order id' });
+      return res.status(400).json(staffApiErrorBody('Invalid order id', 400));
     }
     const actor = /** @type {{ id: string, email: string, role: string }} */ (
       req.user
@@ -292,7 +303,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     if (!isValidTopupOrderId(orderId)) {
-      return res.status(400).json({ error: 'Invalid order id' });
+      return res.status(400).json(staffApiErrorBody('Invalid order id', 400));
     }
     const preflight = await runReloadlySandboxDispatchPreflight(orderId);
     res.setHeader('Cache-Control', 'no-store');
@@ -307,14 +318,18 @@ router.get(
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     if (!isValidTopupOrderId(orderId)) {
-      return res.status(400).json({ error: 'Invalid order id' });
+      return res.status(400).json(staffApiErrorBody('Invalid order id', 400));
     }
     const diag = await getWebTopupFulfillmentDiagnostics(orderId, req.log, {
       includeRunbook: true,
     });
     res.setHeader('Cache-Control', 'no-store');
     if (!diag.ok) {
-      return res.status(404).json(diag);
+      const code =
+        typeof diag.error === 'string'
+          ? diag.error
+          : FULFILLMENT_SERVICE_CODE.ORDER_NOT_FOUND;
+      return res.status(404).json(clientErrorBody('Not found', code));
     }
     return res.status(200).json(diag);
   }),

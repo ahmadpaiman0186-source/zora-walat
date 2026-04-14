@@ -17,6 +17,10 @@ export type PublicTopupOrder = {
   paymentIntentId: string | null;
   paymentStatus: string;
   fulfillmentStatus: string;
+  /** Present when the order was created with a logged-in account (no raw user id). */
+  accountLinked?: boolean;
+  /** True when the viewer is the bound account (JWT matches stored binding). */
+  viewerIsBoundUser?: boolean;
   createdAt: string;
   updatedAt: string;
 };

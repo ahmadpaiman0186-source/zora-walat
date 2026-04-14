@@ -41,20 +41,32 @@ import { deviceFingerprintHash } from '../lib/deviceFingerprint.js';
 import { logOpsEvent } from '../lib/opsLog.js';
 import { recordCheckoutSessionCreated } from '../lib/opsMetrics.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
 import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
+import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
+import { WEBTOPUP_CLIENT_ERROR_CODE } from '../constants/webtopupClientErrors.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { timingSafeEqualUtf8 } from '../lib/timingSafeString.js';
+import { assertPaymentIntentRiskAllowed } from '../services/risk/assertPaymentIntentRisk.js';
 
 export async function createCheckoutSession(req, res) {
   const authUserId = req.user?.id;
   if (!authUserId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
 
   const stripe = getStripeClient();
   if (!stripe) {
-    return res.status(503).json({
-      error:
+    return res.status(503).json(
+      clientErrorBody(
         'Stripe not configured. Set STRIPE_SECRET_KEY in server environment (see server/.env.example).',
-    });
+        'stripe_not_configured',
+      ),
+    );
   }
 
   const origin = req.headers.origin;
@@ -73,9 +85,12 @@ export async function createCheckoutSession(req, res) {
     'checkout client base',
   );
   if (!clientBaseResolution.ok) {
-    return res.status(clientBaseResolution.status).json({
-      error: clientBaseResolution.error,
-    });
+    return res.status(clientBaseResolution.status).json(
+      clientErrorBody(
+        String(clientBaseResolution.error ?? 'Bad request'),
+        'checkout_client_base_unresolved',
+      ),
+    );
   }
   const clientBase = clientBaseResolution.clientBase;
 
@@ -87,7 +102,10 @@ export async function createCheckoutSession(req, res) {
       'security',
     );
     return res.status(400).json({
-      error: 'Idempotency-Key header required (UUID v4)',
+      ...clientErrorBody(
+        'Idempotency-Key header required (UUID v4)',
+        'checkout_idempotency_required',
+      ),
       moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
     });
   }
@@ -103,10 +121,14 @@ export async function createCheckoutSession(req, res) {
         'security',
       );
       if (env.nodeEnv === 'production') {
-        return res.status(400).json({ error: 'Invalid request body' });
+        return res
+          .status(400)
+          .json(
+            clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
+          );
       }
       return res.status(400).json({
-        error: 'Invalid request body',
+        ...clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
         details: err.flatten(),
       });
     }
@@ -117,10 +139,9 @@ export async function createCheckoutSession(req, res) {
     where: { code: parsed.senderCountry },
   });
   if (!sender || !sender.enabled) {
-    return res.status(400).json({
-      error: 'Invalid or disabled sender country',
-      code: 'SENDER_COUNTRY_INVALID',
-    });
+    return res.status(400).json(
+      clientErrorBody('Invalid or disabled sender country', 'SENDER_COUNTRY_INVALID'),
+    );
   }
 
   const priced = resolveCheckoutPricing({
@@ -139,14 +160,15 @@ export async function createCheckoutSession(req, res) {
         : priced.code === 'CHECKOUT_BELOW_MINIMUM'
           ? priced.message
           : null;
-    return res.status(400).json({
-      error:
+    return res.status(400).json(
+      clientErrorBody(
         hard ??
-        (env.nodeEnv === 'production'
-          ? 'Checkout cannot be priced safely'
-          : priced.message),
-      code: priced.code,
-    });
+          (env.nodeEnv === 'production'
+            ? 'Checkout cannot be priced safely'
+            : priced.message),
+        String(priced.code),
+      ),
+    );
   }
 
   const trustedCents = priced.pricing.finalPriceCents;
@@ -160,25 +182,34 @@ export async function createCheckoutSession(req, res) {
       { securityEvent: 'checkout_package_operator_mismatch' },
       'security',
     );
-    return res.status(400).json({
-      error:
+    return res.status(400).json(
+      clientErrorBody(
         env.nodeEnv === 'production'
           ? 'Invalid checkout request'
           : pair.error,
-    });
+        'checkout_package_operator_mismatch',
+      ),
+    );
   }
 
   let recipientNational = null;
   if (parsed.recipientPhone) {
     recipientNational = normalizeAfghanNational(parsed.recipientPhone);
     if (!recipientNational) {
-      return res.status(400).json({ error: 'Invalid recipient phone' });
+      return res
+        .status(400)
+        .json(
+          clientErrorBody('Invalid recipient phone', 'checkout_invalid_recipient_phone'),
+        );
     }
     const v = validateAfghanMobileNational(recipientNational);
     if (!v.ok) {
-      return res
-        .status(400)
-        .json({ error: v.error || 'Invalid recipient phone' });
+      return res.status(400).json(
+        clientErrorBody(
+          v.error || 'Invalid recipient phone',
+          'checkout_invalid_recipient_phone',
+        ),
+      );
     }
   }
 
@@ -420,30 +451,40 @@ export async function createCheckoutSession(req, res) {
 /**
  * POST /create-payment-intent — embedded Payment Element (Next.js marketing checkout).
  * Test keys work in any NODE_ENV; live keys only when NODE_ENV=production.
+ *
+ * When `orderId` is set, caller must prove possession of the order `sessionKey` via
+ * header `X-ZW-WebTopup-Session` (same value returned from `POST /api/topup-orders`).
+ * Optional `Authorization: Bearer` adds non-blocking metadata (`optional_app_user_id`, …).
  */
 export async function createTestPaymentIntent(req, res) {
   if (!getValidatedStripeSecretKey()) {
-    return res.status(503).json({
-      error:
+    return res.status(503).json(
+      clientErrorBody(
         'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
-    });
+        'stripe_not_configured',
+      ),
+    );
   }
   if (!isStripeKeyAllowedForWebTopupCharges()) {
     const mode = process.env.NODE_ENV || 'development';
-    return res.status(403).json({
-      error:
+    return res.status(403).json(
+      clientErrorBody(
         mode === 'production'
           ? 'Stripe key mode is not valid for embedded checkout in this deployment.'
           : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for embedded checkout.',
-    });
+        'stripe_key_mode_forbidden',
+      ),
+    );
   }
 
   const stripe = getStripeClient();
   if (!stripe) {
-    return res.status(503).json({
-      error:
+    return res.status(503).json(
+      clientErrorBody(
         'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
-    });
+        'stripe_not_configured',
+      ),
+    );
   }
 
   let parsed;
@@ -453,11 +494,13 @@ export async function createTestPaymentIntent(req, res) {
     if (e instanceof ZodError) {
       if (env.nodeEnv !== 'production') {
         return res.status(400).json({
-          error: 'Invalid request body',
+          ...clientErrorBody('Invalid request body', 'validation_error'),
           details: e.flatten(),
         });
       }
-      return res.status(400).json({ error: 'Invalid request body' });
+      return res
+        .status(400)
+        .json(clientErrorBody('Invalid request body', 'validation_error'));
     }
     throw e;
   }
@@ -470,48 +513,98 @@ export async function createTestPaymentIntent(req, res) {
       { securityEvent: 'payment_intent_idempotency_key_invalid' },
       'security',
     );
-    return res.status(400).json({
-      error: 'Idempotency-Key header required (UUID v4)',
-      code: 'payment_intent_idempotency_required',
-      moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
-    });
+    return res.status(400).json(
+      clientErrorBody(
+        'Idempotency-Key header required (UUID v4)',
+        WEBTOPUP_CLIENT_ERROR_CODE.PAYMENT_INTENT_IDEMPOTENCY_REQUIRED,
+        { moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED },
+      ),
+    );
   }
   const idempotencyKey = idemParsed.data;
 
   const amountCents = parsed.amount ?? 500;
 
+  assertPaymentIntentRiskAllowed(req, {
+    amountCents,
+    traceId: req.traceId ?? null,
+  });
+
   let metadata = { source: 'zora_walat_next_test' };
   if (parsed.orderId != null && parsed.orderId !== '') {
+    let orderRow;
     try {
-      await assertTopupOrderEligibleForPaymentIntent(
+      orderRow = await assertTopupOrderEligibleForPaymentIntent(
         parsed.orderId,
         amountCents,
       );
-      metadata = { ...metadata, topup_order_id: parsed.orderId };
+      metadata = {
+        ...metadata,
+        topup_order_id: parsed.orderId,
+        ...(orderRow.userId
+          ? { webtopup_bound_user_id: String(orderRow.userId) }
+          : {}),
+      };
     } catch (e) {
       const c = e?.code;
       if (c === 'invalid_order') {
-        return res.status(400).json({ error: 'Invalid order id' });
+        return res
+          .status(400)
+          .json(clientErrorBody('Invalid order id', 'invalid_topup_order_id'));
       }
       if (c === 'not_found') {
-        return res.status(404).json({ error: 'Order not found' });
+        return res
+          .status(404)
+          .json(clientErrorBody('Order not found', 'topup_order_not_found'));
       }
       if (c === 'order_not_pending') {
-        return res
-          .status(409)
-          .json({ error: 'Order is not pending payment' });
+        return res.status(409).json(
+          clientErrorBody('Order is not pending payment', 'topup_order_not_pending'),
+        );
       }
       if (c === 'order_already_linked') {
-        return res.status(409).json({
-          error: 'This order already has a PaymentIntent',
-        });
+        return res.status(409).json(
+          clientErrorBody(
+            'This order already has a PaymentIntent',
+            'topup_order_pi_already_linked',
+          ),
+        );
       }
       if (c === 'amount_mismatch') {
-        return res.status(400).json({ error: 'Amount does not match order' });
+        return res
+          .status(400)
+          .json(clientErrorBody('Amount does not match order', 'topup_order_amount_mismatch'));
       }
       throw e;
     }
+
+    const sessionHeader = req.get('x-zw-webtopup-session')?.trim() ?? '';
+    if (!timingSafeEqualUtf8(sessionHeader, orderRow.sessionKey)) {
+      req.log?.warn(
+        { securityEvent: 'webtopup_pi_session_invalid', orderIdSuffix: parsed.orderId.slice(-8) },
+        'security',
+      );
+      return res.status(403).json(
+        clientErrorBody(
+          'Header X-ZW-WebTopup-Session must match the order session from checkout.',
+          WEBTOPUP_CLIENT_ERROR_CODE.ORDER_SESSION_INVALID,
+          { moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED },
+        ),
+      );
+    }
   }
+
+  const auth = req.webtopupAuthUser;
+  const stripeMetadata = {
+    ...metadata,
+    request_idempotency_key: idempotencyKey,
+    ...(auth
+      ? {
+          optional_app_user_id: auth.id,
+          optional_email_verified: auth.emailVerified ? 'true' : 'false',
+        }
+      : {}),
+  };
 
   let pi;
   try {
@@ -520,10 +613,7 @@ export async function createTestPaymentIntent(req, res) {
         amount: amountCents,
         currency: 'usd',
         automatic_payment_methods: { enabled: true },
-        metadata: {
-          ...metadata,
-          request_idempotency_key: idempotencyKey,
-        },
+        metadata: stripeMetadata,
       },
       { idempotencyKey },
     );
@@ -545,10 +635,52 @@ export async function createTestPaymentIntent(req, res) {
       reason: 'missing_client_secret',
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    return res.status(500).json({ error: 'Stripe did not return a client secret' });
+    return res
+      .status(500)
+      .json(
+        clientErrorBody(
+          'Stripe did not return a client secret',
+          'stripe_missing_client_secret',
+        ),
+      );
   }
 
   if (parsed.orderId != null && parsed.orderId !== '') {
+    const metaOrder = pi.metadata?.topup_order_id;
+    if (String(metaOrder ?? '') !== String(parsed.orderId)) {
+      webTopupLog(req.log, 'error', 'payment_intent_metadata_mismatch', {
+        orderIdSuffix: String(parsed.orderId).slice(-8),
+        paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+      });
+      try {
+        await stripe.paymentIntents.cancel(pi.id);
+      } catch (cancelErr) {
+        req.log?.warn?.(
+          {
+            securityEvent: 'payment_intent_cancel_failed',
+            paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+          },
+          'security',
+        );
+      }
+      return res.status(500).json(
+        clientErrorBody(
+          'PaymentIntent metadata integrity check failed',
+          WEBTOPUP_CLIENT_ERROR_CODE.PAYMENT_INTENT_METADATA_MISMATCH,
+          { moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED },
+        ),
+      );
+    }
+    if (typeof pi.amount === 'number' && pi.amount !== amountCents) {
+      try {
+        await stripe.paymentIntents.cancel(pi.id);
+      } catch {
+        /* best-effort */
+      }
+      return res.status(400).json(
+        clientErrorBody('Amount does not match order', 'topup_order_amount_mismatch'),
+      );
+    }
     const linked = await linkWebTopupPaymentIntent(parsed.orderId, pi.id);
     if (!linked) {
       webTopupLog(req.log, 'warn', 'suspicious_request_detected', {
@@ -556,6 +688,18 @@ export async function createTestPaymentIntent(req, res) {
         orderIdSuffix: String(parsed.orderId).slice(-8),
         paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       });
+      try {
+        await stripe.paymentIntents.cancel(pi.id);
+      } catch {
+        /* best-effort */
+      }
+      return res.status(409).json(
+        clientErrorBody(
+          'Could not attach PaymentIntent to order; refresh and retry.',
+          WEBTOPUP_CLIENT_ERROR_CODE.TOPUP_ORDER_PI_LINK_FAILED,
+          { moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED },
+        ),
+      );
     }
   }
 
@@ -568,9 +712,11 @@ export async function createTestPaymentIntent(req, res) {
       parsed.orderId != null && parsed.orderId !== ''
         ? String(parsed.orderId).slice(-8)
         : undefined,
+    optionalAuth: Boolean(auth),
   });
 
   return res.status(200).json({
+    success: true,
     clientSecret: pi.client_secret,
     paymentIntentId: pi.id,
     moneyPathOutcome: MONEY_PATH_OUTCOME.ACCEPTED,

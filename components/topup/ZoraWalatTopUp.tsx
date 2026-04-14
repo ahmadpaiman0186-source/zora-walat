@@ -40,6 +40,15 @@ import styles from './ZoraWalatTopUp.module.css';
 
 const STRIPE_RETURN_PENDING_KEY = 'zw_stripe_return_pending';
 
+/** Prefers normalized `{ message }`, then legacy `{ error }`. */
+function readApiErrorMessage(data: unknown, fallback: string): string {
+  if (typeof data !== 'object' || data === null) return fallback;
+  const o = data as Record<string, unknown>;
+  if (typeof o.message === 'string' && o.message.length > 0) return o.message;
+  if (typeof o.error === 'string' && o.error.length > 0) return o.error;
+  return fallback;
+}
+
 function formatUsd(cents: number, locale: UiLocale): string {
   const tag =
     locale === 'tr' ? 'tr-TR' : locale === 'ar' ? 'ar' : locale === 'fa' ? 'fa' : 'en-US';
@@ -229,14 +238,7 @@ export function ZoraWalatTopUp() {
       );
       const createData: unknown = await createRes.json().catch(() => ({}));
       if (!createRes.ok) {
-        const msg =
-          typeof createData === 'object' &&
-          createData !== null &&
-          'error' in createData &&
-          typeof (createData as { error: unknown }).error === 'string'
-            ? (createData as { error: string }).error
-            : m.error.orderCreate;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(createData, m.error.orderCreate));
         setStep('error');
         return;
       }
@@ -265,11 +267,19 @@ export function ZoraWalatTopUp() {
       checkoutContextRef.current.updateToken = resolvedToken;
       saveTopupUpdateToken(created.order.id, resolvedToken);
 
+      const webtopupSession = created.sessionKey ?? sessionKey;
+      const piIdempotencyKey = crypto.randomUUID();
       const res = await fetchWithTimeout(
         `${apiBase}/create-payment-intent`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': piIdempotencyKey,
+            ...(webtopupSession
+              ? { 'X-ZW-WebTopup-Session': webtopupSession }
+              : {}),
+          },
           body: JSON.stringify({
             amount: amountCents,
             orderId: created.order.id,
@@ -280,14 +290,7 @@ export function ZoraWalatTopUp() {
       const data: unknown = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const msg =
-          typeof data === 'object' &&
-          data !== null &&
-          'error' in data &&
-          typeof (data as { error: unknown }).error === 'string'
-            ? (data as { error: string }).error
-            : `HTTP ${res.status}`;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(data, `HTTP ${res.status}`));
         setStep('error');
         return;
       }
@@ -377,14 +380,7 @@ export function ZoraWalatTopUp() {
       );
       const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg =
-          typeof data === 'object' &&
-          data !== null &&
-          'error' in data &&
-          typeof (data as { error: unknown }).error === 'string'
-            ? (data as { error: string }).error
-            : m.error.orderFinalize;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(data, m.error.orderFinalize));
         return;
       }
       const body = data as { order?: PublicTopupOrder };

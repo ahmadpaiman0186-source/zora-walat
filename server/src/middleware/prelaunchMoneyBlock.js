@@ -1,9 +1,11 @@
 import { env } from '../config/env.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 /** Unified response for all money-moving routes when `PRELAUNCH_LOCKDOWN=true`. */
-export const PRELAUNCH_MONEY_BODY = {
-  error: 'Service temporarily unavailable (pre-launch)',
-};
+export const PRELAUNCH_MONEY_BODY = clientErrorBody(
+  'Service temporarily unavailable (pre-launch)',
+  'prelaunch_lockdown',
+);
 
 /**
  * Blocks checkout creation, wallet top-up, and recharge order execution.

@@ -26,6 +26,7 @@ class AuthApiUser {
     required this.id,
     required this.email,
     required this.role,
+    this.emailVerified,
   });
 
   factory AuthApiUser.fromJson(Map<String, dynamic> json) {
@@ -33,12 +34,15 @@ class AuthApiUser {
       id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
       role: json['role'] as String? ?? '',
+      emailVerified: json['emailVerified'] as bool?,
     );
   }
 
   final String id;
   final String email;
   final String role;
+  /// Server: `User.emailVerifiedAt` is set (e.g. after OTP verify).
+  final bool? emailVerified;
 }
 
 class OtpRequestResult {
@@ -231,7 +235,37 @@ class AuthApiService {
     }
     final map = jsonDecode(res.body) as Map<String, dynamic>;
     return OtpRequestResult(
-      ok: map['ok'] == true,
+      ok: map['ok'] == true || map['success'] == true,
+      message:
+          map['message'] as String? ??
+          'If the account is eligible, an OTP email will be sent.',
+    );
+  }
+
+  /// Same server semantics as [requestOtp] — uses `POST /api/auth/resend-otp`.
+  Future<OtpRequestResult> resendOtp({required String email}) async {
+    _requireConfiguredBaseUrl();
+    http.Response res;
+    try {
+      res = await client.post(
+        _u('$_authPrefix/resend-otp'),
+        headers: const {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+    } on Exception catch (error) {
+      throw _networkError(error);
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      final error = _readErrorPayload(res);
+      throw AuthApiException(
+        message: error.message,
+        statusCode: res.statusCode,
+        errorCode: error.code,
+      );
+    }
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    return OtpRequestResult(
+      ok: map['ok'] == true || map['success'] == true,
       message:
           map['message'] as String? ??
           'If the account is eligible, an OTP email will be sent.',

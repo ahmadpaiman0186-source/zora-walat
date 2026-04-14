@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import Redis from 'ioredis';
 
+import { INTERNAL_TOOLING_CODE } from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { prisma } from '../db.js';
 import { requireAuth, requireStaff } from '../middleware/authMiddleware.js';
 import { staffPrivilegedLimiter } from '../middleware/rateLimits.js';
@@ -79,7 +82,11 @@ router.get(
       res.json(report);
     } catch (e) {
       req.log?.error({ err: e }, 'phase1_ops_report_failed');
-      res.status(500).json({ error: 'Internal error' });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
@@ -103,7 +110,11 @@ router.get(
       res.json(snapshot);
     } catch (e) {
       req.log?.error({ err: e }, 'ops_health_failed');
-      res.status(500).json({ error: 'Internal error', ok: false });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
@@ -165,7 +176,11 @@ router.get(
       res.json(snapshot);
     } catch (e) {
       req.log?.error({ err: e }, 'fulfillment_queue_metrics_failed');
-      res.status(500).json({ error: 'Internal error' });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
@@ -181,7 +196,7 @@ router.get(
   async (req, res) => {
     const id = String(req.query.id ?? '').trim();
     if (!id || id.length > 128) {
-      return res.status(400).json({ error: 'Missing or invalid id' });
+      return res.status(400).json(staffApiErrorBody('Missing or invalid id', 400));
     }
     try {
       const order = await prisma.paymentCheckout.findFirst({
@@ -200,7 +215,7 @@ router.get(
         },
       });
       if (!order) {
-        return res.status(404).json({ error: 'Not found' });
+        return res.status(404).json(staffApiErrorBody('Not found', 404));
       }
 
       const attempts = await prisma.fulfillmentAttempt.findMany({
@@ -301,7 +316,11 @@ router.get(
       });
     } catch (e) {
       req.log?.error({ err: e }, 'ops order-health failed');
-      return res.status(500).json({ error: 'Internal error' });
+      return res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );

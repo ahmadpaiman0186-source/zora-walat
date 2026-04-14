@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 
 import { prisma } from '../db.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
@@ -17,7 +18,7 @@ const registerBody = z.object({
 router.post('/devices', requireAuth, async (req, res) => {
   const parsed = registerBody.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Invalid body' });
+    return res.status(400).json(staffApiErrorBody('Invalid body', 400));
   }
   const { token, platform } = parsed.data;
   const userId = req.user.id;
@@ -37,7 +38,7 @@ router.post('/devices', requireAuth, async (req, res) => {
 router.delete('/devices', requireAuth, async (req, res) => {
   const parsed = registerBody.pick({ token: true }).safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Invalid body' });
+    return res.status(400).json(staffApiErrorBody('Invalid body', 400));
   }
   await prisma.pushDevice.deleteMany({
     where: { fcmToken: parsed.data.token, userId: req.user.id },
@@ -90,14 +91,14 @@ router.get('/inbox', requireAuth, async (req, res) => {
 router.post('/inbox/:id/read', requireAuth, async (req, res) => {
   const id = String(req.params.id ?? '').trim();
   if (!id) {
-    return res.status(400).json({ error: 'Invalid id' });
+    return res.status(400).json(staffApiErrorBody('Invalid id', 400));
   }
   const u = await prisma.userNotification.updateMany({
     where: { id, userId: req.user.id },
     data: { readAt: new Date() },
   });
   if (u.count === 0) {
-    return res.status(404).json({ error: 'Not found' });
+    return res.status(404).json(staffApiErrorBody('Not found', 404));
   }
   return res.status(204).send();
 });

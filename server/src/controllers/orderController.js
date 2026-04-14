@@ -1,4 +1,6 @@
+import { ORDER_API_ERROR_CODE } from '../constants/apiContractCodes.js';
 import { prisma } from '../db.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { deriveCustomerFulfillmentView } from '../lib/customerVisibleOrderStatus.js';
 import { getCanonicalPhase1OrderForUser } from '../services/canonicalPhase1OrderService.js';
@@ -70,7 +72,11 @@ export async function listOrders(req, res) {
 export async function getOrderById(req, res) {
   const id = req.params.id;
   if (!isLikelyPaymentCheckoutId(id)) {
-    return res.status(400).json({ error: 'Invalid order id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid order id', ORDER_API_ERROR_CODE.INVALID_ORDER_ID),
+      );
   }
   const userId = req.user.id;
 
@@ -86,7 +92,9 @@ export async function getOrderById(req, res) {
     },
   });
   if (!row) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   const latest = row.fulfillmentAttempts?.[0] ?? null;
   const { fulfillmentAttempts: _fa, ...rest } = row;
@@ -98,7 +106,11 @@ const SESSION_ID_RE = /^cs_[a-zA-Z0-9]+$/;
 export async function getOrderByStripeSession(req, res) {
   const sessionId = req.params.sessionId;
   if (!SESSION_ID_RE.test(sessionId)) {
-    return res.status(400).json({ error: 'Invalid session id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid session id', ORDER_API_ERROR_CODE.INVALID_SESSION_ID),
+      );
   }
   const userId = req.user.id;
 
@@ -114,7 +126,9 @@ export async function getOrderByStripeSession(req, res) {
     },
   });
   if (!row) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   const latest = row.fulfillmentAttempts?.[0] ?? null;
   const { fulfillmentAttempts: _fa, ...rest } = row;
@@ -128,7 +142,11 @@ export async function getOrderByStripeSession(req, res) {
 export async function getPhase1CanonicalOrder(req, res) {
   const id = req.params.id;
   if (!isLikelyPaymentCheckoutId(id)) {
-    return res.status(400).json({ error: 'Invalid order id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid order id', ORDER_API_ERROR_CODE.INVALID_ORDER_ID),
+      );
   }
   const userId = req.user.id;
   req.log?.info?.(
@@ -141,7 +159,9 @@ export async function getPhase1CanonicalOrder(req, res) {
   );
   const phase1 = await getCanonicalPhase1OrderForUser(id, userId);
   if (!phase1) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   res.json({ phase1Order: phase1 });
 }

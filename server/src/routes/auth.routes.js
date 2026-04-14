@@ -2,8 +2,8 @@ import { Router } from 'express';
 
 import * as auth from '../controllers/authController.js';
 import {
-  emailOtpRequestLimiter,
-  emailOtpVerifyLimiter,
+  otpRequestEndpointLimiter,
+  otpVerifyEndpointLimiter,
 } from '../middleware/rateLimits.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
@@ -19,13 +19,19 @@ router.post(
 router.post('/login', requireJsonContentType, asyncHandler(auth.postLogin));
 router.post(
   '/request-otp',
-  emailOtpRequestLimiter,
+  otpRequestEndpointLimiter,
   requireJsonContentType,
   asyncHandler(auth.postRequestOtp),
 );
 router.post(
+  '/resend-otp',
+  otpRequestEndpointLimiter,
+  requireJsonContentType,
+  asyncHandler(auth.postResendOtp),
+);
+router.post(
   '/verify-otp',
-  emailOtpVerifyLimiter,
+  otpVerifyEndpointLimiter,
   requireJsonContentType,
   asyncHandler(auth.postVerifyOtp),
 );

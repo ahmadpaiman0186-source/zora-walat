@@ -103,6 +103,8 @@ export function createApp() {
         'X-Trace-Id',
         'X-Request-Id',
         'X-ZW-Ops-Token',
+        /** Web top-up: proves possession of `sessionKey` when creating a PaymentIntent for an order. */
+        'X-ZW-WebTopup-Session',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
       ],

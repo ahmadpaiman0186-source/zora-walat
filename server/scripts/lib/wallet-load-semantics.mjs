@@ -8,10 +8,15 @@ export function classifyWalletTopupResult(status, parsed) {
     parsed && typeof parsed === 'object' && parsed.code != null
       ? String(parsed.code)
       : null;
+  const msgText =
+    parsed && typeof parsed === 'object' && parsed.message != null
+      ? String(parsed.message)
+      : '';
   const errText =
     parsed && typeof parsed === 'object' && parsed.error != null
       ? String(parsed.error)
       : '';
+  const text = errText || msgText;
 
   if (status === 401) {
     return { kind: 'auth_required', status, code };
@@ -19,7 +24,7 @@ export function classifyWalletTopupResult(status, parsed) {
   if (
     status === 400 &&
     (code === 'wallet_topup_idempotency_required' ||
-      errText.includes('Idempotency-Key header required'))
+      text.includes('Idempotency-Key header required'))
   ) {
     return { kind: 'idempotency_required', status, code };
   }
@@ -28,7 +33,7 @@ export function classifyWalletTopupResult(status, parsed) {
   }
   if (
     status === 400 &&
-    errText.includes('Invalid Idempotency-Key') &&
+    text.includes('Invalid Idempotency-Key') &&
     !code
   ) {
     return { kind: 'idempotency_invalid', status, code };
@@ -41,6 +46,9 @@ export function classifyWalletTopupResult(status, parsed) {
   }
   if (status === 400) {
     return { kind: 'validation_or_business_400', status, code };
+  }
+  if (status === 403 && code === 'auth_verification_required') {
+    return { kind: 'verification_required', status, code };
   }
   if (status === 403) {
     return { kind: 'forbidden', status, code };

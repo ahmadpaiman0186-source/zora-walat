@@ -1,5 +1,11 @@
 import { Router } from 'express';
 
+import { INTERNAL_TOOLING_CODE } from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import {
+  processingManualFailureBody,
+  staffApiErrorBody,
+} from '../lib/staffApiError.js';
 import { requireAuth, requireAdmin, requireStaff } from '../middleware/authMiddleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
@@ -41,12 +47,12 @@ router.get(
   asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
     if (!isLikelyPaymentCheckoutId(orderId)) {
-      res.status(400).json({ error: 'Invalid order id' });
+      res.status(400).json(staffApiErrorBody('Invalid order id', 400));
       return;
     }
     const result = await getManualRequiredDiagnostics(orderId);
     if (!result.ok) {
-      res.status(result.status ?? 404).json({ error: result.error });
+      res.status(result.status ?? 404).json(processingManualFailureBody(result));
       return;
     }
     res.setHeader('Cache-Control', 'no-store');
@@ -61,7 +67,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
     if (!isLikelyPaymentCheckoutId(orderId)) {
-      res.status(400).json({ error: 'Invalid order id' });
+      res.status(400).json(staffApiErrorBody('Invalid order id', 400));
       return;
     }
     const reason =
@@ -73,7 +79,7 @@ router.post(
       ip: req.ip ? String(req.ip).slice(0, 64) : null,
     });
     if (!out.ok) {
-      res.status(out.status ?? 400).json({ error: out.error });
+      res.status(out.status ?? 400).json(processingManualFailureBody(out));
       return;
     }
     res.status(200).json(out);
@@ -87,7 +93,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
     if (!isLikelyPaymentCheckoutId(orderId)) {
-      res.status(400).json({ error: 'Invalid order id' });
+      res.status(400).json(staffApiErrorBody('Invalid order id', 400));
       return;
     }
     const reason =
@@ -100,19 +106,19 @@ router.post(
         ip: req.ip ? String(req.ip).slice(0, 64) : null,
       });
       if (!out.ok) {
-        res
-          .status(out.status ?? 400)
-          .json({ error: out.error, guidance: out.guidance ?? undefined });
+        res.status(out.status ?? 400).json(processingManualFailureBody(out));
         return;
       }
       res.status(200).json(out);
     } catch (e) {
       if (e?.code === 'conflict') {
-        res.status(409).json({
-          error: 'concurrent_state_change',
-          guidance:
-            'Order state changed during the operation. Refresh diagnostics and try again only if still appropriate.',
-        });
+        const guidance =
+          'Order state changed during the operation. Refresh diagnostics and try again only if still appropriate.';
+        res.status(409).json(
+          clientErrorBody(guidance, INTERNAL_TOOLING_CODE.PROCESSING_MANUAL_CONCURRENT_STATE, {
+            guidance,
+          }),
+        );
         return;
       }
       throw e;
@@ -127,7 +133,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const orderId = req.params.orderId;
     if (!isLikelyPaymentCheckoutId(orderId)) {
-      res.status(400).json({ error: 'Invalid order id' });
+      res.status(400).json(staffApiErrorBody('Invalid order id', 400));
       return;
     }
     const reason =
@@ -139,9 +145,7 @@ router.post(
       ip: req.ip ? String(req.ip).slice(0, 64) : null,
     });
     if (!out.ok) {
-      res
-        .status(out.status ?? 400)
-        .json({ error: out.error, guidance: out.guidance ?? undefined });
+      res.status(out.status ?? 400).json(processingManualFailureBody(out));
       return;
     }
     res.status(200).json(out);
