@@ -26,6 +26,7 @@
  * @property {string | null} fulfillmentReference
  * @property {string | null} fulfillmentErrorCode
  * @property {string | null} fulfillmentErrorMessageSafe
+ * @property {string | null} fulfillmentNextRetryAt
  * @property {string | null} lastProviderPayloadHash
  * @property {string} createdAt
  * @property {string} updatedAt

@@ -9,6 +9,8 @@ enum CustomerTrackingStage {
   delayed,
   retrying,
   failed,
+  /// Server indicates no further automatic recovery (distinct from transient failure).
+  failedTerminally,
   paymentConfirming,
   orderCancelled,
 }
@@ -32,7 +34,8 @@ class CustomerOrderTracking {
 
   static CustomerOrderTracking fromExecuteJson(Map<String, dynamic>? json) {
     final order = json?['order'] as Map<String, dynamic>?;
-    final keyRaw = order?['trackingStageKey'] as String?;
+    final keyRaw =
+        order?['lifecycleStageKey'] as String? ?? order?['trackingStageKey'] as String?;
     final key = keyRaw?.trim();
     if (key != null && key.isNotEmpty) {
       return fromServerTrackingStageKey(key);
@@ -134,6 +137,34 @@ class CustomerOrderTracking {
       case 'failed':
         return const CustomerOrderTracking(
           stage: CustomerTrackingStage.failed,
+          linearStepIndex: 2,
+          paymentIsSafe: true,
+          systemIsRetrying: false,
+        );
+      case 'failed_terminally':
+        return const CustomerOrderTracking(
+          stage: CustomerTrackingStage.failedTerminally,
+          linearStepIndex: 2,
+          paymentIsSafe: true,
+          systemIsRetrying: false,
+        );
+      case 'completed':
+        return const CustomerOrderTracking(
+          stage: CustomerTrackingStage.delivered,
+          linearStepIndex: 3,
+          paymentIsSafe: true,
+          systemIsRetrying: false,
+        );
+      case 'delayed':
+        return const CustomerOrderTracking(
+          stage: CustomerTrackingStage.delayed,
+          linearStepIndex: 2,
+          paymentIsSafe: true,
+          systemIsRetrying: false,
+        );
+      case 'requires_review':
+        return const CustomerOrderTracking(
+          stage: CustomerTrackingStage.verifying,
           linearStepIndex: 2,
           paymentIsSafe: true,
           systemIsRetrying: false,

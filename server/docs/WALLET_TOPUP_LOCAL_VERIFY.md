@@ -17,7 +17,7 @@
 1. Register or log in:
 
 ```http
-POST /auth/register
+POST /api/auth/register
 Content-Type: application/json
 
 {"email":"you@local.test","password":"AtLeast10Chars!"}
@@ -83,7 +83,7 @@ Invoke-RestMethod -Method Post -Uri "$base/api/wallet/topup" `
 ## Load testing (truthful)
 
 1. **Do not** load-test **without** auth: you will only measure **401s**.
-2. **Obtain tokens** per virtual user (register/login) or use a pool of users; respect **rate limits** on `/auth/*` and `/api/wallet/*`.
+2. **Obtain tokens** per virtual user (register/login) or use a pool of users; respect **rate limits** on `/api/auth/*` and `/api/wallet/*`.
 3. **Idempotency**:
    - **New UUID per request** → exercises first-apply path (real credit each time, until business limits).
    - **Same UUID repeated** → **200** with `idempotentReplay: true` (no extra credit); throughput reflects replay safety, not “payments per second.”

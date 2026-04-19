@@ -5,10 +5,10 @@
  */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { describe, it, before, after, afterEach } from 'node:test';
-import { PrismaClient } from '@prisma/client';
+import { describe, it, afterEach } from 'node:test';
 import bcrypt from 'bcrypt';
 
+import { prisma } from '../../src/db.js';
 import { ORDER_STATUS } from '../../src/constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../../src/constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../../src/constants/fulfillmentAttemptStatus.js';
@@ -24,24 +24,12 @@ const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 describe('Transaction fortress concurrency (integration)', { skip: !runIntegration }, () => {
-  /** @type {PrismaClient} */
-  let prisma;
   /** @type {string[]} */
   const userIds = [];
   /** @type {string[]} */
   const orderIds = [];
   /** @type {string[]} */
   const eventIds = [];
-
-  before(async () => {
-    prisma = new PrismaClient({ datasourceUrl: dbUrl });
-    await prisma.$connect();
-  });
-
-  after(async () => {
-    if (!prisma) return;
-    await prisma.$disconnect();
-  });
 
   afterEach(async () => {
     if (!prisma) return;

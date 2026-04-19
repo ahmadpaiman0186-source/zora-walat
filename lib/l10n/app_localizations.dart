@@ -340,6 +340,18 @@ abstract class AppLocalizations {
   /// **'Your location (card)'**
   String get checkoutCardRegionLabel;
 
+  /// No description provided for @checkoutSenderCountryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.'**
+  String get checkoutSenderCountryHint;
+
+  /// No description provided for @telecomRecipientAfghanistanDialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Afghanistan +93 — enter the local mobile (starts with 7).'**
+  String get telecomRecipientAfghanistanDialHint;
+
   /// No description provided for @checkoutPricingUsdServerNote.
   ///
   /// In en, this message translates to:
@@ -375,6 +387,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recipient number'**
   String get recipientNumber;
+
+  /// No description provided for @receivingCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving country'**
+  String get receivingCountryLabel;
+
+  /// No description provided for @rechargeCountryNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.'**
+  String get rechargeCountryNotSupported;
+
+  /// No description provided for @phoneLocalDigitsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the local number without country code.'**
+  String get phoneLocalDigitsHint;
 
   /// No description provided for @operator.
   ///
@@ -1347,6 +1377,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your bank authorized this purchase. We’re completing your top-up now.'**
   String get successStripeConfirmedShort;
+
+  /// No description provided for @successMissingReturnParamsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.'**
+  String get successMissingReturnParamsHint;
+
+  /// No description provided for @successBootstrapWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n{detail}'**
+  String successBootstrapWarning(String detail);
 
   /// No description provided for @receiptTitle.
   ///

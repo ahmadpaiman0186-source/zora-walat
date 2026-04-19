@@ -1,8 +1,11 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/auth/email_verification_required_exception.dart';
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
@@ -37,17 +40,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _logCheckoutOpened());
   }
 
-  Future<void> _logCheckoutOpened() async {
+  void _logCheckoutOpened() {
     final log = AppScope.of(context).transactionLog;
     final o = widget.order;
-    await log.append({
-      'event': 'checkout_opened',
-      'service': o.line.name,
-      'operator': o.operator.apiKey,
-      'product_id': o.productId,
-      'amount_usd_cents': o.finalUsdCents,
-      'phone_masked': o.metadata['phone_masked'] ?? '—',
-    });
+    unawaited(
+      log
+          .append({
+            'event': 'checkout_opened',
+            'service': o.line.name,
+            'operator': o.operator.apiKey,
+            'product_id': o.productId,
+            'amount_usd_cents': o.finalUsdCents,
+            'phone_masked': o.metadata['phone_masked'] ?? '—',
+          })
+          .catchError((_) {}),
+    );
   }
 
   Future<void> _pay() async {
@@ -64,11 +71,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final router = GoRouter.of(context);
     final paymentService = AppScope.of(context).paymentService;
     final log = AppScope.of(context).transactionLog;
-    await log.append({
-      'event': 'payment_attempt',
-      'product_id': widget.order.productId,
-      'amount_usd_cents': widget.order.finalUsdCents,
-    });
+    unawaited(
+      log
+          .append({
+            'event': 'payment_attempt',
+            'product_id': widget.order.productId,
+            'amount_usd_cents': widget.order.finalUsdCents,
+          })
+          .catchError((_) {}),
+    );
     try {
       await paymentService.startCheckout(
         amountUsdCents: widget.order.finalUsdCents,
@@ -78,26 +89,57 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         recipientPhone: widget.order.phone.raw,
         packageId: widget.order.productId,
       );
-      await log.append({
-        'event': 'payment_checkout_redirect',
-        'product_id': widget.order.productId,
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'payment_checkout_redirect',
+              'product_id': widget.order.productId,
+            })
+            .catchError((_) {}),
+      );
     } on UnauthorizedException catch (_) {
-      await log.append({
-        'event': 'payment_failure',
-        'message': 'unauthorized',
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'payment_failure',
+              'message': 'unauthorized',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.authRequiredMessage)),
       );
       router.push(AppRoutePaths.signIn);
+    } on EmailVerificationRequiredException catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'payment_failure',
+              'message': 'email_verification_required',
+            })
+            .catchError((_) {}),
+      );
+      if (!mounted) return;
+      final email = AppScope.authSessionOf(context).userEmail ?? '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+      if (email.isNotEmpty) {
+        router.push(
+          '${AppRoutePaths.signInOtp}?email=${Uri.encodeComponent(email)}',
+        );
+      }
     } catch (e) {
-      await log.append({
-        'event': 'payment_failure',
-        'message': '$e',
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'payment_failure',
+              'message': '$e',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,6 +292,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         if (v != null) setState(() => _senderCountry = v);
                       },
               ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.checkoutSenderCountryHint,
+            style: t.textTheme.bodySmall?.copyWith(
+              color: t.colorScheme.outline,
+              height: 1.35,
             ),
           ),
           const SizedBox(height: 8),

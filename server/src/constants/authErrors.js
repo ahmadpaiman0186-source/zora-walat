@@ -17,4 +17,6 @@ export const AUTH_ERROR_CODE = Object.freeze({
   /** Sensitive routes when `emailVerifiedAt` is null. */
   AUTH_VERIFICATION_REQUIRED: 'auth_verification_required',
   VALIDATION_ERROR: 'validation_error',
+  /** `OWNER_ALLOWED_EMAIL` is set and the request identity is not that address (fail-closed). */
+  OWNER_ONLY_ACCESS_DENIED: 'owner_only_prelaunch_access_denied',
 });

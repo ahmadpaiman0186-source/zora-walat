@@ -42,7 +42,10 @@ import {
   recordFulfillmentManualInterventionPath,
   recordFulfillmentMoneyPathDurationMs,
 } from '../lib/opsMetrics.js';
+import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
+import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { buildProviderExecutionCorrelationId } from '../lib/providerExecutionCorrelation.js';
 import { logOpsEvent } from '../lib/opsLog.js';
 import {
   buildMarginSnapshotForDeliveredOrder,
@@ -106,8 +109,10 @@ function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
  * statement is isolated (savepoint). A naive create + catch(P2002) + findFirst breaks
  * with 25P02. We: (1) findFirst to skip duplicate inserts in the same tx; (2) wrap
  * create in SAVEPOINT so concurrent insert races recover cleanly.
+ *
+ * @param {{ info?: Function, warn?: Function }} [log] — optional webhook/process logger
  */
-export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
+export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
   const already = await tx.fulfillmentAttempt.findFirst({
     where: { orderId, attemptNumber: 1 },
   });
@@ -116,6 +121,15 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(already.id).slice(-12),
     });
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptIdempotent: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(already.id).slice(-12),
+        attemptNumber: 1,
+      },
+      'fulfillment attempt #1 already present (idempotent)',
+    );
     return already;
   }
 
@@ -128,10 +142,20 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
         attemptNumber: 1,
         status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
         provider: resolveAirtimeProviderName(),
-        requestSummary: JSON.stringify({ phase: 'queued' }),
+        requestSummary: JSON.stringify({ phase: 'queued', orderId }),
       },
     });
     await tx.$executeRawUnsafe('RELEASE SAVEPOINT ensure_queued_fulfillment_attempt');
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptCreated: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(created.id).slice(-12),
+        attemptNumber: 1,
+        provider: created.provider ?? null,
+      },
+      'fulfillment attempt #1 queued after payment',
+    );
     return created;
   } catch (error) {
     await tx.$executeRawUnsafe('ROLLBACK TO SAVEPOINT ensure_queued_fulfillment_attempt');
@@ -148,6 +172,16 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(existing.id).slice(-12),
     });
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptIdempotent: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(existing.id).slice(-12),
+        attemptNumber: 1,
+        via: 'p2002_savepoint_recovery',
+      },
+      'fulfillment attempt #1 already present (idempotent)',
+    );
     return existing;
   }
 }
@@ -342,7 +376,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     outcome: 'processing',
     orderId,
     traceId: getTraceId(),
-    extra: { attemptNumber: phase1.attemptNumber },
+    extra: {
+      attemptNumber: phase1.attemptNumber,
+      attemptIdSuffix: String(phase1.attemptId).slice(-12),
+    },
   });
   emitPhase1OperationalEvent('fulfillment_attempt_started', {
     traceId: getTraceId() ?? null,
@@ -404,14 +441,21 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         retrySuggestedBackoffMs: retry.suggestedBackoffMs,
       },
     });
+    const providerCorrelationId = buildProviderExecutionCorrelationId(
+      phase1.attemptId,
+      orderId,
+    );
     providerResult = {
       outcome: AIRTIME_OUTCOME.FAILURE,
       providerKey: resolveAirtimeProviderName(),
       failureCode,
       failureMessage: String(err?.message ?? err).slice(0, 300),
       errorKind,
-      requestSummary: {},
-      responseSummary: { diagnostic: safeErrorDiagnostics(err) },
+      requestSummary: providerCorrelationId ? { providerCorrelationId } : {},
+      responseSummary: {
+        diagnostic: safeErrorDiagnostics(err),
+        ...(providerCorrelationId ? { providerCorrelationId } : {}),
+      },
     };
     providerOutcome = AIRTIME_OUTCOME.FAILURE;
   }
@@ -1056,6 +1100,12 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
             orderIdSuffix: String(orderId).slice(-12),
             queueJobId: enq.jobId,
           });
+          emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_QUEUED, {
+            traceId: traceId ?? null,
+            orderIdSuffix: String(orderId).slice(-12),
+            via: 'bullmq',
+            deduped: Boolean(enq.deduped),
+          });
           return;
         }
         emitPhase1OperationalEvent('fulfillment_enqueue_failed_inline_fallback', {
@@ -1064,13 +1114,37 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
           reason: enq.reason,
         });
       }
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        via: 'inline_schedule',
+      });
       await processFulfillmentForOrder(orderId, { traceId });
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_SUCCESS, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        via: 'inline_schedule',
+      });
     })().catch((err) => {
       const failureClass = classifyTransactionFailure(err, {
         surface: 'fulfillment_schedule',
       });
       const retryDirective = transactionRetryDirective(failureClass, { attempt: 0 });
       const operationalClass = operationalClassFromTransactionFailure(failureClass);
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_FAILURE, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        surface: 'fulfillment_schedule',
+        message: String(err?.message ?? err).slice(0, 200),
+      });
+      emitMoneyPathLog(MONEY_PATH_EVENT.RETRY_DECISION, {
+        traceId: traceId ?? null,
+        surface: 'fulfillment_schedule',
+        orderIdSuffix: String(orderId).slice(-12),
+        transactionFailureClass: failureClass,
+        retryMaySchedule: retryDirective.mayScheduleRetry,
+        retryReason: retryDirective.reason,
+      });
       emitPhase1OperationalEvent('fulfillment_schedule_async_failed', {
         traceId: traceId ?? null,
         orderIdSuffix: String(orderId).slice(-12),

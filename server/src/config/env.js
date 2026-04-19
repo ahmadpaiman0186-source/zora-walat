@@ -3,6 +3,9 @@
  * DATABASE_URL must point at PostgreSQL (see server/.env.example). No SQLite fallback.
  */
 
+import path from 'node:path';
+
+import { WEBTOP_ENV_SLICE } from './webtopConfig.js';
 import {
   mergeReloadlyOperatorMaps,
   RELOADLY_OPERATOR_ID_DEFAULTS,
@@ -16,6 +19,15 @@ function parseList(raw, fallback) {
     .split(',')
     .map((x) => x.trim())
     .filter(Boolean);
+}
+
+/**
+ * `RELOADLY_SANDBOX` must enable sandbox Topups audience for OAuth + HTTP.
+ * Accept common operator formats: `true`, `1`, `yes` (trimmed, case-insensitive).
+ */
+function parseReloadlySandboxEnv() {
+  const s = String(process.env.RELOADLY_SANDBOX ?? '').trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes';
 }
 
 const defaultCors = [
@@ -55,6 +67,15 @@ function parseNonNegativeInt(raw, fallback) {
   const n = parseInt(String(raw ?? '').trim(), 10);
   if (!Number.isFinite(n) || n < 0) return fallback;
   return n;
+}
+
+/** Comma-separated backoff schedule for reliability retries (ms). */
+function parseBackoffMs(raw, fallback) {
+  const s = String(raw ?? '').trim();
+  if (!s) return fallback;
+  const parts = s.split(',').map((x) => parseInt(x.trim(), 10));
+  const ok = parts.filter((n) => Number.isFinite(n) && n >= 0);
+  return ok.length ? ok : fallback;
 }
 
 /** Basis points (e.g. 290 = 2.9%). */
@@ -170,6 +191,54 @@ export const env = {
   prelaunchLockdown: prelaunchLockdownEnv,
 
   /**
+   * Hosted checkout email gate (`POST /create-checkout-session`):
+   * - `production` / `test`: always enforce `requireEmailVerified` (integration tests unchanged).
+   * - Otherwise: skip verification when `ALLOW_UNVERIFIED_CHECKOUT=true` (explicit), **or** in
+   *   `development` when `ALLOW_UNVERIFIED_CHECKOUT` is unset / not `false` (legacy local default).
+   *
+   * Note: `ALLOW_UNVERIFIED_CHECKOUT=true` does **nothing** while `NODE_ENV=production` — use
+   * `NODE_ENV=development` (or any non-production, non-test value) for local API runs.
+   */
+  allowUnverifiedCheckoutInDev: (() => {
+    if (nodeEnv === 'production' || nodeEnv === 'test') return false;
+    if (process.env.ALLOW_UNVERIFIED_CHECKOUT === 'true') return true;
+    return (
+      nodeEnv === 'development' &&
+      process.env.ALLOW_UNVERIFIED_CHECKOUT !== 'false'
+    );
+  })(),
+
+  /**
+   * When `PRELAUNCH_LOCKDOWN=true`, `POST /api/auth/register` is blocked unless this is `true`
+   * (operator-only opt-in for seeded/staging registration tests).
+   */
+  prelaunchAllowPublicRegistration:
+    process.env.PRELAUNCH_ALLOW_PUBLIC_REGISTRATION === 'true',
+
+  /**
+   * Optional shared secret (>=16 chars) for detailed infra surfaces under private pre-launch:
+   * `GET /ops/health`, `GET /ready`, `GET /metrics` (when enabled). Use `Authorization: Bearer`
+   * or `X-ZW-Ops-Token`. See `OPS_HEALTH_TOKEN` in `.env.example`.
+   */
+  opsInfraHealthToken: String(
+    process.env.OPS_HEALTH_TOKEN ?? process.env.OPS_INFRA_HEALTH_TOKEN ?? '',
+  ).trim(),
+
+  /**
+   * Bearer / `X-Admin-Secret` for `POST /api/admin/webtopup/*` control endpoints (retry, force-deliver).
+   * Minimum 16 characters when set; empty disables those routes (503 until configured).
+   */
+  adminSecret: String(process.env.ADMIN_SECRET ?? '').trim(),
+
+  /**
+   * When set (non-empty), only this exact email (trim + lowercase) may register, log in, use OTP,
+   * refresh sessions, or call routes protected by `requireAuth`. Fail-closed for any other identity.
+   */
+  ownerAllowedEmail: String(process.env.OWNER_ALLOWED_EMAIL ?? '')
+    .trim()
+    .toLowerCase(),
+
+  /**
    * When true: `POST /api/wallet/topup` rejects requests without `Idempotency-Key` (UUID).
    * Recommended for scale / production; off by default for older clients.
    */
@@ -260,7 +329,7 @@ export const env = {
   reloadlyClientId: String(process.env.RELOADLY_CLIENT_ID ?? '').trim(),
   reloadlyClientSecret: String(process.env.RELOADLY_CLIENT_SECRET ?? '').trim(),
   /** Use Reloadly sandbox endpoints when true. */
-  reloadlySandbox: process.env.RELOADLY_SANDBOX === 'true',
+  reloadlySandbox: parseReloadlySandboxEnv(),
   /**
    * When AIRTIME_PROVIDER=reloadly and Reloadly auth/config is unavailable, allow mock airtime fallback.
    * Default false — must be explicitly enabled (never implicit from NODE_ENV).
@@ -272,6 +341,18 @@ export const env = {
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
     30_000,
   ),
+  /**
+   * Mock airtime only: artificial delay before returning (ms). Capped in provider (max 30s).
+   */
+  mockAirtimeDelayMs: Math.min(
+    parseNonNegativeInt(process.env.MOCK_AIRTIME_DELAY_MS, 0),
+    30_000,
+  ),
+  /**
+   * Mock airtime only: `retryable` | `terminal` — deterministic failure classes for tests.
+   * Empty = normal success path.
+   */
+  mockAirtimeSimulate: String(process.env.MOCK_AIRTIME_SIMULATE ?? '').trim().toLowerCase(),
   /**
    * When true, skip Reloadly GET /reports/transactions inquiry before a retrying provider POST.
    * Emergency / tests only — increases duplicate-send risk on timeouts.
@@ -354,43 +435,10 @@ export const env = {
     parseReloadlyOperatorMap(process.env.RELOADLY_OPERATOR_MAP_JSON),
   ),
 
-  /** Reconciliation scan thresholds (ms) — see `reconciliationService.js`. */
-  reconcilePaidStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_PAID_STUCK_MS,
-    900_000,
-  ),
-  reconcileProcessingStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_PROCESSING_STUCK_MS,
-    1_800_000,
-  ),
-  reconcileFulfillmentQueuedStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_FULFILLMENT_QUEUED_STUCK_MS,
-    900_000,
-  ),
-  reconcileFulfillmentProcessingStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_FULFILLMENT_PROCESSING_STUCK_MS,
-    1_800_000,
-  ),
-  /** Fulfilled orders older than this may be flagged if `order:{id}:delivered` inbox row is absent. */
-  reconcilePushQuietPeriodMs: parsePositiveInt(
-    process.env.RECONCILE_PUSH_QUIET_PERIOD_MS,
-    600_000,
-  ),
-  /** Max rows sampled per auxiliary integrity slice (referral/loyalty/push) per scan. */
-  reconcileIntegritySampleLimit: parsePositiveInt(
-    process.env.RECONCILE_INTEGRITY_SAMPLE_LIMIT,
-    250,
-  ),
-  /** Cap loyalty drift detection user rows per scan (raw aggregate). */
-  reconcileLoyaltyDriftLimit: parsePositiveInt(
-    process.env.RECONCILE_LOYALTY_DRIFT_LIMIT,
-    40,
-  ),
-  /** Default chunk size for `runReconciliationScan({ fullChunk })` id scan; `0` uses service default (500). */
-  reconcileFullChunkSize: parseNonNegativeInt(
-    process.env.RECONCILE_FULL_CHUNK_SIZE,
-    0,
-  ),
+  /**
+   * WebTopup + reconciliation thresholds (single parse, frozen) — see webtopConfig.js.
+   */
+  ...WEBTOP_ENV_SLICE,
 
   /**
    * PaymentCheckout stuck in `PROCESSING` (fulfillment) longer than this → recovery worker may revert or retry.
@@ -445,84 +493,6 @@ export const env = {
   devCheckoutBypassUserId: String(
     process.env.DEV_CHECKOUT_BYPASS_USER_ID ?? '',
   ).trim(),
-
-  /**
-   * Web top-up fulfillment provider: `mock` | `reloadly` (Reloadly = AF + airtime only; see reloadlyWebTopupProvider).
-   */
-  webTopupFulfillmentProvider: String(
-    process.env.WEBTOPUP_FULFILLMENT_PROVIDER ?? 'mock',
-  )
-    .trim()
-    .toLowerCase(),
-
-  /** When false, all web top-up fulfillment dispatch/retry is rejected (503). Default on. */
-  fulfillmentDispatchEnabled: process.env.FULFILLMENT_DISPATCH_ENABLED !== 'false',
-  /** Emergency kill switch — rejects dispatch/retry immediately (503). */
-  fulfillmentDispatchKillSwitch:
-    process.env.FULFILLMENT_DISPATCH_KILL_SWITCH === 'true',
-  /**
-   * When false, Reloadly adapter dispatch is disabled (503) while mock may still run.
-   * Scope remains AF + airtime only when enabled.
-   */
-  reloadlyWebTopupProviderActive:
-    process.env.RELOADLY_WEBTOPUP_PROVIDER_ACTIVE !== 'false',
-
-  webtopupVelocitySessionWindowMs: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_SESSION_WINDOW_MS,
-    600_000,
-  ),
-  webtopupVelocitySessionOrdersWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_SESSION_ORDERS_WARN,
-    8,
-  ),
-  webtopupVelocityPhoneHourOrdersWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_ORDERS_WARN,
-    12,
-  ),
-  webtopupVelocityPhoneHourSameAmountWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_SAME_AMOUNT_WARN,
-    6,
-  ),
-
-  /** When true, admin dispatch enqueues DB job only; worker runs provider I/O (see webtopFulfillmentJob.js). */
-  webtopupFulfillmentAsync: process.env.WEBTOPUP_FULFILLMENT_ASYNC === 'true',
-  /** Poll interval for WebTopupFulfillmentJob worker (`0` disables the interval). */
-  webtopupFulfillmentJobPollMs: parseNonNegativeInt(
-    process.env.WEBTOPUP_FULFILLMENT_JOB_POLL_MS,
-    3_000,
-  ),
-
-  providerCircuitFailureThreshold: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_FAILURE_THRESHOLD,
-    5,
-  ),
-  providerCircuitWindowMs: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_WINDOW_MS,
-    60_000,
-  ),
-  providerCircuitOpenMs: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_OPEN_MS,
-    120_000,
-  ),
-
-  /**
-   * Mock-provider failure simulation (never affects Reloadly): timeout | terminal | unsupported
-   */
-  webtopupFailsim: String(process.env.WEBTOPUP_FAILSIM ?? '').trim().toLowerCase(),
-
-  /**
-   * Client `POST …/mark-paid` (poll Stripe then transition row). Duplicates webhook authority — risky in prod.
-   * Default: true in non-production, false in production (Stripe webhooks are canonical).
-   * Set WEBTOPUP_CLIENT_MARK_PAID_ENABLED=true to allow in production (debug / proxy only).
-   */
-  webtopupClientMarkPaidEnabled: (() => {
-    const raw = String(process.env.WEBTOPUP_CLIENT_MARK_PAID_ENABLED ?? '')
-      .trim()
-      .toLowerCase();
-    if (raw === 'true') return true;
-    if (raw === 'false') return false;
-    return nodeEnv !== 'production';
-  })(),
 
   /** USD cents per 1 loyalty point (e.g. 100 → $1.00 = 1 point). */
   loyaltyPointsUsdBasisCents: parsePositiveInt(
@@ -681,7 +651,7 @@ Object.defineProperty(env, 'reloadlyBaseUrl', {
   get() {
     const raw = String(process.env.RELOADLY_BASE_URL ?? '').trim();
     if (raw) return raw.replace(/\/$/, '');
-    return process.env.RELOADLY_SANDBOX === 'true'
+    return parseReloadlySandboxEnv()
       ? 'https://topups-sandbox.reloadly.com'
       : 'https://topups.reloadly.com';
   },

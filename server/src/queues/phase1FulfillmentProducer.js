@@ -1,3 +1,4 @@
+import { parsePhase1FulfillmentJobPayload } from '../infrastructure/fulfillment/fulfillmentJobContract.js';
 import { getPhase1FulfillmentQueue } from './phase1FulfillmentQueue.js';
 import { PHASE1_FULFILLMENT_QUEUE_NAME } from './phase1FulfillmentQueueName.js';
 
@@ -31,17 +32,18 @@ export async function enqueuePhase1FulfillmentJob(orderId, traceId) {
         return { ok: true, jobId: id, deduped: true };
       }
     }
-    await q.add(
-      'process',
-      {
-        orderId: id,
-        traceId: traceId ?? null,
-        v: 1,
-      },
-      {
-        jobId: id,
-      },
-    );
+    const rawPayload = {
+      orderId: id,
+      traceId: traceId ?? null,
+      v: 1,
+    };
+    const parsed = parsePhase1FulfillmentJobPayload(rawPayload);
+    if (!parsed.ok) {
+      return { ok: false, reason: `invalid_job_contract:${parsed.reason}` };
+    }
+    await q.add('process', parsed.payload, {
+      jobId: id,
+    });
     return { ok: true, jobId: id };
   } catch (e) {
     const msg = String(e?.message ?? e).toLowerCase();

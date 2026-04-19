@@ -19,6 +19,7 @@ import rechargeRoutes from './routes/recharge.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import reconciliationRoutes from './routes/reconciliation.routes.js';
 import webTopupFulfillmentAdminRoutes from './routes/webTopupFulfillmentAdmin.routes.js';
+import webtopupAdminControlRoutes from './routes/webtopupAdminControl.routes.js';
 import adminOrdersRoutes from './routes/adminOrders.routes.js';
 import processingManualRoutes from './routes/processingManual.routes.js';
 import transactionsRoutes from './routes/transactions.routes.js';
@@ -30,6 +31,7 @@ import opsRoutes from './routes/ops.routes.js';
 import marginRoutes from './routes/margin.routes.js';
 import referralRoutes from './routes/referral.routes.js';
 import supportRoutes from './routes/support.routes.js';
+import internalWebtopupLogsRoutes from './routes/internalWebtopupLogs.routes.js';
 import fulfillmentDlqRoutes from './routes/fulfillmentDlq.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -40,6 +42,7 @@ import {
   stripeWebhookLimiter,
 } from './middleware/rateLimits.js';
 import authRoutes from './routes/auth.routes.js';
+import { mountCheckoutReturnRoutesIfNonProduction } from './routes/checkoutReturn.routes.js';
 
 /**
  * First line of defense for operators: proves the request matched `/webhooks/stripe`
@@ -105,6 +108,8 @@ export function createApp() {
         'X-ZW-Ops-Token',
         /** Web top-up: proves possession of `sessionKey` when creating a PaymentIntent for an order. */
         'X-ZW-WebTopup-Session',
+        /** WebTopup admin control (`/api/admin/webtopup/*`): alternative to `Authorization: Bearer`. */
+        'X-Admin-Secret',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
       ],
@@ -161,6 +166,7 @@ export function createApp() {
   app.use('/api/admin', apiIpLimiter, reconciliationRoutes);
   app.use('/api/admin', apiIpLimiter, fulfillmentDlqRoutes);
   app.use('/api/admin', apiIpLimiter, webTopupFulfillmentAdminRoutes);
+  app.use('/api/admin/webtopup', apiIpLimiter, webtopupAdminControlRoutes);
   app.use('/api/admin', apiIpLimiter, adminOrdersRoutes);
   app.use('/api/admin', apiIpLimiter, processingManualRoutes);
   /** Ops/metrics JSON: legacy `/ops` and admin-prefixed `/api/admin/ops` (same router). */
@@ -168,6 +174,12 @@ export function createApp() {
   app.use('/api/admin/ops', apiIpLimiter, opsRoutes);
   app.use('/api/admin', apiIpLimiter, marginRoutes);
   app.use('/api/admin', apiIpLimiter, supportRoutes);
+
+  /** Internal structured webtop observation buffer (token-gated; not for public clients). */
+  app.use('/internal', apiIpLimiter, internalWebtopupLogsRoutes);
+
+  /** Dev/local: Stripe success/cancel when client base is this API (see CLIENT_URL / Origin). */
+  mountCheckoutReturnRoutesIfNonProduction(app);
 
   app.use(notFound);
   app.use(errorHandler);

@@ -53,7 +53,7 @@ API base URL for the Flutter app defaults in **`lib/core/config/app_config.dart`
 
 ## Features (high level)
 
-- **Auth:** `POST /auth/register`, `POST /auth/login`, JWT refresh.  
+- **Auth:** `POST /api/auth/register`, `POST /api/auth/login`, JWT refresh.  
 - **Stripe:** `POST /create-checkout-session` (authenticated).  
 - **Fulfillment:** airtime via configured provider (e.g. Reloadly or mock); see `src/domain/delivery/`.  
 - **Trust / receipts:** customer-safe order payloads — `docs/TRUST_API_CONTRACT.md` (transactions API).  

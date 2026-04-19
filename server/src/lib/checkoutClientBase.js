@@ -28,6 +28,9 @@ function validateClientBaseUrl(value) {
  * Production must use the configured CLIENT_URL. In non-production we prefer the
  * request Origin when present, but allow a configured CLIENT_URL fallback so native
  * clients and non-browser test harnesses do not fail on missing Origin headers.
+ *
+ * After resolution, `buildStripeCheckoutReturnUrls` in `checkoutRedirectUrls.js` is the
+ * only place that should construct `success_url` / `cancel_url` for Phase 1 checkout.
  */
 export function resolveCheckoutClientBase({ nodeEnv, clientUrl, origin }) {
   if (nodeEnv === 'production') {

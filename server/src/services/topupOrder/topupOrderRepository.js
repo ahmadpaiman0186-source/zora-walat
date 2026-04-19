@@ -52,6 +52,7 @@ export function rowToRecord(row) {
     fulfillmentReference: row.fulfillmentReference,
     fulfillmentErrorCode: row.fulfillmentErrorCode,
     fulfillmentErrorMessageSafe: row.fulfillmentErrorMessageSafe,
+    fulfillmentNextRetryAt: row.fulfillmentNextRetryAt?.toISOString() ?? null,
     lastProviderPayloadHash: row.lastProviderPayloadHash,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -239,6 +240,7 @@ export async function markTopupOrderPaidClientAtomic(
       paymentIntentId,
       paymentStatus: PAYMENT_STATUS.PAID,
       fulfillmentStatus: FULFILLMENT_STATUS.PENDING,
+      paidAt: new Date(),
     },
   });
   if (n.count === 1) {

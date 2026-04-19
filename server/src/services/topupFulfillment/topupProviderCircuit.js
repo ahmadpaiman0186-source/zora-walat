@@ -1,5 +1,9 @@
 import { FULFILLMENT_SERVICE_CODE } from '../../domain/topupOrder/fulfillmentErrors.js';
 import { env } from '../../config/env.js';
+import {
+  getSharedCircuitBreaker,
+  getAllSharedCircuitSnapshots,
+} from '../reliability/circuitBreaker.js';
 
 function serviceError(code, message) {
   const e = new Error(message);
@@ -7,29 +11,30 @@ function serviceError(code, message) {
   return e;
 }
 
-/** @type {Map<string, { failuresAt: number[], openUntil: number }>} */
-const circuits = new Map();
-
-function cfg() {
+function circuitOpts(name) {
   return {
-    threshold: env.providerCircuitFailureThreshold,
+    name,
+    failureThreshold: env.providerCircuitFailureThreshold,
     windowMs: env.providerCircuitWindowMs,
-    openMs: env.providerCircuitOpenMs,
+    cooldownMs: env.providerCircuitOpenMs,
   };
 }
 
+function breakerFor(providerId) {
+  const id = String(providerId ?? 'unknown').toLowerCase();
+  return getSharedCircuitBreaker(id, circuitOpts(id));
+}
+
 /**
- * Per-provider circuit breaker (in-process; use shared store when horizontally scaling).
+ * Per-provider circuit breaker (in-process; shared with {@link ../providers/providerRouter.js}).
  * @param {string} providerId
  */
 export function assertTopupProviderCircuitClosed(providerId) {
-  const id = String(providerId ?? 'unknown').toLowerCase();
-  const c = circuits.get(id);
-  if (!c) return;
-  if (Date.now() < c.openUntil) {
+  const cb = breakerFor(providerId);
+  if (!cb.allowRequest()) {
     throw serviceError(
       FULFILLMENT_SERVICE_CODE.FULFILLMENT_SUSPENDED,
-      `Provider "${id}" is temporarily isolated (circuit open) due to elevated failure rate`,
+      `Provider "${cb.name}" is temporarily isolated (circuit open) due to elevated failure rate`,
     );
   }
 }
@@ -39,33 +44,25 @@ export function assertTopupProviderCircuitClosed(providerId) {
  * @param {boolean} success
  */
 export function recordTopupProviderCircuitOutcome(providerId, success) {
-  const id = String(providerId ?? 'unknown').toLowerCase();
-  const { threshold, windowMs, openMs } = cfg();
-  const now = Date.now();
-  let st = circuits.get(id) ?? { failuresAt: [], openUntil: 0 };
-
+  const cb = breakerFor(providerId);
   if (success) {
-    st.failuresAt = [];
-    st.openUntil = 0;
+    cb.recordSuccess();
   } else {
-    st.failuresAt.push(now);
-    st.failuresAt = st.failuresAt.filter((t) => now - t <= windowMs);
-    if (st.failuresAt.length >= threshold) {
-      st.openUntil = now + openMs;
-    }
+    cb.recordFailure();
   }
-  circuits.set(id, st);
 }
 
 /** For /ready metrics — no secrets. */
 export function getTopupProviderCircuitSnapshot() {
+  const all = getAllSharedCircuitSnapshots();
+  /** @type {Record<string, { open: boolean, openUntil: string | null, recentFailures: number, state: string }>} */
   const out = {};
-  const now = Date.now();
-  for (const [k, v] of circuits.entries()) {
+  for (const [k, v] of Object.entries(all)) {
     out[k] = {
-      open: now < v.openUntil,
-      openUntil: v.openUntil > now ? new Date(v.openUntil).toISOString() : null,
-      recentFailures: v.failuresAt.length,
+      open: Boolean(v.open),
+      openUntil: v.openUntil,
+      recentFailures: v.recentFailures,
+      state: v.state,
     };
   }
   return out;

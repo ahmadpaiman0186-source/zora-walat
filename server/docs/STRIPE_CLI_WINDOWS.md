@@ -52,3 +52,11 @@ stripe login
 ```
 
 The **`whsec_…`** signing secret is printed when `stripe listen` starts (each new session may differ). You can also run `stripe listen --print-secret` alongside your `--forward-to` URL. Paste the value into `server/.env` as `STRIPE_WEBHOOK_SECRET` and **restart** the API — see [`STRIPE_LOCAL_WEBHOOK_FLOW.md`](./STRIPE_LOCAL_WEBHOOK_FLOW.md).
+
+## Upgrade the CLI (recommended when `stripe version` warns)
+
+Run `stripe version`. If it reports a newer release, install it from Stripe’s official instructions (e.g. [Stripe CLI install](https://docs.stripe.com/stripe-cli)) and replace the binary under `C:\stripe\` (or update via WinGet/Scoop if you used those). Patch updates often include WebSocket client fixes for `stripe listen`.
+
+## One listener at a time
+
+Run `Get-Process stripe` while developing. **More than one** `stripe` process usually means multiple `stripe listen` sessions; that can cause WebSocket churn and errors such as `websocket: close sent` on ping. Stop duplicates and keep a single listener — see the troubleshooting table in [`STRIPE_LOCAL_WEBHOOK_FLOW.md`](./STRIPE_LOCAL_WEBHOOK_FLOW.md).

@@ -19,13 +19,17 @@ import { getPhase1FulfillmentQueueMetrics } from '../queues/phase1FulfillmentQue
 import { env } from '../config/env.js';
 import { getPhase1FulfillmentQueue } from '../queues/phase1FulfillmentQueue.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
+import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
+import { getMoneyPathOperatorSnapshot } from '../services/opsMoneyPathCountService.js';
 
 const router = Router();
 
 /**
  * Infrastructure readiness (no auth). Mounted at `/ops/health` and `/api/admin/ops/health`.
+ * Under `PRELAUNCH_LOCKDOWN`, detailed DB/Redis state requires `OPS_HEALTH_TOKEN` (see opsInfraHealthGate).
  */
 router.get('/health', async (req, res) => {
+  if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
   /** @type {{ server: string, db: string, redis: string, queue: string }} */
   const payload = {
     server: 'ok',
@@ -119,6 +123,10 @@ router.get(
   },
 );
 
+/**
+ * Staff ops snapshot. Optional slices: `?phase1=1`, `?integrity=1`, `?webtopupDb=1`
+ * (DB-backed WebTopup + Phase 1 `PaymentCheckout` histograms — complements in-process `webTopup` counters).
+ */
 router.get(
   '/summary',
   requireAuth,
@@ -135,6 +143,18 @@ router.get(
       } catch (e) {
         req.log?.error({ err: e }, 'ops summary phase1 slice failed');
         base.phase1Ops = { ok: false, error: 'phase1_snapshot_failed' };
+      }
+    }
+    if (String(req.query.webtopupDb ?? '') === '1') {
+      try {
+        const mp = await getMoneyPathOperatorSnapshot();
+        base.moneyPathDbCounts = mp;
+        /** @deprecated prefer `moneyPathDbCounts` — kept for older clients */
+        base.webtopupDbCounts = mp;
+      } catch (e) {
+        req.log?.error({ err: e }, 'ops summary money path db counts failed');
+        base.moneyPathDbCounts = { ok: false, error: 'money_path_db_counts_failed' };
+        base.webtopupDbCounts = base.moneyPathDbCounts;
       }
     }
     if (String(req.query.integrity ?? '') === '1') {
@@ -160,6 +180,35 @@ router.get(
     }
     res.setHeader('Cache-Control', 'no-store');
     res.json(base);
+  },
+);
+
+/**
+ * WebTopupOrder aggregates by payment + fulfillment status (staff).
+ * Complements `/summary` in-process counters with DB-backed marketing-checkout volume.
+ */
+router.get(
+  '/webtopup-money-path-counts',
+  requireAuth,
+  requireStaff,
+  staffPrivilegedLimiter,
+  async (req, res) => {
+    try {
+      const snapshot = await getMoneyPathOperatorSnapshot();
+      req.log?.info?.(
+        { traceId: req.traceId, kind: 'money_path_operator_counts' },
+        'money_path_operator_counts',
+      );
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(snapshot);
+    } catch (e) {
+      req.log?.error({ err: e }, 'webtopup_money_path_counts_failed');
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
+    }
   },
 );
 

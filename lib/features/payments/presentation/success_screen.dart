@@ -34,13 +34,30 @@ class _SuccessScreenState extends State<SuccessScreen> {
   String? _providerRefTail;
   bool _busy = false;
   OrderNotificationPhase? _lastOrderNotif;
+  /// Set when post-checkout bootstrap throws — UI still renders (never a blank screen).
+  String? _bootstrapError;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _seedLocalHistory();
-      await _maybeKickFulfillment();
+      try {
+        await _seedLocalHistory();
+        await _maybeKickFulfillment();
+      } catch (e, st) {
+        assert(() {
+          FlutterError.dumpErrorToConsole(
+            FlutterErrorDetails(exception: e, stack: st),
+          );
+          return true;
+        }());
+        if (!mounted) return;
+        setState(() {
+          _bootstrapError = e.toString();
+          _tracking ??= CustomerOrderTracking.paymentReceived;
+          _busy = false;
+        });
+      }
     });
   }
 
@@ -170,6 +187,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.retrying:
         return Icons.hourglass_top_rounded;
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return Icons.support_agent_rounded;
       case CustomerTrackingStage.orderCancelled:
         return Icons.cancel_outlined;
@@ -183,6 +201,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.delivered:
         return 'delivered';
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return 'failed';
       case CustomerTrackingStage.retrying:
         return 'retrying';
@@ -213,6 +232,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.delivered:
         return l10n.receiptFulfillmentDone;
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return l10n.orderStatusFailed;
       case CustomerTrackingStage.retrying:
         return l10n.orderStatusRetrying;
@@ -233,6 +253,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
     final t = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final cs = t.colorScheme;
+    final hasIds =
+        (widget.checkoutSessionId?.trim().isNotEmpty ?? false) ||
+            (widget.orderReference?.trim().isNotEmpty ?? false);
     final tracking = _tracking ?? CustomerOrderTracking.paymentReceived;
     final copy = TrackingMessages.forTracking(l10n, tracking);
 
@@ -246,6 +269,40 @@ class _SuccessScreenState extends State<SuccessScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (!hasIds)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Material(
+                    color: cs.errorContainer.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        l10n.successMissingReturnParamsHint,
+                        style: t.textTheme.bodySmall?.copyWith(height: 1.4),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_bootstrapError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Material(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        l10n.successBootstrapWarning(
+                          _bootstrapError!.length > 280
+                              ? '${_bootstrapError!.substring(0, 280)}…'
+                              : _bootstrapError!,
+                        ),
+                        style: t.textTheme.bodySmall?.copyWith(height: 1.35),
+                      ),
+                    ),
+                  ),
+                ),
               Align(
                 child: Container(
                   padding: const EdgeInsets.all(22),
@@ -304,7 +361,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
               OrderTrackingTimeline(
                 activeIndex: tracking.linearStepIndex,
                 highlightStep: tracking.linearStepIndex,
-                failedAtStep: tracking.stage == CustomerTrackingStage.failed,
+                failedAtStep:
+                    tracking.stage == CustomerTrackingStage.failed ||
+                    tracking.stage == CustomerTrackingStage.failedTerminally,
               ),
               const SizedBox(height: 22),
               _SafeBanner(l10n: l10n),
@@ -387,6 +446,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.delayed:
         return l10n.trackingBodyCatchingUp;
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return l10n.trackingBodyFailedCalm;
       case CustomerTrackingStage.orderCancelled:
         return l10n.trackingBodyCancelled;

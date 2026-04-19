@@ -7,12 +7,17 @@ import { getHttpRateLimitSnapshot } from '../lib/rateLimitRedisInit.js';
  * Safe, secret-free view of launch-sensitive subsystems (health checks / startup logs).
  */
 export function getLaunchSubsystemSnapshot() {
+  const fb = String(env.webtopupFallbackProvider ?? '').trim();
   return {
     httpRateLimit: getHttpRateLimitSnapshot(),
     prelaunchLockdown: env.prelaunchLockdown,
     nodeEnv: env.nodeEnv,
+    /** Phase 1 airtime: `mock` | `reloadly` (see `deliveryAdapter.js`). */
+    airtimeProvider: env.airtimeProvider,
     airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
     webTopupFulfillmentProvider: env.webTopupFulfillmentProvider,
+    webtopupReliabilityEnabled: env.webtopupReliabilityEnabled,
+    webtopupFallbackProvider: fb || null,
     fulfillmentDispatchEnabled: env.fulfillmentDispatchEnabled,
     fulfillmentDispatchKillSwitch: env.fulfillmentDispatchKillSwitch,
     reloadlyWebTopupProviderActive: env.reloadlyWebTopupProviderActive,

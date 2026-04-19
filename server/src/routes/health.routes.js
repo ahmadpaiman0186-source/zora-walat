@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { sendLivenessJsonOk } from '../lib/sendLivenessJsonOk.js';
+import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ async function getHealthDeps() {
     { renderPrometheusTextFromOps },
     { getWebTopupFulfillmentStuckSummary },
     { getTopupProviderCircuitSnapshot },
+    { getReliabilityWatchdogSnapshot },
     { getAirtimeReloadlyDiagnosticsSnapshot },
     { getLaunchSubsystemSnapshot },
   ] = await Promise.all([
@@ -23,6 +25,7 @@ async function getHealthDeps() {
     import('../lib/prometheusTextFormat.js'),
     import('../services/webtopStuckOrders.js'),
     import('../services/topupFulfillment/topupProviderCircuit.js'),
+    import('../services/reliability/watchdog.js'),
     import('../config/airtimeReloadlyStartup.js'),
     import('../config/launchSubsystemSnapshot.js'),
   ]);
@@ -35,6 +38,7 @@ async function getHealthDeps() {
     renderPrometheusTextFromOps,
     getWebTopupFulfillmentStuckSummary,
     getTopupProviderCircuitSnapshot,
+    getReliabilityWatchdogSnapshot,
     getAirtimeReloadlyDiagnosticsSnapshot,
     getLaunchSubsystemSnapshot,
   };
@@ -104,9 +108,10 @@ router.get('/health', (_req, res) => {
 });
 
 /** Prometheus scrape (opt-in via METRICS_PROMETHEUS_ENABLED=true). */
-router.get('/metrics', async (_req, res, next) => {
+router.get('/metrics', async (req, res, next) => {
   try {
     const { env, renderPrometheusTextFromOps } = await getHealthDeps();
+    if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
     if (!env.metricsPrometheusEnabled) {
       res.status(404).setHeader('Cache-Control', 'no-store').end();
       return;
@@ -124,7 +129,8 @@ router.get('/metrics', async (_req, res, next) => {
  * Readiness — PostgreSQL + `WebTopupOrder` storage reachable.
  * Includes in-process web top-up metrics (counters since process start).
  */
-router.get('/ready', async (_req, res) => {
+router.get('/ready', async (req, res) => {
+  if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
   res.setHeader('Cache-Control', 'no-store');
   const {
     prisma,
@@ -133,6 +139,7 @@ router.get('/ready', async (_req, res) => {
     getOpsMetricsSnapshot,
     getWebTopupFulfillmentStuckSummary,
     getTopupProviderCircuitSnapshot,
+    getReliabilityWatchdogSnapshot,
     getAirtimeReloadlyDiagnosticsSnapshot,
     getLaunchSubsystemSnapshot,
   } = await getHealthDeps();
@@ -198,6 +205,24 @@ router.get('/ready', async (_req, res) => {
     paymentCheckoutByOrderStatus24h = { error: 'payment_checkout_health_unavailable' };
   }
 
+  /** @type {Awaited<ReturnType<typeof import('../lib/phase1FulfillmentQueueObservation.js').getPhase1FulfillmentQueueObservation>>} */
+  let phase1FulfillmentQueue = { available: false, reason: 'not_loaded' };
+  try {
+    const { getPhase1FulfillmentQueueObservation } = await import(
+      '../lib/phase1FulfillmentQueueObservation.js'
+    );
+    phase1FulfillmentQueue = await getPhase1FulfillmentQueueObservation();
+  } catch (e) {
+    phase1FulfillmentQueue = {
+      available: false,
+      reason: 'queue_observation_import_failed',
+      detail: String(e?.message ?? e).slice(0, 160),
+    };
+  }
+
+  const { getValidatedStripeSecretKey } = await import('../config/stripeEnv.js');
+  const wh = String(env.stripeWebhookSecret ?? '').trim();
+
   return res.status(200).json({
     status: 'ready',
     checks,
@@ -208,9 +233,17 @@ router.get('/ready', async (_req, res) => {
     paymentCheckoutByOrderStatus24h,
     webTopupFulfillmentStuck: webTopupStuck,
     topupProviderCircuits: getTopupProviderCircuitSnapshot(),
+    reliabilityWatchdog: getReliabilityWatchdogSnapshot(),
     webTopupFulfillmentJobsQueued,
+    phase1FulfillmentQueue,
     airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
     launchSubsystems: getLaunchSubsystemSnapshot(),
+    /** Secret-free: whether Stripe money path env is present (webhook authority is server-side only). */
+    stripeMoneyPath: {
+      apiKeyConfigured: Boolean(getValidatedStripeSecretKey()),
+      webhookSigningSecretConfigured: wh.length > 0,
+      webhookSigningSecretWellFormed: wh.startsWith('whsec_'),
+    },
   });
 });
 

@@ -47,6 +47,8 @@
   "phase1OnlyAirtimeSnack": "فاز ۱: یوازې د موبایل اېرټایم شتون لري.",
   "phase1UsdSecureCheckout": "تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.",
   "checkoutCardRegionLabel": "ستاسو ځای (کارت)",
+  "checkoutSenderCountryHint": "دا ستاسو د کارت د بلینګ سیمه ده (خطر چیک)؛ ترلاسه کوونکی شمیره تل افغانستان موبایل (+۹۳) ده.",
+  "telecomRecipientAfghanistanDialHint": "افغانستان +۹۳ — ځایی موبایل ولیکئ (د ۷ پیل سره).",
   "checkoutPricingUsdServerNote": "بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.",
   "telecomCheckoutAirtimeRowLabel": "موبایل اېرټایم",
   "phase1ValidityDependsOnOperator": "د اعتبار موده د اپراتور پورې اړه لري — یوازې هغه وخت دلته ښیو چې له بیې څخه تایید شوی مقدار ولرو.",
@@ -60,6 +62,9 @@
   },
   "rechargeTrustLine": "USD نرخونه · خوندي تادیه · افغان موبایل",
   "recipientNumber": "د اخیستونکي شمېره",
+  "receivingCountryLabel": "د اخیستونکي هېواد",
+  "rechargeCountryNotSupported": "د موبایل شارژ یوازې د افغانستان شمېرو لپاره دی. افغانستان غوره کړئ.",
+  "phoneLocalDigitsHint": "ځایی شمېره د هېواد کوډ پرته ولیکئ.",
   "operator": "اپراتور",
   "getPackages": "بستې ترلاسه کړئ",
   "packages": "بستې",
@@ -253,6 +258,13 @@
   "successScreenTitle": "ټول څه سم دي",
   "successPaymentConfirmed": "تادیه ترلاسه شوه",
   "successStripeConfirmedShort": "ستاسو بانک پېرود تایید کړ. موږ اوس ستاسو ټاپ‌آپ بشپړوو.",
+  "successMissingReturnParamsHint": "په دې پته کې د تادیې حواله جزئیات (سشن یا د سفارش پېژند) نشته. که تادیه مو بشپړه کړه، وروستي سفارشونه خلاص کړئ یا د Stripe د تایید برېښنالیک لینک وکاروئ.",
+  "successBootstrapWarning": "موږ نشو کولی ژمیز د سفارش حالت تازه کړو. ستاسو تادیه شايد لاهم پروسس کې وي — یو ځل بیا وروستي سفارشونه وګورئ.\n{detail}",
+  "@successBootstrapWarning": {
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
   "receiptTitle": "رسيډ",
   "receiptOrderRef": "د سفارش شمېره",
   "receiptPaymentStatus": "تادیه",

@@ -1,6 +1,11 @@
 /**
  * Normalized API error body for public/JSON routes.
- * Legacy clients may still read `error`; prefer `message` + `code`.
+ *
+ * Contract (Layer 1):
+ * - `message` — user-safe, stable wording (no stack traces in production).
+ * - `code` — machine-stable string (`API_CONTRACT_CODE`, `WEBTOPUP_CLIENT_ERROR_CODE`, etc.).
+ * - `error` — deprecated duplicate of `message` for legacy clients.
+ * - `details` — optional; only on selected paths (e.g. Zod in non-production).
  *
  * @param {string} message
  * @param {string} code

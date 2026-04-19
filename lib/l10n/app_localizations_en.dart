@@ -143,6 +143,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutCardRegionLabel => 'Your location (card)';
 
   @override
+  String get checkoutSenderCountryHint =>
+      'This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.';
+
+  @override
+  String get telecomRecipientAfghanistanDialHint =>
+      'Afghanistan +93 — enter the local mobile (starts with 7).';
+
+  @override
   String get checkoutPricingUsdServerNote =>
       'Pricing is calculated in USD on our servers for your region.';
 
@@ -164,6 +172,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipientNumber => 'Recipient number';
+
+  @override
+  String get receivingCountryLabel => 'Receiving country';
+
+  @override
+  String get rechargeCountryNotSupported =>
+      'Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.';
+
+  @override
+  String get phoneLocalDigitsHint =>
+      'Enter the local number without country code.';
 
   @override
   String get operator => 'Operator';
@@ -712,6 +731,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get successStripeConfirmedShort =>
       'Your bank authorized this purchase. We’re completing your top-up now.';
+
+  @override
+  String get successMissingReturnParamsHint =>
+      'This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.';
+
+  @override
+  String successBootstrapWarning(String detail) {
+    return 'We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n$detail';
+  }
 
   @override
   String get receiptTitle => 'Receipt';

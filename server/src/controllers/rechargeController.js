@@ -6,7 +6,10 @@ import { getRechargeProvider } from '../services/providers/index.js';
 import { processFulfillmentForOrder } from '../services/fulfillmentProcessingService.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
 import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
-import { deriveCustomerTrackingStageForOrder } from '../services/transactionsService.js';
+import {
+  deriveCustomerTrackingStageForOrder,
+  derivePublicLifecycleStage,
+} from '../services/transactionsService.js';
 import { env } from '../config/env.js';
 import { RECHARGE_ERROR_CODE } from '../constants/apiContractCodes.js';
 import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
@@ -14,16 +17,22 @@ import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { waitForPaymentCheckoutTerminal } from '../services/fulfillmentClientWait.js';
 import { assertRechargeOrderCreateRiskOrThrow } from '../services/risk/assertRechargeOrderRisk.js';
 import { normalizeAfghanNational } from '../lib/phone.js';
+import { orchestrateRechargeProviderCall } from '../services/reliability/reliabilityOrchestrator.js';
 
 export async function postQuote(req, res) {
   const recipient = await resolveRecipientFromBody(req.user.id, req.body);
   const provider = getRechargeProvider();
-  return res.json(
-    provider.getQuote({
-      recipient,
-      operatorKey: recipient.operatorKey,
-    }),
-  );
+  const quote = await orchestrateRechargeProviderCall({
+    operationName: 'recharge.getQuote',
+    traceId: req.traceId ?? null,
+    log: req.log,
+    fn: async () =>
+      provider.getQuote({
+        recipient,
+        operatorKey: recipient.operatorKey,
+      }),
+  });
+  return res.json(quote);
 }
 
 export async function postOrder(req, res) {
@@ -45,11 +54,17 @@ export async function postOrder(req, res) {
     traceId: req.traceId ?? null,
   });
   const provider = getRechargeProvider();
-  const out = provider.createOrder({
-    recipient,
-    operatorKey: recipient.operatorKey,
-    packageId,
-    userId: req.user.id,
+  const out = await orchestrateRechargeProviderCall({
+    operationName: 'recharge.createOrder',
+    traceId: req.traceId ?? null,
+    log: req.log,
+    fn: async () =>
+      provider.createOrder({
+        recipient,
+        operatorKey: recipient.operatorKey,
+        packageId,
+        userId: req.user.id,
+      }),
   });
   return res.status(201).json(out);
 }
@@ -79,6 +94,7 @@ function fulfillmentFromRow(row) {
 
 function publicOrderSlice(row) {
   const latest = row.fulfillmentAttempts?.[0] ?? null;
+  const trackingStageKey = deriveCustomerTrackingStageForOrder(row, latest);
   return {
     id: row.id,
     orderStatus: row.orderStatus,
@@ -90,7 +106,8 @@ function publicOrderSlice(row) {
     failureReason: row.failureReason ?? null,
     paidAt: row.paidAt,
     failedAt: row.failedAt,
-    trackingStageKey: deriveCustomerTrackingStageForOrder(row, latest),
+    trackingStageKey,
+    lifecycleStageKey: derivePublicLifecycleStage(trackingStageKey, row, latest),
   };
 }
 

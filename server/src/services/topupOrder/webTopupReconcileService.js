@@ -1,5 +1,6 @@
 import { PAYMENT_STATUS } from '../../domain/topupOrder/statuses.js';
 import { getStripeClient } from '../stripe.js';
+import { orchestrateStripeCall } from '../reliability/reliabilityOrchestrator.js';
 import { prisma } from '../../db.js';
 import { sessionKeySuffix, webTopupLog } from '../../lib/webTopupObservability.js';
 import { isValidTopupOrderId } from './topupOrderService.js';
@@ -77,7 +78,12 @@ export async function reconcileWebTopupOrder(orderId, log) {
     const stripe = getStripeClient();
     if (stripe) {
       try {
-        const pi = await stripe.paymentIntents.retrieve(piId);
+        const pi = await orchestrateStripeCall({
+          operationName: 'paymentIntents.retrieve.reconcile',
+          traceId: null,
+          log,
+          fn: () => stripe.paymentIntents.retrieve(piId),
+        });
         piSlice = {
           id: pi.id,
           status: pi.status,

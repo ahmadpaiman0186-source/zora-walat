@@ -18,15 +18,31 @@ export function getReloadlyTopupsAudienceUrl(sandbox) {
 }
 
 function safeAuthErrorSummary(status, json) {
-  const err = json && typeof json === 'object' ? json.error : null;
-  const desc =
-    json && typeof json === 'object' && typeof json.error_description === 'string'
+  if (!json || typeof json !== 'object') {
+    return {
+      httpStatus: status,
+      error: null,
+      errorDescription: null,
+      reloadlyErrorCode: null,
+      reloadlyMessagePreview: null,
+    };
+  }
+  const oauthErr = json.error != null ? String(json.error) : null;
+  const oauthDesc =
+    typeof json.error_description === 'string'
       ? json.error_description.slice(0, 200)
       : null;
+  /** Reloadly often returns `{ errorCode, message, path }` instead of OAuth `error` / `error_description`. */
+  const reloadlyCode =
+    json.errorCode != null ? String(json.errorCode) : null;
+  const reloadlyMsg =
+    typeof json.message === 'string' ? json.message.slice(0, 200) : null;
   return {
     httpStatus: status,
-    error: err != null ? String(err) : null,
-    errorDescription: desc,
+    error: oauthErr ?? reloadlyCode,
+    errorDescription: oauthDesc ?? reloadlyMsg,
+    reloadlyErrorCode: reloadlyCode,
+    reloadlyMessagePreview: reloadlyMsg,
   };
 }
 
@@ -129,7 +145,16 @@ export async function fetchReloadlyAccessToken({
 
     if (!res.ok) {
       const f = classifyAuthHttpFailure(res.status, json);
-      return { ok: false, ...f };
+      return {
+        ok: false,
+        ...f,
+        responseSummary: {
+          ...f.responseSummary,
+          /** Helps classify empty-body 401 vs OAuth JSON error without logging raw bodies. */
+          responseBodyLength: text.length,
+          oauthJsonParsed: Boolean(json && typeof json === 'object'),
+        },
+      };
     }
 
     const accessToken =

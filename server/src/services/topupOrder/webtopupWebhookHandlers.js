@@ -5,6 +5,7 @@ import {
 import { assertWebTopupPaymentTransition } from '../../domain/topupOrder/webtopupStateMachine.js';
 import {
   safeSuffix,
+  webTopupCorrelationFields,
   webTopupLog,
 } from '../../lib/webTopupObservability.js';
 import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
@@ -12,12 +13,25 @@ import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
 const TW_ORD = /^tw_ord_[0-9a-f-]{36}$/i;
 
 /**
+ * @param {{ traceId?: string | null }} [ctx]
+ * @param {import('stripe').Stripe.Event} event
+ * @param {string} orderId
+ */
+function webtopWebhookFlowTrace(ctx, event, orderId) {
+  const t = ctx?.traceId;
+  if (typeof t === 'string' && t.trim()) return t.trim().slice(0, 128);
+  return `wt_evt_${safeSuffix(event.id, 12)}_${orderId.slice(-8)}`;
+}
+
+/**
  * @param {import('@prisma/client').Prisma.TransactionClient} tx
  * @param {import('stripe').Stripe.Event} event
  * @param {import('stripe').Stripe.PaymentIntent} pi
  * @param {import('pino').Logger | undefined} log
+ * @param {{ traceId?: string | null }} [ctx]
+ * @returns {Promise<{ scheduleWebTopupFulfillment: string | null }>}
  */
-export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
+export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log, ctx = {}) {
   const orderId = pi.metadata?.topup_order_id;
   if (!orderId || typeof orderId !== 'string' || !TW_ORD.test(orderId)) {
     webTopupLog(log, 'info', 'payment_succeeded', {
@@ -27,7 +41,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       stripeEventIdSuffix: safeSuffix(event.id, 12),
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   const piStatus = String(pi.status ?? '');
@@ -40,7 +54,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       stripeEventIdSuffix: safeSuffix(event.id, 12),
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   const row = await tx.webTopupOrder.findUnique({ where: { id: orderId } });
@@ -52,7 +66,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       stripeEventIdSuffix: safeSuffix(event.id, 12),
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   if (row.paymentStatus === PAYMENT_STATUS.PAID) {
@@ -68,7 +82,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
         kind: 'webhook_pi_mismatch_paid_order',
         orderIdSuffix: orderId.slice(-8),
       });
-      return;
+      return { scheduleWebTopupFulfillment: null };
     }
     const attachPaid = await tx.webTopupOrder.updateMany({
       where: {
@@ -77,7 +91,10 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
         paymentIntentId: pi.id,
         completedByStripeEventId: null,
       },
-      data: { completedByStripeEventId: event.id },
+      data: {
+        completedByStripeEventId: event.id,
+        paidAt: row.paidAt ?? new Date(),
+      },
     });
     if (attachPaid.count === 0) {
       recordMoneyPathOpsSignal('webtop_pi_paid_webhook_row_replay');
@@ -88,8 +105,16 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       orderIdSuffix: orderId.slice(-8),
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       stripeEventIdSuffix: safeSuffix(event.id, 12),
+      traceId: webtopWebhookFlowTrace(ctx, event, orderId),
     });
-    return;
+    webTopupLog(log, 'info', 'payment_received', {
+      ...webTopupCorrelationFields(orderId, pi.id, webtopWebhookFlowTrace(ctx, event, orderId)),
+      stripeEventIdSuffix: safeSuffix(event.id, 12),
+      source: 'stripe_webhook',
+      applied: attachPaid.count >= 1,
+      idempotentStripeEventAttach: attachPaid.count === 0,
+    });
+    return { scheduleWebTopupFulfillment: null };
   }
 
   if (row.paymentIntentId && row.paymentIntentId !== pi.id) {
@@ -100,7 +125,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       stripeEventIdSuffix: safeSuffix(event.id, 12),
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   const amt = typeof pi.amount === 'number' ? pi.amount : Number(pi.amount);
@@ -137,7 +162,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       orderIdSuffix: orderId.slice(-8),
       reason: 'currency_mismatch',
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   if (amt !== row.amountCents) {
@@ -172,7 +197,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       orderIdSuffix: orderId.slice(-8),
       reason: 'amount_mismatch',
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   const pendingToPaid = assertWebTopupPaymentTransition(
@@ -188,7 +213,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       fromStatus: row.paymentStatus,
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
     });
-    return;
+    return { scheduleWebTopupFulfillment: null };
   }
 
   const appliedPending = await tx.webTopupOrder.updateMany({
@@ -202,17 +227,27 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       paymentStatus: PAYMENT_STATUS.PAID,
       fulfillmentStatus: FULFILLMENT_STATUS.PENDING,
       completedByStripeEventId: event.id,
+      paidAt: new Date(),
     },
   });
 
   if (appliedPending.count >= 1) {
+    const trace = webtopWebhookFlowTrace(ctx, event, orderId);
     webTopupLog(log, 'info', 'payment_succeeded', {
       applied: true,
       orderIdSuffix: orderId.slice(-8),
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       stripeEventIdSuffix: safeSuffix(event.id, 12),
+      traceId: trace,
     });
-    return;
+    webTopupLog(log, 'info', 'payment_received', {
+      ...webTopupCorrelationFields(orderId, pi.id, trace),
+      stripeEventIdSuffix: safeSuffix(event.id, 12),
+      source: 'stripe_webhook',
+      applied: true,
+      idempotent: false,
+    });
+    return { scheduleWebTopupFulfillment: orderId };
   }
 
   const attachEventOnly = await tx.webTopupOrder.updateMany({
@@ -222,19 +257,32 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log) {
       paymentIntentId: pi.id,
       completedByStripeEventId: null,
     },
-    data: { completedByStripeEventId: event.id },
+    data: {
+      completedByStripeEventId: event.id,
+      paidAt: row.paidAt ?? row.updatedAt ?? new Date(),
+    },
   });
 
   if (attachEventOnly.count >= 1) {
     recordMoneyPathOpsSignal('webtop_pi_paid_webhook_event_attach_replay');
+    const trace = webtopWebhookFlowTrace(ctx, event, orderId);
     webTopupLog(log, 'info', 'payment_succeeded', {
       applied: true,
       idempotent: true,
       orderIdSuffix: orderId.slice(-8),
       paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       stripeEventIdSuffix: safeSuffix(event.id, 12),
+      traceId: trace,
+    });
+    webTopupLog(log, 'info', 'payment_received', {
+      ...webTopupCorrelationFields(orderId, pi.id, trace),
+      stripeEventIdSuffix: safeSuffix(event.id, 12),
+      source: 'stripe_webhook',
+      applied: true,
+      idempotent: true,
     });
   }
+  return { scheduleWebTopupFulfillment: null };
 }
 
 /**

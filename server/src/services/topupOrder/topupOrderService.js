@@ -5,6 +5,7 @@ import { assertWebTopupPaymentTransition } from '../../domain/topupOrder/webtopu
 import { isStripeKeyAllowedForWebTopupCharges } from '../../config/stripeEnv.js';
 import { computeTopupOrderPayloadHash, sanitizeBoundedString } from '../../lib/topupOrderPayload.js';
 import { getStripeClient } from '../stripe.js';
+import { orchestrateStripeCall } from '../reliability/reliabilityOrchestrator.js';
 import { prisma } from '../../db.js';
 import {
   getTopupOrderById,
@@ -17,7 +18,9 @@ import {
 } from './topupOrderRepository.js';
 import { recordWebTopupOrderVelocitySignals } from '../webtopVelocitySignals.js';
 import { assertWebTopupOrderCreateRiskOrThrow } from '../risk/assertWebTopupOrderCreateRisk.js';
+import { env } from '../../config/env.js';
 import { MONEY_PATH_OUTCOME } from '../../constants/moneyPathOutcome.js';
+import { buildWebtopUserFacingOrderFields } from '../../lib/webtopUserFacingStatus.js';
 import { timingSafeEqualUtf8 } from '../../lib/timingSafeString.js';
 
 /** @typedef {import('./topupOrderTypes.js').TopupOrderRecord} TopupOrderRecord */
@@ -54,6 +57,7 @@ export function toPublicTopupOrder(row, viewer = {}) {
     fulfillmentStatus: row.fulfillmentStatus,
     fulfillmentAttemptCount: row.fulfillmentAttemptCount,
     fulfillmentProvider: row.fulfillmentProvider ?? null,
+    fulfillmentNextRetryAt: row.fulfillmentNextRetryAt ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     /** True when this order was created with a logged-in account (no raw user id exposed). */
@@ -69,6 +73,8 @@ export function toPublicTopupOrder(row, viewer = {}) {
       fulfillmentStatus: row.fulfillmentStatus,
       accountLinked: Boolean(row.userId),
     },
+    uxPublicFieldsEnabled: env.webtopupUxPublicFieldsEnabled,
+    ...(env.webtopupUxPublicFieldsEnabled ? buildWebtopUserFacingOrderFields(row) : {}),
   };
 }
 
@@ -331,7 +337,12 @@ export async function markTopupOrderPaidFromStripe(
     throw err;
   }
 
-  const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+  const pi = await orchestrateStripeCall({
+    operationName: 'paymentIntents.retrieve',
+    traceId: null,
+    log: undefined,
+    fn: () => stripe.paymentIntents.retrieve(paymentIntentId),
+  });
   if (pi.currency !== 'usd') {
     const err = new Error('pi_currency');
     err.code = 'pi_currency';

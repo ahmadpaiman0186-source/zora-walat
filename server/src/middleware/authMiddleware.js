@@ -5,16 +5,22 @@ import { prisma } from '../db.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { verifyAccessToken } from '../services/authTokenService.js';
 import { loadUserForRequest } from '../services/authService.js';
+import {
+  denyIfOwnerOnlyMismatchAuthenticated,
+  isOwnerOnlyEnforced,
+} from './ownerOnlyAccessGuard.js';
 
 async function requireAuthAsync(req, res, next) {
   try {
     /**
      * TEMP — non-production only. Env-gated dev header bypass for routes using `requireAuth`
-     * (e.g. `/api/wallet/*`, `/auth/me`, checkout): same secret as Flutter `X-ZW-Dev-Checkout`.
+     * (e.g. `/api/wallet/*`, `/api/auth/me`, checkout): same secret as Flutter `X-ZW-Dev-Checkout`.
      * See `docs/WALLET_TOPUP_LOCAL_VERIFY.md`.
      */
     if (
       env.nodeEnv !== 'production' &&
+      !env.prelaunchLockdown &&
+      !isOwnerOnlyEnforced() &&
       env.devCheckoutAuthBypass &&
       env.devCheckoutBypassSecret.length >= 16 &&
       env.devCheckoutBypassUserId
@@ -32,6 +38,9 @@ async function requireAuthAsync(req, res, next) {
             role: user.role,
             emailVerified: Boolean(user.emailVerifiedAt),
           };
+          if (denyIfOwnerOnlyMismatchAuthenticated(req, res)) {
+            return;
+          }
           req.log?.warn(
             {
               securityEvent: 'dev_checkout_auth_bypass_used',
@@ -89,6 +98,9 @@ async function requireAuthAsync(req, res, next) {
       role: user.role,
       emailVerified: Boolean(user.emailVerifiedAt),
     };
+    if (denyIfOwnerOnlyMismatchAuthenticated(req, res)) {
+      return;
+    }
     next();
   } catch {
     res

@@ -13,7 +13,31 @@ export const FULFILLMENT_SERVICE_CODE = {
   FULFILLMENT_SUSPENDED: 'fulfillment_suspended',
   /** Same Idempotency-Key already has an in-flight fulfillment attempt. */
   IDEMPOTENCY_CONFLICT: 'idempotency_conflict',
+  /** Pre-dispatch financial evaluation failed (see `guardrailCode` on thrown errors / `fulfillmentErrorCode`). */
+  FINANCIAL_GUARDRAIL: 'financial_guardrail_blocked',
 };
+
+/** Persisted on `fulfillmentErrorCode` when {@link FULFILLMENT_SERVICE_CODE.FINANCIAL_GUARDRAIL} blocks dispatch. */
+export const FINANCIAL_GUARDRAIL_CODES = Object.freeze({
+  UNPAID: 'unpaid_order_dispatch_blocked',
+  INVALID_AMOUNT: 'invalid_amount',
+  UNSUPPORTED_CURRENCY: 'unsupported_currency',
+  CONTRADICTORY: 'contradictory_financial_state',
+  DAILY_CAP: 'financial_daily_cap_exceeded',
+  GENERIC: 'financial_guardrail_blocked',
+});
+
+/** @type {ReadonlySet<string>} */
+const FINANCIAL_GUARDRAIL_CODE_SET = new Set(Object.values(FINANCIAL_GUARDRAIL_CODES));
+
+/**
+ * @param {string | null | undefined} code
+ * @returns {boolean}
+ */
+export function isWebTopupFinancialGuardrailErrorCode(code) {
+  if (code == null || typeof code !== 'string') return false;
+  return FINANCIAL_GUARDRAIL_CODE_SET.has(code.trim());
+}
 
 /** Stored in DB `fulfillmentErrorCode` for failed attempts (subset). */
 export const FULFILLMENT_DB_ERROR = {

@@ -87,6 +87,32 @@ describe('mapReloadlyTopupFailureToFulfillmentResult', () => {
     assert.equal(m.outcome, 'invalid_request');
     assert.equal(m.errorCode, 'AMOUNT_MISMATCH');
   });
+
+  it('maps transport network error to failed_retryable with stable code', () => {
+    const m = mapReloadlyTopupFailureToFulfillmentResult({
+      failureCode: 'provider_network_error',
+      failureMessage: 'fetch failed',
+    });
+    assert.equal(m.outcome, 'failed_retryable');
+    assert.equal(m.errorCode, 'provider_network_error');
+  });
+
+  it('maps non-200 style server error to retryable', () => {
+    const m = mapReloadlyTopupFailureToFulfillmentResult({
+      failureCode: 'reloadly_topup_server_error',
+      failureMessage: '502',
+    });
+    assert.equal(m.outcome, 'failed_retryable');
+    assert.equal(m.errorCode, 'provider_unavailable');
+  });
+
+  it('maps operator not found to unsupported_route (non-retryable policy)', () => {
+    const m = mapReloadlyTopupFailureToFulfillmentResult({
+      failureCode: 'reloadly_topup_not_found',
+      failureMessage: 'Operator not found',
+    });
+    assert.equal(m.outcome, 'unsupported_route');
+  });
 });
 
 describe('mapReloadlyWebTopupBuildFailureToFulfillmentResult', () => {

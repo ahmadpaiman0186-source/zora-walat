@@ -9,10 +9,16 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 import { env } from '../config/env.js';
 import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
+import { webTopupLog } from '../lib/webTopupObservability.js';
 import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { RISK_REASON_CODE } from '../constants/riskErrors.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { rateLimitRedisStore } from '../lib/rateLimitRedisInit.js';
+import {
+  getWebtopupAdminMutationMaxPerWindow,
+  getWebtopupAdminReadMaxPerWindow,
+  WEBTOPUP_ADMIN_RATE_WINDOW_MS,
+} from '../lib/adminSecuritySnapshot.js';
 
 /**
  * @param {string} prefix
@@ -30,7 +36,7 @@ const prod = env.nodeEnv === 'production';
  * undefined (ERR_ERL_UNDEFINED_IP_ADDRESS); Express may omit `req.ip` when trust proxy
  * is off in some edge cases — fall back to the socket (local dev / Flutter web).
  */
-function clientIpKey(req) {
+export function clientIpKey(req) {
   /** Use `||` so empty-string `req.ip` (Express edge cases) falls back like `undefined`. */
   const raw = req.ip || req.socket?.remoteAddress || '127.0.0.1';
   const s = typeof raw === 'string' ? raw.replace(/^::ffff:/, '') : String(raw);
@@ -516,6 +522,50 @@ export const topupOrderSessionBurstLimiter = rateLimitWithOptionalRedis(
   },
 );
 
+/**
+ * Web top-up money flow — max **5** create-order + PaymentIntent requests per **client IP per minute**
+ * (shared bucket with {@link webtopTopupsPerMinuteLimiter} on `POST /create-payment-intent`).
+ * Logs `securityEvent: 'rate_limit_exceeded'` and structured `webTopupLog` `rate_limit_exceeded`.
+ */
+function webtopTopupPerMinuteHandler(req, res, _next, options) {
+  const limit = options.limit ?? options.max;
+  req.log?.warn(
+    {
+      securityEvent: 'rate_limit_exceeded',
+      reason: 'webtop_topup_per_minute',
+      path: req.path,
+      limit,
+      clientIp: req.ip,
+      contractCode: API_CONTRACT_CODE.RATE_LIMITED,
+    },
+    'security',
+  );
+  webTopupLog(req.log, 'warn', 'rate_limit_exceeded', {
+    reason: 'topup_per_minute',
+    limit,
+    path: req.path,
+  });
+  res.status(429).json(
+    clientErrorBody(
+      'Too many top-up requests; try again shortly.',
+      API_CONTRACT_CODE.RATE_LIMITED,
+    ),
+  );
+}
+
+export const webtopTopupsPerMinuteLimiter = rateLimitWithOptionalRedis(
+  'webtop_flow_1m',
+  {
+    windowMs: 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => clientIpKey(req),
+    message: { error: 'Too many top-up requests; try again shortly.' },
+    handler: webtopTopupPerMinuteHandler,
+  },
+);
+
 /** Admin fulfillment mutations — IP + authenticated user (after requireAuth). */
 export const fulfillmentAdminMutationLimiter = rateLimitWithOptionalRedis(
   'admin_fulfill_mut_15m',
@@ -555,3 +605,89 @@ export const fulfillmentPerOrderLimiter = rateLimitWithOptionalRedis(
     handler: rateLimitHandler,
   },
 );
+
+function webtopAdminMutationRateLimitHandler(req, res, _next, options) {
+  const limit = options.limit ?? options.max;
+  req.log?.warn(
+    {
+      webtopAdminRateLimited: true,
+      kind: 'mutation',
+      path: req.path,
+      limit,
+      clientIp: req.ip,
+      traceId: req.traceId,
+    },
+    'security',
+  );
+  webTopupLog(req.log, 'warn', 'webtop_admin_rate_limited', {
+    kind: 'mutation',
+    path: req.path,
+    limit,
+    windowMs: options.windowMs,
+    traceId: req.traceId ?? undefined,
+  });
+  res
+    .status(429)
+    .json(
+      clientErrorBody(
+        'Too many WebTopup admin actions; try again later.',
+        API_CONTRACT_CODE.RATE_LIMITED,
+      ),
+    );
+}
+
+function webtopAdminReadRateLimitHandler(req, res, _next, options) {
+  const limit = options.limit ?? options.max;
+  req.log?.warn(
+    {
+      webtopAdminRateLimited: true,
+      kind: 'read',
+      path: req.path,
+      limit,
+      clientIp: req.ip,
+      traceId: req.traceId,
+    },
+    'security',
+  );
+  webTopupLog(req.log, 'warn', 'webtop_admin_rate_limited', {
+    kind: 'read',
+    path: req.path,
+    limit,
+    windowMs: options.windowMs,
+    traceId: req.traceId ?? undefined,
+  });
+  res
+    .status(429)
+    .json(
+      clientErrorBody(
+        'Too many WebTopup admin reads; try again later.',
+        API_CONTRACT_CODE.RATE_LIMITED,
+      ),
+    );
+}
+
+/**
+ * WebTopup admin POST mutations (`/api/admin/webtopup/retry`, `force-deliver`) — per client IP, stricter than {@link apiIpLimiter}.
+ */
+export const webtopAdminMutationLimiter = rateLimitWithOptionalRedis('webtop_admin_mut_15m', {
+  windowMs: WEBTOPUP_ADMIN_RATE_WINDOW_MS,
+  max: () => getWebtopupAdminMutationMaxPerWindow(),
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `wt_admin_mut:${clientIpKey(req)}`,
+  message: { error: 'Too many WebTopup admin actions; try again later.' },
+  handler: webtopAdminMutationRateLimitHandler,
+});
+
+/**
+ * WebTopup admin GET reads (status, monitoring, health, reconciliation) — per client IP.
+ */
+export const webtopAdminReadLimiter = rateLimitWithOptionalRedis('webtop_admin_read_15m', {
+  windowMs: WEBTOPUP_ADMIN_RATE_WINDOW_MS,
+  max: () => getWebtopupAdminReadMaxPerWindow(),
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => `wt_admin_read:${clientIpKey(req)}`,
+  message: { error: 'Too many WebTopup admin reads; try again later.' },
+  handler: webtopAdminReadRateLimitHandler,
+});

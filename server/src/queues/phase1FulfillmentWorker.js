@@ -1,5 +1,8 @@
 import { Worker, UnrecoverableError } from 'bullmq';
 
+import { parsePhase1FulfillmentJobPayload } from '../infrastructure/fulfillment/fulfillmentJobContract.js';
+import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
+import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
 import { env } from '../config/env.js';
 import { createBullmqConnection } from './bullmqRedis.js';
 import { isFulfillmentQueueEnabled } from './queueEnabled.js';
@@ -13,6 +16,7 @@ import {
   classifyFailureIntelligence,
   recordFailureIntelligenceMetric,
 } from '../lib/failureIntelligence.js';
+import { recordReliabilityDecision } from '../services/reliability/watchdog.js';
 import { recordPhase1FulfillmentDlqEntry } from '../services/phase1FulfillmentDlqService.js';
 import {
   closePhase1FulfillmentDeadLetterQueue,
@@ -61,21 +65,45 @@ export function startPhase1FulfillmentWorker() {
   workerSingleton = new Worker(
     PHASE1_FULFILLMENT_QUEUE_NAME,
     async (job) => {
-      const orderId = job.data?.orderId;
-      const traceId = job.data?.traceId ?? null;
-      if (!orderId || typeof orderId !== 'string') {
-        throw new UnrecoverableError('invalid_job_payload_missing_orderId');
+      const parsed = parsePhase1FulfillmentJobPayload(job.data);
+      if (!parsed.ok) {
+        throw new UnrecoverableError(`invalid_job_payload:${parsed.reason}`);
       }
+      const { orderId, traceId } = parsed.payload;
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
+        traceId,
+        orderIdSuffix: orderId.slice(-12),
+        bullmqJobId: job.id != null ? String(job.id) : null,
+        attempt: job.attemptsMade ?? 0,
+      });
       try {
         await processFulfillmentForOrder(orderId, {
           traceId,
           bullmqAttemptsMade: job.attemptsMade ?? 0,
         });
+        emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_SUCCESS, {
+          traceId,
+          orderIdSuffix: orderId.slice(-12),
+          bullmqJobId: job.id != null ? String(job.id) : null,
+        });
       } catch (err) {
+        emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_FAILURE, {
+          traceId,
+          orderIdSuffix: orderId.slice(-12),
+          message: String(err?.message ?? err).slice(0, 200),
+        });
         const failureClass = classifyTransactionFailure(err, {
           surface: 'fulfillment_worker',
         });
         if (isTransientTransactionFailureClass(failureClass)) {
+          recordReliabilityDecision({
+            layer: 'phase1_fulfillment_worker',
+            traceId,
+            outcome: 'queue_async_retry',
+            orderIdSuffix: orderId.slice(-12),
+            failureClass,
+            attempt: job.attemptsMade + 1,
+          });
           logWorkerStructured({
             event: 'job_retry_transient',
             jobId: job.id,

@@ -191,21 +191,14 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
   ) {
     recordOtpCounter('request_window_limit_total');
     logOtpEvent('warn', 'otp_request_window_limit', { emailHash });
-    throw new HttpError(
-      429,
-      'Too many verification requests for this email; try again later.',
-      { code: RISK_REASON_CODE.OTP_ABUSE },
-    );
+    // Same public response as success (anti-enumeration); metrics carry ops signal.
+    return publicOtpResponse();
   }
 
   if (challenge?.resendAfter && challenge.resendAfter > now) {
     recordOtpCounter('request_cooldown_total');
     logOtpEvent('warn', 'otp_request_cooldown', { emailHash });
-    throw new HttpError(
-      429,
-      'Please wait before requesting another code.',
-      { code: RISK_REASON_CODE.RATE_LIMITED },
-    );
+    return publicOtpResponse();
   }
 
   const otp = generateOtpCode();

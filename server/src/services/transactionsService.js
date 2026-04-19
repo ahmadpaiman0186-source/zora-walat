@@ -1,5 +1,6 @@
 import { prisma } from '../db.js';
 import { env } from '../config/env.js';
+import { parseManualReviewFlags } from './canonicalPhase1Lifecycle.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
@@ -66,6 +67,47 @@ function orderMetadataIndicatesVerifying(metadata) {
   return false;
 }
 
+function normalizedOutcomeFromLatestAttempt(latestAttempt) {
+  if (!latestAttempt?.responseSummary) return null;
+  const o = parseJsonObject(latestAttempt.responseSummary);
+  if (!o) return null;
+  const n =
+    o.normalizedOutcome != null ? String(o.normalizedOutcome).toLowerCase() : '';
+  return n || null;
+}
+
+/**
+ * Distinguishes terminal provider/business failure vs exhausted retryable path (backend/public).
+ * @param {{ orderStatus?: string | null, failureReason?: string | null }} order
+ * @param {{ responseSummary?: string | null, failureReason?: string | null } | null | undefined} latestAttempt
+ * @returns {'failed' | 'failed_terminally'}
+ */
+export function deriveCustomerFailedTerminalKey(order, latestAttempt) {
+  const os = String(order?.orderStatus ?? '').toUpperCase();
+  if (os !== ORDER_STATUS.FAILED) {
+    return 'failed';
+  }
+  const n = normalizedOutcomeFromLatestAttempt(latestAttempt);
+  if (n === 'failed_retryable') {
+    return 'failed';
+  }
+  if (
+    n === 'failed_terminal' ||
+    n === 'invalid_request' ||
+    n === 'unsupported_route'
+  ) {
+    return 'failed_terminally';
+  }
+  const fr = String(latestAttempt?.failureReason ?? order?.failureReason ?? '').toLowerCase();
+  if (fr.includes('retryable') || fr.includes('_retry')) {
+    return 'failed';
+  }
+  if (n) {
+    return 'failed_terminally';
+  }
+  return 'failed';
+}
+
 function attemptResponseSuggestsVerifying(attempt) {
   if (!attempt?.responseSummary) return false;
   const o = parseJsonObject(attempt.responseSummary);
@@ -106,6 +148,25 @@ export function deriveCustomerTrackingStageForOrder(order, latestAttempt) {
     os === ORDER_STATUS.FAILED ||
     os === ORDER_STATUS.CANCELLED;
 
+  if (!terminal) {
+    const manual = parseManualReviewFlags(order?.metadata);
+    if (manual.manualReviewRequired) {
+      return 'requires_review';
+    }
+    const paidAt = order?.paidAt;
+    const timeoutMs = env.processingTimeoutMs ?? 600_000;
+    const isAutoRetry =
+      os === ORDER_STATUS.PROCESSING && fs === FULFILLMENT_ATTEMPT_STATUS.FAILED;
+    if (
+      paidAt instanceof Date &&
+      Date.now() - paidAt.getTime() > timeoutMs &&
+      (os === ORDER_STATUS.PAID || os === ORDER_STATUS.PROCESSING) &&
+      !isAutoRetry
+    ) {
+      return 'delayed';
+    }
+  }
+
   if (
     !terminal &&
     (orderMetadataIndicatesVerifying(order?.metadata) ||
@@ -115,7 +176,11 @@ export function deriveCustomerTrackingStageForOrder(order, latestAttempt) {
   }
 
   if (os === ORDER_STATUS.CANCELLED) return 'cancelled';
-  if (os === ORDER_STATUS.FAILED) return 'failed';
+  if (os === ORDER_STATUS.FAILED) {
+    return deriveCustomerFailedTerminalKey(order, latestAttempt) === 'failed_terminally'
+      ? 'failed_terminally'
+      : 'failed';
+  }
   if (os === ORDER_STATUS.FULFILLED || os === 'DELIVERED') return 'delivered';
   if (os === ORDER_STATUS.PENDING) return 'payment_pending';
   if (os === ORDER_STATUS.PAID) {
@@ -173,6 +238,13 @@ function deriveCustomerTrustStatus(order, trackingStageKey) {
         'Delivered — the carrier should credit this line shortly if not already visible.',
     };
   }
+  if (trackingStageKey === 'failed_terminally') {
+    return {
+      trustStatusKey: 'failed_terminally',
+      trustStatusDetail:
+        'Delivery could not be completed; automatic retries will not change this outcome. If payment was captured, support will align with policy.',
+    };
+  }
   if (trackingStageKey === 'failed') {
     return {
       trustStatusKey: 'failed',
@@ -187,11 +259,35 @@ function deriveCustomerTrustStatus(order, trackingStageKey) {
     };
   }
 
+  if (trackingStageKey === 'requires_review') {
+    return {
+      trustStatusKey: 'requires_review',
+      trustStatusDetail:
+        'This order needs a quick manual check before delivery can finish. No action is required from you right now.',
+    };
+  }
+
+  if (trackingStageKey === 'retrying') {
+    return {
+      trustStatusKey: 'retrying',
+      trustStatusDetail:
+        'Delivery hit a temporary issue; we are retrying automatically. You do not need to pay again.',
+    };
+  }
+
   if (trackingStageKey === 'verifying') {
     return {
       trustStatusKey: 'processing',
       trustStatusDetail:
         'Confirming delivery with the carrier. You will see an update here when it is final.',
+    };
+  }
+
+  if (trackingStageKey === 'delayed') {
+    return {
+      trustStatusKey: 'delayed',
+      trustStatusDetail:
+        'Still processing — carriers occasionally take longer. We are not done yet.',
     };
   }
 
@@ -215,6 +311,24 @@ function deriveCustomerTrustStatus(order, trackingStageKey) {
     trustStatusDetail:
       'Processing your top-up with the carrier. Most complete within a few minutes.',
   };
+}
+
+/**
+ * Stable lifecycle key aligned with Sprint 4 public contract (`completed` = success terminal).
+ * @param {string} trackingStageKey
+ * @param {{ orderStatus?: string | null, failureReason?: string | null }} order
+ * @param {{ responseSummary?: string | null, failureReason?: string | null } | null | undefined} latestAttempt
+ */
+export function derivePublicLifecycleStage(trackingStageKey, order, latestAttempt) {
+  if (trackingStageKey === 'delivered') {
+    return 'completed';
+  }
+  if (trackingStageKey === 'failed' || trackingStageKey === 'failed_terminally') {
+    return deriveCustomerFailedTerminalKey(order, latestAttempt) === 'failed_terminally'
+      ? 'failed_terminally'
+      : 'failed';
+  }
+  return trackingStageKey;
 }
 
 /**
@@ -271,10 +385,23 @@ function mapUserOrder({ order, latestAttempt }) {
       : null;
 
   const trackingStageKey = deriveCustomerTrackingStageForOrder(order, latestAttempt);
+  const lifecycleStageKey = derivePublicLifecycleStage(
+    trackingStageKey,
+    order,
+    latestAttempt,
+  );
   const fulfillmentStatusLabelResolved =
     trackingStageKey === 'verifying'
       ? 'Confirming delivery'
-      : fulfillmentStatusLabel(fulfillmentStatus);
+      : trackingStageKey === 'requires_review'
+        ? 'Needs review'
+        : trackingStageKey === 'delayed'
+          ? 'Taking longer than usual'
+          : trackingStageKey === 'retrying'
+            ? 'Retrying delivery'
+            : trackingStageKey === 'failed_terminally'
+              ? 'Failed — no automatic recovery'
+              : fulfillmentStatusLabel(fulfillmentStatus);
 
   const trust = deriveCustomerTrustStatus(order, trackingStageKey);
   const paidUsd =
@@ -311,6 +438,7 @@ function mapUserOrder({ order, latestAttempt }) {
     failureReason: friendlyFailureReason(order.failureReason, latestAttempt?.failureReason),
 
     trackingStageKey,
+    lifecycleStageKey,
     providerReferenceSuffix: providerRefSuffix(latestAttempt?.providerReference),
     recipientMasked: maskNationalDigits(order.recipientNational),
     /** Server is source of truth for account-linked orders. */

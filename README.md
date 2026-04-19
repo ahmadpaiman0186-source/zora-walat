@@ -8,10 +8,10 @@ Flutter client + Node.js API for mobile recharge (Afghanistan-focused), with Str
 |------|------|--------|
 | **Flutter app** | `lib/` | UI, features, `main.dart` entry |
 | **API base URL (Flutter)** | `lib/core/config/app_config.dart` | Set at build time: `--dart-define=API_BASE_URL=https://…` (empty default — no hardcoded deploy URL) |
-| **Auth (Flutter)** | `lib/features/auth/`, `lib/services/auth_api_service.dart` | `/auth/register`, `/auth/login` |
+| **Auth (Flutter)** | `lib/features/auth/`, `lib/services/auth_api_service.dart` | `/api/auth/register`, `/api/auth/login` |
 | **HTTP + payments** | `lib/services/api_service.dart`, `lib/services/payment_service.dart` | Authed API + Stripe Checkout session |
 | **Backend** | `server/src/` | Express app, routes, Prisma |
-| **Backend entry** | `server/index.js` → `server/bootstrap.js` (loads `server/.env`) → `server/src/index.js` |
+| **Backend entry** | `server/start.js` (`npm start` from `server/`) → `bootstrap.js` (loads `server/.env` + optional `server/.env.local`) → `startApiRuntime()` in `server/src/index.js`. **Do not** run `node server/index.js` as the API — it exits with a “wrong entrypoint” message. |
 | **Backend env template** | `server/.env.example` | Copy to `server/.env`; optional `server/.env.local` overrides |
 | **Next.js (marketing / top-up web)** | **Repository root** (`vercel.json`, `next.config.mjs`, root `package.json`) | Vercel project **zora-walat** → **zorawalat.com** — **not** `server/` |
 | **Node API on Vercel** | `server/` (`.vercel` → project **server**) | Separate `*.vercel.app` host; do **not** run the **frontend** production deploy from here |
@@ -26,7 +26,7 @@ Flutter client + Node.js API for mobile recharge (Afghanistan-focused), with Str
 ## Local development (quick)
 
 1. **PostgreSQL** running and **`DATABASE_URL`** set in `server/.env` (`postgresql://…`).  
-2. From **`server/`**: `npm install` → `npm start` → API on **`http://127.0.0.1:8787`** (default `PORT`).  
+2. From **`server/`**: `npm install` → `npm start` → API on **`http://127.0.0.1:8787`** (default `PORT`). Same from repo root: **`npm run api`** (alias for `npm --prefix server start`).  
 3. From repo root: `flutter pub get` → `flutter run -d chrome --dart-define=API_BASE_URL=http://127.0.0.1:8787` (or your public API HTTPS origin).  
 4. **Stripe (test checkout):** set **`STRIPE_SECRET_KEY`** (`sk_test_…`) in `server/.env`. Webhooks: optional locally; use `stripe listen` and **`STRIPE_WEBHOOK_SECRET`**.  
 5. **Quiet Reloadly logs** while testing auth only: in `server/.env` set **`RELOADLY_AF_PROBE_ON_STARTUP=false`** (Reloadly integration remains; only the startup AF probe is skipped).

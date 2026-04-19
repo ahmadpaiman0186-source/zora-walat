@@ -1,5 +1,9 @@
 import { verifyAccessToken } from '../services/authTokenService.js';
 import { loadUserForRequest } from '../services/authService.js';
+import {
+  isOwnerOnlyEnforced,
+  ownerEmailMatchesAllowed,
+} from './ownerOnlyAccessGuard.js';
 
 /**
  * If `Authorization: Bearer` is present and valid, sets `req.webtopupAuthUser`.
@@ -22,10 +26,14 @@ export async function optionalAuth(req, res, next) {
         : parseInt(String(payload.tv), 10);
     const user = await loadUserForRequest(payload.sub, tv);
     if (user) {
-      req.webtopupAuthUser = {
-        id: user.id,
-        emailVerified: Boolean(user.emailVerifiedAt),
-      };
+      if (isOwnerOnlyEnforced() && !ownerEmailMatchesAllowed(user.email)) {
+        req.webtopupAuthUser = null;
+      } else {
+        req.webtopupAuthUser = {
+          id: user.id,
+          emailVerified: Boolean(user.emailVerifiedAt),
+        };
+      }
     }
   } catch {
     /* optional — ignore bad/expired JWT */

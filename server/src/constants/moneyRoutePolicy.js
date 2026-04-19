@@ -20,7 +20,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'Embedded PI: optional Bearer decorates Stripe metadata; when body.orderId is set, X-ZW-WebTopup-Session must match the order sessionKey (timing-safe). Idempotency-Key required.',
+      'Embedded PI: optional Bearer decorates Stripe metadata unless OWNER_ALLOWED_EMAIL is set (then Bearer required for allowed owner). When body.orderId is set, X-ZW-WebTopup-Session must match the order sessionKey (timing-safe). Idempotency-Key required.',
   },
   {
     method: 'POST',
@@ -37,7 +37,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'Web marketing top-up: optional Bearer binds userId; Idempotency-Key required; sessionKey optional UUID.',
+      'Web marketing top-up: optional Bearer binds userId unless OWNER_ALLOWED_EMAIL is set (then Bearer required). Idempotency-Key required; sessionKey optional UUID. Entire `/api/topup-orders` tree returns 503 when PRELAUNCH_LOCKDOWN=true.',
   },
   {
     method: 'GET',
@@ -46,7 +46,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'List: query sessionKey (capability) and/or Bearer for bound-user list — at least one required.',
+      'List: query sessionKey (capability) and/or Bearer for bound-user list — at least one required. Returns 503 when PRELAUNCH_LOCKDOWN=true.',
   },
   {
     method: 'GET',
@@ -55,7 +55,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'Read: query sessionKey and/or Bearer (JWT recovery for user-bound orders). Wrong proof → 404 (no existence leak).',
+      'Read: query sessionKey and/or Bearer (JWT recovery for user-bound orders). Wrong proof → 404 (no existence leak). Returns 503 when PRELAUNCH_LOCKDOWN=true.',
   },
   {
     method: 'POST',
@@ -64,7 +64,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'Client confirmation path (duplicates webhook authority when WEBTOPUP_CLIENT_MARK_PAID_ENABLED): requires updateToken + paymentIntentId + sessionKey OR Bearer matching bound userId; Stripe PI verified server-side.',
+      'Client confirmation path (duplicates webhook authority when WEBTOPUP_CLIENT_MARK_PAID_ENABLED): requires updateToken + paymentIntentId + sessionKey OR Bearer matching bound userId; Stripe PI verified server-side. Returns 503 when PRELAUNCH_LOCKDOWN=true.',
   },
   {
     method: 'GET',
@@ -104,7 +104,8 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     anonymousAllowed: false,
     authRequired: true,
     emailVerifiedRequired: true,
-    capabilityNotes: 'Post-payment fulfillment kick; not prelaunch-blocked.',
+    capabilityNotes:
+      'Post-payment fulfillment kick; blocked under PRELAUNCH_LOCKDOWN via blockMoneyRoutesIfPrelaunch.',
   },
   {
     method: 'GET',

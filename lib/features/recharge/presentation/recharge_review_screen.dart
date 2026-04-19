@@ -1,7 +1,10 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/auth/email_verification_required_exception.dart';
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
@@ -60,11 +63,15 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
       _errorMessage = null;
     });
 
-    await log.append({
-      'event': 'recharge_payment_attempt',
-      'amount_usd_cents': cents,
-      'operator': widget.draft.operatorKey,
-    });
+    unawaited(
+      log
+          .append({
+            'event': 'recharge_payment_attempt',
+            'amount_usd_cents': cents,
+            'operator': widget.draft.operatorKey,
+          })
+          .catchError((_) {}),
+    );
 
     try {
       await paymentService.startCheckout(
@@ -74,17 +81,25 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
         operatorKey: widget.draft.operatorKey,
         recipientPhone: widget.draft.phoneE164Style,
       );
-      await log.append({
-        'event': 'recharge_checkout_redirect',
-        'amount_usd_cents': cents,
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_checkout_redirect',
+              'amount_usd_cents': cents,
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       setState(() => _phase = _PaymentPhase.hostedCheckout);
     } on UnauthorizedException catch (_) {
-      await log.append({
-        'event': 'recharge_payment_failure',
-        'message': 'unauthorized',
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': 'unauthorized',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       setState(() {
         _phase = _PaymentPhase.failure;
@@ -94,11 +109,36 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
         SnackBar(content: Text(l10n.authRequiredMessage)),
       );
       if (mounted) router.push(AppRoutePaths.signIn);
-    } catch (e) {
-      await log.append({
-        'event': 'recharge_payment_failure',
-        'message': '$e',
+    } on EmailVerificationRequiredException catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': 'email_verification_required',
+            })
+            .catchError((_) {}),
+      );
+      if (!mounted) return;
+      final email = AppScope.authSessionOf(context).userEmail ?? '';
+      setState(() {
+        _phase = _PaymentPhase.failure;
+        _errorMessage = e.message;
       });
+      messenger?.showSnackBar(SnackBar(content: Text(e.message)));
+      if (email.isNotEmpty && mounted) {
+        router.push(
+          '${AppRoutePaths.signInOtp}?email=${Uri.encodeComponent(email)}',
+        );
+      }
+    } catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': '$e',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       final msg = kReleaseMode ? l10n.authGenericError : '$e';
       setState(() {
@@ -333,10 +373,18 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.checkoutSenderCountryHint,
+                  style: t.textTheme.bodySmall?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.35,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 _SummaryCard(
                   rows: [
-                    _Row(l10n.recipientNumber, widget.draft.phoneE164Style),
+                    _Row(l10n.recipientNumber, widget.draft.recipientDisplayPhone),
                     _Row(l10n.operator, widget.draft.operatorLabel),
                     _Row(l10n.selectAmount, _amountLabel),
                   ],

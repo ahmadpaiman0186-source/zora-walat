@@ -22,4 +22,6 @@ export const WEBTOPUP_CLIENT_ERROR_CODE = Object.freeze({
   INVALID_PAYMENT_INTENT_ID: 'invalid_payment_intent_id',
   /** GET list or get: need `sessionKey` or `Authorization: Bearer`. */
   SESSION_OR_AUTH_REQUIRED: 'webtopup_session_or_auth_required',
+  /** Hard abuse / fraud heuristics tripped (see `details.abuseReason`). */
+  WEBTOPUP_ABUSE_BLOCKED: 'webtopup_abuse_blocked',
 });

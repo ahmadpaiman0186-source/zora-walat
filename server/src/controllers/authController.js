@@ -40,6 +40,7 @@ function authValidationError(res, e) {
 }
 
 export async function postRegister(req, res) {
+  console.log('REGISTER ENDPOINT HIT');
   let parsed;
   try {
     parsed = registerBodySchema.parse(req.body ?? {});

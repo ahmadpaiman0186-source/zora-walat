@@ -9,6 +9,7 @@ import { logProductionReloadlyConsistencyWarnings } from '../config/productionRe
 import { assertProductionMoneyPathSafetyOrExit } from '../config/productionSafetyGates.js';
 import { logLaunchDisciplineWarnings } from '../config/launchConfigGuards.js';
 import { assertCriticalLaunchConfigOrExit } from '../config/criticalConfigValidation.js';
+import { assertWebTopupDeploymentConfigOrExit } from '../config/webtopDeploymentConfig.js';
 import { assertProductionDeploymentContractOrExit } from '../config/deploymentProductionContract.js';
 import {
   getAirtimeReloadlyDiagnosticsSnapshot,
@@ -37,6 +38,7 @@ import {
   getRuntimeKind,
   RUNTIME_KIND,
 } from './runtimeContext.js';
+import { jwtSecretLooksTrivial } from '../lib/jwtSecretQuality.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -50,6 +52,11 @@ function validateJwtSecretsOrExit() {
       '[fatal] JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must each be set and at least 32 characters',
     );
     process.exit(1);
+  }
+  if (jwtSecretLooksTrivial(jwtAccess) || jwtSecretLooksTrivial(jwtRefresh)) {
+    console.warn(
+      '[startup] JWT secrets look trivial (repeated characters or placeholder substrings) — use high-entropy values outside throwaway local sandboxes.',
+    );
   }
 }
 
@@ -73,6 +80,16 @@ function validateDatabaseConfigOrExit() {
         '[fatal] PRELAUNCH_LOCKDOWN requires STRIPE_WEBHOOK_SECRET (webhook verification)',
       );
       process.exit(1);
+    }
+    if (!String(env.ownerAllowedEmail ?? '').trim()) {
+      console.warn(
+        '[startup] PRELAUNCH_LOCKDOWN without OWNER_ALLOWED_EMAIL — auth is not single-operator scoped; set OWNER_ALLOWED_EMAIL for owner-only pre-private mode.',
+      );
+    }
+    if (String(env.opsInfraHealthToken ?? '').trim().length < 16) {
+      console.warn(
+        '[startup] PRELAUNCH_LOCKDOWN with OPS_HEALTH_TOKEN shorter than 16 chars or unset — /ready and /ops/health detail gates are weak; use a long random token.',
+      );
     }
   }
 
@@ -192,6 +209,7 @@ function logRuntimeTopologyOnce() {
 
 function logLaunchValidation() {
   validateWebTopupFulfillmentProviderConfigOrExit();
+  assertWebTopupDeploymentConfigOrExit();
   validateAirtimeReloadlyConfigOrExit();
   logProductionReloadlyConsistencyWarnings();
   assertProductionMoneyPathSafetyOrExit();
@@ -284,6 +302,14 @@ export function createValidatedApp() {
 }
 
 async function logApiStartup() {
+  try {
+    await logApiStartupBody();
+  } catch (e) {
+    console.error('[startup] logApiStartup failed (non-fatal)', e);
+  }
+}
+
+async function logApiStartupBody() {
   console.log(
     JSON.stringify({
       event: 'api_runtime_listen',
@@ -306,8 +332,37 @@ async function logApiStartup() {
     `[startup] stripe_webhook_secret=${wh ? (wh.startsWith('whsec_') ? `configured (whsec_, len=${wh.length})` : `present but bad_prefix (len=${wh.length})`) : 'MISSING'}`,
   );
   console.log(`[zora-walat-api] ${env.nodeEnv}`);
+  const allowRaw = String(process.env.ALLOW_UNVERIFIED_CHECKOUT ?? '').trim();
+  console.log(
+    `[startup] checkout_email_gate allowUnverifiedCheckoutInDev=${env.allowUnverifiedCheckoutInDev} (ALLOW_UNVERIFIED_CHECKOUT=${allowRaw || 'unset'})`,
+  );
+  if (
+    allowRaw === 'true' &&
+    !env.allowUnverifiedCheckoutInDev &&
+    env.nodeEnv === 'production'
+  ) {
+    console.warn(
+      '[startup] ALLOW_UNVERIFIED_CHECKOUT=true is ignored while NODE_ENV=production — use NODE_ENV=development for local API, or verify the account email.',
+    );
+  }
   if (env.prelaunchLockdown) {
     console.log('[pre-launch] PRELAUNCH_LOCKDOWN active — money routes return 503; strict CORS');
+    console.log(
+      env.prelaunchAllowPublicRegistration
+        ? '[pre-launch] Public registration allowed (PRELAUNCH_ALLOW_PUBLIC_REGISTRATION=true)'
+        : '[pre-launch] Public registration blocked — set PRELAUNCH_ALLOW_PUBLIC_REGISTRATION=true to opt in',
+    );
+    console.log(
+      '[pre-launch] Detailed infra surfaces (/ops/health, /ready, /metrics) require OPS_HEALTH_TOKEN unless caller presents token',
+    );
+    console.log(
+      '[pre-launch] X-ZW-Dev-Checkout auth bypass is disabled while PRELAUNCH_LOCKDOWN is active',
+    );
+  }
+  if (env.ownerAllowedEmail) {
+    console.log(
+      `[startup] OWNER_ALLOWED_EMAIL active — only ${env.ownerAllowedEmail} may authenticate or use protected APIs`,
+    );
   }
   console.log(stripeKeyStatusLog());
 
@@ -332,7 +387,23 @@ async function logApiStartup() {
   }
 }
 
+/**
+ * When stdout/stderr are pipes (e.g. `node start.js | head`), closing the read end can emit
+ * `EPIPE` on write; an unhandled error can terminate the process despite an active HTTP server.
+ */
+function attachStdioPipeSurvivalForLongRunningApi() {
+  if (process.env.NODE_ENV === 'test') return;
+  /** @param {NodeJS.ErrnoException | null | undefined} err */
+  const onStdioError = (err) => {
+    if (err && (err.code === 'EPIPE' || err.code === 'ERR_STREAM_WRITE_AFTER_END')) return;
+    console.error('[stdio] unexpected stream error', err);
+  };
+  process.stdout.on('error', onStdioError);
+  process.stderr.on('error', onStdioError);
+}
+
 export function startApiRuntime() {
+  attachStdioPipeSurvivalForLongRunningApi();
   const kind = getRuntimeKind();
   if (kind !== RUNTIME_KIND.API) {
     console.error(
@@ -347,9 +418,49 @@ export function startApiRuntime() {
     process.exit(1);
   }
   const app = createValidatedApp();
-  return app.listen(env.port, () => {
+  const server = app.listen(env.port, () => {
     void logApiStartup();
   });
+
+  if (process.env.NODE_ENV !== 'test') {
+    const shutdownTimeoutMs = 15_000;
+    /** @param {NodeJS.Signals} signal */
+    const gracefulShutdown = (signal) => {
+      console.log(
+        JSON.stringify({
+          event: 'api_graceful_shutdown',
+          schemaVersion: 1,
+          signal,
+          pid: process.pid,
+        }),
+      );
+      server.close((closeErr) => {
+        if (closeErr) {
+          console.error('[shutdown] server.close failed', closeErr);
+        }
+        prisma
+          .$disconnect()
+          .catch((e) => console.error('[shutdown] prisma.$disconnect failed', e))
+          .finally(() => {
+            process.exit(closeErr ? 1 : 0);
+          });
+      });
+      setTimeout(() => {
+        console.error(
+          JSON.stringify({
+            event: 'api_shutdown_force_exit',
+            schemaVersion: 1,
+            ms: shutdownTimeoutMs,
+          }),
+        );
+        process.exit(1);
+      }, shutdownTimeoutMs).unref();
+    };
+    process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.once('SIGINT', () => gracefulShutdown('SIGINT'));
+  }
+
+  return server;
 }
 
 function startIntervalLoop(name, intervalMs, fn) {
@@ -419,7 +530,7 @@ export function startBackgroundWorkerRuntime() {
   const webTopupLoop = startIntervalLoop(
     'processWebTopupFulfillmentJobs',
     env.webtopupFulfillmentJobPollMs,
-    () => processWebTopupFulfillmentJobs({ limit: 15 }),
+    () => processWebTopupFulfillmentJobs({ limit: env.webtopupFulfillmentJobBatchSize }),
   );
   if (webTopupLoop) cleanup.push(webTopupLoop);
 

@@ -258,7 +258,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             OrderTrackingTimeline(
               activeIndex: tracking.linearStepIndex,
               highlightStep: tracking.linearStepIndex,
-              failedAtStep: tracking.stage == CustomerTrackingStage.failed,
+              failedAtStep:
+                  tracking.stage == CustomerTrackingStage.failed ||
+                  tracking.stage == CustomerTrackingStage.failedTerminally,
             ),
             const SizedBox(height: 18),
             OrderTrustReceiptCard(l10n: l10n, row: row),

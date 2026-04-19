@@ -8,6 +8,18 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const serverRoot = dirname(fileURLToPath(import.meta.url));
+/**
+ * Development uses `override: true` so `server/.env` wins over stale shell vars (e.g. DATABASE_URL).
+ * Stripe CLI `stripe listen` emits a **new** `whsec_` per session; automation and operators sometimes
+ * inject `STRIPE_WEBHOOK_SECRET` into the process environment before Node starts. That value must
+ * win over the copy in `.env`, or signature verification fails until `.env` is edited and the server
+ * is restarted.
+ */
+const inheritedStripeWebhookSecret = String(
+  process.env.STRIPE_WEBHOOK_SECRET ?? '',
+).trim();
+/** Preserved when non-empty so dev `dotenv` override does not clobber e.g. `PORT=8798` from a proof child process. */
+const inheritedPort = String(process.env.PORT ?? '').trim();
 const dotenvQuiet =
   String(process.env.FORTRESS_PROBE_QUIET ?? '')
     .trim()
@@ -30,6 +42,20 @@ if (envLocalLoaded) {
     override: true,
     quiet: dotenvQuiet || dotenvQuietDev,
   });
+}
+
+/** True when `STRIPE_WEBHOOK_SECRET` was set before bootstrap and restored after dotenv (local/CI listen alignment). */
+let stripeWebhookSecretEffectiveSource = 'dotenv_or_platform';
+if (
+  inheritedStripeWebhookSecret.startsWith('whsec_') &&
+  inheritedStripeWebhookSecret.length >= 20
+) {
+  process.env.STRIPE_WEBHOOK_SECRET = inheritedStripeWebhookSecret;
+  stripeWebhookSecretEffectiveSource = 'process_inheritance';
+}
+
+if (inheritedPort) {
+  process.env.PORT = inheritedPort;
 }
 
 const isPrismaCliTooling =
@@ -68,8 +94,14 @@ if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
       `❌ STRIPE_WEBHOOK_SECRET is invalid or placeholder (must start with whsec_).\n${webhookHelp}`,
     );
   } else {
+    const tail =
+      whsec.length >= 10 ? whsec.slice(-6) : '???';
+    const src =
+      stripeWebhookSecretEffectiveSource === 'process_inheritance'
+        ? 'effective=process_inheritance (not overwritten by server/.env — use for Stripe CLI session alignment)'
+        : 'effective=dotenv_or_shell';
     console.log(
-      `[env] STRIPE_WEBHOOK_SECRET loaded (prefix=whsec_, len=${whsec.length}) — must match the **active** stripe listen session`,
+      `[env] STRIPE_WEBHOOK_SECRET loaded (${src}; prefix=whsec_, len=${whsec.length}, tail=…${tail}) — must match the **active** stripe listen session exactly; restart Node after any whsec change`,
     );
   }
 }

@@ -143,6 +143,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get checkoutCardRegionLabel => 'موقعیت شما (کارت)';
 
   @override
+  String get checkoutSenderCountryHint =>
+      'این منطقهٔ صدور کارت شما برای بررسی ریسک است؛ شمارهٔ گیرنده همیشه موبایل افغانستان (+۹۳) است.';
+
+  @override
+  String get telecomRecipientAfghanistanDialHint =>
+      'افغانستان +۹۳ — شمارهٔ محلی موبایل را وارد کنید (با ۷ شروع می‌شود).';
+
+  @override
   String get checkoutPricingUsdServerNote =>
       'قیمت‌گذاری به دلار روی سرورهای ما برای منطقهٔ شما محاسبه می‌شود.';
 
@@ -164,6 +172,16 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get recipientNumber => 'شمارهٔ گیرنده';
+
+  @override
+  String get receivingCountryLabel => 'کشور گیرنده';
+
+  @override
+  String get rechargeCountryNotSupported =>
+      'شارژ موبایل فقط برای شماره‌های افغانستان است. افغانستان را انتخاب کنید.';
+
+  @override
+  String get phoneLocalDigitsHint => 'شمارهٔ محلی را بدون کد کشور وارد کنید.';
 
   @override
   String get operator => 'اپراتور';
@@ -708,6 +726,15 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get successStripeConfirmedShort =>
       'بانک شما خرید را تأیید کرد. اکنون در حال تکمیل شارژ هستیم.';
+
+  @override
+  String get successMissingReturnParamsHint =>
+      'این آدرس جزئیات مرجع پرداخت (جلسه یا شماره سفارش) را ندارد. اگر پرداخت را انجام دادید، «سفارش‌های اخیر» را باز کنید یا از ایمیل تأیید Stripe استفاده کنید.';
+
+  @override
+  String successBootstrapWarning(String detail) {
+    return 'نتوانستیم وضعیت زنده سفارش را به‌روز کنیم. پرداخت شما ممکن است هنوز در حال پردازش باشد — لحظاتی بعد «سفارش‌های اخیر» را بررسی کنید.\n$detail';
+  }
 
   @override
   String get receiptTitle => 'رسید';

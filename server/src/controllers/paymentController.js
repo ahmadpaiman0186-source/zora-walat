@@ -16,6 +16,8 @@ import {
   assertTopupOrderEligibleForPaymentIntent,
   linkWebTopupPaymentIntent,
 } from '../services/topupOrder/topupOrderService.js';
+import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
+import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { safeSuffix, webTopupLog } from '../lib/webTopupObservability.js';
 import { validatePackageOperatorPair } from '../lib/allowedCheckout.js';
 import { resolveCheckoutPricing } from '../domain/pricing/resolveCheckoutPricing.js';
@@ -25,6 +27,10 @@ import {
 } from '../lib/phone.js';
 import { originHostnameForLog } from '../lib/corsPolicy.js';
 import { resolveCheckoutClientBase } from '../lib/checkoutClientBase.js';
+import {
+  buildStripeCheckoutReturnUrls,
+  checkoutRedirectLocalDiagnosticCode,
+} from '../lib/checkoutRedirectUrls.js';
 import { checkoutRequestFingerprint } from '../lib/checkoutFingerprint.js';
 import {
   findReusableCheckout,
@@ -48,6 +54,7 @@ import { WEBTOPUP_CLIENT_ERROR_CODE } from '../constants/webtopupClientErrors.js
 import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { timingSafeEqualUtf8 } from '../lib/timingSafeString.js';
 import { assertPaymentIntentRiskAllowed } from '../services/risk/assertPaymentIntentRisk.js';
+import { orchestrateStripeCall } from '../services/reliability/reliabilityOrchestrator.js';
 
 export async function createCheckoutSession(req, res) {
   const authUserId = req.user?.id;
@@ -93,6 +100,22 @@ export async function createCheckoutSession(req, res) {
     );
   }
   const clientBase = clientBaseResolution.clientBase;
+
+  const redirectDiag = checkoutRedirectLocalDiagnosticCode({
+    nodeEnv: env.nodeEnv,
+    clientBase,
+    source: clientBaseResolution.source,
+  });
+  if (redirectDiag) {
+    req.log?.warn(
+      {
+        checkoutRedirectDiagnostic: redirectDiag,
+        clientBase,
+        hint: `Repo Next.js defaults to port 3000 (root package.json). Origin must match a running web app.`,
+      },
+      'checkout redirect origin port mismatch risk',
+    );
+  }
 
   const idemRaw = req.get('idempotency-key');
   const idemParsed = idempotencyKeyHeaderSchema.safeParse(idemRaw);
@@ -378,34 +401,53 @@ export async function createCheckoutSession(req, res) {
     throw e;
   }
 
+  const stripeReturn = buildStripeCheckoutReturnUrls(clientBase, row.id);
+  req.log?.info(
+    {
+      checkoutRedirectBuilt: true,
+      clientBase,
+      checkoutClientBaseSource: clientBaseResolution.source,
+      successPath: stripeReturn.successPath,
+      cancelPath: stripeReturn.cancelPath,
+      cancelUrl: stripeReturn.cancelUrl,
+    },
+    'checkout stripe return urls',
+  );
+
   try {
-    const session = await stripe.checkout.sessions.create(
-      {
-        payment_method_types: ['card'],
-        mode: 'payment',
-        line_items: [
+    const session = await orchestrateStripeCall({
+      operationName: 'checkout.sessions.create',
+      traceId: req.traceId,
+      log: req.log,
+      fn: () =>
+        stripe.checkout.sessions.create(
           {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: 'Afghanistan mobile top-up (USD)',
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [
+              {
+                price_data: {
+                  currency: 'usd',
+                  product_data: {
+                    name: 'Afghanistan mobile top-up (USD)',
+                  },
+                  unit_amount: trustedCents,
+                },
+                quantity: 1,
               },
-              unit_amount: trustedCents,
+            ],
+            success_url: stripeReturn.successUrl,
+            cancel_url: stripeReturn.cancelUrl,
+            client_reference_id: row.id,
+            metadata: {
+              internalCheckoutId: row.id,
+              idempotencyKey,
+              appUserId: authUserId,
             },
-            quantity: 1,
           },
-        ],
-        success_url: `${clientBase}/success?session_id={CHECKOUT_SESSION_ID}&order_id=${encodeURIComponent(row.id)}`,
-        cancel_url: `${clientBase}/cancel`,
-        client_reference_id: row.id,
-        metadata: {
-          internalCheckoutId: row.id,
-          idempotencyKey,
-          appUserId: authUserId,
-        },
-      },
-      { idempotencyKey },
-    );
+          { idempotencyKey },
+        ),
+    });
 
     await markCheckoutCreated(row.id, {
       stripeCheckoutSessionId: session.id,
@@ -435,6 +477,11 @@ export async function createCheckoutSession(req, res) {
       orderId: row.id,
       traceId: req.traceId,
       extra: { stripeSessionIdSuffix: String(session.id).slice(-12) },
+    });
+    emitMoneyPathLog(MONEY_PATH_EVENT.CHECKOUT_SESSION_CREATED, {
+      traceId: req.traceId ?? null,
+      orderIdSuffix: safeSuffix(row.id, 10),
+      stripeSessionIdSuffix: String(session.id).slice(-12),
     });
     return res.json({
       url: session.url,
@@ -608,15 +655,21 @@ export async function createTestPaymentIntent(req, res) {
 
   let pi;
   try {
-    pi = await stripe.paymentIntents.create(
-      {
-        amount: amountCents,
-        currency: 'usd',
-        automatic_payment_methods: { enabled: true },
-        metadata: stripeMetadata,
-      },
-      { idempotencyKey },
-    );
+    pi = await orchestrateStripeCall({
+      operationName: 'paymentIntents.create',
+      traceId: req.traceId,
+      log: req.log,
+      fn: () =>
+        stripe.paymentIntents.create(
+          {
+            amount: amountCents,
+            currency: 'usd',
+            automatic_payment_methods: { enabled: true },
+            metadata: stripeMetadata,
+          },
+          { idempotencyKey },
+        ),
+    });
   } catch (err) {
     webTopupLog(req.log, 'warn', 'payment_intent_failed', {
       amountCents,
@@ -653,7 +706,14 @@ export async function createTestPaymentIntent(req, res) {
         paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       });
       try {
-        await stripe.paymentIntents.cancel(pi.id);
+        await orchestrateStripeCall({
+          operationName: 'paymentIntents.cancel',
+          traceId: req.traceId,
+          log: req.log,
+          useCircuit: false,
+          maxAttempts: 2,
+          fn: () => stripe.paymentIntents.cancel(pi.id),
+        });
       } catch (cancelErr) {
         req.log?.warn?.(
           {
@@ -673,7 +733,14 @@ export async function createTestPaymentIntent(req, res) {
     }
     if (typeof pi.amount === 'number' && pi.amount !== amountCents) {
       try {
-        await stripe.paymentIntents.cancel(pi.id);
+        await orchestrateStripeCall({
+          operationName: 'paymentIntents.cancel',
+          traceId: req.traceId,
+          log: req.log,
+          useCircuit: false,
+          maxAttempts: 2,
+          fn: () => stripe.paymentIntents.cancel(pi.id),
+        });
       } catch {
         /* best-effort */
       }
@@ -689,7 +756,14 @@ export async function createTestPaymentIntent(req, res) {
         paymentIntentIdSuffix: safeSuffix(pi.id, 10),
       });
       try {
-        await stripe.paymentIntents.cancel(pi.id);
+        await orchestrateStripeCall({
+          operationName: 'paymentIntents.cancel',
+          traceId: req.traceId,
+          log: req.log,
+          useCircuit: false,
+          maxAttempts: 2,
+          fn: () => stripe.paymentIntents.cancel(pi.id),
+        });
       } catch {
         /* best-effort */
       }
@@ -713,6 +787,17 @@ export async function createTestPaymentIntent(req, res) {
         ? String(parsed.orderId).slice(-8)
         : undefined,
     optionalAuth: Boolean(auth),
+  });
+
+  emitMoneyPathLog(MONEY_PATH_EVENT.PAYMENT_INTENT_CREATED, {
+    traceId: req.traceId ?? null,
+    paymentIntentIdSuffix: safeSuffix(pi.id, 10),
+    amountCents,
+    hasTopupOrder: Boolean(parsed.orderId),
+    orderIdSuffix:
+      parsed.orderId != null && parsed.orderId !== ''
+        ? String(parsed.orderId).slice(-8)
+        : undefined,
   });
 
   return res.status(200).json({

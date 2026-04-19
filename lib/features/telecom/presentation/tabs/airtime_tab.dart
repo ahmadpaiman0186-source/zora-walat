@@ -145,6 +145,14 @@ class _AirtimeTabState extends State<AirtimeTab> {
             validator: (v) =>
                 AfghanPhoneUtils.validationErrorL10n(l10n, v),
           ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.telecomRecipientAfghanistanDialHint,
+            style: t.textTheme.bodySmall?.copyWith(
+              color: t.colorScheme.outline,
+              height: 1.35,
+            ),
+          ),
           const SizedBox(height: 16),
           if (_detected != null && _manual == null)
             Chip(

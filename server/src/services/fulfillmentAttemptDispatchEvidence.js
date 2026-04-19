@@ -6,7 +6,11 @@ import { prisma } from '../db.js';
  * DB remains authoritative; Redis markers can evaporate — this row survives for recon.
  *
  * @param {string} attemptId FulfillmentAttempt.id
- * @param {{ customIdentifier: string, traceId?: string | null }} fields
+ * @param {{
+ *   customIdentifier: string,
+ *   traceId?: string | null,
+ *   providerExecutionCorrelationId?: string | null,
+ * }} fields
  */
 export async function persistReloadlyPreHttpDispatchEvidence(attemptId, fields) {
   const id = String(attemptId ?? '').trim();
@@ -36,6 +40,9 @@ export async function persistReloadlyPreHttpDispatchEvidence(attemptId, fields) 
 
   req.reloadlyPreHttpArmedAt = new Date().toISOString();
   req.reloadlyCustomIdentifier = customIdentifier;
+  if (fields.providerExecutionCorrelationId != null && String(fields.providerExecutionCorrelationId).trim()) {
+    req.providerExecutionCorrelationId = String(fields.providerExecutionCorrelationId).trim();
+  }
   if (fields.traceId != null && String(fields.traceId).trim()) {
     req.reloadlyPreHttpTraceId = String(fields.traceId).trim();
   }

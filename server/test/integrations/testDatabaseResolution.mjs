@@ -49,8 +49,53 @@ export function applyIntegrationTestDatabaseEnv() {
     testUrl ? 'TEST_DATABASE_URL' : baseUrl ? 'DATABASE_URL' : 'none';
   const effective = testUrl || baseUrl || null;
 
+  /**
+   * Cap Prisma pool size for integration runs so multiple suites + a dev API on the same Postgres
+   * are less likely to hit `FATAL: sorry, too many clients already`.
+   * Always sets `connection_limit` on the URL (overrides an existing value from `.env`).
+   */
+  const integrationPoolLimit = String(
+    process.env.ZW_INTEGRATION_PRISMA_POOL ?? process.env.PRISMA_CONNECTION_LIMIT ?? '3',
+  ).trim() || '3';
+
+  /** Same query-string rule as `src/db.js` (avoid importing db before `DATABASE_URL` is set). */
+  function applyConnectionLimitToUrl(url, limit) {
+    const s = String(url ?? '').trim();
+    if (!s) return s;
+    const qIndex = s.indexOf('?');
+    const lim = String(limit);
+    if (qIndex === -1) {
+      return `${s}?connection_limit=${encodeURIComponent(lim)}`;
+    }
+    const base = s.slice(0, qIndex);
+    const qs = s.slice(qIndex + 1);
+    const params = new URLSearchParams(qs);
+    params.set('connection_limit', lim);
+    return `${base}?${params.toString()}`;
+  }
+
   if (effective) {
-    process.env.DATABASE_URL = effective;
+    process.env.DATABASE_URL = applyConnectionLimitToUrl(effective, integrationPoolLimit);
+    if (!String(process.env.PRISMA_CONNECTION_LIMIT ?? '').trim()) {
+      process.env.PRISMA_CONNECTION_LIMIT = integrationPoolLimit;
+    }
+  }
+
+  /**
+   * Local `server/.env` may set `PRELAUNCH_LOCKDOWN=true` for operator staging.
+   * Integration suites expect normal money + registration + `/ready` unless they opt into lockdown.
+   * Set `ZW_INTEGRATION_RESPECT_PRELAUNCH=true` to keep `.env` prelaunch behavior in a test process.
+   */
+  if (process.env.ZW_INTEGRATION_RESPECT_PRELAUNCH !== 'true') {
+    process.env.PRELAUNCH_LOCKDOWN = 'false';
+  }
+
+  /**
+   * Integration suites use synthetic emails unless testing owner-only mode.
+   * Set `ZW_INTEGRATION_RESPECT_OWNER_ONLY=true` and `OWNER_ALLOWED_EMAIL` to exercise allow/deny.
+   */
+  if (process.env.ZW_INTEGRATION_RESPECT_OWNER_ONLY !== 'true') {
+    process.env.OWNER_ALLOWED_EMAIL = '';
   }
 
   process.env.ZW_INTEGRATION_TEST_DB_SOURCE = source;

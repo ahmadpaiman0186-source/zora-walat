@@ -9,11 +9,11 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { describe, it, before, after, afterEach } from 'node:test';
 import { performance } from 'node:perf_hooks';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import Stripe from 'stripe';
 import request from 'supertest';
 
+import { prisma } from '../../src/db.js';
 import { ORDER_STATUS } from '../../src/constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../../src/constants/paymentCheckoutStatus.js';
 import { POST_PAYMENT_INCIDENT_STATUS } from '../../src/constants/postPaymentIncidentStatus.js';
@@ -31,8 +31,6 @@ const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () => {
-  /** @type {PrismaClient} */
-  let prisma;
   /** @type {import('express').Express} */
   let app;
   const userIds = [];
@@ -40,13 +38,11 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
   const webhookSecret = String(process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
 
   before(async () => {
-    prisma = new PrismaClient({ datasourceUrl: dbUrl });
-    await prisma.$connect();
     app = createApp();
   });
 
   after(async () => {
-    if (prisma) await prisma.$disconnect();
+    /* Shared singleton prisma: avoid $disconnect while webhook/async handlers may still run; process exit closes pool. */
   });
 
   afterEach(async () => {
@@ -144,7 +140,8 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
     };
   }
 
-  async function settle(ms = 700) {
+  /** Default allows async Phase-1 fee capture (`recordPaymentCheckoutStripeFee`) to finish after HTTP 200. */
+  async function settle(ms = 2200) {
     await new Promise((r) => setTimeout(r, ms));
   }
 

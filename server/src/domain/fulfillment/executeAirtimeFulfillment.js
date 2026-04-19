@@ -21,12 +21,13 @@ export function resolveAirtimeProviderName() {
  * Mock airtime fulfillment only — Reloadly is routed in `deliveryAdapter.js`.
  *
  * @param {import('@prisma/client').PaymentCheckout} order
+ * @param {Record<string, unknown>} [fulfillmentCtx]
  */
-export async function executeAirtimeFulfillment(order) {
+export async function executeAirtimeFulfillment(order, fulfillmentCtx = {}) {
   const name = resolveAirtimeProviderName();
 
   try {
-    return fulfillMockAirtime(order);
+    return await fulfillMockAirtime(order, fulfillmentCtx);
   } catch (err) {
     const { errorKind, failureCode } = classifyProviderError(err);
     const msg = String(err?.message ?? err ?? 'provider_error').slice(0, 300);
@@ -36,7 +37,12 @@ export async function executeAirtimeFulfillment(order) {
       failureCode,
       failureMessage: msg,
       errorKind,
-      requestSummary: { packageId: order.packageId ?? null },
+      requestSummary: {
+        packageId: order.packageId ?? null,
+        ...(typeof fulfillmentCtx.providerCorrelationId === 'string'
+          ? { providerCorrelationId: fulfillmentCtx.providerCorrelationId }
+          : {}),
+      },
       responseSummary: { diagnostic: safeErrorDiagnostics(err) },
     };
   }

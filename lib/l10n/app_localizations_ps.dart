@@ -141,6 +141,14 @@ class AppLocalizationsPs extends AppLocalizations {
   String get checkoutCardRegionLabel => 'ستاسو ځای (کارت)';
 
   @override
+  String get checkoutSenderCountryHint =>
+      'دا ستاسو د کارت د بلینګ سیمه ده (خطر چیک)؛ ترلاسه کوونکی شمیره تل افغانستان موبایل (+۹۳) ده.';
+
+  @override
+  String get telecomRecipientAfghanistanDialHint =>
+      'افغانستان +۹۳ — ځایی موبایل ولیکئ (د ۷ پیل سره).';
+
+  @override
   String get checkoutPricingUsdServerNote =>
       'بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.';
 
@@ -161,6 +169,16 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get recipientNumber => 'د اخیستونکي شمېره';
+
+  @override
+  String get receivingCountryLabel => 'د اخیستونکي هېواد';
+
+  @override
+  String get rechargeCountryNotSupported =>
+      'د موبایل شارژ یوازې د افغانستان شمېرو لپاره دی. افغانستان غوره کړئ.';
+
+  @override
+  String get phoneLocalDigitsHint => 'ځایی شمېره د هېواد کوډ پرته ولیکئ.';
 
   @override
   String get operator => 'اپراتور';
@@ -702,6 +720,15 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get successStripeConfirmedShort =>
       'ستاسو بانک پېرود تایید کړ. موږ اوس ستاسو ټاپ‌آپ بشپړوو.';
+
+  @override
+  String get successMissingReturnParamsHint =>
+      'په دې پته کې د تادیې حواله جزئیات (سشن یا د سفارش پېژند) نشته. که تادیه مو بشپړه کړه، وروستي سفارشونه خلاص کړئ یا د Stripe د تایید برېښنالیک لینک وکاروئ.';
+
+  @override
+  String successBootstrapWarning(String detail) {
+    return 'موږ نشو کولی ژمیز د سفارش حالت تازه کړو. ستاسو تادیه شايد لاهم پروسس کې وي — یو ځل بیا وروستي سفارشونه وګورئ.\n$detail';
+  }
 
   @override
   String get receiptTitle => 'رسيډ';

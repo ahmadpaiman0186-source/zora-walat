@@ -3,6 +3,7 @@ import { ZodError } from 'zod';
 import { env } from '../config/env.js';
 import {
   sessionKeySuffix,
+  webTopupCorrelationFields,
   webTopupLog,
 } from '../lib/webTopupObservability.js';
 import {
@@ -15,6 +16,8 @@ import {
 } from '../services/topupOrder/topupOrderService.js';
 import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
 import { WEBTOPUP_CLIENT_ERROR_CODE } from '../constants/webtopupClientErrors.js';
+import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
+import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
 import {
   idempotencyKeyHeaderSchema,
@@ -90,6 +93,13 @@ export async function postCreateTopupOrder(req, res) {
         statusCode: code,
       },
     );
+    emitMoneyPathLog(MONEY_PATH_EVENT.WEBTOPUP_ORDER_CREATED, {
+      traceId: req.traceId ?? null,
+      orderIdSuffix: String(result.order.id).slice(-8),
+      sessionKeySuffix: sessionKeySuffix(result.sessionKey),
+      idempotentReplay: Boolean(result.idempotentReplay),
+      statusCode: code,
+    });
     return res.status(code).json({
       order: result.order,
       updateToken: result.updateToken,
@@ -259,6 +269,11 @@ export async function postMarkTopupOrderPaid(req, res) {
     /** Explicit: not `stripe_webhook` — duplicates webhook authority when enabled. */
     paymentAuthority: 'client_mark_paid',
   });
+  emitMoneyPathLog(MONEY_PATH_EVENT.WEBTOPUP_MARK_PAID_REQUESTED, {
+    traceId: req.traceId ?? null,
+    orderIdSuffix: id.slice(-8),
+    paymentIntentIdSuffix: body.paymentIntentId.slice(-10),
+  });
 
   try {
     const { order, markPaidReplay } = await markTopupOrderPaidFromStripe(
@@ -275,8 +290,20 @@ export async function postMarkTopupOrderPaid(req, res) {
       {
         orderIdSuffix: String(order.id).slice(-8),
         paymentIntentIdSuffix: body.paymentIntentId.slice(-10),
+        traceId: req.traceId,
       },
     );
+    webTopupLog(req.log, 'info', 'payment_received', {
+      ...webTopupCorrelationFields(String(order.id), body.paymentIntentId, req.traceId),
+      source: 'client_mark_paid',
+      markPaidReplay: Boolean(markPaidReplay),
+    });
+    emitMoneyPathLog(MONEY_PATH_EVENT.WEBTOPUP_MARK_PAID_COMPLETED, {
+      traceId: req.traceId ?? null,
+      orderIdSuffix: String(order.id).slice(-8),
+      paymentIntentIdSuffix: body.paymentIntentId.slice(-10),
+      markPaidReplay: Boolean(markPaidReplay),
+    });
     return res.json({ order });
   } catch (e) {
     const code = e?.code;

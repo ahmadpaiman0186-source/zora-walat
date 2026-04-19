@@ -47,6 +47,8 @@
   "phase1OnlyAirtimeSnack": "Phase 1: only mobile airtime is available.",
   "phase1UsdSecureCheckout": "You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.",
   "checkoutCardRegionLabel": "Your location (card)",
+  "checkoutSenderCountryHint": "This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.",
+  "telecomRecipientAfghanistanDialHint": "Afghanistan +93 — enter the local mobile (starts with 7).",
   "checkoutPricingUsdServerNote": "Pricing is calculated in USD on our servers for your region.",
   "telecomCheckoutAirtimeRowLabel": "Airtime",
   "phase1ValidityDependsOnOperator": "How long credit stays usable depends on the operator — we show it here only when we have a verified value from pricing.",
@@ -60,6 +62,9 @@
   },
   "rechargeTrustLine": "USD pricing · Secure checkout · Afghanistan mobile",
   "recipientNumber": "Recipient number",
+  "receivingCountryLabel": "Receiving country",
+  "rechargeCountryNotSupported": "Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.",
+  "phoneLocalDigitsHint": "Enter the local number without country code.",
   "operator": "Operator",
   "getPackages": "Get packages",
   "packages": "Packages",
@@ -288,6 +293,13 @@
   "successScreenTitle": "You’re all set",
   "successPaymentConfirmed": "Payment received",
   "successStripeConfirmedShort": "Your bank authorized this purchase. We’re completing your top-up now.",
+  "successMissingReturnParamsHint": "This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.",
+  "successBootstrapWarning": "We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n{detail}",
+  "@successBootstrapWarning": {
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
   "receiptTitle": "Receipt",
   "receiptOrderRef": "Order reference",
   "receiptPaymentStatus": "Payment",

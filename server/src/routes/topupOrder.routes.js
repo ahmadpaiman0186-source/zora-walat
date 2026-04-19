@@ -7,9 +7,15 @@ import {
   topupOrderMarkPaidLimiter,
   topupOrderReadLimiter,
   topupOrderSessionBurstLimiter,
+  webtopTopupsPerMinuteLimiter,
 } from '../middleware/rateLimits.js';
+import {
+  webtopAbusePreCheck,
+  webtopAbuseRecordFailedPayments,
+} from '../middleware/webtopAbuseProtection.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
-import { optionalAuth } from '../middleware/optionalAuth.js';
+import { optionalAuthOrRequireOwnerForMoneyAdjacency } from '../middleware/optionalAuthOrRequireOwnerForMoneyAdjacency.js';
+import { blockMoneyRoutesIfPrelaunch } from '../middleware/prelaunchMoneyBlock.js';
 
 /** Money-path policy table: `src/constants/moneyRoutePolicy.js`. */
 const router = Router();
@@ -19,10 +25,13 @@ router.use((req, res, next) => {
   next();
 });
 
-router.use(asyncHandler(optionalAuth));
+router.use(blockMoneyRoutesIfPrelaunch);
+router.use(asyncHandler(optionalAuthOrRequireOwnerForMoneyAdjacency));
 
 router.post(
   '/',
+  webtopTopupsPerMinuteLimiter,
+  webtopAbusePreCheck,
   topupOrderCreateLimiter,
   topupOrderSessionBurstLimiter,
   requireJsonContentType,
@@ -35,6 +44,8 @@ router.get('/:id', topupOrderReadLimiter, asyncHandler(topupOrder.getTopupOrder)
 
 router.post(
   '/:id/mark-paid',
+  webtopAbusePreCheck,
+  webtopAbuseRecordFailedPayments,
   topupOrderMarkPaidLimiter,
   requireJsonContentType,
   asyncHandler(topupOrder.postMarkTopupOrderPaid),

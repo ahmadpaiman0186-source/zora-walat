@@ -77,6 +77,8 @@ model WebTopupOrder {
   currency                String    @default("usd")
   paymentIntentId         String?   @unique
   paymentStatus           String
+  /// First transition to `paid` (Stripe webhook / client mark-paid). Backfilled from `updatedAt` for legacy rows.
+  paidAt                  DateTime?
   fulfillmentStatus       String
   /// Provider id (e.g. `mock`, `reloadly`) — set when fulfillment is claimed.
   fulfillmentProvider           String?
@@ -84,6 +86,8 @@ model WebTopupOrder {
   fulfillmentRequestedAt        DateTime?
   fulfillmentCompletedAt        DateTime?
   fulfillmentFailedAt           DateTime?
+  /// When set, background worker may transition FAILED → PENDING and re-dispatch (retryable errors only).
+  fulfillmentNextRetryAt        DateTime?
   /// Provider correlation id (safe subset only in public/admin DTOs).
   fulfillmentReference          String?
   /// Stable machine code (e.g. `retryable`, `terminal`, provider codes).
@@ -108,7 +112,9 @@ model WebTopupOrder {
   @@index([sessionKey, createdAt])
   @@index([userId, createdAt])
   @@index([paymentStatus, createdAt])
+  @@index([paymentStatus, paidAt])
   @@index([fulfillmentStatus, createdAt])
+  @@index([fulfillmentStatus, fulfillmentNextRetryAt])
   @@index([phoneAnalyticsHash])
 }
 
@@ -129,6 +135,22 @@ model WebTopupFulfillmentIdempotency {
   @@index([orderId])
 }
 
+/// Durable per-provider circuit breaker for WebTopup outbound provider calls (multi-instance safe).
+/// Currently used for Reloadly; `mock` may use in-memory breaker only.
+model WebtopupProviderCircuitState {
+  providerId String @id
+  /// closed | open | half_open
+  state                String
+  openedAt             DateTime?
+  cooldownUntil        DateTime?
+  /// Epoch ms JSON array — rolling failure window
+  failureTimestamps    Json      @default("[]")
+  halfOpenProbesUsed   Int       @default(0)
+  lastSuccessAt        DateTime?
+  lastFailureAt        DateTime?
+  updatedAt            DateTime  @updatedAt
+}
+
 /// Queue worker jobs for async web top-up fulfillment (deduped per order attempt).
 model WebTopupFulfillmentJob {
   id          String   @id @default(cuid())
@@ -142,10 +164,13 @@ model WebTopupFulfillmentJob {
   maxAttempts Int      @default(5)
   nextRunAt   DateTime @default(now())
   lastError   String?
+  /// Set when status becomes processing — used for stale lease recovery.
+  processingStartedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([status, nextRunAt])
+  @@index([status, processingStartedAt])
 }
 
 model AuditLog {
@@ -292,6 +317,7 @@ model FulfillmentAttempt {
 }
 
 /// Processed Stripe webhook event ids (evt_…) — idempotent handling across retries and multiple app instances.
+/// `id` is the primary key (globally unique); duplicate inserts fail with P2002 and are acked without side effects.
 model StripeWebhookEvent {
   id         String   @id
   receivedAt DateTime @default(now())

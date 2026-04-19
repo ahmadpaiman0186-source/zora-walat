@@ -26,12 +26,13 @@ router.post(
   asyncHandler(recharge.postOrder),
 );
 
-/** Post-payment: kick or poll airtime fulfillment (auth + owns order). Not blocked in pre-launch. */
+/** Post-payment: kick or poll airtime fulfillment (auth + owns order). Blocked under prelaunch like other money paths. */
 router.post(
   '/execute',
   rechargeExecuteLimiter,
   requireJsonContentType,
   requireEmailVerified,
+  blockMoneyRoutesIfPrelaunch,
   asyncHandler(recharge.postExecute),
 );
 

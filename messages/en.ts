@@ -73,6 +73,7 @@ export const en = {
     title: 'Secure payment',
     subtitle:
       'Card details are handled by Stripe. We never store your full card number.',
+    loadingStripeSdk: 'Loading Stripe…',
     processing: 'Processing…',
     payWithAmount: 'Pay',
     badgeLock: 'Encrypted',
