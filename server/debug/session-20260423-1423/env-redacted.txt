@@ -1,0 +1,7 @@
+﻿PORT: present
+DATABASE_URL: present
+STRIPE_SECRET_KEY: present
+STRIPE_WEBHOOK_SECRET: present (overridden by .env.local)
+EMAIL_USER: present
+EMAIL_PASS: present (both .env and .env.local; .local wins for duplicate)
+FULFILLMENT/REDIS/AIRTIME: .env.local sets inline mode
