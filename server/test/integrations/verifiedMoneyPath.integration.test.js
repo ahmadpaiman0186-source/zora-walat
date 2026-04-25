@@ -34,13 +34,42 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
   });
 
   after(async () => {
-    for (const email of emails) {
-      await prisma.refreshToken.deleteMany({
-        where: { user: { email } },
-      });
-      await prisma.recipient.deleteMany({ where: { user: { email } } });
-      await prisma.user.deleteMany({ where: { email } });
+    if (emails.length === 0) {
+      await prisma.$disconnect();
+      return;
     }
+    const users = await prisma.user.findMany({
+      where: { email: { in: emails } },
+      select: { id: true },
+    });
+    const userIds = users.map((u) => u.id);
+    if (userIds.length > 0) {
+      await prisma.fulfillmentAttempt.deleteMany({
+        where: { order: { userId: { in: userIds } } },
+      });
+      await prisma.loyaltyPointsGrant.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+      await prisma.loyaltyLedger.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+      await prisma.referralRewardTransaction.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+      await prisma.referralLoyaltyBonus.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+      await prisma.paymentCheckout.deleteMany({
+        where: { userId: { in: userIds } },
+      });
+    }
+    await prisma.refreshToken.deleteMany({
+      where: { user: { email: { in: emails } } },
+    });
+    await prisma.recipient.deleteMany({
+      where: { user: { email: { in: emails } } },
+    });
+    await prisma.user.deleteMany({ where: { email: { in: emails } } });
     await prisma.$disconnect();
   });
 

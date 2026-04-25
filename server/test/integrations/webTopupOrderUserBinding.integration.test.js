@@ -34,7 +34,8 @@ const baseTopup = {
 
 /** Unique MSISDN per call so hourly same-amount velocity does not block unrelated cases. */
 function topupPayload() {
-  const suffix = randomUUID().replace(/-/g, '').slice(0, 6);
+  // Digits only — `normalizeTopupPhone` strips non-digits; a hex-only UUID slice can drop below 9 digits and fail Zod.
+  const suffix = String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0');
   return {
     ...baseTopup,
     phoneNumber: `7012345${suffix}`.slice(0, 15),
