@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/auth/email_verification_required_exception.dart';
 import '../../../core/auth/unauthorized_exception.dart';
@@ -11,6 +12,7 @@ import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/trust_strip.dart';
+import '../../../models/checkout_pricing_quote_response.dart';
 import '../../../models/recharge_draft.dart';
 
 /// Review → pay: in-app PaymentSheet (non-web) or Stripe Checkout redirect (web).
@@ -36,6 +38,9 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
   _PaymentPhase _phase = _PaymentPhase.idle;
   String? _errorMessage;
   late String _senderCountry;
+  /// Server quote for the same request shape as [startCheckout] (product + tax + fee = total).
+  CheckoutPricingQuoteResponse? _pricingQuote;
+  bool _quoteBusy = false;
 
   @override
   void initState() {
@@ -43,6 +48,67 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
     _senderCountry = inferSenderCountryCodeFromLocale(
       WidgetsBinding.instance.platformDispatcher.locale.countryCode,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_loadPricingQuote());
+    });
+  }
+
+  Future<void> _loadPricingQuote() async {
+    if (!mounted) return;
+    setState(() => _quoteBusy = true);
+    final paymentService = AppScope.of(context).paymentService;
+    final cents = (widget.draft.amountUsd * 100).round();
+    final q = await paymentService.fetchCheckoutPricingQuote(
+      amountCents: cents,
+      senderCountry: _senderCountry,
+      operatorKey: widget.draft.operatorKey,
+      recipientPhone: widget.draft.phoneE164Style,
+    );
+    if (!mounted) return;
+    setState(() {
+      _pricingQuote = q;
+      _quoteBusy = false;
+    });
+  }
+
+  /// Pay CTA and Stripe must match [CheckoutPricingBreakdown.totalUsd] when the quote exists.
+  String _payAmountDisplay(BuildContext context) {
+    final b = _pricingQuote?.breakdown;
+    if (b != null) {
+      final fmt = NumberFormat.currency(
+        locale: Localizations.localeOf(context).toString(),
+        symbol: r'$',
+      );
+      return fmt.format(b.totalUsd);
+    }
+    return _amountLabel;
+  }
+
+  List<_Row> _pricingSummaryRows(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final fmt = NumberFormat.currency(
+      locale: Localizations.localeOf(context).toString(),
+      symbol: r'$',
+    );
+    if (_quoteBusy) {
+      return [
+        _Row(l10n.checkoutPricingLoading, '—'),
+      ];
+    }
+    final b = _pricingQuote?.breakdown;
+    if (b != null) {
+      return [
+        _Row(l10n.checkoutProductValueLabel, fmt.format(b.productValueUsd)),
+        _Row(l10n.checkoutSenderTaxLabel, fmt.format(b.taxUsd)),
+        _Row(l10n.checkoutServiceFeeLabel, fmt.format(b.serviceFeeUsd)),
+        _Row(l10n.checkoutTotalChargedLabel, fmt.format(b.totalUsd)),
+      ];
+    }
+    return [
+      _Row(l10n.selectAmount, _amountLabel),
+    ];
   }
 
   String get _amountLabel {
@@ -75,7 +141,7 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
 
     try {
       await paymentService.startCheckout(
-        amountUsdCents: cents,
+        amountCents: cents,
         senderCountry: _senderCountry,
         currency: 'usd',
         operatorKey: widget.draft.operatorKey,
@@ -170,6 +236,16 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         children: [
+          Icon(Icons.info_outline, color: t.colorScheme.secondary, size: 22),
+          const SizedBox(height: 8),
+          Text(
+            l10n.hubTileLegacySub,
+            style: t.textTheme.bodyMedium?.copyWith(
+              color: t.colorScheme.outline,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
           if (_phase == _PaymentPhase.processing) ...[
             const LinearProgressIndicator(),
             const SizedBox(height: 16),
@@ -368,7 +444,10 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                       onChanged: _phase == _PaymentPhase.processing
                           ? null
                           : (v) {
-                              if (v != null) setState(() => _senderCountry = v);
+                              if (v != null) {
+                                setState(() => _senderCountry = v);
+                                unawaited(_loadPricingQuote());
+                              }
                             },
                     ),
                   ),
@@ -386,16 +465,20 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                   rows: [
                     _Row(l10n.recipientNumber, widget.draft.recipientDisplayPhone),
                     _Row(l10n.operator, widget.draft.operatorLabel),
-                    _Row(l10n.selectAmount, _amountLabel),
+                    ..._pricingSummaryRows(context, l10n),
                   ],
                 ),
                 const SizedBox(height: 28),
                 FilledButton(
-                  onPressed: _phase == _PaymentPhase.processing ? null : _pay,
+                  onPressed: _phase == _PaymentPhase.processing || _quoteBusy
+                      ? null
+                      : _pay,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(54),
                   ),
-                  child: Text(l10n.paymentPayWithCard(_amountLabel)),
+                  child: Text(
+                    l10n.paymentPayWithCard(_payAmountDisplay(context)),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(

@@ -4,6 +4,7 @@ import 'data_package_period.dart';
 import 'mobile_operator.dart';
 import 'pricing_engine.dart';
 import 'product_tier.dart';
+import '../../../core/pricing/phase1_ladder.dart';
 
 @immutable
 class DataPackageOffer {
@@ -27,8 +28,9 @@ class DataPackageOffer {
   final ProductTier tier;
   final bool isBestValue;
 
-  int get finalUsdCents =>
-      PricingEngine.retailUsdCents(baseCostUsdCents, tier);
+  int get finalUsdCents => Phase1Ladder.snapUsdCents(
+        PricingEngine.retailUsdCents(baseCostUsdCents, tier),
+      );
 
   String get dataLabel {
     if (dataGb >= 1) {

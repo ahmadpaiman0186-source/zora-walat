@@ -333,11 +333,17 @@ class ApiService {
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
-  /// `POST /api/recharge/execute` — kicks or polls airtime after Stripe Checkout (200 or 409).
+  /// `POST /api/recharge/execute` — kicks or polls airtime after Stripe Checkout (200, 409, or 504).
+  ///
+  /// **504** — server waited for a terminal order (queue mode + worker slow/absent). Body may
+  /// still include `order` / `fulfillment` snapshots; callers should map to in-progress UI, not
+  /// treat as a hard transport failure.
   Future<RechargeExecuteResponse> postRechargeExecute(String orderId) async {
     final res = await _postAuthed('/api/recharge/execute', {'orderId': orderId});
     final body = jsonDecode(res.body) as Map<String, dynamic>;
-    if (res.statusCode != 200 && res.statusCode != 409) {
+    if (res.statusCode != 200 &&
+        res.statusCode != 409 &&
+        res.statusCode != 504) {
       throw StateError(_httpErrorMessage('Recharge execute', res));
     }
     return RechargeExecuteResponse(statusCode: res.statusCode, json: body);
@@ -524,6 +530,36 @@ class ApiService {
         .toList();
   }
 
+  /// `POST /api/checkout-pricing-quote` — **no auth**; same body as hosted checkout; returns `pricingBreakdown`.
+  Future<http.Response> postCheckoutPricingQuotePublic(Map<String, dynamic> body) {
+    _requireConfiguredBaseUrl();
+    return client.post(
+      _u('/api/checkout-pricing-quote'),
+      headers: _jsonHeadersBearer(null),
+      body: jsonEncode(body),
+    );
+  }
+
+  /// Single order row including `pricingBreakdown` (`GET /api/orders/:id`).
+  Future<Map<String, dynamic>> fetchOrderById(String orderId) async {
+    final id = orderId.trim();
+    if (id.isEmpty) {
+      throw ArgumentError('orderId empty');
+    }
+    final enc = Uri.encodeComponent(id);
+    final res = await _getAuthed('/api/orders/$enc');
+    if (res.statusCode == 404) {
+      throw StateError('Order ${res.statusCode}: not found');
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Order detail', res));
+    }
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final o = map['order'];
+    if (o is Map<String, dynamic>) return o;
+    throw StateError('Order detail: missing order object');
+  }
+
   /// Single order for receipt / tracking (`GET /api/transactions/:id`).
   Future<Map<String, dynamic>> fetchUserOrder(String orderId) async {
     final id = orderId.trim();
@@ -551,4 +587,7 @@ class RechargeExecuteResponse {
 
   bool get isOk => statusCode == 200;
   bool get isPaymentPending => statusCode == 409;
+
+  /// Queue mode: worker did not finish within server wait window (`fulfillmentClientExecuteWaitMs`).
+  bool get isFulfillmentTimeout => statusCode == 504;
 }

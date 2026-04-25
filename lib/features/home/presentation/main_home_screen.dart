@@ -99,7 +99,7 @@ class MainHomeScreen extends StatelessWidget {
               icon: Icons.phone_android_rounded,
               title: l10n.hubTileRechargeTitle,
               subtitle: l10n.hubTileRechargeSub,
-              onTap: () => context.go(AppRoutePaths.recharge),
+              onTap: () => context.go(AppRoutePaths.telecom),
             ),
             _Tile(
               icon: Icons.receipt_long_rounded,
@@ -141,7 +141,7 @@ class MainHomeScreen extends StatelessWidget {
               icon: Icons.dashboard_customize_outlined,
               title: l10n.hubTileLegacyTitle,
               subtitle: l10n.hubTileLegacySub,
-              onTap: () => context.push('/telecom'),
+              onTap: () => context.push(AppRoutePaths.recharge),
             ),
           ],
         ),
