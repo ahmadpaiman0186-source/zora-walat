@@ -165,13 +165,41 @@ class AppLocalizationsPs extends AppLocalizations {
   }
 
   @override
+  String checkoutReviewTotalChargedHeadline(String amount) {
+    return 'ټول تادیه شوی: $amount';
+  }
+
+  @override
+  String checkoutReviewAirtimeValueSubline(String amount) {
+    return 'د اېرټایم بیه (ترلاسه کوونکی): $amount';
+  }
+
+  @override
+  String get checkoutReviewHeadlinePricingUnavailable =>
+      'بشپړه بیه به د پورته بارېدلو وروسته ښکاري — لاندې د امر لنډیز وګورئ.';
+
+  @override
+  String get checkoutQuoteFailed =>
+      'بیه پورته نشوه. اړیکه مو چیک کړئ او بیا هڅه وکړئ.';
+
+  @override
+  String get checkoutAirtimeValueLabel => 'د اېرټایم بیه';
+
+  @override
+  String get receiptBreakdownLoadingHint => 'د تادیې جزئیات بارېږي…';
+
+  @override
+  String get receiptBreakdownPartialHint =>
+      'د مالیې او فیس بشپړ ردیز نشته؛ لاندې مقدار ستاسو د کارت څخه اخیستل شوی ټول دی.';
+
+  @override
   String get rechargeTrustLine => 'USD نرخونه · خوندي تادیه · افغان موبایل';
 
   @override
   String get recipientNumber => 'د اخیستونکي شمېره';
 
   @override
-  String get receivingCountryLabel => 'د اخیستونکي هېواد';
+  String get receivingCountryLabel => 'هېواد (ترلاسه‌کوونکی)';
 
   @override
   String get rechargeCountryNotSupported =>
@@ -238,7 +266,8 @@ class AppLocalizationsPs extends AppLocalizations {
   String get hubTileRechargeTitle => 'د موبایل شارژ';
 
   @override
-  String get hubTileRechargeSub => 'ګړندي بستې · USD بیه';
+  String get hubTileRechargeSub =>
+      'افغانستان اېرټایم · ژوندی کاتالوګ · Stripe تادیه';
 
   @override
   String get hubTileWalletTitle => 'بټوه';
@@ -253,10 +282,10 @@ class AppLocalizationsPs extends AppLocalizations {
   String get hubTileCallingSub => 'ژر راځي';
 
   @override
-  String get hubTileLegacyTitle => 'پلانونه او کاتالوګ';
+  String get hubTileLegacyTitle => 'کلاسیک شارژ';
 
   @override
-  String get hubTileLegacySub => 'اېرټایم او ډیټا';
+  String get hubTileLegacySub => 'لاسي مقدارونه او بیاکتنه (زړې لاره)';
 
   @override
   String get walletScreenTitle => 'بټوه';
@@ -342,8 +371,45 @@ class AppLocalizationsPs extends AppLocalizations {
   String get totalUsd => 'ټول (USD)';
 
   @override
+  String get checkoutProductValueLabel => 'د محصول ارزښت';
+
+  @override
+  String get checkoutSenderTaxLabel => 'مالیه (د لېږونکي سیمه)';
+
+  @override
+  String get checkoutServiceFeeLabel => 'د زورا-ولت خدمت فیس';
+
+  @override
+  String get checkoutTotalChargedLabel => 'ټول تادیه‌شوی';
+
+  @override
+  String get checkoutTaxJurisdictionPhaseNote =>
+      'مالیه د ټاکل شوي لېږونکي هېواد پر اساس محاسبه کېږي. که ایالت، ښار یا پوستي کوډ ورکړئ، زموږ په دې نسخه کې نرخ نه بدلېږي — د راتلونکو مالیاتي ماشینونو او compliance لپاره ساتل کېږي.';
+
+  @override
+  String get checkoutPricingLoading => 'ستاسو سیمې لپاره بیه تازه کېږي…';
+
+  @override
   String get checkoutUsdTotalFootnote =>
       'په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.';
+
+  @override
+  String get checkoutScreenCurrencyHint => 'بیې په امریکایي ډالرو (USD) کې دي.';
+
+  @override
+  String get checkoutScreenServerPricingNote =>
+      'بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.';
+
+  @override
+  String get checkoutScreenOrderTotalCaption => 'ټول (USD)';
+
+  @override
+  String get checkoutScreenChargeFootnote =>
+      'په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.';
+
+  @override
+  String get checkoutScreenStripeSecureNote =>
+      'تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.';
 
   @override
   String get stripeSectionTitle => 'خوندي تادیه';
@@ -402,6 +468,16 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get telecomPhoneHintAirtime => '07X XXX XXXX یا 937…';
+
+  @override
+  String get recipientLocalNumber => 'زموږ موبایل شمېره';
+
+  @override
+  String get phase1AirtimeAfghanistanOnly =>
+      'په فاز ۱ کې یوازې افغانستان. افغانستان غوره کړئ.';
+
+  @override
+  String get checkoutSecuringCheckout => 'تادیه خوندي کیږي…';
 
   @override
   String get telecomDataHeadline => 'ډیټا بستې';

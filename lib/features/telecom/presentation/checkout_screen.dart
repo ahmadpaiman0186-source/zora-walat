@@ -7,11 +7,14 @@ import 'package:intl/intl.dart';
 
 import '../../../core/auth/email_verification_required_exception.dart';
 import '../../../core/auth/unauthorized_exception.dart';
+import '../../../models/checkout_pricing_breakdown.dart';
+import '../../../models/checkout_pricing_quote_response.dart';
 import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/utils/afghan_phone_utils.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../services/checkout_errors.dart';
 import '../../../shared/widgets/trust_strip.dart';
 import '../../../shared/widgets/zw_primary_button.dart';
 import '../../../stripe_keys.dart';
@@ -29,7 +32,14 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _busy = false;
+  bool _quoteBusy = false;
+  /// True after quote request completes without a breakdown (or on exception).
+  bool _quoteFailed = false;
+  CheckoutPricingQuoteResponse? _quote;
+  CheckoutPricingBreakdown? get _breakdown => _quote?.breakdown;
   late String _senderCountry;
+  /// Increments on each quote request so out-of-order completions are ignored.
+  int _quoteSeq = 0;
 
   @override
   void initState() {
@@ -37,7 +47,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _senderCountry = inferSenderCountryCodeFromLocale(
       WidgetsBinding.instance.platformDispatcher.locale.countryCode,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _logCheckoutOpened());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _logCheckoutOpened();
+      unawaited(_loadPricingQuote());
+    });
+  }
+
+  Future<void> _loadPricingQuote() async {
+    if (widget.order.line != TelecomServiceLine.airtime) return;
+    if (!mounted) return;
+    final seq = ++_quoteSeq;
+    setState(() {
+      _quoteBusy = true;
+      _quoteFailed = false;
+    });
+    final paymentService = AppScope.of(context).paymentService;
+    try {
+      final q = await paymentService.fetchCheckoutPricingQuote(
+        amountCents: widget.order.finalAmountCents,
+        senderCountry: _senderCountry,
+        operatorKey: widget.order.operator.apiKey,
+        recipientPhone: widget.order.phone.raw,
+        packageId: widget.order.productId,
+      );
+      if (!mounted || seq != _quoteSeq) return;
+      setState(() {
+        _quote = q;
+        _quoteBusy = false;
+        _quoteFailed = q == null || q.breakdown == null;
+      });
+    } catch (_) {
+      if (!mounted || seq != _quoteSeq) return;
+      setState(() {
+        _quoteBusy = false;
+        _quoteFailed = true;
+      });
+    }
   }
 
   void _logCheckoutOpened() {
@@ -50,7 +95,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             'service': o.line.name,
             'operator': o.operator.apiKey,
             'product_id': o.productId,
-            'amount_usd_cents': o.finalUsdCents,
+            'amount_cents': o.finalAmountCents,
             'phone_masked': o.metadata['phone_masked'] ?? '—',
           })
           .catchError((_) {}),
@@ -76,19 +121,27 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           .append({
             'event': 'payment_attempt',
             'product_id': widget.order.productId,
-            'amount_usd_cents': widget.order.finalUsdCents,
+            'amount_cents': widget.order.finalAmountCents,
           })
           .catchError((_) {}),
     );
     try {
-      await paymentService.startCheckout(
-        amountUsdCents: widget.order.finalUsdCents,
+      final sessionBreakdown = await paymentService.startCheckout(
+        amountCents: widget.order.finalAmountCents,
         senderCountry: _senderCountry,
-        currency: 'usd',
+        currency: StripeKeys.stripeCheckoutCurrencyCode,
         operatorKey: widget.order.operator.apiKey,
         recipientPhone: widget.order.phone.raw,
         packageId: widget.order.productId,
       );
+      if (mounted && sessionBreakdown != null) {
+        setState(
+          () => _quote = CheckoutPricingQuoteResponse(
+            breakdown: sessionBreakdown,
+            pricingMeta: _quote?.pricingMeta,
+          ),
+        );
+      }
       unawaited(
         log
             .append({
@@ -96,6 +149,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               'product_id': widget.order.productId,
             })
             .catchError((_) {}),
+      );
+    } on PaymentsLockdownException catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'payment_failure',
+              'message': 'payments_lockdown',
+            })
+            .catchError((_) {}),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          backgroundColor: Colors.orange.shade900,
+        ),
       );
     } on UnauthorizedException catch (_) {
       unawaited(
@@ -145,14 +214,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            kReleaseMode ? l10n.authGenericError : '$e',
+            kReleaseMode
+                ? (e is StateError
+                    ? (e.message as String? ?? l10n.authGenericError)
+                    : l10n.authGenericError)
+                : '$e',
           ),
           backgroundColor: Colors.red.shade800,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
     }
-    if (!mounted) return;
-    setState(() => _busy = false);
   }
 
   String _lineLabel(AppLocalizations l10n) {
@@ -175,7 +250,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       locale: Localizations.localeOf(context).toString(),
       symbol: r'$',
     );
-    final usd = fmt.format(o.finalUsdCents / 100);
     final phonePretty =
         AfghanPhoneUtils.displayInternational(o.phone.raw);
 
@@ -192,19 +266,54 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.currencyUsdHint,
+            l10n.checkoutScreenCurrencyHint,
             style: t.textTheme.bodySmall?.copyWith(
               color: t.colorScheme.outline,
             ),
           ),
           if (widget.order.line == TelecomServiceLine.airtime) ...[
             const SizedBox(height: 8),
-            Text(
-              l10n.checkoutAirtimeAmountLine(usd),
-              style: t.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+            if (_breakdown != null) ...[
+              Text(
+                l10n.checkoutReviewTotalChargedHeadline(
+                  fmt.format(_breakdown!.totalUsd),
+                ),
+                style: t.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  height: 1.2,
+                ),
               ),
-            ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.checkoutReviewAirtimeValueSubline(
+                  fmt.format(_breakdown!.productValueUsd),
+                ),
+                style: t.textTheme.bodyMedium?.copyWith(
+                  color: t.colorScheme.outline,
+                  height: 1.35,
+                ),
+              ),
+            ] else if (_quoteBusy) ...[
+              Text(
+                l10n.checkoutPricingLoading,
+                style: t.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: t.colorScheme.outline,
+                ),
+              ),
+            ] else ...[
+              Text(
+                _quoteFailed
+                    ? l10n.checkoutQuoteFailed
+                    : l10n.checkoutReviewHeadlinePricingUnavailable,
+                style: t.textTheme.bodyMedium?.copyWith(
+                  color: _quoteFailed
+                      ? t.colorScheme.error
+                      : t.colorScheme.outline,
+                  height: 1.35,
+                ),
+              ),
+            ],
             const SizedBox(height: 6),
             Text(
               l10n.phase1ValidityDependsOnOperator,
@@ -289,7 +398,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 onChanged: _busy
                     ? null
                     : (v) {
-                        if (v != null) setState(() => _senderCountry = v);
+                        if (v == null) return;
+                        setState(() => _senderCountry = v);
+                        unawaited(_loadPricingQuote());
                       },
               ),
             ),
@@ -302,14 +413,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               height: 1.35,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.checkoutPricingUsdServerNote,
-            style: t.textTheme.bodySmall?.copyWith(
-              color: t.colorScheme.outline,
-            ),
-          ),
           const SizedBox(height: 20),
+          if (widget.order.line == TelecomServiceLine.airtime) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                l10n.orderSummary,
+                style: t.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -327,30 +444,121 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 color: t.colorScheme.primary.withValues(alpha: 0.35),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.totalUsd,
-                  style: t.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+            child: widget.order.line == TelecomServiceLine.airtime
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_quoteBusy)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: t.colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  l10n.checkoutPricingLoading,
+                                  style: t.textTheme.bodySmall?.copyWith(
+                                    color: t.colorScheme.outline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (_breakdown != null) ...[
+                        _CheckoutPriceLine(
+                          label: l10n.checkoutAirtimeValueLabel,
+                          value: fmt.format(_breakdown!.productValueUsd),
+                          emphasized: false,
+                        ),
+                        _CheckoutPriceLine(
+                          label: l10n.checkoutSenderTaxLabel,
+                          value: fmt.format(_breakdown!.taxUsd),
+                          emphasized: false,
+                        ),
+                        _CheckoutPriceLine(
+                          label: l10n.checkoutServiceFeeLabel,
+                          value: fmt.format(_breakdown!.serviceFeeUsd),
+                          emphasized: false,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Divider(
+                            height: 1,
+                            color: t.colorScheme.outline.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        _CheckoutPriceLine(
+                          label: l10n.checkoutTotalChargedLabel,
+                          value: fmt.format(_breakdown!.totalUsd),
+                          emphasized: true,
+                        ),
+                        if (_quote?.pricingMeta != null &&
+                            _quote!.pricingMeta!['jurisdictionAppliedToTax'] ==
+                                false) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              l10n.checkoutTaxJurisdictionPhaseNote,
+                              style: t.textTheme.bodySmall?.copyWith(
+                                color: t.colorScheme.outline,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ] else if (!_quoteBusy) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            _quoteFailed
+                                ? l10n.checkoutQuoteFailed
+                                : l10n.checkoutReviewHeadlinePricingUnavailable,
+                            style: t.textTheme.bodyMedium?.copyWith(
+                              color: _quoteFailed
+                                  ? t.colorScheme.error
+                                  : t.colorScheme.outline,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.checkoutScreenOrderTotalCaption,
+                        style: t.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        _breakdown != null
+                            ? fmt.format(_breakdown!.totalUsd)
+                            : '—',
+                        style: t.textTheme.headlineSmall?.copyWith(
+                          color: t.colorScheme.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Text(
-                  usd,
-                  style: t.textTheme.headlineSmall?.copyWith(
-                    color: t.colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              l10n.checkoutUsdTotalFootnote,
+              l10n.checkoutScreenChargeFootnote,
               style: t.textTheme.bodySmall?.copyWith(
                 color: t.colorScheme.outline,
               ),
@@ -410,7 +618,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.phase1UsdSecureCheckout,
+                    l10n.checkoutScreenStripeSecureNote,
                     style: t.textTheme.bodySmall?.copyWith(
                       color: t.colorScheme.outline,
                       height: 1.45,
@@ -422,9 +630,60 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           const SizedBox(height: 28),
           ZwPrimaryButton(
-            label: _busy ? l10n.processing : l10n.payWithStripe,
+            label: _busy
+                ? l10n.checkoutSecuringCheckout
+                : l10n.payWithStripe,
             icon: Icons.credit_card_rounded,
             onPressed: _busy ? null : _pay,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CheckoutPriceLine extends StatelessWidget {
+  const _CheckoutPriceLine({
+    required this.label,
+    required this.value,
+    required this.emphasized,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context);
+    final valueColor =
+        emphasized ? t.colorScheme.primary : t.colorScheme.onSurface;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: (emphasized ? t.textTheme.titleMedium : t.textTheme.bodyMedium)
+                  ?.copyWith(
+                fontWeight: emphasized ? FontWeight.w800 : FontWeight.w500,
+                color: emphasized
+                    ? t.colorScheme.onSurface
+                    : t.colorScheme.outline,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: (emphasized ? t.textTheme.headlineSmall : t.textTheme.titleSmall)
+                ?.copyWith(
+              color: valueColor,
+              fontWeight: emphasized ? FontWeight.w800 : FontWeight.w600,
+            ),
           ),
         ],
       ),

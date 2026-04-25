@@ -376,6 +376,48 @@ abstract class AppLocalizations {
   /// **'Send {amount} airtime'**
   String checkoutAirtimeAmountLine(String amount);
 
+  /// No description provided for @checkoutReviewTotalChargedHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Total charged: {amount}'**
+  String checkoutReviewTotalChargedHeadline(String amount);
+
+  /// No description provided for @checkoutReviewAirtimeValueSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime value (recipient): {amount}'**
+  String checkoutReviewAirtimeValueSubline(String amount);
+
+  /// No description provided for @checkoutReviewHeadlinePricingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Full pricing will appear when the quote loads — check the order summary below.'**
+  String get checkoutReviewHeadlinePricingUnavailable;
+
+  /// No description provided for @checkoutQuoteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load pricing. Check your connection and try again.'**
+  String get checkoutQuoteFailed;
+
+  /// No description provided for @checkoutAirtimeValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime value'**
+  String get checkoutAirtimeValueLabel;
+
+  /// No description provided for @receiptBreakdownLoadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading payment breakdown…'**
+  String get receiptBreakdownLoadingHint;
+
+  /// No description provided for @receiptBreakdownPartialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full line-item breakdown was not available; amount below is the total charged to your card.'**
+  String get receiptBreakdownPartialHint;
+
   /// No description provided for @rechargeTrustLine.
   ///
   /// In en, this message translates to:
@@ -511,7 +553,7 @@ abstract class AppLocalizations {
   /// No description provided for @hubTileRechargeSub.
   ///
   /// In en, this message translates to:
-  /// **'Instant packages · USD pricing'**
+  /// **'Afghanistan airtime · live catalog · Stripe checkout'**
   String get hubTileRechargeSub;
 
   /// No description provided for @hubTileWalletTitle.
@@ -541,13 +583,13 @@ abstract class AppLocalizations {
   /// No description provided for @hubTileLegacyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Plans & catalog'**
+  /// **'Classic recharge'**
   String get hubTileLegacyTitle;
 
   /// No description provided for @hubTileLegacySub.
   ///
   /// In en, this message translates to:
-  /// **'Airtime & data'**
+  /// **'Manual amounts & review (legacy path)'**
   String get hubTileLegacySub;
 
   /// No description provided for @walletScreenTitle.
@@ -700,11 +742,77 @@ abstract class AppLocalizations {
   /// **'Total (USD)'**
   String get totalUsd;
 
+  /// No description provided for @checkoutProductValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Product value'**
+  String get checkoutProductValueLabel;
+
+  /// No description provided for @checkoutSenderTaxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax (sender jurisdiction)'**
+  String get checkoutSenderTaxLabel;
+
+  /// No description provided for @checkoutServiceFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zora-Walat service fee'**
+  String get checkoutServiceFeeLabel;
+
+  /// No description provided for @checkoutTotalChargedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total charged'**
+  String get checkoutTotalChargedLabel;
+
+  /// No description provided for @checkoutTaxJurisdictionPhaseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.'**
+  String get checkoutTaxJurisdictionPhaseNote;
+
+  /// No description provided for @checkoutPricingLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating price for your region…'**
+  String get checkoutPricingLoading;
+
   /// No description provided for @checkoutUsdTotalFootnote.
   ///
   /// In en, this message translates to:
   /// **'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.'**
   String get checkoutUsdTotalFootnote;
+
+  /// No description provided for @checkoutScreenCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices in US dollars (USD).'**
+  String get checkoutScreenCurrencyHint;
+
+  /// No description provided for @checkoutScreenServerPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing is calculated in USD on our servers for your region.'**
+  String get checkoutScreenServerPricingNote;
+
+  /// No description provided for @checkoutScreenOrderTotalCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (USD)'**
+  String get checkoutScreenOrderTotalCaption;
+
+  /// No description provided for @checkoutScreenChargeFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.'**
+  String get checkoutScreenChargeFootnote;
+
+  /// No description provided for @checkoutScreenStripeSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.'**
+  String get checkoutScreenStripeSecureNote;
 
   /// No description provided for @stripeSectionTitle.
   ///
@@ -807,6 +915,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'07X XXX XXXX or 937…'**
   String get telecomPhoneHintAirtime;
+
+  /// No description provided for @recipientLocalNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Local mobile number'**
+  String get recipientLocalNumber;
+
+  /// No description provided for @phase1AirtimeAfghanistanOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.'**
+  String get phase1AirtimeAfghanistanOnly;
+
+  /// No description provided for @checkoutSecuringCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Securing checkout…'**
+  String get checkoutSecuringCheckout;
 
   /// No description provided for @telecomDataHeadline.
   ///

@@ -7,9 +7,11 @@ import { env } from '../src/config/env.js';
 import { resolveCheckoutClientBase } from '../src/lib/checkoutClientBase.js';
 
 const originalPrelaunchLockdown = env.prelaunchLockdown;
+const originalPaymentsLockdown = env.paymentsLockdownMode;
 
 after(() => {
   env.prelaunchLockdown = originalPrelaunchLockdown;
+  env.paymentsLockdownMode = originalPaymentsLockdown;
 });
 
 describe('resolveCheckoutClientBase', () => {
@@ -68,9 +70,28 @@ describe('resolveCheckoutClientBase', () => {
   });
 });
 
+describe('payment route lockdown guardrails', () => {
+  it('blocks create-payment-intent when PAYMENTS_LOCKDOWN_MODE is on (not prelaunch)', async () => {
+    env.prelaunchLockdown = false;
+    env.paymentsLockdownMode = true;
+    const app = createApp();
+
+    const res = await request(app)
+      .post('/create-payment-intent')
+      .set('Content-Type', 'application/json')
+      .send({ amount: 500 });
+
+    assert.equal(res.status, 503);
+    assert.equal(res.body?.success, false);
+    assert.equal(res.body?.code, 'payments_lockdown');
+    assert.equal(res.body?.message, 'Payments temporarily unavailable');
+  });
+});
+
 describe('payment route prelaunch guardrails', () => {
   it('blocks create-payment-intent during prelaunch lockdown', async () => {
     env.prelaunchLockdown = true;
+    env.paymentsLockdownMode = false;
     const app = createApp();
 
     const res = await request(app)

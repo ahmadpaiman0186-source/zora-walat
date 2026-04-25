@@ -60,6 +60,27 @@
       }
     }
   },
+  "checkoutReviewTotalChargedHeadline": "ټول تادیه شوی: {amount}",
+  "@checkoutReviewTotalChargedHeadline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewAirtimeValueSubline": "د اېرټایم بیه (ترلاسه کوونکی): {amount}",
+  "@checkoutReviewAirtimeValueSubline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewHeadlinePricingUnavailable": "بشپړه بیه به د پورته بارېدلو وروسته ښکاري — لاندې د امر لنډیز وګورئ.",
+  "checkoutQuoteFailed": "بیه پورته نشوه. اړیکه مو چیک کړئ او بیا هڅه وکړئ.",
+  "checkoutAirtimeValueLabel": "د اېرټایم بیه",
+  "receiptBreakdownLoadingHint": "د تادیې جزئیات بارېږي…",
+  "receiptBreakdownPartialHint": "د مالیې او فیس بشپړ ردیز نشته؛ لاندې مقدار ستاسو د کارت څخه اخیستل شوی ټول دی.",
   "rechargeTrustLine": "USD نرخونه · خوندي تادیه · افغان موبایل",
   "recipientNumber": "د اخیستونکي شمېره",
   "receivingCountryLabel": "د اخیستونکي هېواد",
@@ -82,13 +103,13 @@
   "apiUnreachableRecharge": "اړیکه نشوه. خپل انټرنټ مو چیک کړئ او بیا هڅه وکړئ.",
   "hubSubtitle": "شارژ · بټوه · زنګ",
   "hubTileRechargeTitle": "د موبایل شارژ",
-  "hubTileRechargeSub": "ګړندي بستې · USD بیه",
+  "hubTileRechargeSub": "افغانستان اېرټایم · ژوندی کاتالوګ · Stripe تادیه",
   "hubTileWalletTitle": "بټوه",
   "hubTileWalletSub": "بیلانس او شارژ",
   "hubTileCallingTitle": "نړیوال زنګ",
   "hubTileCallingSub": "ژر راځي",
-  "hubTileLegacyTitle": "پلانونه او کاتالوګ",
-  "hubTileLegacySub": "اېرټایم او ډیټا",
+  "hubTileLegacyTitle": "کلاسیک شارژ",
+  "hubTileLegacySub": "لاسي مقدارونه او بیاکتنه (زړې لاره)",
   "walletScreenTitle": "بټوه",
   "balanceHeroLabel": "د حساب بیلانس",
   "availableLabel": "شته",
@@ -114,7 +135,18 @@
   "operatorLabel": "اپراتور",
   "packageLabel": "بسته",
   "totalUsd": "ټول (USD)",
+  "checkoutProductValueLabel": "د محصول ارزښت",
+  "checkoutSenderTaxLabel": "مالیه (د لېږونکي سیمه)",
+  "checkoutServiceFeeLabel": "د زورا-ولت خدمت فیس",
+  "checkoutTotalChargedLabel": "ټول تادیه‌شوی",
+  "checkoutTaxJurisdictionPhaseNote": "مالیه د ټاکل شوي لېږونکي هېواد پر اساس محاسبه کېږي. که ایالت، ښار یا پوستي کوډ ورکړئ، زموږ په دې نسخه کې نرخ نه بدلېږي — د راتلونکو مالیاتي ماشینونو او compliance لپاره ساتل کېږي.",
+  "checkoutPricingLoading": "ستاسو سیمې لپاره بیه تازه کېږي…",
   "checkoutUsdTotalFootnote": "په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.",
+  "checkoutScreenCurrencyHint": "بیې په امریکایي ډالرو (USD) کې دي.",
+  "checkoutScreenServerPricingNote": "بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.",
+  "checkoutScreenOrderTotalCaption": "ټول (USD)",
+  "checkoutScreenChargeFootnote": "په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.",
+  "checkoutScreenStripeSecureNote": "تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.",
   "stripeSectionTitle": "خوندي تادیه",
   "stripeKeyMissing": "د دې build لپاره Stripe publishable کی نشته.",
   "stripeKeyLoaded": "د کارت تادیه چمتو ده. ستاسو سرور PaymentIntent جوړوي او client_secret ورکوي.",
@@ -132,6 +164,10 @@
   "telecomMinuteBundlesTitle": "د دقیقو بستې (USD)",
   "telecomEnterNumberForAmounts": "معتبر شمېره ولیکئ او اپراتور تایید کړئ ترڅو مقدارونه ښکاره شي.",
   "telecomPhoneHintAirtime": "07X XXX XXXX یا 937…",
+  "receivingCountryLabel": "هېواد (ترلاسه‌کوونکی)",
+  "recipientLocalNumber": "زموږ موبایل شمېره",
+  "phase1AirtimeAfghanistanOnly": "په فاز ۱ کې یوازې افغانستان. افغانستان غوره کړئ.",
+  "checkoutSecuringCheckout": "تادیه خوندي کیږي…",
   "telecomDataHeadline": "ډیټا بستې",
   "telecomDataSubtitle": "ورځنۍ، اونیزې او میاشتنۍ بستې. ټول په USD کې.",
   "telecomPhoneHintData": "07X XXX XXXX",

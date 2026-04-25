@@ -14,6 +14,8 @@ export const API_CONTRACT_CODE = Object.freeze({
   RATE_LIMITED: 'rate_limited',
   /** Role / staff gate on authenticated routes. */
   AUTH_FORBIDDEN: 'auth_forbidden',
+  /** `PAYMENTS_LOCKDOWN_MODE` — new checkouts / wallet top-up / money creation blocked. */
+  PAYMENTS_LOCKDOWN: 'payments_lockdown',
   /** Stripe SDK errors surfaced to clients (non-production may include detail). */
   PAYMENT_PROVIDER_ERROR: 'payment_provider_error',
 });

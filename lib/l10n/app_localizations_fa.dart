@@ -167,6 +167,34 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String checkoutReviewTotalChargedHeadline(String amount) {
+    return 'Total charged: $amount';
+  }
+
+  @override
+  String checkoutReviewAirtimeValueSubline(String amount) {
+    return 'Airtime value (recipient): $amount';
+  }
+
+  @override
+  String get checkoutReviewHeadlinePricingUnavailable =>
+      'Full pricing will appear when the quote loads — check the order summary below.';
+
+  @override
+  String get checkoutQuoteFailed =>
+      'We couldn\'t load pricing. Check your connection and try again.';
+
+  @override
+  String get checkoutAirtimeValueLabel => 'Airtime value';
+
+  @override
+  String get receiptBreakdownLoadingHint => 'Loading payment breakdown…';
+
+  @override
+  String get receiptBreakdownPartialHint =>
+      'Full line-item breakdown was not available; amount below is the total charged to your card.';
+
+  @override
   String get rechargeTrustLine =>
       'قیمت‌گذاری دلاری · پرداخت امن · موبایل افغانستان';
 
@@ -345,8 +373,45 @@ class AppLocalizationsFa extends AppLocalizations {
   String get totalUsd => 'جمع (USD)';
 
   @override
+  String get checkoutProductValueLabel => 'Product value';
+
+  @override
+  String get checkoutSenderTaxLabel => 'Tax (sender jurisdiction)';
+
+  @override
+  String get checkoutServiceFeeLabel => 'Zora-Walat service fee';
+
+  @override
+  String get checkoutTotalChargedLabel => 'Total charged';
+
+  @override
+  String get checkoutTaxJurisdictionPhaseNote =>
+      'Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.';
+
+  @override
+  String get checkoutPricingLoading => 'Updating price for your region…';
+
+  @override
   String get checkoutUsdTotalFootnote =>
       'کسر به USD است. اگر کارت شما USD نیست، بانک ممکن است کارمزد تبدیل اضافه کند؛ تحت کنترل ما نیست.';
+
+  @override
+  String get checkoutScreenCurrencyHint => 'Prices in US dollars (USD).';
+
+  @override
+  String get checkoutScreenServerPricingNote =>
+      'Pricing is calculated in USD on our servers for your region.';
+
+  @override
+  String get checkoutScreenOrderTotalCaption => 'Total (USD)';
+
+  @override
+  String get checkoutScreenChargeFootnote =>
+      'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
+
+  @override
+  String get checkoutScreenStripeSecureNote =>
+      'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.';
 
   @override
   String get stripeSectionTitle => 'پرداخت امن';
@@ -406,6 +471,16 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get telecomPhoneHintAirtime => '07X XXX XXXX یا 937…';
+
+  @override
+  String get recipientLocalNumber => 'شماره موبایل محلی';
+
+  @override
+  String get phase1AirtimeAfghanistanOnly =>
+      'در فاز ۱، شارژ فقط برای افغانستان. افغانستان را انتخاب کنید.';
+
+  @override
+  String get checkoutSecuringCheckout => 'در حال ایمن‌سازی پرداخت…';
 
   @override
   String get telecomDataHeadline => 'بسته‌های دیتا';

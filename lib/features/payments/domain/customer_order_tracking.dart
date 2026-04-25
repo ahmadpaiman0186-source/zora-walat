@@ -124,6 +124,16 @@ class CustomerOrderTracking {
     systemIsRetrying: false,
   );
 
+  /// `GET /api/orders/:id` body — uses `lifecycleStageKey` / `trackingStageKey`.
+  static CustomerOrderTracking fromOrdersApiOrder(Map<String, dynamic> order) {
+    final keyRaw = order['lifecycleStageKey'] as String? ??
+        order['trackingStageKey'] as String?;
+    if (keyRaw != null && keyRaw.trim().isNotEmpty) {
+      return fromServerTrackingStageKey(keyRaw.trim());
+    }
+    return unknownAfterPay;
+  }
+
   /// Maps server `trackingStageKey` to customer-safe timeline + copy.
   static CustomerOrderTracking fromServerTrackingStageKey(String? key) {
     switch (key) {

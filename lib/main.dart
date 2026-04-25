@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb, debugPrint;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +25,7 @@ import 'core/push/fcm_background.dart';
 import 'services/api_service.dart';
 import 'services/auth_api_service.dart';
 import 'services/payment_service.dart';
+import 'stripe_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,6 +57,18 @@ Future<void> main() async {
 
   final httpClient = http.Client();
   final apiBase = AppConfig.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+  if (kDebugMode) {
+    if (apiBase.isEmpty) {
+      debugPrint(
+        'MISSING: API_BASE_URL — set --dart-define=API_BASE_URL=http://127.0.0.1:8787',
+      );
+    }
+    if (StripeKeys.publishableKey.trim().isEmpty) {
+      debugPrint(
+        'MISSING: STRIPE_PUBLISHABLE_KEY — set --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_…',
+      );
+    }
+  }
   final authSession = AuthSession(prefs);
   await authSession.restore();
   final authApiService = AuthApiService(client: httpClient, baseUrl: apiBase);

@@ -55,6 +55,12 @@ import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { timingSafeEqualUtf8 } from '../lib/timingSafeString.js';
 import { assertPaymentIntentRiskAllowed } from '../services/risk/assertPaymentIntentRisk.js';
 import { orchestrateStripeCall } from '../services/reliability/reliabilityOrchestrator.js';
+import {
+  buildStripeCheckoutLineItems,
+  pricingBreakdownFromSnapshot,
+  pricingBreakdownResponseBody,
+} from '../lib/checkoutPricingBreakdown.js';
+import { buildPricingMeta } from '../domain/pricing/pricingSnapshotPolicy.js';
 
 export async function createCheckoutSession(req, res) {
   const authUserId = req.user?.id;
@@ -171,6 +177,8 @@ export async function createCheckoutSession(req, res) {
     packageId: parsed.packageId,
     amountUsdCents: parsed.amountUsdCents,
     riskBufferPercent: sender.riskBufferPercent,
+    senderCountryCode: parsed.senderCountry,
+    billingJurisdiction: parsed.billingJurisdiction ?? null,
   });
   if (!priced.ok) {
     req.log?.warn(
@@ -195,6 +203,7 @@ export async function createCheckoutSession(req, res) {
   }
 
   const trustedCents = priced.pricing.finalPriceCents;
+  const pricingBreakdown = pricingBreakdownResponseBody(priced.pricing);
 
   const pair = validatePackageOperatorPair(
     parsed.packageId,
@@ -243,6 +252,7 @@ export async function createCheckoutSession(req, res) {
     operatorKey: parsed.operatorKey ?? null,
     recipientNational,
     packageId: parsed.packageId ?? null,
+    billingJurisdiction: parsed.billingJurisdiction ?? null,
   });
 
   // Anti-abuse: detect excessive/rapid repeated checkout creation attempts.
@@ -346,11 +356,22 @@ export async function createCheckoutSession(req, res) {
         { checkoutId: reused.id, reused: true },
         'checkout idempotent replay',
       );
+      const replayRow = await prisma.paymentCheckout.findUnique({
+        where: { id: reused.id },
+        select: { pricingSnapshot: true, amountUsdCents: true },
+      });
+      const replayBreakdown = replayRow
+        ? pricingBreakdownFromSnapshot(
+            replayRow.pricingSnapshot,
+            replayRow.amountUsdCents,
+          )
+        : pricingBreakdown;
       return res.json({
         url: reused.url,
         orderId: reused.id,
         orderReference: reused.id,
         moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
+        pricingBreakdown: replayBreakdown,
       });
     }
   } catch (e) {
@@ -376,6 +397,10 @@ export async function createCheckoutSession(req, res) {
       recipientNational,
       packageId: parsed.packageId ?? null,
       pricing: priced.pricing,
+      pricingMeta: buildPricingMeta({
+        senderCountryCode: parsed.senderCountry,
+        billingJurisdiction: parsed.billingJurisdiction ?? null,
+      }),
     });
   } catch (e) {
     if (
@@ -390,7 +415,13 @@ export async function createCheckoutSession(req, res) {
       ) {
         return res.json({
           url: existing.stripeCheckoutUrl,
+          orderId: existing.id,
+          orderReference: existing.id,
           moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
+          pricingBreakdown: pricingBreakdownFromSnapshot(
+            existing.pricingSnapshot,
+            existing.amountUsdCents,
+          ),
         });
       }
       return res.status(409).json({
@@ -419,23 +450,14 @@ export async function createCheckoutSession(req, res) {
       operationName: 'checkout.sessions.create',
       traceId: req.traceId,
       log: req.log,
+      /** With Stripe `timeout` ~25s, cap attempts so the handler finishes before typical client timeouts. */
+      maxAttempts: 2,
       fn: () =>
         stripe.checkout.sessions.create(
           {
             payment_method_types: ['card'],
             mode: 'payment',
-            line_items: [
-              {
-                price_data: {
-                  currency: 'usd',
-                  product_data: {
-                    name: 'Afghanistan mobile top-up (USD)',
-                  },
-                  unit_amount: trustedCents,
-                },
-                quantity: 1,
-              },
-            ],
+            line_items: buildStripeCheckoutLineItems(priced.pricing),
             success_url: stripeReturn.successUrl,
             cancel_url: stripeReturn.cancelUrl,
             client_reference_id: row.id,
@@ -453,6 +475,8 @@ export async function createCheckoutSession(req, res) {
       stripeCheckoutSessionId: session.id,
       stripeCheckoutUrl: session.url,
     });
+
+    console.log('STRIPE_SESSION_CREATED', session.id);
 
     await writeOrderAudit(prisma, {
       event: 'checkout_session_created',
@@ -483,16 +507,108 @@ export async function createCheckoutSession(req, res) {
       orderIdSuffix: safeSuffix(row.id, 10),
       stripeSessionIdSuffix: String(session.id).slice(-12),
     });
+    if (
+      session.amount_total != null &&
+      session.amount_total !== trustedCents
+    ) {
+      req.log?.error(
+        {
+          securityEvent: 'stripe_checkout_amount_total_mismatch',
+          expectedCents: trustedCents,
+          sessionAmountTotal: session.amount_total,
+        },
+        'security',
+      );
+    }
+
     return res.json({
       url: session.url,
       orderId: row.id,
       orderReference: row.id,
       moneyPathOutcome: MONEY_PATH_OUTCOME.ACCEPTED,
+      pricingBreakdown,
     });
   } catch (e) {
     await markCheckoutFailed(row.id);
     throw e;
   }
+}
+
+/**
+ * POST /checkout-pricing-quote (root) and POST /api/checkout-pricing-quote (`routes/index.js` + `payment.routes` under `/api`)
+ * — same body as hosted checkout; returns transparent breakdown
+ * without creating a Stripe session (for review UI before pay).
+ */
+export async function createCheckoutPricingQuote(req, res) {
+  let parsed;
+  try {
+    parsed = checkoutSessionBodySchema.parse(req.body ?? {});
+  } catch (err) {
+    if (err instanceof ZodError) {
+      req.log?.warn(
+        { securityEvent: 'checkout_quote_payload_schema_invalid' },
+        'security',
+      );
+      if (env.nodeEnv === 'production') {
+        return res
+          .status(400)
+          .json(
+            clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
+          );
+      }
+      return res.status(400).json({
+        ...clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
+        details: err.flatten(),
+      });
+    }
+    throw err;
+  }
+
+  const sender = await prisma.senderCountry.findUnique({
+    where: { code: parsed.senderCountry },
+  });
+  if (!sender || !sender.enabled) {
+    return res.status(400).json(
+      clientErrorBody('Invalid or disabled sender country', 'SENDER_COUNTRY_INVALID'),
+    );
+  }
+
+  const priced = resolveCheckoutPricing({
+    packageId: parsed.packageId,
+    amountUsdCents: parsed.amountUsdCents,
+    riskBufferPercent: sender.riskBufferPercent,
+    senderCountryCode: parsed.senderCountry,
+    billingJurisdiction: parsed.billingJurisdiction ?? null,
+  });
+  if (!priced.ok) {
+    req.log?.warn(
+      { securityEvent: 'checkout_quote_pricing_rejected', code: priced.code },
+      'security',
+    );
+    const hard =
+      priced.code === 'MARGIN_BELOW_FLOOR'
+        ? 'Checkout rejected: projected margin below minimum threshold'
+        : priced.code === 'CHECKOUT_BELOW_MINIMUM'
+          ? priced.message
+          : null;
+    return res.status(400).json(
+      clientErrorBody(
+        hard ??
+          (env.nodeEnv === 'production'
+            ? 'Checkout cannot be priced safely'
+            : priced.message),
+        String(priced.code),
+      ),
+    );
+  }
+
+  return res.json({
+    pricingBreakdown: pricingBreakdownResponseBody(priced.pricing),
+    pricingMeta: buildPricingMeta({
+      senderCountryCode: parsed.senderCountry,
+      billingJurisdiction: parsed.billingJurisdiction ?? null,
+    }),
+  });
 }
 
 /**

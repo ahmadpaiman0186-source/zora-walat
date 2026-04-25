@@ -167,6 +167,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String checkoutReviewTotalChargedHeadline(String amount) {
+    return 'Total charged: $amount';
+  }
+
+  @override
+  String checkoutReviewAirtimeValueSubline(String amount) {
+    return 'Airtime value (recipient): $amount';
+  }
+
+  @override
+  String get checkoutReviewHeadlinePricingUnavailable =>
+      'Full pricing will appear when the quote loads — check the order summary below.';
+
+  @override
+  String get checkoutQuoteFailed =>
+      'We couldn\'t load pricing. Check your connection and try again.';
+
+  @override
+  String get checkoutAirtimeValueLabel => 'Airtime value';
+
+  @override
+  String get receiptBreakdownLoadingHint => 'Loading payment breakdown…';
+
+  @override
+  String get receiptBreakdownPartialHint =>
+      'Full line-item breakdown was not available; amount below is the total charged to your card.';
+
+  @override
   String get rechargeTrustLine =>
       'USD pricing · Secure checkout · Afghanistan mobile';
 
@@ -243,7 +271,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hubTileRechargeTitle => 'Mobile recharge';
 
   @override
-  String get hubTileRechargeSub => 'Instant packages · USD pricing';
+  String get hubTileRechargeSub =>
+      'Afghanistan airtime · live catalog · Stripe checkout';
 
   @override
   String get hubTileWalletTitle => 'Wallet';
@@ -258,10 +287,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hubTileCallingSub => 'Coming soon';
 
   @override
-  String get hubTileLegacyTitle => 'Plans & catalog';
+  String get hubTileLegacyTitle => 'Classic recharge';
 
   @override
-  String get hubTileLegacySub => 'Airtime & data';
+  String get hubTileLegacySub => 'Manual amounts & review (legacy path)';
 
   @override
   String get walletScreenTitle => 'Wallet';
@@ -348,8 +377,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalUsd => 'Total (USD)';
 
   @override
+  String get checkoutProductValueLabel => 'Product value';
+
+  @override
+  String get checkoutSenderTaxLabel => 'Tax (sender jurisdiction)';
+
+  @override
+  String get checkoutServiceFeeLabel => 'Zora-Walat service fee';
+
+  @override
+  String get checkoutTotalChargedLabel => 'Total charged';
+
+  @override
+  String get checkoutTaxJurisdictionPhaseNote =>
+      'Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.';
+
+  @override
+  String get checkoutPricingLoading => 'Updating price for your region…';
+
+  @override
   String get checkoutUsdTotalFootnote =>
       'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
+
+  @override
+  String get checkoutScreenCurrencyHint => 'Prices in US dollars (USD).';
+
+  @override
+  String get checkoutScreenServerPricingNote =>
+      'Pricing is calculated in USD on our servers for your region.';
+
+  @override
+  String get checkoutScreenOrderTotalCaption => 'Total (USD)';
+
+  @override
+  String get checkoutScreenChargeFootnote =>
+      'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
+
+  @override
+  String get checkoutScreenStripeSecureNote =>
+      'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.';
 
   @override
   String get stripeSectionTitle => 'Secure payment';
@@ -409,6 +475,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get telecomPhoneHintAirtime => '07X XXX XXXX or 937…';
+
+  @override
+  String get recipientLocalNumber => 'Local mobile number';
+
+  @override
+  String get phase1AirtimeAfghanistanOnly =>
+      'Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.';
+
+  @override
+  String get checkoutSecuringCheckout => 'Securing checkout…';
 
   @override
   String get telecomDataHeadline => 'Data packages';

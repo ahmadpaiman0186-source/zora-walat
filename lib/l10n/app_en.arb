@@ -60,6 +60,27 @@
       }
     }
   },
+  "checkoutReviewTotalChargedHeadline": "Total charged: {amount}",
+  "@checkoutReviewTotalChargedHeadline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewAirtimeValueSubline": "Airtime value (recipient): {amount}",
+  "@checkoutReviewAirtimeValueSubline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewHeadlinePricingUnavailable": "Full pricing will appear when the quote loads — check the order summary below.",
+  "checkoutQuoteFailed": "We couldn't load pricing. Check your connection and try again.",
+  "checkoutAirtimeValueLabel": "Airtime value",
+  "receiptBreakdownLoadingHint": "Loading payment breakdown…",
+  "receiptBreakdownPartialHint": "Full line-item breakdown was not available; amount below is the total charged to your card.",
   "rechargeTrustLine": "USD pricing · Secure checkout · Afghanistan mobile",
   "recipientNumber": "Recipient number",
   "receivingCountryLabel": "Receiving country",
@@ -96,13 +117,13 @@
   "apiUnreachableRecharge": "We can’t reach the service. Check your connection and try again.",
   "hubSubtitle": "Recharge · Wallet · Calling",
   "hubTileRechargeTitle": "Mobile recharge",
-  "hubTileRechargeSub": "Instant packages · USD pricing",
+  "hubTileRechargeSub": "Afghanistan airtime · live catalog · Stripe checkout",
   "hubTileWalletTitle": "Wallet",
   "hubTileWalletSub": "Balance & top-up",
   "hubTileCallingTitle": "International calling",
   "hubTileCallingSub": "Coming soon",
-  "hubTileLegacyTitle": "Plans & catalog",
-  "hubTileLegacySub": "Airtime & data",
+  "hubTileLegacyTitle": "Classic recharge",
+  "hubTileLegacySub": "Manual amounts & review (legacy path)",
   "walletScreenTitle": "Wallet",
   "balanceHeroLabel": "Account balance",
   "availableLabel": "Available",
@@ -135,7 +156,18 @@
   "operatorLabel": "Operator",
   "packageLabel": "Package",
   "totalUsd": "Total (USD)",
+  "checkoutProductValueLabel": "Product value",
+  "checkoutSenderTaxLabel": "Tax (sender jurisdiction)",
+  "checkoutServiceFeeLabel": "Zora-Walat service fee",
+  "checkoutTotalChargedLabel": "Total charged",
+  "checkoutTaxJurisdictionPhaseNote": "Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.",
+  "checkoutPricingLoading": "Updating price for your region…",
   "checkoutUsdTotalFootnote": "Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.",
+  "checkoutScreenCurrencyHint": "Prices in US dollars (USD).",
+  "checkoutScreenServerPricingNote": "Pricing is calculated in USD on our servers for your region.",
+  "checkoutScreenOrderTotalCaption": "Total (USD)",
+  "checkoutScreenChargeFootnote": "Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.",
+  "checkoutScreenStripeSecureNote": "You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.",
   "stripeSectionTitle": "Secure payment",
   "stripeKeyMissing": "Stripe publishable key not configured for this build.",
   "stripeKeyLoaded": "Card payments ready. Your server creates the PaymentIntent and returns the client secret.",
@@ -160,6 +192,10 @@
   "telecomMinuteBundlesTitle": "Minute bundles (USD)",
   "telecomEnterNumberForAmounts": "Enter a valid number and confirm the operator to see amounts.",
   "telecomPhoneHintAirtime": "07X XXX XXXX or 937…",
+  "receivingCountryLabel": "Receiving country",
+  "recipientLocalNumber": "Local mobile number",
+  "phase1AirtimeAfghanistanOnly": "Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.",
+  "checkoutSecuringCheckout": "Securing checkout…",
   "telecomDataHeadline": "Data packages",
   "telecomDataSubtitle": "Daily, weekly, and monthly bundles. All prices in USD.",
   "telecomPhoneHintData": "07X XXX XXXX",
