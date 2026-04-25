@@ -10,6 +10,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { after } from 'node:test';
 import dotenv from 'dotenv';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -27,3 +28,12 @@ process.env.NODE_ENV = 'test';
 if (!String(process.env.PRISMA_CONNECTION_LIMIT ?? '').trim()) {
   process.env.PRISMA_CONNECTION_LIMIT = '3';
 }
+
+after(async () => {
+  try {
+    const { resetRedisClientForTests } = await import('../src/services/redisClient.js');
+    await resetRedisClientForTests();
+  } catch {
+    // ignore — teardown must never fail the suite
+  }
+});

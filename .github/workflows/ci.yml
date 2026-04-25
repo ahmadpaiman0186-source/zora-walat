@@ -41,6 +41,10 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zw_phase1_test
       REDIS_URL: redis://localhost:6379/0
+      # Supertest has no browser Origin; checkout + Stripe return URLs need a stable client base.
+      CLIENT_URL: http://127.0.0.1:3000
+      # Default dev NODE_ENV would otherwise allow unverified checkout (see env.allowUnverifiedCheckoutInDev).
+      ALLOW_UNVERIFIED_CHECKOUT: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -75,8 +75,9 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     const res = await request(app)
       .post('/create-checkout-session')
       .set('Authorization', `Bearer ${token}`)
+      .set('Idempotency-Key', randomUUID())
       .set('Content-Type', 'application/json')
-      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'pkg_smoke' });
+      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'mock_airtime_10' });
 
     expectVerificationGate(res);
   });
@@ -85,7 +86,7 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     const res = await request(app)
       .post('/create-checkout-session')
       .set('Content-Type', 'application/json')
-      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'pkg_smoke' });
+      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'mock_airtime_10' });
 
     assert.equal(res.status, 401);
     assert.equal(res.body?.code, AUTH_ERROR_CODE.AUTH_REQUIRED);
@@ -96,8 +97,9 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     const res = await request(app)
       .post('/create-checkout-session')
       .set('Authorization', `Bearer ${token}`)
+      .set('Idempotency-Key', randomUUID())
       .set('Content-Type', 'application/json')
-      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'pkg_smoke' });
+      .send({ senderCountry: 'US', amountUsdCents: 1000, packageId: 'mock_airtime_10' });
 
     assert.notEqual(res.status, 403);
   });

@@ -7,7 +7,10 @@ import { describe, it, beforeEach, afterEach } from 'node:test';
 
 import express from 'express';
 
-import { webtopTopupsPerMinuteLimiter } from '../src/middleware/rateLimits.js';
+import {
+  webtopFlowPerMinuteMax,
+  webtopTopupsPerMinuteLimiter,
+} from '../src/middleware/rateLimits.js';
 import {
   __resetWebtopAbuseStoresForTests,
   webtopAbusePreCheck,
@@ -81,14 +84,15 @@ describe('webtopTopupsPerMinuteLimiter', () => {
     await new Promise((r) => server?.close(r));
   });
 
-  it('returns 429 on the 6th request within one minute (same IP)', async () => {
-    for (let i = 0; i < 5; i += 1) {
+  it('returns 429 after max+1 requests within one minute (same IP)', async () => {
+    const max = webtopFlowPerMinuteMax;
+    for (let i = 0; i < max; i += 1) {
       const r = await postJson(port, '/api/topup-orders', {});
       assert.equal(r.status, 200);
     }
-    const r6 = await postJson(port, '/api/topup-orders', {});
-    assert.equal(r6.status, 429);
-    const j = JSON.parse(r6.body);
+    const blocked = await postJson(port, '/api/topup-orders', {});
+    assert.equal(blocked.status, 429);
+    const j = JSON.parse(blocked.body);
     assert.equal(j.code, 'rate_limited');
   });
 });

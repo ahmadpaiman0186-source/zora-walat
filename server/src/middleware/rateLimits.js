@@ -32,6 +32,19 @@ function rateLimitWithOptionalRedis(prefix, options) {
 const prod = env.nodeEnv === 'production';
 
 /**
+ * Shared loopback IP in CI runs many webtop + PaymentIntent flows in one process.
+ * Production stays at 5; local default stays at 5; override via WEBTOP_FLOW_PER_MINUTE_MAX.
+ */
+export const webtopFlowPerMinuteMax = (() => {
+  if (prod) return 5;
+  if (process.env.CI === 'true') return 200;
+  const raw = String(process.env.WEBTOP_FLOW_PER_MINUTE_MAX ?? '').trim();
+  const n = Number.parseInt(raw, 10);
+  if (Number.isFinite(n) && n >= 5) return n;
+  return 5;
+})();
+
+/**
  * Stable client IP for rate-limit keys. express-rate-limit v7 throws if `req.ip` is
  * undefined (ERR_ERL_UNDEFINED_IP_ADDRESS); Express may omit `req.ip` when trust proxy
  * is off in some edge cases — fall back to the socket (local dev / Flutter web).
@@ -557,7 +570,7 @@ export const webtopTopupsPerMinuteLimiter = rateLimitWithOptionalRedis(
   'webtop_flow_1m',
   {
     windowMs: 60 * 1000,
-    max: 5,
+    max: webtopFlowPerMinuteMax,
     standardHeaders: true,
     legacyHeaders: false,
     keyGenerator: (req) => clientIpKey(req),
