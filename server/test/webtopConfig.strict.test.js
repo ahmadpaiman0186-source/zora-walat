@@ -121,12 +121,7 @@ describe('webtopConfig (strict Phase 11)', () => {
   it('assertWebTopupDeploymentConfigOrExit exits in production when SLA is invalid', () => {
     const r = spawnSync(
       process.execPath,
-      [
-        '--input-type=module',
-        '-e',
-        `import { assertWebTopupDeploymentConfigOrExit } from './src/config/webtopDeploymentConfig.js';
-assertWebTopupDeploymentConfigOrExit();`,
-      ],
+      [join(__dirname, 'fixtures', 'invokeWebtopAssertProd.mjs')],
       {
         cwd: serverRoot,
         encoding: 'utf8',
