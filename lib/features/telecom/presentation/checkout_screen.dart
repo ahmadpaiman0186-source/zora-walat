@@ -64,7 +64,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final paymentService = AppScope.of(context).paymentService;
     try {
       final q = await paymentService.fetchCheckoutPricingQuote(
-        amountCents: widget.order.finalAmountCents,
+        amountCents: widget.order.finalUsdCents,
         senderCountry: _senderCountry,
         operatorKey: widget.order.operator.apiKey,
         recipientPhone: widget.order.phone.raw,
@@ -95,7 +95,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             'service': o.line.name,
             'operator': o.operator.apiKey,
             'product_id': o.productId,
-            'amount_cents': o.finalAmountCents,
+            'amount_cents': o.finalUsdCents,
             'phone_masked': o.metadata['phone_masked'] ?? '—',
           })
           .catchError((_) {}),
@@ -121,13 +121,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           .append({
             'event': 'payment_attempt',
             'product_id': widget.order.productId,
-            'amount_cents': widget.order.finalAmountCents,
+            'amount_cents': widget.order.finalUsdCents,
           })
           .catchError((_) {}),
     );
     try {
       final sessionBreakdown = await paymentService.startCheckout(
-        amountCents: widget.order.finalAmountCents,
+        amountCents: widget.order.finalUsdCents,
         senderCountry: _senderCountry,
         currency: StripeKeys.stripeCheckoutCurrencyCode,
         operatorKey: widget.order.operator.apiKey,
