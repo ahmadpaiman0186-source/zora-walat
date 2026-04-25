@@ -129,7 +129,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       final sessionBreakdown = await paymentService.startCheckout(
         amountCents: widget.order.finalUsdCents,
         senderCountry: _senderCountry,
-        currency: StripeKeys.stripeCheckoutCurrencyCode,
+        currency: 'usd',
         operatorKey: widget.order.operator.apiKey,
         recipientPhone: widget.order.phone.raw,
         packageId: widget.order.productId,
