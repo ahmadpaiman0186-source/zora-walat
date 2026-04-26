@@ -1,5 +1,30 @@
 # Engineering checkpoint (Zora-Walat)
 
+## Mandatory checkpoint & freeze — 2026-04-25 (evidence only)
+
+**Branch:** `2026-04-11-qrw0`  
+**Latest commit hash (local HEAD):** `3d3469c97d9d84cacb6a4ab7b24802a6a163b035`  
+**Pushed commit hash (origin/2026-04-11-qrw0):** `3d3469c97d9d84cacb6a4ab7b24802a6a163b035`  
+**Working tree:** clean (`git status` shows nothing to commit)  
+
+**Local tests (PowerShell / Windows):**
+
+- `npm test`: **458 pass / 0 fail** (unit suite)
+
+**GitHub CI current blocker (do not merge until green):**
+
+- **Job**: `CI / server` failed
+- **Failing test**: `apiContractAuthFlow.integration.test.js`
+- **Symptom**: signup → verify-otp → `GET /api/wallet/balance` returns **500** (expected **201**)
+
+**Security lockdown expectation (already supported; do not bypass):**
+
+- Production/operator mode should set:
+  - `OWNER_ALLOWED_EMAIL=ahmadpaiman0186@gmail.com`
+  - `PAYMENTS_LOCKDOWN_MODE=true`
+- `PAYMENTS_LOCKDOWN_MODE=true` must block **new money creation** routes (checkout/top-up/recharge) while keeping Stripe webhooks intact.
+- `OWNER_ALLOWED_EMAIL` (when set) must enforce **owner-only** access for protected/admin/owner flows.
+
 **Date (authoritative per session):** 2026-04-23  
 **Repository HEAD at checkpoint write time:** `de487f84fa9d3bf3ec66bf5fc3617153abc603c1` (branch `2026-04-11-qrw0`)
 
