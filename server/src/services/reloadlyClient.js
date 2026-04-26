@@ -397,6 +397,16 @@ export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
 
   const phase1Identity = buildPhase1ProviderIdentityBundle(order.id, fulfillmentCtx.attemptId);
 
+  const snap =
+    order.pricingSnapshot && typeof order.pricingSnapshot === 'object'
+      ? order.pricingSnapshot
+      : null;
+  const recipientValueCents =
+    snap?.customerProductValueUsdCents != null &&
+    Number.isFinite(Number(snap.customerProductValueUsdCents))
+      ? Math.round(Number(snap.customerProductValueUsdCents))
+      : order.amountUsdCents;
+
   const requestSummary = {
     mode: 'reloadly',
     sandbox: env.reloadlySandbox,
@@ -405,7 +415,8 @@ export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
     packageId: order.packageId ?? null,
     operatorKey: order.operatorKey ?? null,
     recipientHint: safeRecipientHint(order.recipientNational),
-    amountUsdCents: order.amountUsdCents,
+    amountUsdCents: recipientValueCents,
+    stripeChargeUsdCents: order.amountUsdCents,
     currency: order.currency,
     providerRequestKey: customIdentifier,
     externalReference: customIdentifier,

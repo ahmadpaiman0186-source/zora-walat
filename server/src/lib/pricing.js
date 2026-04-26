@@ -1,34 +1,32 @@
+import { PHASE1_LADDER_USD_CENTS } from './phase1PriceLadder.js';
+
 /**
- * Single source of truth for airtime SKUs (must match app catalog).
- * Phase 1: retail face value ≥ $10 USD (see PHASE1_MIN_CHECKOUT_USD_CENTS).
+ * Wholesale COGS models aligned 1:1 with [PHASE1_LADDER_USD_CENTS] (operator quotes / policy).
  */
-export const AIRTIME_SKUS = [
-  {
-    idSuffix: 'air_25m',
-    minutes: 25,
-    retailUsdCents: 1000,
-    /** Wholesale — set from operator quotes / provider API. */
-    providerUsdCents: 880,
-  },
-  {
-    idSuffix: 'air_50m',
-    minutes: 50,
-    retailUsdCents: 1500,
-    providerUsdCents: 1320,
-  },
-  {
-    idSuffix: 'air_100m',
-    minutes: 100,
-    retailUsdCents: 2000,
-    providerUsdCents: 1760,
-  },
-  {
-    idSuffix: 'air_125m',
-    minutes: 125,
-    retailUsdCents: 2500,
-    providerUsdCents: 2200,
-  },
+const PROVIDER_USD_CENTS_BY_LADDER_INDEX = [
+  80, 120, 220, 350, 470, 770, 1000, 1200, 1640, 2200,
 ];
+
+const MINUTES_BY_LADDER_INDEX = [2, 3, 5, 7, 9, 11, 13, 15, 20, 25];
+
+function buildAirtimeSkus() {
+  if (PHASE1_LADDER_USD_CENTS.length !== PROVIDER_USD_CENTS_BY_LADDER_INDEX.length) {
+    throw new Error('AIRTIME_SKUS: ladder and provider economics length mismatch');
+  }
+  return PHASE1_LADDER_USD_CENTS.map((retailUsdCents, i) => ({
+    idSuffix: `usd_${retailUsdCents}`,
+    minutes: MINUTES_BY_LADDER_INDEX[i],
+    retailUsdCents,
+    providerUsdCents: PROVIDER_USD_CENTS_BY_LADDER_INDEX[i],
+  }));
+}
+
+/**
+ * Single source of truth for Phase 1 airtime SKUs (must match app catalog / GET /catalog/airtime).
+ * Retail face values in USD cents; providerUsdCents are wholesale COGS models (operator quotes / policy).
+ * Minimum checkout floor: see PHASE1_MIN_CHECKOUT_USD_CENTS (must be ≤ smallest retail SKU).
+ */
+export const AIRTIME_SKUS = buildAirtimeSkus();
 
 const skuByProductId = new Map();
 

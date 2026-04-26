@@ -1,0 +1,162 @@
+﻿[
+    {
+        "pid":  16376,
+        "startTime":  "2026-04-21T08:20:35.4604495-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --max-old-space-size=8132 -e \"process.title = process.env[\\\"VSCODE_PROCESS_TITLE\\\"]; require(process.argv[1])\" c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\extensions\\node_modules\\typescript\\lib\\tsserver.js --serverMode partialSemantic --useInferredProjectPerProjectRoot --disableAutomaticTypingAcquisition --cancellationPipeName C:\\Users\\ahmad\\AppData\\Local\\Temp\\vscode-typescript\\56d0cb4e99bd77bc51f1\\tscancellation-284c36b9136214918c9f.tmp* --locale en --noGetErrOnBackgroundUpdate --canUseWatchEvents --validateDefaultNpmLocation"
+    },
+    {
+        "pid":  12340,
+        "startTime":  "2026-04-21T08:20:35.4709602-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --max-old-space-size=8132 -e \"process.title = process.env[\\\"VSCODE_PROCESS_TITLE\\\"]; require(process.argv[1])\" c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\extensions\\node_modules\\typescript\\lib\\tsserver.js --useInferredProjectPerProjectRoot --enableTelemetry --cancellationPipeName C:\\Users\\ahmad\\AppData\\Local\\Temp\\vscode-typescript\\56d0cb4e99bd77bc51f1\\tscancellation-8b69e2c5dbba3c1873d5.tmp* --locale en --noGetErrOnBackgroundUpdate --canUseWatchEvents --validateDefaultNpmLocation"
+    },
+    {
+        "pid":  8352,
+        "startTime":  "2026-04-21T08:20:38.4867292-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe c:/Users/ahmad/AppData/Local/Programs/cursor/resources/app/extensions/node_modules/typescript/lib/typingsInstaller.js --globalTypingsCacheLocation C:/Users/ahmad/AppData/Local/Microsoft/TypeScript/5.9 --enableTelemetry --typesMapLocation c:/Users/ahmad/AppData/Local/Programs/cursor/resources/app/extensions/node_modules/typescript/lib/typesMap.json --validateDefaultNpmLocation"
+    },
+    {
+        "pid":  10524,
+        "startTime":  "2026-04-21T11:14:47.8214723-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" test"
+    },
+    {
+        "pid":  13856,
+        "startTime":  "2026-04-21T11:14:48.1697691-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  5612,
+        "startTime":  "2026-04-21T11:15:15.2873535-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  11424,
+        "startTime":  "2026-04-21T14:37:48.6567495-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" run test -- --test-name-pattern=moneyRoutePolicy"
+    },
+    {
+        "pid":  13740,
+        "startTime":  "2026-04-21T14:37:49.3499402-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js --test-name-pattern=moneyRoutePolicy"
+    },
+    {
+        "pid":  12388,
+        "startTime":  "2026-04-21T14:38:14.8989311-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  14000,
+        "startTime":  "2026-04-21T14:47:51.7651436-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" start"
+    },
+    {
+        "pid":  12944,
+        "startTime":  "2026-04-21T14:47:52.0815161-07:00",
+        "commandLine":  "node  start.js"
+    },
+    {
+        "pid":  632,
+        "startTime":  "2026-04-21T16:58:15.5922921-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" test"
+    },
+    {
+        "pid":  1624,
+        "startTime":  "2026-04-21T16:58:15.9038887-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  9896,
+        "startTime":  "2026-04-21T16:58:44.0761960-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  9640,
+        "startTime":  "2026-04-21T17:04:00.9943160-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" test"
+    },
+    {
+        "pid":  12636,
+        "startTime":  "2026-04-21T17:04:01.3550751-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  9404,
+        "startTime":  "2026-04-21T17:04:27.7790185-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  16200,
+        "startTime":  "2026-04-21T17:20:00.8140387-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" test"
+    },
+    {
+        "pid":  15172,
+        "startTime":  "2026-04-21T17:20:01.1386326-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  1512,
+        "startTime":  "2026-04-21T17:20:26.3841874-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  3544,
+        "startTime":  "2026-04-21T17:39:31.7177788-07:00",
+        "commandLine":  "\"c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe\" --import ./test/setupTestEnv.mjs scripts/stage1-closeout-stripe-db.mjs"
+    },
+    {
+        "pid":  3792,
+        "startTime":  "2026-04-21T17:42:03.8340840-07:00",
+        "commandLine":  "\"c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe\" --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  7104,
+        "startTime":  "2026-04-21T17:42:29.8001778-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  8752,
+        "startTime":  "2026-04-21T18:10:54.4021010-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Program Files\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" test"
+    },
+    {
+        "pid":  13484,
+        "startTime":  "2026-04-21T18:10:54.9313728-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  16296,
+        "startTime":  "2026-04-21T18:11:21.7159703-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  8980,
+        "startTime":  "2026-04-21T19:41:09.5003930-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Program Files\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" test"
+    },
+    {
+        "pid":  5944,
+        "startTime":  "2026-04-21T19:41:10.0290074-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  11604,
+        "startTime":  "2026-04-21T19:41:48.2539237-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    },
+    {
+        "pid":  4128,
+        "startTime":  "2026-04-21T20:54:47.9812937-07:00",
+        "commandLine":  "\"C:\\Program Files\\nodejs\\\\node.exe\"  \"C:\\Program Files\\nodejs\\\\node_modules\\npm\\bin\\npm-cli.js\" test"
+    },
+    {
+        "pid":  16496,
+        "startTime":  "2026-04-21T20:54:48.3172394-07:00",
+        "commandLine":  "node  --test --test-concurrency=1 --import ./test/setupTestEnv.mjs test/*.test.js"
+    },
+    {
+        "pid":  16896,
+        "startTime":  "2026-04-21T20:55:14.9637933-07:00",
+        "commandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --test-concurrency=1 --import ./test/setupTestEnv.mjs test\\reloadlyWebTopupProvider.test.js"
+    }
+]

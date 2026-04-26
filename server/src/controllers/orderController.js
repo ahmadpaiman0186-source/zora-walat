@@ -4,6 +4,11 @@ import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { deriveCustomerFulfillmentView } from '../lib/customerVisibleOrderStatus.js';
 import { getCanonicalPhase1OrderForUser } from '../services/canonicalPhase1OrderService.js';
+import { pricingBreakdownFromSnapshot } from '../lib/checkoutPricingBreakdown.js';
+import {
+  deriveCustomerTrackingStageForOrder,
+  derivePublicLifecycleStage,
+} from '../services/transactionsService.js';
 
 const publicSelect = {
   id: true,
@@ -24,6 +29,7 @@ const publicSelect = {
   clientOrigin: true,
   createdAt: true,
   updatedAt: true,
+  pricingSnapshot: true,
 };
 
 /**
@@ -32,6 +38,16 @@ const publicSelect = {
  */
 function toPublicOrder(row, latestAttempt = null) {
   const customerVisible = deriveCustomerFulfillmentView(row, latestAttempt);
+  const pricingBreakdown = pricingBreakdownFromSnapshot(
+    row.pricingSnapshot,
+    row.amountUsdCents,
+  );
+  const trackingStageKey = deriveCustomerTrackingStageForOrder(row, latestAttempt);
+  const lifecycleStageKey = derivePublicLifecycleStage(
+    trackingStageKey,
+    row,
+    latestAttempt,
+  );
   return {
     id: row.id,
     orderStatus: row.orderStatus,
@@ -51,6 +67,10 @@ function toPublicOrder(row, latestAttempt = null) {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     customerVisible,
+    pricingBreakdown,
+    /** Mirrors `/api/transactions` + execute payloads — Flutter success hydration uses GET /api/orders/:id. */
+    trackingStageKey,
+    lifecycleStageKey,
   };
 }
 
@@ -63,10 +83,23 @@ export async function listOrders(req, res) {
     where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
-    select: publicSelect,
+    select: {
+      ...publicSelect,
+      fulfillmentAttempts: {
+        orderBy: { attemptNumber: 'desc' },
+        take: 1,
+        select: { status: true, failureReason: true },
+      },
+    },
   });
 
-  res.json({ orders: rows.map(toPublicOrder) });
+  res.json({
+    orders: rows.map((r) => {
+      const latest = r.fulfillmentAttempts?.[0] ?? null;
+      const { fulfillmentAttempts: _fa, ...rest } = r;
+      return toPublicOrder(rest, latest);
+    }),
+  });
 }
 
 export async function getOrderById(req, res) {

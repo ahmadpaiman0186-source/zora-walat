@@ -74,6 +74,11 @@ import { operationalClassFromTransactionFailure } from '../lib/operationalErrorC
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
 import { fulfillmentDbLimit } from '../lib/fulfillmentDbLimiter.js';
+import {
+  assertCanonicalTransition,
+  CANONICAL_ORDER_STATUS,
+} from '../domain/orders/canonicalOrderLifecycle.js';
+import { emitOrderTransitionLog } from '../lib/orderTransitionLog.js';
 
 function safeJson(obj) {
   try {
@@ -365,6 +370,20 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     return;
   }
 
+  {
+    const q2s = assertCanonicalTransition(
+      CANONICAL_ORDER_STATUS.QUEUED,
+      CANONICAL_ORDER_STATUS.SENT,
+    );
+    if (q2s.ok) {
+      emitOrderTransitionLog(undefined, {
+        orderId,
+        from: CANONICAL_ORDER_STATUS.QUEUED,
+        to: CANONICAL_ORDER_STATUS.SENT,
+      });
+    }
+  }
+
   mergeOrderAttemptIntoCorrelation({
     orderId,
     attemptId: phase1.attemptId,
@@ -468,6 +487,8 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     providerResult.outcome != null && providerResult.outcome !== ''
       ? providerResult.outcome
       : AIRTIME_OUTCOME.FAILURE;
+
+  let canonicalPostFulfillmentTransition = null;
 
   try {
     const marginTelemetry = await prisma.$transaction(async (tx) => {
@@ -581,6 +602,12 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
             ip: null,
           });
         }
+
+        canonicalPostFulfillmentTransition = {
+          orderId,
+          from: CANONICAL_ORDER_STATUS.SENT,
+          to: CANONICAL_ORDER_STATUS.DELIVERED,
+        };
 
         return {
           orderId,
@@ -766,6 +793,15 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
           },
           ip: null,
         });
+        canonicalPostFulfillmentTransition = {
+          orderId,
+          from: CANONICAL_ORDER_STATUS.SENT,
+          to: CANONICAL_ORDER_STATUS.FAILED,
+          reason:
+            providerResult.failureCode ??
+            providerResult.errorKind ??
+            'airtime_provider_failure',
+        };
         return null;
       }
 
@@ -809,6 +845,25 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         return null;
       }
     });
+
+    if (canonicalPostFulfillmentTransition) {
+      const step = assertCanonicalTransition(
+        canonicalPostFulfillmentTransition.from,
+        canonicalPostFulfillmentTransition.to,
+      );
+      if (!step.ok) {
+        console.error(
+          JSON.stringify({
+            event: 'canonical_transition_denied',
+            orderId: canonicalPostFulfillmentTransition.orderId,
+            denial: step,
+          }),
+        );
+      } else {
+        emitOrderTransitionLog(undefined, canonicalPostFulfillmentTransition);
+      }
+      canonicalPostFulfillmentTransition = null;
+    }
 
     if (marginTelemetry) {
       recordMarginIntelAfterSnapshot(
@@ -1023,6 +1078,19 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         ip: null,
       });
     });
+
+    const postOrchestrationFailSnap = await prisma.paymentCheckout.findUnique({
+      where: { id: orderId },
+      select: { orderStatus: true },
+    });
+    if (postOrchestrationFailSnap?.orderStatus === ORDER_STATUS.FAILED) {
+      emitOrderTransitionLog(undefined, {
+        orderId,
+        from: CANONICAL_ORDER_STATUS.SENT,
+        to: CANONICAL_ORDER_STATUS.FAILED,
+        reason: 'fulfillment_processing_error',
+      });
+    }
 
     schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
   }

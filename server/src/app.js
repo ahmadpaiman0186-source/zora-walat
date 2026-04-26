@@ -147,13 +147,16 @@ export function createApp() {
 
   app.use(express.json({ limit: '32kb', strict: true }));
 
-  /** Prefix-only liveness (`GET /api/health`); other `/api/*` mounts follow. */
+  /** Prefix-only liveness (`GET /api/health`); `POST /api/checkout-pricing-quote` comes from `paymentRoutes` below. */
   app.use('/api', apiRoutes);
 
   /** Root liveness (`GET /health`), readiness (`GET /ready`), Prometheus (`GET /metrics`). */
   app.use(healthRoutes);
   app.use('/api/auth', authLimiter, authRoutes);
+  /** Payment routes at root (`/create-checkout-session`, `/checkout-pricing-quote`, …). */
   app.use(paymentRoutes);
+  /** Alias: same routes under `/api/*` for clients that prefix the API path. */
+  app.use('/api', paymentRoutes);
   app.use('/api/topup-orders', topupOrderRoutes);
   app.use('/catalog', catalogLimiter, catalogRoutes);
   app.use('/api/wallet', apiIpLimiter, walletRoutes);

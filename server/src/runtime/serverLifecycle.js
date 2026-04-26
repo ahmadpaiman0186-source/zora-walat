@@ -39,6 +39,7 @@ import {
   RUNTIME_KIND,
 } from './runtimeContext.js';
 import { jwtSecretLooksTrivial } from '../lib/jwtSecretQuality.js';
+import { logCheckoutPricingQuoteRouteProof } from '../lib/expressRouteInventory.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -301,15 +302,24 @@ export function createValidatedApp() {
   return app;
 }
 
-async function logApiStartup() {
+/**
+ * @param {import('express').Express | undefined} app
+ */
+async function logApiStartup(app) {
   try {
-    await logApiStartupBody();
+    await logApiStartupBody(app);
   } catch (e) {
     console.error('[startup] logApiStartup failed (non-fatal)', e);
   }
 }
 
-async function logApiStartupBody() {
+/**
+ * @param {import('express').Express | undefined} app
+ */
+async function logApiStartupBody(app) {
+  if (app && process.env.NODE_ENV !== 'test') {
+    logCheckoutPricingQuoteRouteProof(app);
+  }
   console.log(
     JSON.stringify({
       event: 'api_runtime_listen',
@@ -343,6 +353,28 @@ async function logApiStartupBody() {
   ) {
     console.warn(
       '[startup] ALLOW_UNVERIFIED_CHECKOUT=true is ignored while NODE_ENV=production — use NODE_ENV=development for local API, or verify the account email.',
+    );
+  }
+  const taxBpsKeys = Object.keys(env.phase1GovernmentSalesTaxBpsBySender ?? {});
+  if (taxBpsKeys.length === 0) {
+    console.log(
+      '[pricing] PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER unset or empty — customer-facing government sales tax is 0% for every sender country until JSON is configured (see env.js).',
+    );
+  } else {
+    console.log(
+      `[pricing] customer government sales tax: ${taxBpsKeys.length} sender region(s) have non-zero bps in PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER`,
+    );
+  }
+  console.log(
+    `[pricing] phase1MinZoraServiceFeeBps=${env.phase1MinZoraServiceFeeBps} (env PHASE1_MIN_ZORA_SERVICE_FEE_BPS; 0 disables min line-item fee) amountOnlyProviderBps=${env.pricingAmountOnlyProviderBps} (PRICING_AMOUNT_ONLY_PROVIDER_BPS)`,
+  );
+  if (env.fulfillmentQueueEnabled) {
+    console.warn(
+      '[fulfillment] FULFILLMENT_QUEUE_ENABLED=true with REDIS_URL — Phase 1 jobs go to BullMQ (`phase1-fulfillment-v1`). This API process does not consume that queue. Paid orders stay QUEUED until a worker runs: from server/, `npm run worker:fulfillment` (separate terminal). For single-process local dev, set FULFILLMENT_QUEUE_ENABLED=false (or unset) so the webhook runs fulfillment inline.',
+    );
+  } else {
+    console.log(
+      '[fulfillment] queue mode off (FULFILLMENT_QUEUE_ENABLED not true or REDIS_URL empty) — webhook schedules fulfillment in-process after checkout.session.completed.',
     );
   }
   if (env.prelaunchLockdown) {
@@ -419,7 +451,7 @@ export function startApiRuntime() {
   }
   const app = createValidatedApp();
   const server = app.listen(env.port, () => {
-    void logApiStartup();
+    void logApiStartup(app);
   });
 
   if (process.env.NODE_ENV !== 'test') {

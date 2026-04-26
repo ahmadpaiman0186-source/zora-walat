@@ -20,7 +20,7 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     authRequired: false,
     emailVerifiedRequired: false,
     capabilityNotes:
-      'Embedded PI: optional Bearer decorates Stripe metadata unless OWNER_ALLOWED_EMAIL is set (then Bearer required for allowed owner). When body.orderId is set, X-ZW-WebTopup-Session must match the order sessionKey (timing-safe). Idempotency-Key required.',
+      'Embedded PI: optional Bearer decorates Stripe metadata unless OWNER_ALLOWED_EMAIL is set (then Bearer required for allowed owner). When body.orderId is set, X-ZW-WebTopup-Session must match the order sessionKey (timing-safe). Idempotency-Key required. 503+payments_lockdown when PAYMENTS_LOCKDOWN_MODE; PRELAUNCH_LOCKDOWN first.',
   },
   {
     method: 'POST',
@@ -28,7 +28,26 @@ export const MONEY_ROUTE_POLICY = Object.freeze([
     anonymousAllowed: false,
     authRequired: true,
     emailVerifiedRequired: true,
-    capabilityNotes: 'Authenticated catalog checkout; Idempotency-Key required.',
+    capabilityNotes:
+      'Authenticated catalog checkout; Idempotency-Key required. 503+payments_lockdown when PAYMENTS_LOCKDOWN_MODE; PRELAUNCH_LOCKDOWN first.',
+  },
+  {
+    method: 'POST',
+    path: '/checkout-pricing-quote',
+    anonymousAllowed: true,
+    authRequired: false,
+    emailVerifiedRequired: false,
+    capabilityNotes:
+      'Public pricing preview (IP rate-limited). Same JSON body as hosted checkout; returns pricingBreakdown without Stripe session. Flutter uses POST /api/checkout-pricing-quote.',
+  },
+  {
+    method: 'POST',
+    path: '/api/checkout-pricing-quote',
+    anonymousAllowed: true,
+    authRequired: false,
+    emailVerifiedRequired: false,
+    capabilityNotes:
+      'Same handler as POST /checkout-pricing-quote; primary path for clients scoped to /api/*.',
   },
   {
     method: 'POST',

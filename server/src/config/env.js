@@ -191,6 +191,13 @@ export const env = {
   prelaunchLockdown: prelaunchLockdownEnv,
 
   /**
+   * When true: block **new** payment surface area (checkout session, wallet top-up, web top-up create,
+   * recharge order/execute) with 503 + `payments_lockdown`. Stripe webhooks and signature
+   * verification are unchanged; in-flight settlement can still complete.
+   */
+  paymentsLockdownMode: process.env.PAYMENTS_LOCKDOWN_MODE === 'true',
+
+  /**
    * Hosted checkout email gate (`POST /create-checkout-session`):
    * - `production` / `test`: always enforce `requireEmailVerified` (integration tests unchanged).
    * - Otherwise: skip verification when `ALLOW_UNVERIFIED_CHECKOUT=true` (explicit), **or** in
@@ -287,10 +294,10 @@ export const env = {
     process.env.PHASE1_MAX_MARGIN_PERCENT,
     6,
   ),
-  /** Reject checkouts whose final USD charge is below this (cents). Default $10. */
+  /** Reject checkouts whose final USD charge is below this (cents). Default $2 (smallest airtime SKU). */
   phase1MinCheckoutUsdCents: parseNonNegativeInt(
     process.env.PHASE1_MIN_CHECKOUT_USD_CENTS,
-    1000,
+    200,
   ),
   /** Advisory only (logs / admin); preferred floor when tuning catalog. Default $15. */
   phase1RecommendedMinCheckoutUsdCents: parseNonNegativeInt(
@@ -319,6 +326,54 @@ export const env = {
     process.env.PRICING_AMOUNT_ONLY_PROVIDER_BPS,
     9000,
   ),
+
+  /**
+   * Minimum Zora **line-item** service fee (basis points of **product value** P) before
+   * margin search. Prevents `customerZoraServiceFeeCents = 0` when wholesale (amount-only
+   * provider bps) is set so low that margin is already met with no separate fee — a common
+   * misconfiguration that makes checkout total equal face value only. Set to 0 to restore
+   * legacy “fee may be zero if margin allows” behavior.
+   */
+  phase1MinZoraServiceFeeBps: parseBps(
+    process.env.PHASE1_MIN_ZORA_SERVICE_FEE_BPS,
+    100,
+  ),
+
+  /**
+   * Customer-facing government sales tax (sender jurisdiction), basis points of **product value** (recipient USD).
+   * JSON object: `{"US":500,"CA":500}` → 5% for US/CA; omitted keys → 0.
+   * Internal provider tax buffers remain separate (see PRICING_TAX_BPS on COGS).
+   */
+  phase1GovernmentSalesTaxBpsBySender: (() => {
+    const raw = String(
+      process.env.PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER ?? '',
+    ).trim();
+    if (!raw) return {};
+    try {
+      const obj = JSON.parse(raw);
+      if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) {
+        console.warn(
+          '[env] PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER must be a JSON object',
+        );
+        return {};
+      }
+      /** @type {Record<string, number>} */
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        const key = String(k).trim().toUpperCase();
+        if (!key) continue;
+        const n = parseInt(String(v).trim(), 10);
+        if (!Number.isFinite(n) || n < 0 || n > 10000) continue;
+        out[key] = n;
+      }
+      return out;
+    } catch {
+      console.warn(
+        '[env] PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER is not valid JSON',
+      );
+      return {};
+    }
+  })(),
 
   /**
    * Margin intel: routes with net/sell ratio below this (basis points) emit `low_margin_route_detected` (e.g. 500 = 5%).

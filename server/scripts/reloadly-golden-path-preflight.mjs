@@ -9,7 +9,7 @@ import '../bootstrap.js';
 import { env } from '../src/config/env.js';
 
 const GOLDEN_OPERATOR_KEY = 'roshan';
-const GOLDEN_PRODUCT_ID = 'roshan_air_25m';
+const GOLDEN_PRODUCT_ID = 'roshan_usd_2500';
 
 function fail(msg) {
   console.error(`[reloadly:golden-path-preflight] BLOCKED: ${msg}`);

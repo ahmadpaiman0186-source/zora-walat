@@ -5,6 +5,7 @@ import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
+import { pricingBreakdownFromSnapshot } from '../lib/checkoutPricingBreakdown.js';
 
 function labelFromStatus(status, map) {
   if (!status) return null;
@@ -455,6 +456,10 @@ function mapUserOrder({ order, latestAttempt }) {
       'Charge is in USD. Your bank or wallet may show a converted amount or an international fee.',
     transparencyDeliveryNote:
       'Mobile airtime is usually applied within a few minutes; rare carrier delays can take longer.',
+    pricingBreakdown: pricingBreakdownFromSnapshot(
+      order.pricingSnapshot,
+      order.amountUsdCents,
+    ),
   };
 }
 
@@ -494,6 +499,7 @@ export async function listUserOrders({
       failedAt: true,
       cancelledAt: true,
       metadata: true,
+      pricingSnapshot: true,
       fulfillmentTruthSnapshot: true,
       stripeFeeEstimateUsdCents: true,
       stripeFeeActualUsdCents: true,
@@ -551,6 +557,7 @@ export async function inspectUserOrder({ userId, id } = {}) {
       failedAt: true,
       cancelledAt: true,
       metadata: true,
+      pricingSnapshot: true,
       fulfillmentTruthSnapshot: true,
       stripeFeeEstimateUsdCents: true,
       stripeFeeActualUsdCents: true,
