@@ -1,5 +1,41 @@
 # Engineering checkpoint (Zora-Walat)
 
+## Emergency local dev stabilization — 2026-04-26 (15 min timebox)
+
+**Timestamp (UTC-7):** 2026-04-26 (session)  
+**HEAD at write:** `ee413829cf03495fce23b4ec5e11bbc4eb7d896b` (branch `2026-04-11-qrw0`; other WIP may exist in working tree)
+
+**KPI (operator to verify on machine):**
+
+| KPI | Status | Notes |
+|-----|--------|--------|
+| `GET http://127.0.0.1:8787/health` → `{"status":"ok"}` | **NOT re-run here** | Start API: `cd server && npm start` (PORT default 8787) |
+| Next.js `http://localhost:3000` without “Cannot reach the API” | **Config** | Root `.env.local` should set `NEXT_PUBLIC_API_URL=http://127.0.0.1:8787`. **CORS:** set `CORS_ORIGINS` to include `http://localhost:3000` and `http://127.0.0.1:3000` (see `server/.env.local.example`); for this workspace a line was added in **local** `server/.env` (gitignored) |
+| OTP / email | **PASS (code path)** | `server/services/emailService.js` now honors **`OTP_TRANSPORT=console`** in `sendOTP` — logs OTP to stdout (no SMTP). Ensure `server/.env` or `.env.local` has `OTP_TRANSPORT=console` for dev. |
+| Prisma | **PASS** | `cd server && npx prisma generate` — exit 0, client generated. `DATABASE_URL` read from `server/.env` when present. Studio: `cd server && npm run db:studio` (default browser port **5555**; use `prisma studio --port 5556` if you require 5556). |
+
+**Commands executed (this session):**
+
+- `cd server && npx prisma generate` → success.
+
+**Files changed in repo (stabilization slice, committed separately):**
+
+- `server/.env.local.example` — document `CORS_ORIGINS` for Next (:3000) → API (:8787).
+- `server/services/emailService.js` — `OTP_TRANSPORT=console` handling in `sendOTP`.
+
+**Skipped (timebox / policy):**
+
+- `taskkill /F /IM node.exe` and port checks — **not run** (destructive; operator should free 3000/8787 as needed).
+- `npm start` + curl `/health` — not run in this environment (no long-lived server in tool session).
+- Full Next `build && start` — not run.
+- `git push` — not requested; CI may still be red.
+
+**Remaining blockers:**
+
+- **GitHub CI** integration failure (`apiContractAuthFlow`) noted in 2026-04-25 section — **out of scope** for this stabilization.
+
+---
+
 ## Mandatory checkpoint & freeze — 2026-04-25 (evidence only)
 
 **Branch:** `2026-04-11-qrw0`  

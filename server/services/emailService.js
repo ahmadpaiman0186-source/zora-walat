@@ -333,6 +333,17 @@ async function sendEmail({ to, subject, text, html, template }) {
 
 export async function sendOTP(email, code) {
   const normalizedCode = normalizeNonEmpty(code, 'OTP code');
+  if (String(process.env.OTP_TRANSPORT ?? '').trim().toLowerCase() === 'console') {
+    const r = redactRecipient(email);
+    logEmailEvent('info', 'otp_console_transport', {
+      template: 'otp',
+      ...r,
+    });
+    console.log(
+      `[email] OTP_TRANSPORT=console — code for ${r.recipientLocalHash ? '…' : '?'}@${r.recipientDomain}: ${normalizedCode}`,
+    );
+    return { messageId: null, accepted: [], rejected: [], response: 'console' };
+  }
   return sendEmail({
     to: email,
     subject: 'Your Zora-Walat verification code',
