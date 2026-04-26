@@ -1,19 +1,50 @@
 import { Router } from 'express';
 
-import { prisma } from '../db.js';
-import { env } from '../config/env.js';
-import { getWebTopupMetricsSnapshot } from '../lib/webTopupObservability.js';
-import { getOpsMetricsSnapshot } from '../lib/opsMetrics.js';
-import { renderPrometheusTextFromOps } from '../lib/prometheusTextFormat.js';
-import { getWebTopupFulfillmentStuckSummary } from '../services/webtopStuckOrders.js';
-import { getTopupProviderCircuitSnapshot } from '../services/topupFulfillment/topupProviderCircuit.js';
-import { getAirtimeReloadlyDiagnosticsSnapshot } from '../config/airtimeReloadlyStartup.js';
-import { getLaunchSubsystemSnapshot } from '../config/launchSubsystemSnapshot.js';
 import { sendLivenessJsonOk } from '../lib/sendLivenessJsonOk.js';
+import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
 
 const router = Router();
 
-function walletTopupContractSnapshot() {
+async function getHealthDeps() {
+  const [
+    { prisma },
+    { env },
+    { getWebTopupMetricsSnapshot },
+    { getOpsMetricsSnapshot },
+    { renderPrometheusTextFromOps },
+    { getWebTopupFulfillmentStuckSummary },
+    { getTopupProviderCircuitSnapshot },
+    { getReliabilityWatchdogSnapshot },
+    { getAirtimeReloadlyDiagnosticsSnapshot },
+    { getLaunchSubsystemSnapshot },
+  ] = await Promise.all([
+    import('../db.js'),
+    import('../config/env.js'),
+    import('../lib/webTopupObservability.js'),
+    import('../lib/opsMetrics.js'),
+    import('../lib/prometheusTextFormat.js'),
+    import('../services/webtopStuckOrders.js'),
+    import('../services/topupFulfillment/topupProviderCircuit.js'),
+    import('../services/reliability/watchdog.js'),
+    import('../config/airtimeReloadlyStartup.js'),
+    import('../config/launchSubsystemSnapshot.js'),
+  ]);
+
+  return {
+    prisma,
+    env,
+    getWebTopupMetricsSnapshot,
+    getOpsMetricsSnapshot,
+    renderPrometheusTextFromOps,
+    getWebTopupFulfillmentStuckSummary,
+    getTopupProviderCircuitSnapshot,
+    getReliabilityWatchdogSnapshot,
+    getAirtimeReloadlyDiagnosticsSnapshot,
+    getLaunchSubsystemSnapshot,
+  };
+}
+
+function walletTopupContractSnapshot(env) {
   return {
     requireIdempotencyKey: env.requireWalletTopupIdempotencyKey,
     idempotencyKeyFormat: 'uuid_v4',
@@ -66,18 +97,25 @@ function walletTopupContractSnapshot() {
   };
 }
 
-/** Liveness — process up (safe behind LB without hitting DB). */
+/** Liveness — must stay public, JSON, and free of optional service dependencies. */
+router.get('/', (_req, res) => {
+  sendLivenessJsonOk(res);
+});
+
+/** Liveness — must stay public, JSON, and free of optional service dependencies. */
 router.get('/health', (_req, res) => {
   sendLivenessJsonOk(res);
 });
 
 /** Prometheus scrape (opt-in via METRICS_PROMETHEUS_ENABLED=true). */
-router.get('/metrics', async (_req, res, next) => {
-  if (!env.metricsPrometheusEnabled) {
-    res.status(404).setHeader('Cache-Control', 'no-store').end();
-    return;
-  }
+router.get('/metrics', async (req, res, next) => {
   try {
+    const { env, renderPrometheusTextFromOps } = await getHealthDeps();
+    if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
+    if (!env.metricsPrometheusEnabled) {
+      res.status(404).setHeader('Cache-Control', 'no-store').end();
+      return;
+    }
     res.setHeader('Cache-Control', 'no-store');
     res.type('text/plain; version=0.0.4; charset=utf-8');
     const body = await renderPrometheusTextFromOps();
@@ -91,8 +129,20 @@ router.get('/metrics', async (_req, res, next) => {
  * Readiness — PostgreSQL + `WebTopupOrder` storage reachable.
  * Includes in-process web top-up metrics (counters since process start).
  */
-router.get('/ready', async (_req, res) => {
+router.get('/ready', async (req, res) => {
+  if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
   res.setHeader('Cache-Control', 'no-store');
+  const {
+    prisma,
+    env,
+    getWebTopupMetricsSnapshot,
+    getOpsMetricsSnapshot,
+    getWebTopupFulfillmentStuckSummary,
+    getTopupProviderCircuitSnapshot,
+    getReliabilityWatchdogSnapshot,
+    getAirtimeReloadlyDiagnosticsSnapshot,
+    getLaunchSubsystemSnapshot,
+  } = await getHealthDeps();
   /** @type {{ database?: string, webTopupPersistence?: string }} */
   const checks = {};
   try {
@@ -104,7 +154,7 @@ router.get('/ready', async (_req, res) => {
     return res.status(503).json({
       status: 'unavailable',
       checks,
-      walletTopupContract: walletTopupContractSnapshot(),
+      walletTopupContract: walletTopupContractSnapshot(env),
       webTopupMetrics: getWebTopupMetricsSnapshot(),
       opsMetrics: getOpsMetricsSnapshot(),
     });
@@ -117,7 +167,7 @@ router.get('/ready', async (_req, res) => {
     return res.status(503).json({
       status: 'unavailable',
       checks,
-      walletTopupContract: walletTopupContractSnapshot(),
+      walletTopupContract: walletTopupContractSnapshot(env),
       webTopupMetrics: getWebTopupMetricsSnapshot(),
       opsMetrics: getOpsMetricsSnapshot(),
     });
@@ -155,19 +205,45 @@ router.get('/ready', async (_req, res) => {
     paymentCheckoutByOrderStatus24h = { error: 'payment_checkout_health_unavailable' };
   }
 
+  /** @type {Awaited<ReturnType<typeof import('../lib/phase1FulfillmentQueueObservation.js').getPhase1FulfillmentQueueObservation>>} */
+  let phase1FulfillmentQueue = { available: false, reason: 'not_loaded' };
+  try {
+    const { getPhase1FulfillmentQueueObservation } = await import(
+      '../lib/phase1FulfillmentQueueObservation.js'
+    );
+    phase1FulfillmentQueue = await getPhase1FulfillmentQueueObservation();
+  } catch (e) {
+    phase1FulfillmentQueue = {
+      available: false,
+      reason: 'queue_observation_import_failed',
+      detail: String(e?.message ?? e).slice(0, 160),
+    };
+  }
+
+  const { getValidatedStripeSecretKey } = await import('../config/stripeEnv.js');
+  const wh = String(env.stripeWebhookSecret ?? '').trim();
+
   return res.status(200).json({
     status: 'ready',
     checks,
     /** Runtime API contract hints (not a substitute for `npm run gate:check`). */
-    walletTopupContract: walletTopupContractSnapshot(),
+    walletTopupContract: walletTopupContractSnapshot(env),
     webTopupMetrics: getWebTopupMetricsSnapshot(),
     opsMetrics: getOpsMetricsSnapshot(),
     paymentCheckoutByOrderStatus24h,
     webTopupFulfillmentStuck: webTopupStuck,
     topupProviderCircuits: getTopupProviderCircuitSnapshot(),
+    reliabilityWatchdog: getReliabilityWatchdogSnapshot(),
     webTopupFulfillmentJobsQueued,
+    phase1FulfillmentQueue,
     airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
     launchSubsystems: getLaunchSubsystemSnapshot(),
+    /** Secret-free: whether Stripe money path env is present (webhook authority is server-side only). */
+    stripeMoneyPath: {
+      apiKeyConfigured: Boolean(getValidatedStripeSecretKey()),
+      webhookSigningSecretConfigured: wh.length > 0,
+      webhookSigningSecretWellFormed: wh.startsWith('whsec_'),
+    },
   });
 });
 

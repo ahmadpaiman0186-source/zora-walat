@@ -88,6 +88,8 @@ describe('Phase 1 canonical DTO contract (fixtures)', () => {
     assert.equal(dto.financialAnomalySupportLines.length, 0);
     assert.ok(typeof dto.processingTimeoutMsApplied === 'number' && dto.processingTimeoutMsApplied > 0);
     assert.ok(dto.supportCorrelationChecklist?.apiOwnerPhase1Truth?.includes('ck_fixture'));
+    assert.equal(dto.supportCorrelationChecklist?.paymentCompletionTruth?.schemaVersion, 1);
+    assert.equal(dto.supportCorrelationChecklist?.fulfillmentExecutionTruth?.schemaVersion, 1);
     assert.equal(dto.supportCorrelationChecklist?.stripeObjects?.paymentIntentId, 'pi_fixture');
     assert.equal(dto.reconciliationStatus, RECONCILIATION_STATUS.MATCH);
     assert.ok(typeof dto.expectedMarginUsd === 'number');

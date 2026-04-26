@@ -4,3 +4,10 @@ stripe_secret.key
 prisma/dev.db
 prisma/dev.db-journal
 *.log
+
+# Local test / debug output captures
+chaos-test-out.txt
+tap-out.txt
+tmp-npm-test-exit.txt
+
+.vercel

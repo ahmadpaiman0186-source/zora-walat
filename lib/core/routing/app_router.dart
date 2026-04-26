@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../auth/auth_session.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/calling/calling_placeholder_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -20,6 +21,7 @@ import '../../features/telecom/domain/telecom_order.dart';
 import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
+import '../../features/auth/presentation/otp_verify_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/loyalty/presentation/loyalty_hub_screen.dart';
 import '../../features/referral/presentation/referral_center_screen.dart';
@@ -40,6 +42,7 @@ abstract final class AppRoutePaths {
   static const telecom = '/telecom';
   static const checkout = '/checkout';
   static const signIn = '/sign-in';
+  static const signInOtp = '/sign-in/code';
   static const signUp = '/sign-up';
   static const paymentSuccess = '/success';
   static const paymentCancel = '/cancel';
@@ -54,19 +57,58 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// On web, honor the browser path for Stripe return URLs (`/success`, `/cancel`).
 /// Root `/` loads the public [LandingScreen] (deploy-friendly home).
+///
+/// Stripe and some browsers may use a trailing slash (`/success/`). [GoRouter]
+/// paths are registered without it — normalize so the route matches and the page
+/// is not a blank unknown location.
 String initialAppLocation() {
   if (!kIsWeb) return AppRoutePaths.splash;
   final u = Uri.base;
-  final path = u.path;
+  var path = u.path;
+  if (path.length > 1 && path.endsWith('/')) {
+    path = path.substring(0, path.length - 1);
+  }
   if (path.isEmpty || path == '/') return AppRoutePaths.landing;
   if (u.hasQuery) return '$path?${u.query}';
   return path;
 }
 
-GoRouter createAppRouter() {
+GoRouter createAppRouter({required AuthSession authSession}) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
+    refreshListenable: authSession,
     initialLocation: initialAppLocation(),
+    redirect: (context, state) {
+      var path = state.uri.path;
+      if (path.length > 1 && path.endsWith('/')) {
+        final trimmed = path.substring(0, path.length - 1);
+        return '$trimmed${state.uri.hasQuery ? '?${state.uri.query}' : ''}';
+      }
+      if (!authSession.isAuthenticated) return null;
+      if (path == AppRoutePaths.splash ||
+          path == AppRoutePaths.landing ||
+          path == AppRoutePaths.signIn ||
+          path == AppRoutePaths.signInOtp) {
+        return AppRoutePaths.hub;
+      }
+      return null;
+    },
+    errorBuilder: (context, state) {
+      final t = Theme.of(context);
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Route not found: ${state.uri}\n'
+              'If you returned from payment, open /success with query session_id & order_id.',
+              style: t.textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    },
     routes: [
       GoRoute(
         path: AppRoutePaths.splash,
@@ -138,6 +180,17 @@ GoRouter createAppRouter() {
         builder: (context, state) => const SignInScreen(),
       ),
       GoRoute(
+        path: AppRoutePaths.signInOtp,
+        name: 'signInOtp',
+        builder: (context, state) {
+          final email = state.uri.queryParameters['email']?.trim() ?? '';
+          if (email.isEmpty) {
+            return const SignInScreen();
+          }
+          return OtpVerifyScreen(email: email);
+        },
+      ),
+      GoRoute(
         path: AppRoutePaths.signUp,
         name: 'signUp',
         builder: (context, state) => const SignUpScreen(),
@@ -145,10 +198,13 @@ GoRouter createAppRouter() {
       GoRoute(
         path: AppRoutePaths.paymentSuccess,
         name: 'paymentSuccess',
-        builder: (context, state) => SuccessScreen(
-          checkoutSessionId: state.uri.queryParameters['session_id'],
-          orderReference: state.uri.queryParameters['order_id'],
-        ),
+        builder: (context, state) {
+          final q = state.uri.queryParameters;
+          return SuccessScreen(
+            checkoutSessionId: q['session_id'] ?? q['sessionId'],
+            orderReference: q['order_id'] ?? q['orderId'],
+          );
+        },
       ),
       GoRoute(
         path: AppRoutePaths.paymentCancel,

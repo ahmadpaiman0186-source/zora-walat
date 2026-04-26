@@ -143,6 +143,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkoutCardRegionLabel => 'Your location (card)';
 
   @override
+  String get checkoutSenderCountryHint =>
+      'This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.';
+
+  @override
+  String get telecomRecipientAfghanistanDialHint =>
+      'Afghanistan +93 — enter the local mobile (starts with 7).';
+
+  @override
   String get checkoutPricingUsdServerNote =>
       'Pricing is calculated in USD on our servers for your region.';
 
@@ -159,11 +167,50 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String checkoutReviewTotalChargedHeadline(String amount) {
+    return 'Total charged: $amount';
+  }
+
+  @override
+  String checkoutReviewAirtimeValueSubline(String amount) {
+    return 'Airtime value (recipient): $amount';
+  }
+
+  @override
+  String get checkoutReviewHeadlinePricingUnavailable =>
+      'Full pricing will appear when the quote loads — check the order summary below.';
+
+  @override
+  String get checkoutQuoteFailed =>
+      'We couldn\'t load pricing. Check your connection and try again.';
+
+  @override
+  String get checkoutAirtimeValueLabel => 'Airtime value';
+
+  @override
+  String get receiptBreakdownLoadingHint => 'Loading payment breakdown…';
+
+  @override
+  String get receiptBreakdownPartialHint =>
+      'Full line-item breakdown was not available; amount below is the total charged to your card.';
+
+  @override
   String get rechargeTrustLine =>
       'USD pricing · Secure checkout · Afghanistan mobile';
 
   @override
   String get recipientNumber => 'Recipient number';
+
+  @override
+  String get receivingCountryLabel => 'Receiving country';
+
+  @override
+  String get rechargeCountryNotSupported =>
+      'Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.';
+
+  @override
+  String get phoneLocalDigitsHint =>
+      'Enter the local number without country code.';
 
   @override
   String get operator => 'Operator';
@@ -224,7 +271,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hubTileRechargeTitle => 'Mobile recharge';
 
   @override
-  String get hubTileRechargeSub => 'Instant packages · USD pricing';
+  String get hubTileRechargeSub =>
+      'Afghanistan airtime · live catalog · Stripe checkout';
 
   @override
   String get hubTileWalletTitle => 'Wallet';
@@ -239,10 +287,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hubTileCallingSub => 'Coming soon';
 
   @override
-  String get hubTileLegacyTitle => 'Plans & catalog';
+  String get hubTileLegacyTitle => 'Classic recharge';
 
   @override
-  String get hubTileLegacySub => 'Airtime & data';
+  String get hubTileLegacySub => 'Manual amounts & review (legacy path)';
 
   @override
   String get walletScreenTitle => 'Wallet';
@@ -282,7 +330,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDevHint =>
-      'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.';
+      'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.';
 
   @override
   String get tabAirtime => 'Airtime';
@@ -329,8 +377,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get totalUsd => 'Total (USD)';
 
   @override
+  String get checkoutProductValueLabel => 'Product value';
+
+  @override
+  String get checkoutSenderTaxLabel => 'Tax (sender jurisdiction)';
+
+  @override
+  String get checkoutServiceFeeLabel => 'Zora-Walat service fee';
+
+  @override
+  String get checkoutTotalChargedLabel => 'Total charged';
+
+  @override
+  String get checkoutTaxJurisdictionPhaseNote =>
+      'Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.';
+
+  @override
+  String get checkoutPricingLoading => 'Updating price for your region…';
+
+  @override
   String get checkoutUsdTotalFootnote =>
       'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
+
+  @override
+  String get checkoutScreenCurrencyHint => 'Prices in US dollars (USD).';
+
+  @override
+  String get checkoutScreenServerPricingNote =>
+      'Pricing is calculated in USD on our servers for your region.';
+
+  @override
+  String get checkoutScreenOrderTotalCaption => 'Total (USD)';
+
+  @override
+  String get checkoutScreenChargeFootnote =>
+      'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.';
+
+  @override
+  String get checkoutScreenStripeSecureNote =>
+      'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.';
 
   @override
   String get stripeSectionTitle => 'Secure payment';
@@ -390,6 +475,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get telecomPhoneHintAirtime => '07X XXX XXXX or 937…';
+
+  @override
+  String get recipientLocalNumber => 'Local mobile number';
+
+  @override
+  String get phase1AirtimeAfghanistanOnly =>
+      'Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.';
+
+  @override
+  String get checkoutSecuringCheckout => 'Securing checkout…';
 
   @override
   String get telecomDataHeadline => 'Data packages';
@@ -555,6 +650,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authInvalidEmail => 'Enter a valid email address.';
 
   @override
+  String get authEmailRequired => 'Enter your email address.';
+
+  @override
+  String get authOtpEmailIntro =>
+      'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.';
+
+  @override
+  String get authOtpEmailHelp =>
+      'Use the same email address you use for your Zora-Walat account.';
+
+  @override
+  String get authOtpContinueCta => 'Send code';
+
+  @override
+  String get authOtpCodeTitle => 'Enter code';
+
+  @override
+  String get authOtpCheckEmail => 'Check your inbox';
+
+  @override
+  String get authOtpCodeLabel => 'Verification code';
+
+  @override
+  String get authOtpVerifyCta => 'Verify code';
+
+  @override
+  String get authOtpCodeRequired => 'Enter the 6-digit verification code.';
+
+  @override
+  String get authOtpInvalidOrExpired =>
+      'That code is invalid or has expired. Request a new code and try again.';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'Too many attempts. Please wait a moment before trying again.';
+
+  @override
+  String get authNetworkRetry =>
+      'Network error. Check your connection and try again.';
+
+  @override
+  String get authOtpRequestSuccess =>
+      'If the account is eligible, a verification code has been sent.';
+
+  @override
+  String get authOtpResendReady => 'You can request a new code now.';
+
+  @override
+  String get authOtpResendCta => 'Resend code';
+
+  @override
+  String get authOtpChangeEmail => 'Use a different email';
+
+  @override
+  String authOtpCodeHelp(Object email) {
+    return 'We sent a 6-digit code to $email. Enter it below to continue.';
+  }
+
+  @override
+  String authOtpResendIn(Object seconds) {
+    return 'You can resend a code in ${seconds}s.';
+  }
+
+  @override
   String get landingNavBrand => 'Zora-Walat';
 
   @override
@@ -648,6 +807,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get successStripeConfirmedShort =>
       'Your bank authorized this purchase. We’re completing your top-up now.';
+
+  @override
+  String get successMissingReturnParamsHint =>
+      'This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.';
+
+  @override
+  String successBootstrapWarning(String detail) {
+    return 'We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n$detail';
+  }
 
   @override
   String get receiptTitle => 'Receipt';

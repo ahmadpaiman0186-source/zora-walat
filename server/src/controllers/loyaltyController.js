@@ -10,7 +10,9 @@ import {
   getLoyaltySummary,
 } from '../services/loyaltyLeaderboardService.js';
 import { utcLeaderboardMonth } from '../services/loyaltyPointsService.js';
+import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { prisma } from '../db.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 function parseMonth(raw) {
   const s = String(raw ?? '').trim();
@@ -21,7 +23,11 @@ function parseMonth(raw) {
 export async function getSummary(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const summary = await getLoyaltySummary(userId);
   res.json(summary);
@@ -53,12 +59,18 @@ export async function getLeaderboardHandler(req, res) {
 export async function postCreateGroup(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const name = req.body?.name;
   const result = await createFamilyGroup(userId, name);
   if (!result.ok) {
-    return res.status(result.status).json({ error: result.error });
+    return res
+      .status(result.status)
+      .json(clientErrorBody(String(result.error), 'loyalty_operation_failed'));
   }
   res.status(201).json({ group: result.group });
 }
@@ -66,7 +78,11 @@ export async function postCreateGroup(req, res) {
 export async function getMyGroup(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const ctx = await getMyFamilyContext(userId);
   res.json(ctx);
@@ -75,12 +91,18 @@ export async function getMyGroup(req, res) {
 export async function postJoinGroup(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const inviteCode = req.body?.inviteCode;
   const result = await joinFamilyGroup(userId, inviteCode);
   if (!result.ok) {
-    return res.status(result.status).json({ error: result.error });
+    return res
+      .status(result.status)
+      .json(clientErrorBody(String(result.error), 'loyalty_operation_failed'));
   }
   res.json({ group: result.group });
 }
@@ -88,11 +110,17 @@ export async function postJoinGroup(req, res) {
 export async function postDissolveGroup(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const result = await dissolveFamilyGroup(userId);
   if (!result.ok) {
-    return res.status(result.status).json({ error: result.error });
+    return res
+      .status(result.status)
+      .json(clientErrorBody(String(result.error), 'loyalty_operation_failed'));
   }
   res.status(204).end();
 }
@@ -100,11 +128,17 @@ export async function postDissolveGroup(req, res) {
 export async function postLeaveGroup(req, res) {
   const userId = req.user?.id;
   if (!userId) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res
+      .status(401)
+      .json(
+        clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
+      );
   }
   const result = await leaveFamilyGroup(userId);
   if (!result.ok) {
-    return res.status(result.status).json({ error: result.error });
+    return res
+      .status(result.status)
+      .json(clientErrorBody(String(result.error), 'loyalty_operation_failed'));
   }
   res.status(204).end();
 }

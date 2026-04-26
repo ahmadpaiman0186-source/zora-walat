@@ -64,6 +64,14 @@ export function isCorsOriginAllowed(origin) {
   }
   if (!origin) return true;
   if (env.corsOrigins.includes(origin)) return true;
+  /** Production: allow browser Origin that matches CLIENT_URL (same site as checkout redirects). */
+  if (env.nodeEnv === 'production' && env.clientUrl) {
+    try {
+      if (new URL(env.clientUrl).origin === origin) return true;
+    } catch {
+      /* ignore invalid CLIENT_URL */
+    }
+  }
   // Non-production: allow any http(s) origin on localhost / 127.0.0.1 (variable port) for local/staging web.
   // Production never hits this branch for disallowed origins — list explicit CORS_ORIGINS only.
   if (env.nodeEnv !== 'production') {

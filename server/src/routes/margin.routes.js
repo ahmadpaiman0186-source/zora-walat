@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   getMarginAnalyticsSummary,
@@ -20,7 +21,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const r = parseMarginRangeFromQuery(req.query);
     if (r.error) {
-      return res.status(400).json({ error: r.error });
+      return res.status(400).json(staffApiErrorBody(r.error, 400));
     }
     const data = await getMarginAnalyticsSummary({
       since: r.since,
@@ -36,7 +37,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const r = parseMarginRangeFromQuery(req.query);
     if (r.error) {
-      return res.status(400).json({ error: r.error });
+      return res.status(400).json(staffApiErrorBody(r.error, 400));
     }
     const data = await getMarginByOperator({ since: r.since, until: r.until });
     res.setHeader('Cache-Control', 'no-store');
@@ -49,7 +50,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const r = parseMarginRangeFromQuery(req.query);
     if (r.error) {
-      return res.status(400).json({ error: r.error });
+      return res.status(400).json(staffApiErrorBody(r.error, 400));
     }
     const data = await getMarginByDestination({
       since: r.since,
@@ -65,7 +66,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const r = parseMarginRangeFromQuery(req.query);
     if (r.error) {
-      return res.status(400).json({ error: r.error });
+      return res.status(400).json(staffApiErrorBody(r.error, 400));
     }
     const data = await getMarginByProductType({
       since: r.since,
@@ -81,7 +82,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const r = parseMarginRangeFromQuery(req.query);
     if (r.error) {
-      return res.status(400).json({ error: r.error });
+      return res.status(400).json(staffApiErrorBody(r.error, 400));
     }
     const raw = parseInt(String(req.query.limit ?? '50'), 10);
     const limit = Number.isFinite(raw) ? raw : 50;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   listAdminOrders,
@@ -27,7 +28,11 @@ router.get(
     });
 
     if (!result.ok) {
-      res.status(result.status ?? 400).json({ error: result.error });
+      res
+        .status(result.status ?? 400)
+        .json(
+          staffApiErrorBody(result.error, result.status ?? 400),
+        );
       return;
     }
 
@@ -58,7 +63,11 @@ router.get(
     });
 
     if (!result.ok) {
-      res.status(result.status ?? 400).json({ error: result.error });
+      res
+        .status(result.status ?? 400)
+        .json(
+          staffApiErrorBody(result.error, result.status ?? 400),
+        );
       return;
     }
 
@@ -74,7 +83,11 @@ router.get(
   asyncHandler(async (req, res) => {
     const result = await retryPreviewAdminOrder({ id: req.params.id });
     if (!result.ok) {
-      res.status(result.status ?? 400).json({ error: result.error });
+      res
+        .status(result.status ?? 400)
+        .json(
+          staffApiErrorBody(result.error, result.status ?? 400),
+        );
       return;
     }
     res.setHeader('Cache-Control', 'no-store');

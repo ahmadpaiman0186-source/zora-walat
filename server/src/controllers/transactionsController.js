@@ -1,3 +1,4 @@
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { listUserOrders, inspectUserOrder } from '../services/transactionsService.js';
 
 export async function listTransactions(req, res) {
@@ -24,7 +25,9 @@ export async function getTransaction(req, res) {
 
   const result = await inspectUserOrder({ userId, id });
   if (!result.ok) {
-    res.status(result.status ?? 400).json({ error: result.error });
+    res
+      .status(result.status ?? 400)
+      .json(staffApiErrorBody(result.error, result.status ?? 400));
     return;
   }
 

@@ -1,6 +1,7 @@
 /**
  * @typedef {object} TopupOrderRecord
  * @property {string} id
+ * @property {string | null} userId
  * @property {string} sessionKey
  * @property {string} originCountry
  * @property {string} destinationCountry
@@ -25,6 +26,7 @@
  * @property {string | null} fulfillmentReference
  * @property {string | null} fulfillmentErrorCode
  * @property {string | null} fulfillmentErrorMessageSafe
+ * @property {string | null} fulfillmentNextRetryAt
  * @property {string | null} lastProviderPayloadHash
  * @property {string} createdAt
  * @property {string} updatedAt

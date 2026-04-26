@@ -30,8 +30,6 @@ export const ALLOWED_CHECKOUT_USD_CENTS = new Set(
   uniqueSorted([
     ...AIRTIME_SKUS.map((r) => r.retailUsdCents),
     ...Object.values(MOCK_PACKAGE_FACE_CENTS),
-    // Amount-only presets (Phase 1: ≥ $10)
-    1000, 1500, 2000, 2500,
   ]),
 );
 

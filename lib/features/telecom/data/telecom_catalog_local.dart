@@ -7,20 +7,29 @@ import '../domain/product_tier.dart';
 /// Local product matrix. Replace with [TelecomService] HTTP responses in production.
 abstract final class TelecomCatalogLocal {
   static List<AirtimeOffer> airtimeFor(MobileOperator op) {
-    // Phase 1: minimum retail $10 — matches server AIRTIME_SKUS.
-    return [
-      const _AirSpec(25, 1000),
-      const _AirSpec(50, 1500),
-      const _AirSpec(100, 2000),
-      const _AirSpec(125, 2500),
-    ].map((s) {
-      return AirtimeOffer(
-        id: '${op.apiKey}_air_${s.minutes}m',
-        operator: op,
-        minutes: s.minutes,
-        retailUsdCents: s.retailUsdCents,
-      );
-    }).toList();
+    // Phase 1: must match server `AIRTIME_SKUS` (GET /catalog/airtime).
+    const specs = <(int, int)>[
+      (2, 200),
+      (3, 300),
+      (5, 500),
+      (7, 700),
+      (9, 900),
+      (11, 1100),
+      (13, 1300),
+      (15, 1500),
+      (20, 2000),
+      (25, 2500),
+    ];
+    return specs
+        .map(
+          (s) => AirtimeOffer(
+            id: '${op.apiKey}_usd_${s.$2}',
+            operator: op,
+            minutes: s.$1,
+            retailUsdCents: s.$2,
+          ),
+        )
+        .toList();
   }
 
   static List<DataPackageOffer> dataFor(MobileOperator op) {
@@ -130,11 +139,4 @@ abstract final class TelecomCatalogLocal {
     });
     return updated;
   }
-}
-
-class _AirSpec {
-  const _AirSpec(this.minutes, this.retailUsdCents);
-
-  final int minutes;
-  final int retailUsdCents;
 }

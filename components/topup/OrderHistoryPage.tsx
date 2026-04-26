@@ -8,9 +8,8 @@ import { useLocale } from '@/components/i18n/localeContext';
 import type { PublicTopupOrder } from '@/topup/publicTopupOrder';
 import { getOrCreateCheckoutSessionKey } from '@/topup/checkoutSession';
 
+import { CHECKOUT_FETCH_TIMEOUT_MS, fetchWithTimeout } from './apiFetch';
 import styles from './OrderHistoryPage.module.css';
-
-const defaultApiBase = 'http://127.0.0.1:8787';
 
 export function OrderHistoryPage() {
   const { messages: m, locale } = useLocale();
@@ -18,13 +17,17 @@ export function OrderHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
-  const apiBase = (
-    process.env.NEXT_PUBLIC_API_URL ?? defaultApiBase
-  ).replace(/\/+$/, '');
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '');
 
   const load = useCallback(async () => {
     setLoading(true);
     setErr(null);
+    if (!apiBase) {
+      setErr(m.error.configApi);
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
     const sessionKey = getOrCreateCheckoutSessionKey();
     if (!sessionKey) {
       setOrders([]);
@@ -32,8 +35,10 @@ export function OrderHistoryPage() {
       return;
     }
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${apiBase}/api/topup-orders?sessionKey=${encodeURIComponent(sessionKey)}&limit=30`,
+        { method: 'GET' },
+        CHECKOUT_FETCH_TIMEOUT_MS,
       );
       const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -55,7 +60,7 @@ export function OrderHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [apiBase, m.history.loadError]);
+  }, [apiBase, m.error.configApi, m.history.loadError]);
 
   useEffect(() => {
     void load();

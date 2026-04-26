@@ -12,6 +12,10 @@ import {
   reloadlyFulfillmentBaseFields,
 } from '../lib/reloadlyFulfillmentObservability.js';
 import { getTraceId } from '../lib/requestContext.js';
+import {
+  buildPhase1ProviderIdentityBundle,
+  buildReloadlyPhase1CustomIdentifier,
+} from '../lib/providerExecutionCorrelation.js';
 import { getReloadlyAccessTokenCached } from './reloadlyAuthService.js';
 import {
   getReloadlyTopupCircuitState,
@@ -360,9 +364,10 @@ export async function sendTopup({ phone, operatorId, amount, countryCode, custom
 /**
  * Paid checkout → Reloadly top-up (uses {@link sendTopup}).
  *
- * **Idempotency / duplicate-send:** `customIdentifier` is `${orderId}_a${attemptNumber}` (stable per DB
- * attempt). Reloadly HTTP 409 → `reloadly_topup_duplicate` (logged; not silent success). A *new* attempt
- * number uses a *new* key → a second provider send is possible by design (human-approved recovery only).
+ * **Idempotency / duplicate-send:** `customIdentifier` is `zwr_{FulfillmentAttempt.id}` when `attemptId`
+ * is present (stable 1:1 with the attempt row; aligns with `providerExecutionCorrelationId` logs). Legacy
+ * fallback: `${orderId}_a${attemptNumber}`. Reloadly HTTP 409 → `reloadly_topup_duplicate` (logged; not
+ * silent success). A *new* FulfillmentAttempt row → *new* key → second provider send only via new attempt.
  * **Residual risk:** transport success at Reloadly with no persisted HTTP body locally → reconciler/ops
  * must verify in dashboard before approving a replacement attempt; use `PROCESSING_RECOVERY_SANDBOX_CONSERVATIVE=true`
  * during first sandbox drills to block auto `retry_new_attempt`.
@@ -384,7 +389,23 @@ export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
     fulfillmentCtx.attemptNumber != null && Number.isFinite(Number(fulfillmentCtx.attemptNumber))
       ? Number(fulfillmentCtx.attemptNumber)
       : 1;
-  const customIdentifier = `${String(order.id)}_a${attemptNum}`.slice(0, 120);
+  const customIdentifier = buildReloadlyPhase1CustomIdentifier(
+    order.id,
+    fulfillmentCtx.attemptId,
+    attemptNum,
+  );
+
+  const phase1Identity = buildPhase1ProviderIdentityBundle(order.id, fulfillmentCtx.attemptId);
+
+  const snap =
+    order.pricingSnapshot && typeof order.pricingSnapshot === 'object'
+      ? order.pricingSnapshot
+      : null;
+  const recipientValueCents =
+    snap?.customerProductValueUsdCents != null &&
+    Number.isFinite(Number(snap.customerProductValueUsdCents))
+      ? Math.round(Number(snap.customerProductValueUsdCents))
+      : order.amountUsdCents;
 
   const requestSummary = {
     mode: 'reloadly',
@@ -394,12 +415,24 @@ export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
     packageId: order.packageId ?? null,
     operatorKey: order.operatorKey ?? null,
     recipientHint: safeRecipientHint(order.recipientNational),
-    amountUsdCents: order.amountUsdCents,
+    amountUsdCents: recipientValueCents,
+    stripeChargeUsdCents: order.amountUsdCents,
     currency: order.currency,
     providerRequestKey: customIdentifier,
     externalReference: customIdentifier,
+    reloadlyCustomIdentifier: customIdentifier,
     attemptNumber: attemptNum,
     attemptId: fulfillmentCtx.attemptId ?? null,
+    phase1ReloadlyCustomIdentifierSource: fulfillmentCtx.attemptId
+      ? 'fulfillment_attempt_id'
+      : 'legacy_order_attempt_number',
+    ...(phase1Identity
+      ? {
+          providerExecutionCorrelationId: phase1Identity.providerExecutionCorrelationId,
+          identityAlignmentNote: phase1Identity.identityAlignmentNote,
+          reloadlyInquiryAndRegistryKeyMatchesCustomIdentifier: true,
+        }
+      : {}),
   };
 
   if (!isReloadlyConfigured()) {
@@ -643,8 +676,25 @@ export async function fulfillReloadlyDelivery(order, fulfillmentCtx = {}) {
     await persistReloadlyPreHttpDispatchEvidence(fulfillmentCtx.attemptId, {
       customIdentifier,
       traceId,
+      providerExecutionCorrelationId: phase1Identity?.providerExecutionCorrelationId ?? null,
     });
   }
+
+  if (phase1Identity) {
+    console.log(
+      JSON.stringify({
+        reloadlyPhase1ProviderIdentity: true,
+        orderIdSuffix: String(order.id).slice(-12),
+        attemptIdSuffix: phase1Identity.fulfillmentAttemptIdSuffix,
+        providerExecutionCorrelationId: phase1Identity.providerExecutionCorrelationId,
+        reloadlyCustomIdentifier: customIdentifier,
+        inquiryRegistryAndPostUseSameKey: true,
+        traceId: traceId ?? null,
+        t: new Date().toISOString(),
+      }),
+    );
+  }
+
   await markReloadlyTopupPostInFlight(customIdentifier, { traceId });
   let normalized;
   try {

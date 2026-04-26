@@ -299,7 +299,17 @@ export function buildReloadlyTopupPayload(order, operatorMap, opts = {}) {
   }
   const { operatorId } = resolved;
 
-  const cents = order.amountUsdCents;
+  const snap =
+    order.pricingSnapshot && typeof order.pricingSnapshot === 'object'
+      ? order.pricingSnapshot
+      : null;
+  const productCentsRaw = snap?.customerProductValueUsdCents;
+  const cents =
+    productCentsRaw != null &&
+    Number.isFinite(Number(productCentsRaw)) &&
+    Number(productCentsRaw) > 0
+      ? Math.round(Number(productCentsRaw))
+      : order.amountUsdCents;
   if (cents == null || !Number.isFinite(Number(cents)) || Number(cents) <= 0) {
     return {
       ok: false,

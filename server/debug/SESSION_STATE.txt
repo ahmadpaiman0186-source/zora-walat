@@ -1,0 +1,11 @@
+﻿SESSION_STATE snapshot (read-only, no processes stopped)
+Created: 2026-04-21T21:41:28.1622021-07:00
+
+Node process count: 32
+Note: Environment is considered CONTAMINATED (many concurrent node / npm test processes possible from prior verification runs).
+
+Last npm test log (by LastWriteTime in server/):
+  npm-test-closeout-20260421205447.log  (61746 bytes, 2026-04-21T20:55:15.9491315-07:00)
+
+Log copies saved under: server/debug/logs/
+See: node-processes-snapshot.json, env.txt, git-state.txt

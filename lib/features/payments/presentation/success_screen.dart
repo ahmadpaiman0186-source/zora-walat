@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/notifications/app_notification_hub.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../models/checkout_pricing_breakdown.dart';
 import '../../../shared/widgets/order_tracking_timeline.dart';
 import '../../../shared/widgets/trust_strip.dart';
 import '../domain/customer_order_tracking.dart';
+import 'success_receipt_card.dart';
 import 'tracking_messages.dart';
 
 /// Shown after Stripe Checkout when the app opens at `/success`.
@@ -32,15 +35,44 @@ class SuccessScreen extends StatefulWidget {
 class _SuccessScreenState extends State<SuccessScreen> {
   CustomerOrderTracking? _tracking;
   String? _providerRefTail;
+  CheckoutPricingBreakdown? _pricingBreakdown;
+  /// Stripe row total (cents) from `GET /api/orders/:id` when breakdown lines are delayed.
+  int? _orderChargedTotalCents;
+  bool _receiptBreakdownLoading = false;
   bool _busy = false;
   OrderNotificationPhase? _lastOrderNotif;
+  /// Set when post-checkout bootstrap throws — UI still renders (never a blank screen).
+  String? _bootstrapError;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _seedLocalHistory();
-      await _maybeKickFulfillment();
+      try {
+        if (mounted) {
+          final oid = widget.orderReference?.trim();
+          if (oid != null && oid.isNotEmpty) {
+            setState(() => _receiptBreakdownLoading = true);
+          }
+        }
+        await _seedLocalHistory();
+        await _hydrateOrderPricing(maxAttempts: 6);
+        await _maybeKickFulfillment();
+        await _hydrateOrderPricing(maxAttempts: 5);
+      } catch (e, st) {
+        assert(() {
+          FlutterError.dumpErrorToConsole(
+            FlutterErrorDetails(exception: e, stack: st),
+          );
+          return true;
+        }());
+        if (!mounted) return;
+        setState(() {
+          _bootstrapError = e.toString();
+          _tracking ??= CustomerOrderTracking.paymentReceived;
+          _busy = false;
+        });
+      }
     });
   }
 
@@ -66,6 +98,55 @@ class _SuccessScreenState extends State<SuccessScreen> {
     _lastOrderNotif = OrderNotificationPhase.paymentSecured;
   }
 
+  /// Fetches order until [pricingBreakdown] is present or attempts exhausted (webhook / DB race).
+  Future<void> _hydrateOrderPricing({required int maxAttempts}) async {
+    final oid = widget.orderReference?.trim();
+    if (oid == null || oid.isEmpty) {
+      if (mounted) setState(() => _receiptBreakdownLoading = false);
+      return;
+    }
+    if (_pricingBreakdown != null) {
+      if (mounted) setState(() => _receiptBreakdownLoading = false);
+      return;
+    }
+    final api = AppScope.of(context).apiService;
+    for (var i = 0; i < maxAttempts; i++) {
+      if (!mounted) return;
+      try {
+        final order = await api.fetchOrderById(oid);
+        if (mounted) {
+          setState(() {
+            _tracking = CustomerOrderTracking.fromOrdersApiOrder(order);
+          });
+        }
+        final centsRaw = order['amountUsdCents'];
+        if (centsRaw is num) {
+          final c = centsRaw.round();
+          if (mounted) {
+            setState(() => _orderChargedTotalCents = c);
+          }
+        }
+        final pb = order['pricingBreakdown'];
+        if (pb is Map) {
+          if (!mounted) return;
+          setState(() {
+            _pricingBreakdown = CheckoutPricingBreakdown.fromJson(
+              Map<String, dynamic>.from(pb),
+            );
+            _receiptBreakdownLoading = false;
+          });
+          return;
+        }
+      } catch (_) {
+        /* Order row may not exist until webhook completes. */
+      }
+      if (i < maxAttempts - 1) {
+        await Future<void>.delayed(Duration(milliseconds: 320 + i * 280));
+      }
+    }
+    if (mounted) setState(() => _receiptBreakdownLoading = false);
+  }
+
   Future<void> _maybeKickFulfillment() async {
     final oid = widget.orderReference?.trim();
     if (oid == null || oid.isEmpty) {
@@ -88,6 +169,10 @@ class _SuccessScreenState extends State<SuccessScreen> {
         if (ref != null && ref.length > 6) {
           refTail = ref.length <= 14 ? ref : '…${ref.substring(ref.length - 10)}';
         }
+        tracking = CustomerOrderTracking.fromExecuteJson(r.json);
+      } else if (r.isFulfillmentTimeout) {
+        // Queue mode without a worker (or slow worker): server returns 504 with mid-flight order.
+        // Show truthful preparing/sending from JSON — not [unknownAfterPay].
         tracking = CustomerOrderTracking.fromExecuteJson(r.json);
       } else if (r.isPaymentPending) {
         final orderMap = r.json['order'];
@@ -170,6 +255,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.retrying:
         return Icons.hourglass_top_rounded;
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return Icons.support_agent_rounded;
       case CustomerTrackingStage.orderCancelled:
         return Icons.cancel_outlined;
@@ -183,6 +269,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.delivered:
         return 'delivered';
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return 'failed';
       case CustomerTrackingStage.retrying:
         return 'retrying';
@@ -213,6 +300,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
       case CustomerTrackingStage.delivered:
         return l10n.receiptFulfillmentDone;
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return l10n.orderStatusFailed;
       case CustomerTrackingStage.retrying:
         return l10n.orderStatusRetrying;
@@ -233,6 +321,13 @@ class _SuccessScreenState extends State<SuccessScreen> {
     final t = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final cs = t.colorScheme;
+    final fmt = NumberFormat.currency(
+      locale: Localizations.localeOf(context).toString(),
+      symbol: r'$',
+    );
+    final hasIds =
+        (widget.checkoutSessionId?.trim().isNotEmpty ?? false) ||
+            (widget.orderReference?.trim().isNotEmpty ?? false);
     final tracking = _tracking ?? CustomerOrderTracking.paymentReceived;
     final copy = TrackingMessages.forTracking(l10n, tracking);
 
@@ -246,6 +341,40 @@ class _SuccessScreenState extends State<SuccessScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (!hasIds)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Material(
+                    color: cs.errorContainer.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        l10n.successMissingReturnParamsHint,
+                        style: t.textTheme.bodySmall?.copyWith(height: 1.4),
+                      ),
+                    ),
+                  ),
+                ),
+              if (_bootstrapError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Material(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        l10n.successBootstrapWarning(
+                          _bootstrapError!.length > 280
+                              ? '${_bootstrapError!.substring(0, 280)}…'
+                              : _bootstrapError!,
+                        ),
+                        style: t.textTheme.bodySmall?.copyWith(height: 1.35),
+                      ),
+                    ),
+                  ),
+                ),
               Align(
                 child: Container(
                   padding: const EdgeInsets.all(22),
@@ -281,6 +410,35 @@ class _SuccessScreenState extends State<SuccessScreen> {
                   height: 1.45,
                 ),
               ),
+              if (_pricingBreakdown != null || _orderChargedTotalCents != null) ...[
+                const SizedBox(height: 20),
+                Text(
+                  l10n.checkoutReviewTotalChargedHeadline(
+                    _pricingBreakdown != null
+                        ? fmt.format(_pricingBreakdown!.totalUsd)
+                        : fmt.format(_orderChargedTotalCents! / 100.0),
+                  ),
+                  textAlign: TextAlign.center,
+                  style: t.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                    color: cs.primary,
+                  ),
+                ),
+                if (_pricingBreakdown != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.checkoutReviewAirtimeValueSubline(
+                      fmt.format(_pricingBreakdown!.productValueUsd),
+                    ),
+                    textAlign: TextAlign.center,
+                    style: t.textTheme.bodyMedium?.copyWith(
+                      color: cs.outline,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ],
               const SizedBox(height: 22),
               TrustStrip(compact: true),
               const SizedBox(height: 24),
@@ -304,7 +462,9 @@ class _SuccessScreenState extends State<SuccessScreen> {
               OrderTrackingTimeline(
                 activeIndex: tracking.linearStepIndex,
                 highlightStep: tracking.linearStepIndex,
-                failedAtStep: tracking.stage == CustomerTrackingStage.failed,
+                failedAtStep:
+                    tracking.stage == CustomerTrackingStage.failed ||
+                    tracking.stage == CustomerTrackingStage.failedTerminally,
               ),
               const SizedBox(height: 22),
               _SafeBanner(l10n: l10n),
@@ -317,13 +477,16 @@ class _SuccessScreenState extends State<SuccessScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              _ReceiptCard(
+              SuccessReceiptCard(
                 l10n: l10n,
                 orderRef: _primaryReference(),
                 sessionSnippet: _stripeSessionSnippet(),
                 paymentLabel: _paymentLabel(l10n, tracking),
                 fulfillmentLabel: _fulfillmentLabel(l10n, tracking),
                 providerRef: _providerRefTail,
+                pricingBreakdown: _pricingBreakdown,
+                orderChargedTotalCents: _orderChargedTotalCents,
+                breakdownLoading: _receiptBreakdownLoading,
               ),
               const SizedBox(height: 20),
               Text(
@@ -334,9 +497,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                tracking.stage == CustomerTrackingStage.verifying
-                    ? l10n.trackingBodyVerifying
-                    : l10n.receiptWhatNextBody,
+                _whatNextBody(l10n, tracking),
                 style: t.textTheme.bodyMedium?.copyWith(
                   color: cs.outline,
                   height: 1.45,
@@ -373,6 +534,35 @@ class _SuccessScreenState extends State<SuccessScreen> {
     if (s.length <= 24) return s;
     return '${s.substring(0, 10)}…${s.substring(s.length - 8)}';
   }
+
+  /// “What next” must track fulfillment state, not only payment — avoids generic copy while top-up is pending.
+  static String _whatNextBody(
+    AppLocalizations l10n,
+    CustomerOrderTracking tracking,
+  ) {
+    switch (tracking.stage) {
+      case CustomerTrackingStage.verifying:
+        return l10n.trackingBodyVerifying;
+      case CustomerTrackingStage.retrying:
+        return l10n.trackingBodyRetrying;
+      case CustomerTrackingStage.paymentReceived:
+        return l10n.trackingBodyPaymentReceived;
+      case CustomerTrackingStage.delayed:
+        return l10n.trackingBodyCatchingUp;
+      case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
+        return l10n.trackingBodyFailedCalm;
+      case CustomerTrackingStage.orderCancelled:
+        return l10n.trackingBodyCancelled;
+      case CustomerTrackingStage.preparingTopup:
+      case CustomerTrackingStage.sendingToOperator:
+        return l10n.receiptWhatNextBody;
+      case CustomerTrackingStage.delivered:
+        return l10n.trackingBodyDelivered;
+      case CustomerTrackingStage.paymentConfirming:
+        return l10n.trackingBodyPaymentConfirming;
+    }
+  }
 }
 
 class _SafeBanner extends StatelessWidget {
@@ -402,127 +592,6 @@ class _SafeBanner extends StatelessWidget {
             child: Text(
               l10n.paymentSafeBanner,
               style: t.textTheme.bodySmall?.copyWith(height: 1.45),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReceiptCard extends StatelessWidget {
-  const _ReceiptCard({
-    required this.l10n,
-    required this.orderRef,
-    required this.paymentLabel,
-    required this.fulfillmentLabel,
-    this.sessionSnippet,
-    this.providerRef,
-  });
-
-  final AppLocalizations l10n;
-  final String orderRef;
-  final String paymentLabel;
-  final String fulfillmentLabel;
-  final String? sessionSnippet;
-  final String? providerRef;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: t.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: t.colorScheme.outline.withValues(alpha: 0.18),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.receiptOrderRef,
-            style: t.textTheme.labelLarge?.copyWith(
-              color: t.colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 6),
-          SelectableText(
-            orderRef,
-            style: t.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-            ),
-          ),
-          if (sessionSnippet != null) ...[
-            const SizedBox(height: 10),
-            Text(
-              '${l10n.stripeSectionTitle} · $sessionSnippet',
-              style: t.textTheme.bodySmall?.copyWith(
-                color: t.colorScheme.outline,
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          _Row(l10n.receiptPaymentStatus, paymentLabel, t),
-          _Row(l10n.receiptFulfillmentStatus, fulfillmentLabel, t),
-          if (providerRef != null && providerRef!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${l10n.receiptCarrierRef}: $providerRef',
-              style: t.textTheme.bodySmall?.copyWith(
-                color: t.colorScheme.outline,
-                height: 1.35,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Row extends StatelessWidget {
-  const _Row(this.label, this.value, this.t);
-
-  final String label;
-  final String value;
-  final ThemeData t;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: t.textTheme.bodySmall?.copyWith(
-                color: t.colorScheme.outline,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: t.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
             ),
           ),
         ],

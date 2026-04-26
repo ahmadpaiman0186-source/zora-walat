@@ -1,4 +1,6 @@
 # Miscellaneous
+tmp-*.txt
+.commit-msg-checkpoint.txt
 *.class
 *.log
 *.pyc

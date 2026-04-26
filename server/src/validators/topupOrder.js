@@ -30,20 +30,23 @@ export const topupOrderMarkPaidSchema = z
   .object({
     updateToken: z.string().min(32).max(256),
     paymentIntentId: z.string().min(1).max(64),
-    sessionKey: z.string().uuid(),
+    /** Omit when `Authorization: Bearer` matches the order-bound user (recovery path). */
+    sessionKey: z.string().uuid().optional(),
   })
   .strict();
 
 export const topupOrderListQuerySchema = z
   .object({
-    sessionKey: z.string().uuid(),
+    /** Omit when listing orders for the authenticated user (`Authorization: Bearer`). */
+    sessionKey: z.string().uuid().optional(),
     limit: z.coerce.number().int().min(1).max(50).default(20),
   })
   .strict();
 
 export const topupOrderGetQuerySchema = z
   .object({
-    sessionKey: z.string().uuid(),
+    /** Omit when recovering via `Authorization: Bearer` for a user-bound order. */
+    sessionKey: z.string().uuid().optional(),
   })
   .strict();
 

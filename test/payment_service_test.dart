@@ -15,7 +15,7 @@ class _RecordingApiService extends ApiService {
     required super.client,
     required super.authSession,
     required super.authApi,
-  }) : super(baseUrl: 'http://127.0.0.1:9');
+  }) : super(baseUrlOverride: 'https://stub.test');
 
   Map<String, dynamic>? lastCheckoutBody;
 
@@ -55,7 +55,7 @@ void main() {
     final payment = PaymentService(api: api);
 
     await payment.startCheckout(
-      amountUsdCents: 9999,
+      amountCents: 9999,
       senderCountry: 'US',
       currency: 'usd',
       operatorKey: 'mtn',
@@ -87,7 +87,7 @@ void main() {
     final payment = PaymentService(api: api);
 
     await payment.startCheckout(
-      amountUsdCents: 2500,
+      amountCents: 2500,
       senderCountry: 'CA',
       currency: 'usd',
       operatorKey: 'roshan',
@@ -97,5 +97,12 @@ void main() {
     final body = api.lastCheckoutBody;
     expect(body!['amountUsdCents'], 2500);
     expect(body.containsKey('packageId'), false);
+  });
+
+  test('RechargeExecuteResponse flags 504 fulfillment wait timeout', () {
+    final r = RechargeExecuteResponse(statusCode: 504, json: {'fulfillmentQueue': true});
+    expect(r.isFulfillmentTimeout, true);
+    expect(r.isOk, false);
+    expect(r.isPaymentPending, false);
   });
 }

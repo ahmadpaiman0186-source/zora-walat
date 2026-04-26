@@ -58,6 +58,14 @@ describe('fulfillmentEligibility', () => {
       }).ok,
       false,
     );
+    assert.equal(
+      assertEligibleForRetryDispatch({
+        paymentStatus: PAYMENT_STATUS.PAID,
+        fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
+        fulfillmentErrorCode: 'provider_timeout',
+      }).ok,
+      true,
+    );
   });
 
   it('blocks duplicate dispatch when queued/processing/delivered', () => {

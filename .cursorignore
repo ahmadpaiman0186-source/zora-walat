@@ -1,0 +1,11 @@
+node_modules
+.build
+.dart_tool
+coverage
+server/debug
+server/*.log
+server/npm-test-*.log
+*.log
+*.tmp
+dist
+.cache

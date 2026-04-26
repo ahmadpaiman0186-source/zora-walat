@@ -3,6 +3,9 @@
  * DATABASE_URL must point at PostgreSQL (see server/.env.example). No SQLite fallback.
  */
 
+import path from 'node:path';
+
+import { WEBTOP_ENV_SLICE } from './webtopConfig.js';
 import {
   mergeReloadlyOperatorMaps,
   RELOADLY_OPERATOR_ID_DEFAULTS,
@@ -16,6 +19,15 @@ function parseList(raw, fallback) {
     .split(',')
     .map((x) => x.trim())
     .filter(Boolean);
+}
+
+/**
+ * `RELOADLY_SANDBOX` must enable sandbox Topups audience for OAuth + HTTP.
+ * Accept common operator formats: `true`, `1`, `yes` (trimmed, case-insensitive).
+ */
+function parseReloadlySandboxEnv() {
+  const s = String(process.env.RELOADLY_SANDBOX ?? '').trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes';
 }
 
 const defaultCors = [
@@ -55,6 +67,15 @@ function parseNonNegativeInt(raw, fallback) {
   const n = parseInt(String(raw ?? '').trim(), 10);
   if (!Number.isFinite(n) || n < 0) return fallback;
   return n;
+}
+
+/** Comma-separated backoff schedule for reliability retries (ms). */
+function parseBackoffMs(raw, fallback) {
+  const s = String(raw ?? '').trim();
+  if (!s) return fallback;
+  const parts = s.split(',').map((x) => parseInt(x.trim(), 10));
+  const ok = parts.filter((n) => Number.isFinite(n) && n >= 0);
+  return ok.length ? ok : fallback;
 }
 
 /** Basis points (e.g. 290 = 2.9%). */
@@ -139,10 +160,90 @@ export const env = {
   accessTokenTtlSec: parsePositiveInt(process.env.ACCESS_TOKEN_TTL, 900),
   /** Refresh token TTL (seconds). */
   refreshTokenTtlSec: parsePositiveInt(process.env.REFRESH_TOKEN_TTL, 604800),
+
+  /** Email OTP challenge — TTL for a single code (seconds). */
+  authOtpTtlSec: parsePositiveInt(process.env.AUTH_OTP_TTL_SEC, 300),
+  authOtpResendCooldownSec: parsePositiveInt(
+    process.env.AUTH_OTP_RESEND_COOLDOWN_SEC,
+    60,
+  ),
+  authOtpRequestWindowSec: parsePositiveInt(
+    process.env.AUTH_OTP_REQUEST_WINDOW_SEC,
+    600,
+  ),
+  authOtpMaxRequestsPerWindow: parsePositiveInt(
+    process.env.AUTH_OTP_MAX_REQUESTS_PER_WINDOW,
+    3,
+  ),
+  authOtpMaxVerifyAttempts: parsePositiveInt(
+    process.env.AUTH_OTP_MAX_VERIFY_ATTEMPTS,
+    5,
+  ),
+  authOtpLockSec: parsePositiveInt(process.env.AUTH_OTP_LOCK_SEC, 600),
+  authOtpStaleRetentionSec: parsePositiveInt(
+    process.env.AUTH_OTP_STALE_RETENTION_SEC,
+    86400,
+  ),
+
   /**
    * When true: money routes return 503; strict CORS; minimal access logs; extra startup checks.
    */
   prelaunchLockdown: prelaunchLockdownEnv,
+
+  /**
+   * When true: block **new** payment surface area (checkout session, wallet top-up, web top-up create,
+   * recharge order/execute) with 503 + `payments_lockdown`. Stripe webhooks and signature
+   * verification are unchanged; in-flight settlement can still complete.
+   */
+  paymentsLockdownMode: process.env.PAYMENTS_LOCKDOWN_MODE === 'true',
+
+  /**
+   * Hosted checkout email gate (`POST /create-checkout-session`):
+   * - `production` / `test`: always enforce `requireEmailVerified` (integration tests unchanged).
+   * - Otherwise: skip verification when `ALLOW_UNVERIFIED_CHECKOUT=true` (explicit), **or** in
+   *   `development` when `ALLOW_UNVERIFIED_CHECKOUT` is unset / not `false` (legacy local default).
+   *
+   * Note: `ALLOW_UNVERIFIED_CHECKOUT=true` does **nothing** while `NODE_ENV=production` — use
+   * `NODE_ENV=development` (or any non-production, non-test value) for local API runs.
+   */
+  allowUnverifiedCheckoutInDev: (() => {
+    if (nodeEnv === 'production' || nodeEnv === 'test') return false;
+    if (process.env.ALLOW_UNVERIFIED_CHECKOUT === 'true') return true;
+    return (
+      nodeEnv === 'development' &&
+      process.env.ALLOW_UNVERIFIED_CHECKOUT !== 'false'
+    );
+  })(),
+
+  /**
+   * When `PRELAUNCH_LOCKDOWN=true`, `POST /api/auth/register` is blocked unless this is `true`
+   * (operator-only opt-in for seeded/staging registration tests).
+   */
+  prelaunchAllowPublicRegistration:
+    process.env.PRELAUNCH_ALLOW_PUBLIC_REGISTRATION === 'true',
+
+  /**
+   * Optional shared secret (>=16 chars) for detailed infra surfaces under private pre-launch:
+   * `GET /ops/health`, `GET /ready`, `GET /metrics` (when enabled). Use `Authorization: Bearer`
+   * or `X-ZW-Ops-Token`. See `OPS_HEALTH_TOKEN` in `.env.example`.
+   */
+  opsInfraHealthToken: String(
+    process.env.OPS_HEALTH_TOKEN ?? process.env.OPS_INFRA_HEALTH_TOKEN ?? '',
+  ).trim(),
+
+  /**
+   * Bearer / `X-Admin-Secret` for `POST /api/admin/webtopup/*` control endpoints (retry, force-deliver).
+   * Minimum 16 characters when set; empty disables those routes (503 until configured).
+   */
+  adminSecret: String(process.env.ADMIN_SECRET ?? '').trim(),
+
+  /**
+   * When set (non-empty), only this exact email (trim + lowercase) may register, log in, use OTP,
+   * refresh sessions, or call routes protected by `requireAuth`. Fail-closed for any other identity.
+   */
+  ownerAllowedEmail: String(process.env.OWNER_ALLOWED_EMAIL ?? '')
+    .trim()
+    .toLowerCase(),
 
   /**
    * When true: `POST /api/wallet/topup` rejects requests without `Idempotency-Key` (UUID).
@@ -193,10 +294,10 @@ export const env = {
     process.env.PHASE1_MAX_MARGIN_PERCENT,
     6,
   ),
-  /** Reject checkouts whose final USD charge is below this (cents). Default $10. */
+  /** Reject checkouts whose final USD charge is below this (cents). Default $2 (smallest airtime SKU). */
   phase1MinCheckoutUsdCents: parseNonNegativeInt(
     process.env.PHASE1_MIN_CHECKOUT_USD_CENTS,
-    1000,
+    200,
   ),
   /** Advisory only (logs / admin); preferred floor when tuning catalog. Default $15. */
   phase1RecommendedMinCheckoutUsdCents: parseNonNegativeInt(
@@ -227,6 +328,54 @@ export const env = {
   ),
 
   /**
+   * Minimum Zora **line-item** service fee (basis points of **product value** P) before
+   * margin search. Prevents `customerZoraServiceFeeCents = 0` when wholesale (amount-only
+   * provider bps) is set so low that margin is already met with no separate fee — a common
+   * misconfiguration that makes checkout total equal face value only. Set to 0 to restore
+   * legacy “fee may be zero if margin allows” behavior.
+   */
+  phase1MinZoraServiceFeeBps: parseBps(
+    process.env.PHASE1_MIN_ZORA_SERVICE_FEE_BPS,
+    100,
+  ),
+
+  /**
+   * Customer-facing government sales tax (sender jurisdiction), basis points of **product value** (recipient USD).
+   * JSON object: `{"US":500,"CA":500}` → 5% for US/CA; omitted keys → 0.
+   * Internal provider tax buffers remain separate (see PRICING_TAX_BPS on COGS).
+   */
+  phase1GovernmentSalesTaxBpsBySender: (() => {
+    const raw = String(
+      process.env.PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER ?? '',
+    ).trim();
+    if (!raw) return {};
+    try {
+      const obj = JSON.parse(raw);
+      if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) {
+        console.warn(
+          '[env] PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER must be a JSON object',
+        );
+        return {};
+      }
+      /** @type {Record<string, number>} */
+      const out = {};
+      for (const [k, v] of Object.entries(obj)) {
+        const key = String(k).trim().toUpperCase();
+        if (!key) continue;
+        const n = parseInt(String(v).trim(), 10);
+        if (!Number.isFinite(n) || n < 0 || n > 10000) continue;
+        out[key] = n;
+      }
+      return out;
+    } catch {
+      console.warn(
+        '[env] PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER is not valid JSON',
+      );
+      return {};
+    }
+  })(),
+
+  /**
    * Margin intel: routes with net/sell ratio below this (basis points) emit `low_margin_route_detected` (e.g. 500 = 5%).
    */
   marginLowRouteBp: parseBps(process.env.MARGIN_LOW_ROUTE_BP, 500),
@@ -235,7 +384,7 @@ export const env = {
   reloadlyClientId: String(process.env.RELOADLY_CLIENT_ID ?? '').trim(),
   reloadlyClientSecret: String(process.env.RELOADLY_CLIENT_SECRET ?? '').trim(),
   /** Use Reloadly sandbox endpoints when true. */
-  reloadlySandbox: process.env.RELOADLY_SANDBOX === 'true',
+  reloadlySandbox: parseReloadlySandboxEnv(),
   /**
    * When AIRTIME_PROVIDER=reloadly and Reloadly auth/config is unavailable, allow mock airtime fallback.
    * Default false — must be explicitly enabled (never implicit from NODE_ENV).
@@ -247,6 +396,18 @@ export const env = {
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
     30_000,
   ),
+  /**
+   * Mock airtime only: artificial delay before returning (ms). Capped in provider (max 30s).
+   */
+  mockAirtimeDelayMs: Math.min(
+    parseNonNegativeInt(process.env.MOCK_AIRTIME_DELAY_MS, 0),
+    30_000,
+  ),
+  /**
+   * Mock airtime only: `retryable` | `terminal` — deterministic failure classes for tests.
+   * Empty = normal success path.
+   */
+  mockAirtimeSimulate: String(process.env.MOCK_AIRTIME_SIMULATE ?? '').trim().toLowerCase(),
   /**
    * When true, skip Reloadly GET /reports/transactions inquiry before a retrying provider POST.
    * Emergency / tests only — increases duplicate-send risk on timeouts.
@@ -314,6 +475,12 @@ export const env = {
     2_000,
   ),
   /**
+   * When literal `true` and `REDIS_URL` is set: money-adjacent HTTP rate limiters use Redis
+   * (`rate-limit-redis`) so limits are shared across Node instances. On connection failure,
+   * startup falls back to in-memory limits and logs a warning.
+   */
+  rateLimitUseRedis: process.env.RATE_LIMIT_USE_REDIS === 'true',
+  /**
    * Internal operatorKey → Reloadly numeric operator id (server-only).
    * Defaults: `reloadlyOperatorIdDefaults.js`; overridden by `RELOADLY_OPERATOR_MAP_JSON` per key.
    * @type {Record<string, string>}
@@ -323,43 +490,10 @@ export const env = {
     parseReloadlyOperatorMap(process.env.RELOADLY_OPERATOR_MAP_JSON),
   ),
 
-  /** Reconciliation scan thresholds (ms) — see `reconciliationService.js`. */
-  reconcilePaidStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_PAID_STUCK_MS,
-    900_000,
-  ),
-  reconcileProcessingStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_PROCESSING_STUCK_MS,
-    1_800_000,
-  ),
-  reconcileFulfillmentQueuedStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_FULFILLMENT_QUEUED_STUCK_MS,
-    900_000,
-  ),
-  reconcileFulfillmentProcessingStuckAfterMs: parsePositiveInt(
-    process.env.RECONCILE_FULFILLMENT_PROCESSING_STUCK_MS,
-    1_800_000,
-  ),
-  /** Fulfilled orders older than this may be flagged if `order:{id}:delivered` inbox row is absent. */
-  reconcilePushQuietPeriodMs: parsePositiveInt(
-    process.env.RECONCILE_PUSH_QUIET_PERIOD_MS,
-    600_000,
-  ),
-  /** Max rows sampled per auxiliary integrity slice (referral/loyalty/push) per scan. */
-  reconcileIntegritySampleLimit: parsePositiveInt(
-    process.env.RECONCILE_INTEGRITY_SAMPLE_LIMIT,
-    250,
-  ),
-  /** Cap loyalty drift detection user rows per scan (raw aggregate). */
-  reconcileLoyaltyDriftLimit: parsePositiveInt(
-    process.env.RECONCILE_LOYALTY_DRIFT_LIMIT,
-    40,
-  ),
-  /** Default chunk size for `runReconciliationScan({ fullChunk })` id scan; `0` uses service default (500). */
-  reconcileFullChunkSize: parseNonNegativeInt(
-    process.env.RECONCILE_FULL_CHUNK_SIZE,
-    0,
-  ),
+  /**
+   * WebTopup + reconciliation thresholds (single parse, frozen) — see webtopConfig.js.
+   */
+  ...WEBTOP_ENV_SLICE,
 
   /**
    * PaymentCheckout stuck in `PROCESSING` (fulfillment) longer than this → recovery worker may revert or retry.
@@ -414,70 +548,6 @@ export const env = {
   devCheckoutBypassUserId: String(
     process.env.DEV_CHECKOUT_BYPASS_USER_ID ?? '',
   ).trim(),
-
-  /**
-   * Web top-up fulfillment provider: `mock` | `reloadly` (Reloadly = AF + airtime only; see reloadlyWebTopupProvider).
-   */
-  webTopupFulfillmentProvider: String(
-    process.env.WEBTOPUP_FULFILLMENT_PROVIDER ?? 'mock',
-  )
-    .trim()
-    .toLowerCase(),
-
-  /** When false, all web top-up fulfillment dispatch/retry is rejected (503). Default on. */
-  fulfillmentDispatchEnabled: process.env.FULFILLMENT_DISPATCH_ENABLED !== 'false',
-  /** Emergency kill switch — rejects dispatch/retry immediately (503). */
-  fulfillmentDispatchKillSwitch:
-    process.env.FULFILLMENT_DISPATCH_KILL_SWITCH === 'true',
-  /**
-   * When false, Reloadly adapter dispatch is disabled (503) while mock may still run.
-   * Scope remains AF + airtime only when enabled.
-   */
-  reloadlyWebTopupProviderActive:
-    process.env.RELOADLY_WEBTOPUP_PROVIDER_ACTIVE !== 'false',
-
-  webtopupVelocitySessionWindowMs: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_SESSION_WINDOW_MS,
-    600_000,
-  ),
-  webtopupVelocitySessionOrdersWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_SESSION_ORDERS_WARN,
-    8,
-  ),
-  webtopupVelocityPhoneHourOrdersWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_ORDERS_WARN,
-    12,
-  ),
-  webtopupVelocityPhoneHourSameAmountWarn: parsePositiveInt(
-    process.env.WEBTOPUP_VELOCITY_PHONE_HOUR_SAME_AMOUNT_WARN,
-    6,
-  ),
-
-  /** When true, admin dispatch enqueues DB job only; worker runs provider I/O (see webtopFulfillmentJob.js). */
-  webtopupFulfillmentAsync: process.env.WEBTOPUP_FULFILLMENT_ASYNC === 'true',
-  /** Poll interval for WebTopupFulfillmentJob worker (`0` disables the interval). */
-  webtopupFulfillmentJobPollMs: parseNonNegativeInt(
-    process.env.WEBTOPUP_FULFILLMENT_JOB_POLL_MS,
-    3_000,
-  ),
-
-  providerCircuitFailureThreshold: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_FAILURE_THRESHOLD,
-    5,
-  ),
-  providerCircuitWindowMs: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_WINDOW_MS,
-    60_000,
-  ),
-  providerCircuitOpenMs: parsePositiveInt(
-    process.env.PROVIDER_CIRCUIT_OPEN_MS,
-    120_000,
-  ),
-
-  /**
-   * Mock-provider failure simulation (never affects Reloadly): timeout | terminal | unsupported
-   */
-  webtopupFailsim: String(process.env.WEBTOPUP_FAILSIM ?? '').trim().toLowerCase(),
 
   /** USD cents per 1 loyalty point (e.g. 100 → $1.00 = 1 point). */
   loyaltyPointsUsdBasisCents: parsePositiveInt(
@@ -636,7 +706,7 @@ Object.defineProperty(env, 'reloadlyBaseUrl', {
   get() {
     const raw = String(process.env.RELOADLY_BASE_URL ?? '').trim();
     if (raw) return raw.replace(/\/$/, '');
-    return process.env.RELOADLY_SANDBOX === 'true'
+    return parseReloadlySandboxEnv()
       ? 'https://topups-sandbox.reloadly.com'
       : 'https://topups.reloadly.com';
   },

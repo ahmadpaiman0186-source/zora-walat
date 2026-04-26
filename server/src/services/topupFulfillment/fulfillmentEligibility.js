@@ -1,5 +1,5 @@
 import { FULFILLMENT_STATUS, PAYMENT_STATUS } from '../../domain/topupOrder/statuses.js';
-import { FULFILLMENT_DB_ERROR } from '../../domain/topupOrder/fulfillmentErrors.js';
+import { isPersistedFulfillmentErrorRetryable } from '../../domain/topupOrder/webtopFulfillmentAutoRetryPolicy.js';
 
 /**
  * @param {{ paymentStatus: string, fulfillmentStatus: string, fulfillmentErrorCode?: string | null }} row
@@ -28,7 +28,7 @@ export function assertEligibleForRetryDispatch(row) {
   }
   if (
     row.fulfillmentStatus === FULFILLMENT_STATUS.FAILED &&
-    row.fulfillmentErrorCode === FULFILLMENT_DB_ERROR.RETRYABLE
+    isPersistedFulfillmentErrorRetryable(row.fulfillmentErrorCode)
   ) {
     return { ok: true };
   }

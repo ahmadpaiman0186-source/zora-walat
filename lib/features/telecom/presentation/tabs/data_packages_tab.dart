@@ -120,6 +120,14 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
             validator: (v) =>
                 AfghanPhoneUtils.validationErrorL10n(l10n, v),
           ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.telecomRecipientAfghanistanDialHint,
+            style: t.textTheme.bodySmall?.copyWith(
+              color: t.colorScheme.outline,
+              height: 1.35,
+            ),
+          ),
           const SizedBox(height: 20),
           Text(l10n.operator, style: t.textTheme.titleMedium),
           const SizedBox(height: 8),

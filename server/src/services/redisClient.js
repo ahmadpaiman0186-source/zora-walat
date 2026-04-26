@@ -71,3 +71,35 @@ export async function withRedis(fn) {
   }
 }
 
+/**
+ * Test teardown: closes the process-wide singleton so `node --test` can finish
+ * after suites that opened Redis (e.g. provider outcome registry reads).
+ * Safe to call multiple times; no-op when no client.
+ */
+export async function resetRedisClientForTests() {
+  disabledUntilMs = 0;
+  const pending = clientPromise;
+  let c = client;
+  client = null;
+  clientPromise = null;
+
+  if (pending) {
+    try {
+      const resolved = await pending;
+      if (resolved) c = resolved;
+    } catch {
+      // connect may have failed; nothing to close
+    }
+  }
+  if (!c) return;
+  try {
+    await c.quit();
+  } catch {
+    try {
+      c.disconnect();
+    } catch {
+      // ignore
+    }
+  }
+}
+

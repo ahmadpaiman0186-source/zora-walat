@@ -47,6 +47,8 @@
   "phase1OnlyAirtimeSnack": "فاز ۱: فقط شارژ ایرتیم موبایل در دسترس است.",
   "phase1UsdSecureCheckout": "پرداخت به دلار در صفحهٔ امن Stripe انجام می‌شود. مبلغ نهایی قبل از برداشت از سرور ما تأیید می‌شود.",
   "checkoutCardRegionLabel": "موقعیت شما (کارت)",
+  "checkoutSenderCountryHint": "این منطقهٔ صدور کارت شما برای بررسی ریسک است؛ شمارهٔ گیرنده همیشه موبایل افغانستان (+۹۳) است.",
+  "telecomRecipientAfghanistanDialHint": "افغانستان +۹۳ — شمارهٔ محلی موبایل را وارد کنید (با ۷ شروع می‌شود).",
   "checkoutPricingUsdServerNote": "قیمت‌گذاری به دلار روی سرورهای ما برای منطقهٔ شما محاسبه می‌شود.",
   "telecomCheckoutAirtimeRowLabel": "اعتبار موبایل (ایرتیم)",
   "phase1ValidityDependsOnOperator": "مدت اعتبار بسته به اپراتور است — فقط وقتی مقدار تأییدشده از قیمت‌گذاری داریم اینجا نشان می‌دهیم.",
@@ -60,6 +62,9 @@
   },
   "rechargeTrustLine": "قیمت‌گذاری دلاری · پرداخت امن · موبایل افغانستان",
   "recipientNumber": "شمارهٔ گیرنده",
+  "receivingCountryLabel": "کشور گیرنده",
+  "rechargeCountryNotSupported": "شارژ موبایل فقط برای شماره‌های افغانستان است. افغانستان را انتخاب کنید.",
+  "phoneLocalDigitsHint": "شمارهٔ محلی را بدون کد کشور وارد کنید.",
   "operator": "اپراتور",
   "getPackages": "دریافت بسته‌ها",
   "packages": "بسته‌ها",
@@ -127,6 +132,10 @@
   "telecomMinuteBundlesTitle": "بسته‌های دقیقه‌ای (USD)",
   "telecomEnterNumberForAmounts": "شمارهٔ معتبر وارد کرده و اپراتور را تأیید کنید تا مبالغ نمایش داده شود.",
   "telecomPhoneHintAirtime": "07X XXX XXXX یا 937…",
+  "receivingCountryLabel": "کشور گیرنده",
+  "recipientLocalNumber": "شماره موبایل محلی",
+  "phase1AirtimeAfghanistanOnly": "در فاز ۱، شارژ فقط برای افغانستان. افغانستان را انتخاب کنید.",
+  "checkoutSecuringCheckout": "در حال ایمن‌سازی پرداخت…",
   "telecomDataHeadline": "بسته‌های دیتا",
   "telecomDataSubtitle": "بسته‌های روزانه، هفتگی و ماهانه. همه به دلار.",
   "telecomPhoneHintData": "07X XXX XXXX",
@@ -197,6 +206,34 @@
   "authGenericError": "مشکلی پیش آمد. دوباره تلاش کنید.",
   "authFillAllFields": "ایمیل و رمز عبور را وارد کنید.",
   "authInvalidEmail": "یک نشانی ایمیل معتبر وارد کنید.",
+  "authEmailRequired": "نشانی ایمیل خود را وارد کنید.",
+  "authOtpEmailIntro": "نشانی ایمیل خود را وارد کنید تا در صورت واجد شرایط بودن حساب، یک کد ۶ رقمی ورود برای شما ارسال شود.",
+  "authOtpEmailHelp": "از همان ایمیلی استفاده کنید که برای حساب زوره‌ولت خود دارید.",
+  "authOtpContinueCta": "ارسال کد",
+  "authOtpCodeTitle": "ورود کد",
+  "authOtpCheckEmail": "صندوق ایمیل خود را بررسی کنید",
+  "authOtpCodeLabel": "کد تأیید",
+  "authOtpVerifyCta": "تأیید کد",
+  "authOtpCodeRequired": "کد تأیید ۶ رقمی را وارد کنید.",
+  "authOtpInvalidOrExpired": "این کد نامعتبر است یا منقضی شده. یک کد تازه درخواست کرده و دوباره تلاش کنید.",
+  "authOtpTooManyAttempts": "تلاش‌های زیادی انجام شده است. لطفاً کمی صبر کرده و دوباره امتحان کنید.",
+  "authNetworkRetry": "خطای شبکه. اتصال خود را بررسی کرده و دوباره تلاش کنید.",
+  "authOtpRequestSuccess": "اگر حساب واجد شرایط باشد، کد تأیید ارسال شده است.",
+  "authOtpResendReady": "اکنون می‌توانید یک کد تازه درخواست کنید.",
+  "authOtpResendCta": "ارسال دوباره کد",
+  "authOtpChangeEmail": "استفاده از ایمیل دیگر",
+  "authOtpCodeHelp": "یک کد ۶ رقمی به {email} فرستاده شد. برای ادامه آن را در پایین وارد کنید.",
+  "@authOtpCodeHelp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "authOtpResendIn": "می‌توانید تا {seconds} ثانیه دیگر کد را دوباره بفرستید.",
+  "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "landingNavBrand": "زوره‌ولت",
   "landingHeroTitle": "شارژ افغانستان را در چند ثانیه بفرستید",
   "landingHeroSubtitle": "شارژ بین‌المللی برای شماره‌های افغانستان — برای خانواده‌هایی که به راهی سریع و مطمئن برای ارتباط نیاز دارند.",
@@ -225,6 +262,13 @@
   "successScreenTitle": "همه‌چیز مرتب است",
   "successPaymentConfirmed": "پرداخت دریافت شد",
   "successStripeConfirmedShort": "بانک شما خرید را تأیید کرد. اکنون در حال تکمیل شارژ هستیم.",
+  "successMissingReturnParamsHint": "این آدرس جزئیات مرجع پرداخت (جلسه یا شماره سفارش) را ندارد. اگر پرداخت را انجام دادید، «سفارش‌های اخیر» را باز کنید یا از ایمیل تأیید Stripe استفاده کنید.",
+  "successBootstrapWarning": "نتوانستیم وضعیت زنده سفارش را به‌روز کنیم. پرداخت شما ممکن است هنوز در حال پردازش باشد — لحظاتی بعد «سفارش‌های اخیر» را بررسی کنید.\n{detail}",
+  "@successBootstrapWarning": {
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
   "receiptTitle": "رسید",
   "receiptOrderRef": "شماره سفارش",
   "receiptPaymentStatus": "پرداخت",

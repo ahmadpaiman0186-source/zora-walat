@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/auth/auth_session.dart';
+import '../core/auth/email_verification_required_exception.dart';
 import '../core/auth/unauthorized_exception.dart';
 import '../core/config/app_config.dart';
 import '../models/recharge_package.dart';
@@ -16,19 +17,38 @@ const String _kBffApiKey = String.fromEnvironment(
   defaultValue: '',
 );
 
+const String _kAuthVerificationRequiredCode = 'auth_verification_required';
+
+void _throwIfEmailVerificationRequired(http.Response res) {
+  if (res.statusCode != 403) return;
+  try {
+    final decoded = jsonDecode(res.body);
+    if (decoded is Map && decoded['code'] == _kAuthVerificationRequiredCode) {
+      throw EmailVerificationRequiredException(
+        decoded['message']?.toString() ?? 'Email verification required',
+        errorCode: _kAuthVerificationRequiredCode,
+      );
+    }
+  } on EmailVerificationRequiredException {
+    rethrow;
+  } catch (_) {
+    /* not JSON or wrong shape */
+  }
+}
+
 /// HTTP client for the Node API (`/api/wallet`, `/api/recharge`, authenticated checkout).
 class ApiService {
   ApiService({
     required this.client,
-    String? baseUrl,
+    String? baseUrlOverride,
     AuthSession? authSession,
     AuthApiService? authApi,
   })  : _session = authSession,
         _authApi = authApi,
         baseUrl = _normalizeBase(
-          (baseUrl == null || baseUrl.trim().isEmpty)
+          (baseUrlOverride == null || baseUrlOverride.trim().isEmpty)
               ? AppConfig.apiBaseUrl
-              : baseUrl,
+              : baseUrlOverride,
         );
 
   final http.Client client;
@@ -38,8 +58,16 @@ class ApiService {
 
   static String _normalizeBase(String raw) {
     final t = raw.trim();
-    if (t.isEmpty) return AppConfig.apiBaseUrl;
+    if (t.isEmpty) return '';
     return t.replaceAll(RegExp(r'/+$'), '');
+  }
+
+  void _requireConfiguredBaseUrl() {
+    if (baseUrl.isEmpty) {
+      throw StateError(
+        'API base URL is not configured. Set --dart-define=API_BASE_URL=https://your-api-host.example',
+      );
+    }
   }
 
   Uri _u(String path) => Uri.parse('$baseUrl$path');
@@ -60,13 +88,17 @@ class ApiService {
           'Authorization': 'Bearer $bearer',
       };
 
+  /// Prefers `{ message, code }` (HttpError); falls back to `{ error }`.
   static String _httpErrorMessage(String prefix, http.Response res) {
     try {
       final decoded = jsonDecode(res.body);
-      if (decoded is Map && decoded['error'] != null) {
-        final code = decoded['code'];
-        final extra = code != null ? ' (code: $code)' : '';
-        return '$prefix ${res.statusCode}: ${decoded['error']}$extra';
+      if (decoded is Map) {
+        final text = decoded['message'] ?? decoded['error'];
+        if (text != null) {
+          final code = decoded['code'];
+          final extra = code != null ? ' (code: $code)' : '';
+          return '$prefix ${res.statusCode}: $text$extra';
+        }
       }
     } catch (_) {
       /* use raw body below */
@@ -102,6 +134,7 @@ class ApiService {
   }
 
   Future<http.Response> _getAuthed(String path) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var res = await client.get(
       _u(path),
@@ -118,10 +151,12 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
   Future<http.Response> _postAuthed(String path, Object body) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var res = await client.post(
       _u(path),
@@ -140,6 +175,7 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
@@ -149,6 +185,7 @@ class ApiService {
     required Map<String, dynamic> body,
     Map<String, String> extraHeaders = const {},
   }) async {
+    _requireConfiguredBaseUrl();
     var token = await _requireAccessToken();
     var headers = {
       ..._jsonHeadersBearer(token),
@@ -175,6 +212,7 @@ class ApiService {
       await _session?.clear();
       throw UnauthorizedException();
     }
+    _throwIfEmailVerificationRequired(res);
     return res;
   }
 
@@ -185,6 +223,7 @@ class ApiService {
     required String devSecret,
     Map<String, String> extraHeaders = const {},
   }) async {
+    _requireConfiguredBaseUrl();
     final headers = {
       'Content-Type': 'application/json',
       'X-ZW-Dev-Checkout': devSecret,
@@ -201,6 +240,7 @@ class ApiService {
   Future<WalletBalance> getBalance() async {
     final res = await _getAuthed('/api/wallet/balance');
     if (res.statusCode == 403) {
+      _throwIfEmailVerificationRequired(res);
       throw StateError(
         kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Balance', res),
       );
@@ -228,6 +268,7 @@ class ApiService {
       extraHeaders: {'Idempotency-Key': idem},
     );
     if (res.statusCode == 403) {
+      _throwIfEmailVerificationRequired(res);
       throw StateError(
         kReleaseMode ? 'Request could not be completed.' : _httpErrorMessage('Topup', res),
       );
@@ -292,11 +333,17 @@ class ApiService {
     return jsonDecode(res.body) as Map<String, dynamic>;
   }
 
-  /// `POST /api/recharge/execute` — kicks or polls airtime after Stripe Checkout (200 or 409).
+  /// `POST /api/recharge/execute` — kicks or polls airtime after Stripe Checkout (200, 409, or 504).
+  ///
+  /// **504** — server waited for a terminal order (queue mode + worker slow/absent). Body may
+  /// still include `order` / `fulfillment` snapshots; callers should map to in-progress UI, not
+  /// treat as a hard transport failure.
   Future<RechargeExecuteResponse> postRechargeExecute(String orderId) async {
     final res = await _postAuthed('/api/recharge/execute', {'orderId': orderId});
     final body = jsonDecode(res.body) as Map<String, dynamic>;
-    if (res.statusCode != 200 && res.statusCode != 409) {
+    if (res.statusCode != 200 &&
+        res.statusCode != 409 &&
+        res.statusCode != 504) {
       throw StateError(_httpErrorMessage('Recharge execute', res));
     }
     return RechargeExecuteResponse(statusCode: res.statusCode, json: body);
@@ -483,6 +530,36 @@ class ApiService {
         .toList();
   }
 
+  /// `POST /api/checkout-pricing-quote` — **no auth**; same body as hosted checkout; returns `pricingBreakdown`.
+  Future<http.Response> postCheckoutPricingQuotePublic(Map<String, dynamic> body) {
+    _requireConfiguredBaseUrl();
+    return client.post(
+      _u('/api/checkout-pricing-quote'),
+      headers: _jsonHeadersBearer(null),
+      body: jsonEncode(body),
+    );
+  }
+
+  /// Single order row including `pricingBreakdown` (`GET /api/orders/:id`).
+  Future<Map<String, dynamic>> fetchOrderById(String orderId) async {
+    final id = orderId.trim();
+    if (id.isEmpty) {
+      throw ArgumentError('orderId empty');
+    }
+    final enc = Uri.encodeComponent(id);
+    final res = await _getAuthed('/api/orders/$enc');
+    if (res.statusCode == 404) {
+      throw StateError('Order ${res.statusCode}: not found');
+    }
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw StateError(_httpErrorMessage('Order detail', res));
+    }
+    final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final o = map['order'];
+    if (o is Map<String, dynamic>) return o;
+    throw StateError('Order detail: missing order object');
+  }
+
   /// Single order for receipt / tracking (`GET /api/transactions/:id`).
   Future<Map<String, dynamic>> fetchUserOrder(String orderId) async {
     final id = orderId.trim();
@@ -510,4 +587,7 @@ class RechargeExecuteResponse {
 
   bool get isOk => statusCode == 200;
   bool get isPaymentPending => statusCode == 409;
+
+  /// Queue mode: worker did not finish within server wait window (`fulfillmentClientExecuteWaitMs`).
+  bool get isFulfillmentTimeout => statusCode == 504;
 }

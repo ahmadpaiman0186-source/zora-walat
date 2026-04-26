@@ -2,6 +2,7 @@ import { POST_PAYMENT_INCIDENT_STATUS } from '../constants/postPaymentIncidentSt
 import { POST_PAYMENT_INCIDENT_MAP_SOURCE } from '../constants/postPaymentIncidentMapSource.js';
 import { writeOrderAudit } from './orderAuditService.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { orchestrateStripeCall } from './reliability/reliabilityOrchestrator.js';
 
 /**
  * @param {unknown} obj Stripe Charge or similar
@@ -101,7 +102,15 @@ export async function applyPhase1DisputeCreated(tx, dispute, eventId, ctx = {}) 
     const chargeId = stripeChargeIdFromDispute(dispute);
     if (chargeId && stripe && typeof stripe.charges?.retrieve === 'function') {
       try {
-        const ch = await stripe.charges.retrieve(chargeId);
+        /** In-DB-transaction: single Stripe attempt (no multi-retry while holding locks). */
+        const ch = await orchestrateStripeCall({
+          operationName: 'charges.retrieve.dispute_map',
+          traceId: null,
+          log,
+          maxAttempts: 1,
+          backoffMs: [0],
+          fn: () => stripe.charges.retrieve(chargeId),
+        });
         piId = stripePaymentIntentIdFromObject(ch);
         if (piId) {
           mapSource = POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_CHARGE_LOOKUP;

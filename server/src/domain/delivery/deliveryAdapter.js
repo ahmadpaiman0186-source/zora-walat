@@ -32,6 +32,7 @@ export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
     if (r.outcome === AIRTIME_OUTCOME.UNAVAILABLE) {
       if (allowReloadlyUnavailableMockFallback()) {
         return fulfillMockAirtime(order, {
+          ...fulfillmentCtx,
           fallbackFrom: 'reloadly',
           fallbackReason: r.failureCode ?? 'unavailable',
         });
@@ -51,5 +52,5 @@ export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
     return r;
   }
 
-  return executeAirtimeFulfillment(order);
+  return executeAirtimeFulfillment(order, fulfillmentCtx);
 }

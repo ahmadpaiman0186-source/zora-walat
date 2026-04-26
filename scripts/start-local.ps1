@@ -1,4 +1,4 @@
-# Zora-Walat: free busy ports, start API :8787 + Next :3001, verify health + payment test.
+# Zora-Walat: free busy ports, start API :8787 + Next :3000, verify health + payment test.
 # Usage: from repo root,  pwsh -ExecutionPolicy Bypass -File scripts/start-local.ps1
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -59,14 +59,13 @@ if ($ok) {
 }
 
 # 2) Free Next.js ports
-Write-Host "[2/4] Free ports 3000 and 3001 (Next uses 3001)..."
+Write-Host "[2/4] Free port 3000 (Next — matches Stripe checkout Origin / CORS defaults)..."
 Stop-ListenersOnPort 3000
-Stop-ListenersOnPort 3001
 Start-Sleep -Seconds 1
 Write-Host "  Done`n"
 
 # 3) Frontend
-Write-Host "[3/4] Next.js (port 3001)..."
+Write-Host "[3/4] Next.js (port 3000)..."
 if (-not (Test-Path (Join-Path $root 'node_modules'))) {
   Write-Host "  npm install (root)..."
   npm install --silent
@@ -76,15 +75,15 @@ $frontOk = $false
 $dead = (Get-Date).AddSeconds(90)
 while ((Get-Date) -lt $dead) {
   try {
-    $r = Invoke-WebRequest -Uri 'http://127.0.0.1:3001' -UseBasicParsing -TimeoutSec 2
+    $r = Invoke-WebRequest -Uri 'http://127.0.0.1:3000' -UseBasicParsing -TimeoutSec 2
     if ($r.StatusCode -ge 200 -and $r.StatusCode -lt 500) { $frontOk = $true; break }
   } catch { }
   Start-Sleep -Seconds 2
 }
 if ($frontOk) {
-  Write-Host "  Frontend running OK http://localhost:3001`n"
+  Write-Host "  Frontend running OK http://localhost:3000`n"
 } else {
-  Write-Host "  WARNING: Next not responding yet; it may still compile. Open http://localhost:3001`n"
+  Write-Host "  WARNING: Next not responding yet; it may still compile. Open http://localhost:3000`n"
 }
 
 # 4) Payment API
@@ -105,6 +104,8 @@ try {
 
 Write-Host "=== Summary ==="
 Write-Host "  Backend running   " -NoNewline; if ($ok) { Write-Host "OK" -ForegroundColor Green } else { Write-Host "FAIL" -ForegroundColor Red }
-Write-Host "  Frontend (3001)   " -NoNewline; if ($frontOk) { Write-Host "OK" -ForegroundColor Green } else { Write-Host "pending/open browser" -ForegroundColor Yellow }
-Write-Host "  Open: http://localhost:3001"
-Write-Host "  API:  http://127.0.0.1:8787`n"
+Write-Host "  Frontend (3000)   " -NoNewline; if ($frontOk) { Write-Host "OK" -ForegroundColor Green } else { Write-Host "pending/open browser" -ForegroundColor Yellow }
+Write-Host "  Open: http://localhost:3000"
+Write-Host "  API:  http://127.0.0.1:8787"
+Write-Host "  Stripe Checkout redirects: success/cancel must match the web Origin (default localhost:3000)."
+Write-Host "  API-only checkout (no Next): set server CLIENT_URL=http://127.0.0.1:8787 and use non-production API /success.`n"

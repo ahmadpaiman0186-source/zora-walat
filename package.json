@@ -2,11 +2,15 @@
   "name": "zora-walat",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "api": "npm --prefix server start",
+    "api:dev": "npm --prefix server run dev",
+    "dev": "next dev -p 3000",
     "start:local": "pwsh -ExecutionPolicy Bypass -File ./scripts/start-local.ps1",
     "build": "next build",
-    "start": "next start -p 3001",
-    "lint": "next lint"
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "smoke:stripe-pe": "node scripts/stripe-payment-element-smoke.mjs",
+    "verify:flutter-checkout": "node scripts/flutter-web-checkout-live.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^3.1.0",
@@ -21,6 +25,7 @@
     "@types/react-dom": "^18.3.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.18",
+    "playwright": "^1.49.1",
     "typescript": "^5.6.3"
   }
 }

@@ -1,14 +1,14 @@
 /**
- * Concurrency + idempotency guards (PostgreSQL). Requires TEST_DATABASE_URL.
+ * Concurrency + idempotency guards (PostgreSQL). Requires migrated PostgreSQL.
  * Run with: node --import ./test/integrations/preloadTestDatabaseUrl.mjs --test …
- * so `src/db.js` and this file share the same `DATABASE_URL`.
+ * so `src/db.js` and this file share the same effective `DATABASE_URL`.
  */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { describe, it, before, after, afterEach } from 'node:test';
-import { PrismaClient } from '@prisma/client';
+import { describe, it, afterEach } from 'node:test';
 import bcrypt from 'bcrypt';
 
+import { prisma } from '../../src/db.js';
 import { ORDER_STATUS } from '../../src/constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../../src/constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../../src/constants/fulfillmentAttemptStatus.js';
@@ -20,29 +20,16 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
 }
 
-const dbUrl = process.env.TEST_DATABASE_URL;
+const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 describe('Transaction fortress concurrency (integration)', { skip: !runIntegration }, () => {
-  /** @type {PrismaClient} */
-  let prisma;
   /** @type {string[]} */
   const userIds = [];
   /** @type {string[]} */
   const orderIds = [];
   /** @type {string[]} */
   const eventIds = [];
-
-  before(async () => {
-    const url = String(process.env.DATABASE_URL ?? process.env.TEST_DATABASE_URL ?? '').trim();
-    prisma = new PrismaClient({ datasourceUrl: url });
-    await prisma.$connect();
-  });
-
-  after(async () => {
-    if (!prisma) return;
-    await prisma.$disconnect();
-  });
 
   afterEach(async () => {
     if (!prisma) return;

@@ -170,6 +170,7 @@ OrderNotificationPhase? orderPhaseFromCustomerTracking(CustomerOrderTracking t) 
     case CustomerTrackingStage.delivered:
       return OrderNotificationPhase.delivered;
     case CustomerTrackingStage.failed:
+    case CustomerTrackingStage.failedTerminally:
       return OrderNotificationPhase.failedCalm;
     case CustomerTrackingStage.retrying:
       return OrderNotificationPhase.retrying;

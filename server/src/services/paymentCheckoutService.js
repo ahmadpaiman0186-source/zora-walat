@@ -1,6 +1,7 @@
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { prisma } from '../db.js';
+import { buildPricingPolicySnapshotFields } from '../domain/pricing/pricingSnapshotPolicy.js';
 
 /**
  * @param {object} params
@@ -69,6 +70,7 @@ export async function createInitiatedRow({
   packageId,
   clientOrigin,
   pricing,
+  pricingMeta,
 }) {
   const meta = {
     source: 'checkout_api',
@@ -94,6 +96,7 @@ export async function createInitiatedRow({
       actualNetMarginBp: null,
       pricingSnapshot: pricing
         ? {
+            ...(pricingMeta ?? buildPricingPolicySnapshotFields()),
             providerCostCents: pricing.providerCostCents,
             fxBufferCents: pricing.fxBufferCents,
             fxOnlyCents: pricing.fxOnlyCents,
@@ -103,8 +106,12 @@ export async function createInitiatedRow({
             targetProfitCents: pricing.targetProfitCents,
             projectedNetMarginBp: pricing.projectedNetMarginBp,
             finalPriceCents: pricing.finalPriceCents,
+            customerProductValueUsdCents: pricing.customerProductValueCents,
+            customerGovernmentTaxUsdCents: pricing.customerGovernmentTaxCents,
+            customerZoraServiceFeeUsdCents: pricing.customerZoraServiceFeeCents,
+            finalPriceUsdCents: pricing.finalPriceCents,
             formula:
-              'final = provider + stripe_fee(final) + fx_buffer + risk_buffer + target_profit (solved iteratively)',
+              'total = product_value + government_sales_tax(product) + zora_service_fee; margin on total; COGS buffers internal only',
           }
         : undefined,
       operatorKey,

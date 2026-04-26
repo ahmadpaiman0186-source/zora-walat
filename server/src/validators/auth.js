@@ -21,3 +21,16 @@ export const refreshBodySchema = z
   .strict();
 
 export const logoutBodySchema = refreshBodySchema;
+
+export const requestOtpBodySchema = z
+  .object({
+    email: z.string().email().max(254),
+  })
+  .strict();
+
+export const verifyOtpBodySchema = z
+  .object({
+    email: z.string().email().max(254),
+    otp: z.string().regex(/^\d{6}$/),
+  })
+  .strict();

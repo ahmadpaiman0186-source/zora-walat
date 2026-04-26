@@ -1,6 +1,6 @@
 /**
  * Chaos-style + incident simulations for Phase 1 (PostgreSQL).
- * Requires TEST_DATABASE_URL.
+ * Requires migrated DB; use preloadTestDatabaseUrl (same rule as wallet / Phase 1 money path).
  */
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -26,7 +26,7 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
 }
 
-const dbUrl = process.env.TEST_DATABASE_URL;
+const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 function checkoutSessionFixture(checkoutId, overrides = {}) {

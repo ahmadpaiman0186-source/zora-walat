@@ -82,6 +82,8 @@ export function buildPhase1ReconciliationHints(checkout, attempts = []) {
       completedByWebhookEventId: checkout.completedByWebhookEventId ?? null,
       fulfillmentProviderReference: checkout.fulfillmentProviderReference ?? null,
       fulfillmentProviderKey: checkout.fulfillmentProviderKey ?? null,
+      /** DB FK: every attempt row belongs to exactly one PaymentCheckout. */
+      fulfillmentAttemptOrderLinkage: 'FulfillmentAttempt.orderId = PaymentCheckout.id',
     },
     triage: {
       customerPaid: paymentCaptured,

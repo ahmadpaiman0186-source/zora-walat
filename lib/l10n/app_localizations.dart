@@ -340,6 +340,18 @@ abstract class AppLocalizations {
   /// **'Your location (card)'**
   String get checkoutCardRegionLabel;
 
+  /// No description provided for @checkoutSenderCountryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.'**
+  String get checkoutSenderCountryHint;
+
+  /// No description provided for @telecomRecipientAfghanistanDialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Afghanistan +93 — enter the local mobile (starts with 7).'**
+  String get telecomRecipientAfghanistanDialHint;
+
   /// No description provided for @checkoutPricingUsdServerNote.
   ///
   /// In en, this message translates to:
@@ -364,6 +376,48 @@ abstract class AppLocalizations {
   /// **'Send {amount} airtime'**
   String checkoutAirtimeAmountLine(String amount);
 
+  /// No description provided for @checkoutReviewTotalChargedHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Total charged: {amount}'**
+  String checkoutReviewTotalChargedHeadline(String amount);
+
+  /// No description provided for @checkoutReviewAirtimeValueSubline.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime value (recipient): {amount}'**
+  String checkoutReviewAirtimeValueSubline(String amount);
+
+  /// No description provided for @checkoutReviewHeadlinePricingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Full pricing will appear when the quote loads — check the order summary below.'**
+  String get checkoutReviewHeadlinePricingUnavailable;
+
+  /// No description provided for @checkoutQuoteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load pricing. Check your connection and try again.'**
+  String get checkoutQuoteFailed;
+
+  /// No description provided for @checkoutAirtimeValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Airtime value'**
+  String get checkoutAirtimeValueLabel;
+
+  /// No description provided for @receiptBreakdownLoadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading payment breakdown…'**
+  String get receiptBreakdownLoadingHint;
+
+  /// No description provided for @receiptBreakdownPartialHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full line-item breakdown was not available; amount below is the total charged to your card.'**
+  String get receiptBreakdownPartialHint;
+
   /// No description provided for @rechargeTrustLine.
   ///
   /// In en, this message translates to:
@@ -375,6 +429,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recipient number'**
   String get recipientNumber;
+
+  /// No description provided for @receivingCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving country'**
+  String get receivingCountryLabel;
+
+  /// No description provided for @rechargeCountryNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.'**
+  String get rechargeCountryNotSupported;
+
+  /// No description provided for @phoneLocalDigitsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the local number without country code.'**
+  String get phoneLocalDigitsHint;
 
   /// No description provided for @operator.
   ///
@@ -481,7 +553,7 @@ abstract class AppLocalizations {
   /// No description provided for @hubTileRechargeSub.
   ///
   /// In en, this message translates to:
-  /// **'Instant packages · USD pricing'**
+  /// **'Afghanistan airtime · live catalog · Stripe checkout'**
   String get hubTileRechargeSub;
 
   /// No description provided for @hubTileWalletTitle.
@@ -511,13 +583,13 @@ abstract class AppLocalizations {
   /// No description provided for @hubTileLegacyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Plans & catalog'**
+  /// **'Classic recharge'**
   String get hubTileLegacyTitle;
 
   /// No description provided for @hubTileLegacySub.
   ///
   /// In en, this message translates to:
-  /// **'Airtime & data'**
+  /// **'Manual amounts & review (legacy path)'**
   String get hubTileLegacySub;
 
   /// No description provided for @walletScreenTitle.
@@ -583,7 +655,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutDevHint.
   ///
   /// In en, this message translates to:
-  /// **'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.'**
+  /// **'Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.'**
   String get aboutDevHint;
 
   /// No description provided for @tabAirtime.
@@ -670,11 +742,77 @@ abstract class AppLocalizations {
   /// **'Total (USD)'**
   String get totalUsd;
 
+  /// No description provided for @checkoutProductValueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Product value'**
+  String get checkoutProductValueLabel;
+
+  /// No description provided for @checkoutSenderTaxLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax (sender jurisdiction)'**
+  String get checkoutSenderTaxLabel;
+
+  /// No description provided for @checkoutServiceFeeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zora-Walat service fee'**
+  String get checkoutServiceFeeLabel;
+
+  /// No description provided for @checkoutTotalChargedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total charged'**
+  String get checkoutTotalChargedLabel;
+
+  /// No description provided for @checkoutTaxJurisdictionPhaseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.'**
+  String get checkoutTaxJurisdictionPhaseNote;
+
+  /// No description provided for @checkoutPricingLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating price for your region…'**
+  String get checkoutPricingLoading;
+
   /// No description provided for @checkoutUsdTotalFootnote.
   ///
   /// In en, this message translates to:
   /// **'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.'**
   String get checkoutUsdTotalFootnote;
+
+  /// No description provided for @checkoutScreenCurrencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices in US dollars (USD).'**
+  String get checkoutScreenCurrencyHint;
+
+  /// No description provided for @checkoutScreenServerPricingNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing is calculated in USD on our servers for your region.'**
+  String get checkoutScreenServerPricingNote;
+
+  /// No description provided for @checkoutScreenOrderTotalCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (USD)'**
+  String get checkoutScreenOrderTotalCaption;
+
+  /// No description provided for @checkoutScreenChargeFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.'**
+  String get checkoutScreenChargeFootnote;
+
+  /// No description provided for @checkoutScreenStripeSecureNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.'**
+  String get checkoutScreenStripeSecureNote;
 
   /// No description provided for @stripeSectionTitle.
   ///
@@ -777,6 +915,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'07X XXX XXXX or 937…'**
   String get telecomPhoneHintAirtime;
+
+  /// No description provided for @recipientLocalNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Local mobile number'**
+  String get recipientLocalNumber;
+
+  /// No description provided for @phase1AirtimeAfghanistanOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.'**
+  String get phase1AirtimeAfghanistanOnly;
+
+  /// No description provided for @checkoutSecuringCheckout.
+  ///
+  /// In en, this message translates to:
+  /// **'Securing checkout…'**
+  String get checkoutSecuringCheckout;
 
   /// No description provided for @telecomDataHeadline.
   ///
@@ -1072,6 +1228,114 @@ abstract class AppLocalizations {
   /// **'Enter a valid email address.'**
   String get authInvalidEmail;
 
+  /// No description provided for @authEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address.'**
+  String get authEmailRequired;
+
+  /// No description provided for @authOtpEmailIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.'**
+  String get authOtpEmailIntro;
+
+  /// No description provided for @authOtpEmailHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the same email address you use for your Zora-Walat account.'**
+  String get authOtpEmailHelp;
+
+  /// No description provided for @authOtpContinueCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get authOtpContinueCta;
+
+  /// No description provided for @authOtpCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code'**
+  String get authOtpCodeTitle;
+
+  /// No description provided for @authOtpCheckEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox'**
+  String get authOtpCheckEmail;
+
+  /// No description provided for @authOtpCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code'**
+  String get authOtpCodeLabel;
+
+  /// No description provided for @authOtpVerifyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify code'**
+  String get authOtpVerifyCta;
+
+  /// No description provided for @authOtpCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit verification code.'**
+  String get authOtpCodeRequired;
+
+  /// No description provided for @authOtpInvalidOrExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is invalid or has expired. Request a new code and try again.'**
+  String get authOtpInvalidOrExpired;
+
+  /// No description provided for @authOtpTooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait a moment before trying again.'**
+  String get authOtpTooManyAttempts;
+
+  /// No description provided for @authNetworkRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Check your connection and try again.'**
+  String get authNetworkRetry;
+
+  /// No description provided for @authOtpRequestSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'If the account is eligible, a verification code has been sent.'**
+  String get authOtpRequestSuccess;
+
+  /// No description provided for @authOtpResendReady.
+  ///
+  /// In en, this message translates to:
+  /// **'You can request a new code now.'**
+  String get authOtpResendReady;
+
+  /// No description provided for @authOtpResendCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend code'**
+  String get authOtpResendCta;
+
+  /// No description provided for @authOtpChangeEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different email'**
+  String get authOtpChangeEmail;
+
+  /// No description provided for @authOtpCodeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {email}. Enter it below to continue.'**
+  String authOtpCodeHelp(Object email);
+
+  /// No description provided for @authOtpResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can resend a code in {seconds}s.'**
+  String authOtpResendIn(Object seconds);
+
   /// No description provided for @landingNavBrand.
   ///
   /// In en, this message translates to:
@@ -1239,6 +1503,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your bank authorized this purchase. We’re completing your top-up now.'**
   String get successStripeConfirmedShort;
+
+  /// No description provided for @successMissingReturnParamsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.'**
+  String get successMissingReturnParamsHint;
+
+  /// No description provided for @successBootstrapWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n{detail}'**
+  String successBootstrapWarning(String detail);
 
   /// No description provided for @receiptTitle.
   ///

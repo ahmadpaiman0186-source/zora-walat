@@ -1,0 +1,30 @@
+﻿[
+    {
+        "ProcessId":  9704,
+        "CommandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --max-old-space-size=8132 -e \"process.title = process.env[\\\"VSCODE_PROCESS_TITLE\\\"]; require(process.argv[1])\" c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\extensions\\node_modules\\typescript\\lib\\tsserver.js --serverMode partialSemantic --useInferredProjectPerProjectRoot --disableAutomaticTypingAcquisition --cancellationPipeName C:\\Users\\ahmad\\AppData\\Local\\Temp\\vscode-typescript\\d3703feb79fc98442a7a\\tscancellation-08387d0fe231cf5b746a.tmp* --locale en --noGetErrOnBackgroundUpdate --canUseWatchEvents --validateDefaultNpmLocation"
+    },
+    {
+        "ProcessId":  14768,
+        "CommandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe --max-old-space-size=8132 -e \"process.title = process.env[\\\"VSCODE_PROCESS_TITLE\\\"]; require(process.argv[1])\" c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\extensions\\node_modules\\typescript\\lib\\tsserver.js --useInferredProjectPerProjectRoot --enableTelemetry --cancellationPipeName C:\\Users\\ahmad\\AppData\\Local\\Temp\\vscode-typescript\\d3703feb79fc98442a7a\\tscancellation-68e5dc9dc1c6b1a21a5a.tmp* --locale en --noGetErrOnBackgroundUpdate --canUseWatchEvents --validateDefaultNpmLocation"
+    },
+    {
+        "ProcessId":  14348,
+        "CommandLine":  "c:\\Users\\ahmad\\AppData\\Local\\Programs\\cursor\\resources\\app\\resources\\helpers\\node.exe c:/Users/ahmad/AppData/Local/Programs/cursor/resources/app/extensions/node_modules/typescript/lib/typingsInstaller.js --globalTypingsCacheLocation C:/Users/ahmad/AppData/Local/Microsoft/TypeScript/5.9 --enableTelemetry --typesMapLocation c:/Users/ahmad/AppData/Local/Programs/cursor/resources/app/extensions/node_modules/typescript/lib/typesMap.json --validateDefaultNpmLocation"
+    },
+    {
+        "ProcessId":  1340,
+        "CommandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" start"
+    },
+    {
+        "ProcessId":  9396,
+        "CommandLine":  "node  start.js"
+    },
+    {
+        "ProcessId":  9156,
+        "CommandLine":  "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Program Files\\nodejs/node_modules/npm/bin/npm-cli.js\" start"
+    },
+    {
+        "ProcessId":  17400,
+        "CommandLine":  "\"node\"   \"C:\\Users\\ahmad\\zora_walat\\node_modules\\.bin\\\\..\\next\\dist\\bin\\next\" start -p 3000"
+    }
+]

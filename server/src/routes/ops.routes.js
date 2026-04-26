@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import Redis from 'ioredis';
 
+import { INTERNAL_TOOLING_CODE } from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { prisma } from '../db.js';
 import { requireAuth, requireStaff } from '../middleware/authMiddleware.js';
 import { staffPrivilegedLimiter } from '../middleware/rateLimits.js';
@@ -16,13 +19,17 @@ import { getPhase1FulfillmentQueueMetrics } from '../queues/phase1FulfillmentQue
 import { env } from '../config/env.js';
 import { getPhase1FulfillmentQueue } from '../queues/phase1FulfillmentQueue.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
+import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
+import { getMoneyPathOperatorSnapshot } from '../services/opsMoneyPathCountService.js';
 
 const router = Router();
 
 /**
  * Infrastructure readiness (no auth). Mounted at `/ops/health` and `/api/admin/ops/health`.
+ * Under `PRELAUNCH_LOCKDOWN`, detailed DB/Redis state requires `OPS_HEALTH_TOKEN` (see opsInfraHealthGate).
  */
 router.get('/health', async (req, res) => {
+  if (denyUnauthenticatedInfraIfPrelaunch(req, res)) return;
   /** @type {{ server: string, db: string, redis: string, queue: string }} */
   const payload = {
     server: 'ok',
@@ -79,7 +86,11 @@ router.get(
       res.json(report);
     } catch (e) {
       req.log?.error({ err: e }, 'phase1_ops_report_failed');
-      res.status(500).json({ error: 'Internal error' });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
@@ -103,11 +114,19 @@ router.get(
       res.json(snapshot);
     } catch (e) {
       req.log?.error({ err: e }, 'ops_health_failed');
-      res.status(500).json({ error: 'Internal error', ok: false });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
 
+/**
+ * Staff ops snapshot. Optional slices: `?phase1=1`, `?integrity=1`, `?webtopupDb=1`
+ * (DB-backed WebTopup + Phase 1 `PaymentCheckout` histograms — complements in-process `webTopup` counters).
+ */
 router.get(
   '/summary',
   requireAuth,
@@ -124,6 +143,18 @@ router.get(
       } catch (e) {
         req.log?.error({ err: e }, 'ops summary phase1 slice failed');
         base.phase1Ops = { ok: false, error: 'phase1_snapshot_failed' };
+      }
+    }
+    if (String(req.query.webtopupDb ?? '') === '1') {
+      try {
+        const mp = await getMoneyPathOperatorSnapshot();
+        base.moneyPathDbCounts = mp;
+        /** @deprecated prefer `moneyPathDbCounts` — kept for older clients */
+        base.webtopupDbCounts = mp;
+      } catch (e) {
+        req.log?.error({ err: e }, 'ops summary money path db counts failed');
+        base.moneyPathDbCounts = { ok: false, error: 'money_path_db_counts_failed' };
+        base.webtopupDbCounts = base.moneyPathDbCounts;
       }
     }
     if (String(req.query.integrity ?? '') === '1') {
@@ -152,6 +183,35 @@ router.get(
   },
 );
 
+/**
+ * WebTopupOrder aggregates by payment + fulfillment status (staff).
+ * Complements `/summary` in-process counters with DB-backed marketing-checkout volume.
+ */
+router.get(
+  '/webtopup-money-path-counts',
+  requireAuth,
+  requireStaff,
+  staffPrivilegedLimiter,
+  async (req, res) => {
+    try {
+      const snapshot = await getMoneyPathOperatorSnapshot();
+      req.log?.info?.(
+        { traceId: req.traceId, kind: 'money_path_operator_counts' },
+        'money_path_operator_counts',
+      );
+      res.setHeader('Cache-Control', 'no-store');
+      res.json(snapshot);
+    } catch (e) {
+      req.log?.error({ err: e }, 'webtopup_money_path_counts_failed');
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
+    }
+  },
+);
+
 /** BullMQ Phase 1 fulfillment queue depth (staff) — overload visibility. */
 router.get(
   '/fulfillment-queue',
@@ -165,7 +225,11 @@ router.get(
       res.json(snapshot);
     } catch (e) {
       req.log?.error({ err: e }, 'fulfillment_queue_metrics_failed');
-      res.status(500).json({ error: 'Internal error' });
+      res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );
@@ -181,7 +245,7 @@ router.get(
   async (req, res) => {
     const id = String(req.query.id ?? '').trim();
     if (!id || id.length > 128) {
-      return res.status(400).json({ error: 'Missing or invalid id' });
+      return res.status(400).json(staffApiErrorBody('Missing or invalid id', 400));
     }
     try {
       const order = await prisma.paymentCheckout.findFirst({
@@ -200,7 +264,7 @@ router.get(
         },
       });
       if (!order) {
-        return res.status(404).json({ error: 'Not found' });
+        return res.status(404).json(staffApiErrorBody('Not found', 404));
       }
 
       const attempts = await prisma.fulfillmentAttempt.findMany({
@@ -301,7 +365,11 @@ router.get(
       });
     } catch (e) {
       req.log?.error({ err: e }, 'ops order-health failed');
-      return res.status(500).json({ error: 'Internal error' });
+      return res
+        .status(500)
+        .json(
+          clientErrorBody('Internal error', INTERNAL_TOOLING_CODE.OPS_INTERNAL_ERROR),
+        );
     }
   },
 );

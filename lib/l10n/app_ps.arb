@@ -47,6 +47,8 @@
   "phase1OnlyAirtimeSnack": "فاز ۱: یوازې د موبایل اېرټایم شتون لري.",
   "phase1UsdSecureCheckout": "تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.",
   "checkoutCardRegionLabel": "ستاسو ځای (کارت)",
+  "checkoutSenderCountryHint": "دا ستاسو د کارت د بلینګ سیمه ده (خطر چیک)؛ ترلاسه کوونکی شمیره تل افغانستان موبایل (+۹۳) ده.",
+  "telecomRecipientAfghanistanDialHint": "افغانستان +۹۳ — ځایی موبایل ولیکئ (د ۷ پیل سره).",
   "checkoutPricingUsdServerNote": "بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.",
   "telecomCheckoutAirtimeRowLabel": "موبایل اېرټایم",
   "phase1ValidityDependsOnOperator": "د اعتبار موده د اپراتور پورې اړه لري — یوازې هغه وخت دلته ښیو چې له بیې څخه تایید شوی مقدار ولرو.",
@@ -58,8 +60,32 @@
       }
     }
   },
+  "checkoutReviewTotalChargedHeadline": "ټول تادیه شوی: {amount}",
+  "@checkoutReviewTotalChargedHeadline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewAirtimeValueSubline": "د اېرټایم بیه (ترلاسه کوونکی): {amount}",
+  "@checkoutReviewAirtimeValueSubline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewHeadlinePricingUnavailable": "بشپړه بیه به د پورته بارېدلو وروسته ښکاري — لاندې د امر لنډیز وګورئ.",
+  "checkoutQuoteFailed": "بیه پورته نشوه. اړیکه مو چیک کړئ او بیا هڅه وکړئ.",
+  "checkoutAirtimeValueLabel": "د اېرټایم بیه",
+  "receiptBreakdownLoadingHint": "د تادیې جزئیات بارېږي…",
+  "receiptBreakdownPartialHint": "د مالیې او فیس بشپړ ردیز نشته؛ لاندې مقدار ستاسو د کارت څخه اخیستل شوی ټول دی.",
   "rechargeTrustLine": "USD نرخونه · خوندي تادیه · افغان موبایل",
   "recipientNumber": "د اخیستونکي شمېره",
+  "receivingCountryLabel": "د اخیستونکي هېواد",
+  "rechargeCountryNotSupported": "د موبایل شارژ یوازې د افغانستان شمېرو لپاره دی. افغانستان غوره کړئ.",
+  "phoneLocalDigitsHint": "ځایی شمېره د هېواد کوډ پرته ولیکئ.",
   "operator": "اپراتور",
   "getPackages": "بستې ترلاسه کړئ",
   "packages": "بستې",
@@ -77,13 +103,13 @@
   "apiUnreachableRecharge": "اړیکه نشوه. خپل انټرنټ مو چیک کړئ او بیا هڅه وکړئ.",
   "hubSubtitle": "شارژ · بټوه · زنګ",
   "hubTileRechargeTitle": "د موبایل شارژ",
-  "hubTileRechargeSub": "ګړندي بستې · USD بیه",
+  "hubTileRechargeSub": "افغانستان اېرټایم · ژوندی کاتالوګ · Stripe تادیه",
   "hubTileWalletTitle": "بټوه",
   "hubTileWalletSub": "بیلانس او شارژ",
   "hubTileCallingTitle": "نړیوال زنګ",
   "hubTileCallingSub": "ژر راځي",
-  "hubTileLegacyTitle": "پلانونه او کاتالوګ",
-  "hubTileLegacySub": "اېرټایم او ډیټا",
+  "hubTileLegacyTitle": "کلاسیک شارژ",
+  "hubTileLegacySub": "لاسي مقدارونه او بیاکتنه (زړې لاره)",
   "walletScreenTitle": "بټوه",
   "balanceHeroLabel": "د حساب بیلانس",
   "availableLabel": "شته",
@@ -109,7 +135,18 @@
   "operatorLabel": "اپراتور",
   "packageLabel": "بسته",
   "totalUsd": "ټول (USD)",
+  "checkoutProductValueLabel": "د محصول ارزښت",
+  "checkoutSenderTaxLabel": "مالیه (د لېږونکي سیمه)",
+  "checkoutServiceFeeLabel": "د زورا-ولت خدمت فیس",
+  "checkoutTotalChargedLabel": "ټول تادیه‌شوی",
+  "checkoutTaxJurisdictionPhaseNote": "مالیه د ټاکل شوي لېږونکي هېواد پر اساس محاسبه کېږي. که ایالت، ښار یا پوستي کوډ ورکړئ، زموږ په دې نسخه کې نرخ نه بدلېږي — د راتلونکو مالیاتي ماشینونو او compliance لپاره ساتل کېږي.",
+  "checkoutPricingLoading": "ستاسو سیمې لپاره بیه تازه کېږي…",
   "checkoutUsdTotalFootnote": "په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.",
+  "checkoutScreenCurrencyHint": "بیې په امریکایي ډالرو (USD) کې دي.",
+  "checkoutScreenServerPricingNote": "بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.",
+  "checkoutScreenOrderTotalCaption": "ټول (USD)",
+  "checkoutScreenChargeFootnote": "په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.",
+  "checkoutScreenStripeSecureNote": "تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.",
   "stripeSectionTitle": "خوندي تادیه",
   "stripeKeyMissing": "د دې build لپاره Stripe publishable کی نشته.",
   "stripeKeyLoaded": "د کارت تادیه چمتو ده. ستاسو سرور PaymentIntent جوړوي او client_secret ورکوي.",
@@ -127,6 +164,10 @@
   "telecomMinuteBundlesTitle": "د دقیقو بستې (USD)",
   "telecomEnterNumberForAmounts": "معتبر شمېره ولیکئ او اپراتور تایید کړئ ترڅو مقدارونه ښکاره شي.",
   "telecomPhoneHintAirtime": "07X XXX XXXX یا 937…",
+  "receivingCountryLabel": "هېواد (ترلاسه‌کوونکی)",
+  "recipientLocalNumber": "زموږ موبایل شمېره",
+  "phase1AirtimeAfghanistanOnly": "په فاز ۱ کې یوازې افغانستان. افغانستان غوره کړئ.",
+  "checkoutSecuringCheckout": "تادیه خوندي کیږي…",
   "telecomDataHeadline": "ډیټا بستې",
   "telecomDataSubtitle": "ورځنۍ، اونیزې او میاشتنۍ بستې. ټول په USD کې.",
   "telecomPhoneHintData": "07X XXX XXXX",
@@ -197,6 +238,34 @@
   "authGenericError": "ستونزه رامنځته شوه. بیا هڅه وکړئ.",
   "authFillAllFields": "بریښنالیک او پټنوم ولیکئ.",
   "authInvalidEmail": "اعتباری بریښنالیک ولیکئ.",
+  "authEmailRequired": "خپل بریښنالیک ولیکئ.",
+  "authOtpEmailIntro": "خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.",
+  "authOtpEmailHelp": "هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.",
+  "authOtpContinueCta": "کوډ ولېږه",
+  "authOtpCodeTitle": "کوډ داخل کړئ",
+  "authOtpCheckEmail": "خپل انباکس وګورئ",
+  "authOtpCodeLabel": "د تایید کوډ",
+  "authOtpVerifyCta": "کوډ تایید کړئ",
+  "authOtpCodeRequired": "۶ عددي تاییدي کوډ ولیکئ.",
+  "authOtpInvalidOrExpired": "دا کوډ ناسم دی یا موده یې تېره شوې ده. نوی کوډ وغواړئ او بیا هڅه وکړئ.",
+  "authOtpTooManyAttempts": "ډېرې هڅې شوې دي. مهرباني وکړئ لږ تم شئ او بیا هڅه وکړئ.",
+  "authNetworkRetry": "د شبکې ستونزه. خپله اړیکه وګورئ او بیا هڅه وکړئ.",
+  "authOtpRequestSuccess": "که حساب وړ وي، د تایید کوډ استول شوی دی.",
+  "authOtpResendReady": "اوس کولی شئ نوی کوډ وغواړئ.",
+  "authOtpResendCta": "کوډ بیا ولېږه",
+  "authOtpChangeEmail": "بل بریښنالیک وکاروئ",
+  "authOtpCodeHelp": "{email} ته ۶ عددي کوډ لېږل شوی دی. د دوام لپاره یې لاندې داخل کړئ.",
+  "@authOtpCodeHelp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "authOtpResendIn": "تاسو کولی شئ په {seconds} ثانیو کې کوډ بیا وغواړئ.",
+  "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "landingNavBrand": "زوره‌ولت",
   "landingHeroTitle": "افغانستان ته په ثانیو کې ایئرټایم واستوئ",
   "landingHeroSubtitle": "د افغان شمېرو لپاره نړیوال موبایل ټاپ‌آپ — د هغو کورنیو لپاره چې په چټک او باوري لار اړتیا لري.",
@@ -225,6 +294,13 @@
   "successScreenTitle": "ټول څه سم دي",
   "successPaymentConfirmed": "تادیه ترلاسه شوه",
   "successStripeConfirmedShort": "ستاسو بانک پېرود تایید کړ. موږ اوس ستاسو ټاپ‌آپ بشپړوو.",
+  "successMissingReturnParamsHint": "په دې پته کې د تادیې حواله جزئیات (سشن یا د سفارش پېژند) نشته. که تادیه مو بشپړه کړه، وروستي سفارشونه خلاص کړئ یا د Stripe د تایید برېښنالیک لینک وکاروئ.",
+  "successBootstrapWarning": "موږ نشو کولی ژمیز د سفارش حالت تازه کړو. ستاسو تادیه شايد لاهم پروسس کې وي — یو ځل بیا وروستي سفارشونه وګورئ.\n{detail}",
+  "@successBootstrapWarning": {
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
   "receiptTitle": "رسيډ",
   "receiptOrderRef": "د سفارش شمېره",
   "receiptPaymentStatus": "تادیه",
