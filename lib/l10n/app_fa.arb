@@ -210,6 +210,7 @@
   "authOtpEmailIntro": "نشانی ایمیل خود را وارد کنید تا در صورت واجد شرایط بودن حساب، یک کد ۶ رقمی ورود برای شما ارسال شود.",
   "authOtpEmailHelp": "از همان ایمیلی استفاده کنید که برای حساب زوره‌ولت خود دارید.",
   "authOtpContinueCta": "ارسال کد",
+  "authOtpSendingCode": "در حال ارسال کد تأیید…",
   "authOtpCodeTitle": "ورود کد",
   "authOtpCheckEmail": "صندوق ایمیل خود را بررسی کنید",
   "authOtpCodeLabel": "کد تأیید",
@@ -222,7 +223,7 @@
   "authOtpResendReady": "اکنون می‌توانید یک کد تازه درخواست کنید.",
   "authOtpResendCta": "ارسال دوباره کد",
   "authOtpChangeEmail": "استفاده از ایمیل دیگر",
-  "authOtpCodeHelp": "یک کد ۶ رقمی به {email} فرستاده شد. برای ادامه آن را در پایین وارد کنید.",
+  "authOtpCodeHelp": "کد ۶ رقمی ورود برای {email} را وارد کنید (پوشهٔ هرزنامه را هم ببینید).",
   "@authOtpCodeHelp": {
     "placeholders": {
       "email": {}

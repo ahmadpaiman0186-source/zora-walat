@@ -225,6 +225,11 @@ class AuthApiService {
     } on Exception catch (error) {
       throw _networkError(error);
     }
+    if (kDebugMode) {
+      debugPrint(
+        'auth OTP POST ${_u('$_authPrefix/request-otp')} → HTTP ${res.statusCode}',
+      );
+    }
     if (res.statusCode < 200 || res.statusCode >= 300) {
       final error = _readErrorPayload(res);
       throw AuthApiException(
@@ -234,8 +239,13 @@ class AuthApiService {
       );
     }
     final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final ok = map['ok'] == true || map['success'] == true;
+    if (!ok) {
+      final msg = map['message']?.toString() ?? 'Request failed';
+      throw AuthApiException(message: msg, statusCode: res.statusCode);
+    }
     return OtpRequestResult(
-      ok: map['ok'] == true || map['success'] == true,
+      ok: true,
       message:
           map['message'] as String? ??
           'If the account is eligible, an OTP email will be sent.',
@@ -255,6 +265,11 @@ class AuthApiService {
     } on Exception catch (error) {
       throw _networkError(error);
     }
+    if (kDebugMode) {
+      debugPrint(
+        'auth OTP POST ${_u('$_authPrefix/resend-otp')} → HTTP ${res.statusCode}',
+      );
+    }
     if (res.statusCode < 200 || res.statusCode >= 300) {
       final error = _readErrorPayload(res);
       throw AuthApiException(
@@ -264,8 +279,13 @@ class AuthApiService {
       );
     }
     final map = jsonDecode(res.body) as Map<String, dynamic>;
+    final ok = map['ok'] == true || map['success'] == true;
+    if (!ok) {
+      final msg = map['message']?.toString() ?? 'Request failed';
+      throw AuthApiException(message: msg, statusCode: res.statusCode);
+    }
     return OtpRequestResult(
-      ok: map['ok'] == true || map['success'] == true,
+      ok: true,
       message:
           map['message'] as String? ??
           'If the account is eligible, an OTP email will be sent.',

@@ -1,11 +1,23 @@
-﻿SESSION_STATE snapshot (read-only, no processes stopped)
-Created: 2026-04-21T21:41:28.1622021-07:00
+﻿# Session state snapshot (Zora-Walat API / local dev)
+# Do not commit secrets. Safe to keep local under server/debug/
 
-Node process count: 32
-Note: Environment is considered CONTAMINATED (many concurrent node / npm test processes possible from prior verification runs).
+timestamp: 2026-04-26 (session closeout; local wall clock: America/Los_Angeles)
 
-Last npm test log (by LastWriteTime in server/):
-  npm-test-closeout-20260421205447.log  (61746 bytes, 2026-04-21T20:55:15.9491315-07:00)
+tooling (captured this session):
+  node: v22.22.0
+  npm:  11.11.0
+  git branch: 2026-04-11-qrw0
 
-Log copies saved under: server/debug/logs/
-See: node-processes-snapshot.json, env.txt, git-state.txt
+active ports (assumption for resume):
+  - Next.js frontend: 3000
+  - Node API: 8787 (http://127.0.0.1:8787 per PORT in server env)
+
+last known status (expected -- re-verify on resume):
+  - API: expected OK -- GET /health should return {"status":"ok"} when `cd server && npm start` is running
+  - Frontend: expected running -- `npm run dev` at repo root, http://localhost:3000
+  - OTP: console mode -- OTP_TRANSPORT=console; OTP printed in API terminal from sendOTP (not email)
+
+env files (present on disk; values not shown):
+  - server/.env: yes
+  - root .env.local: yes
+  - ENGINEERING_CHECKPOINT.md: yes (repo root)

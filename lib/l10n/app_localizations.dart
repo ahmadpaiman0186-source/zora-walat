@@ -1252,6 +1252,12 @@ abstract class AppLocalizations {
   /// **'Send code'**
   String get authOtpContinueCta;
 
+  /// No description provided for @authOtpSendingCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending verification code…'**
+  String get authOtpSendingCode;
+
   /// No description provided for @authOtpCodeTitle.
   ///
   /// In en, this message translates to:
@@ -1327,7 +1333,7 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpCodeHelp.
   ///
   /// In en, this message translates to:
-  /// **'We sent a 6-digit code to {email}. Enter it below to continue.'**
+  /// **'Use the 6-digit sign-in code for {email} (check spam). Enter it below.'**
   String authOtpCodeHelp(Object email);
 
   /// No description provided for @authOtpResendIn.

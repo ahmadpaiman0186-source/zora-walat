@@ -277,6 +277,7 @@
   "authOtpEmailIntro": "Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.",
   "authOtpEmailHelp": "Use the same email address you use for your Zora-Walat account.",
   "authOtpContinueCta": "Send code",
+  "authOtpSendingCode": "Sending verification code…",
   "authOtpCodeTitle": "Enter code",
   "authOtpCheckEmail": "Check your inbox",
   "authOtpCodeLabel": "Verification code",
@@ -289,7 +290,7 @@
   "authOtpResendReady": "You can request a new code now.",
   "authOtpResendCta": "Resend code",
   "authOtpChangeEmail": "Use a different email",
-  "authOtpCodeHelp": "We sent a 6-digit code to {email}. Enter it below to continue.",
+  "authOtpCodeHelp": "Use the 6-digit sign-in code for {email} (check spam). Enter it below.",
   "@authOtpCodeHelp": {
     "placeholders": {
       "email": {}

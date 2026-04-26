@@ -664,6 +664,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authOtpContinueCta => 'Send code';
 
   @override
+  String get authOtpSendingCode => 'Sending verification code…';
+
+  @override
   String get authOtpCodeTitle => 'Enter code';
 
   @override
@@ -705,7 +708,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String authOtpCodeHelp(Object email) {
-    return 'We sent a 6-digit code to $email. Enter it below to continue.';
+    return 'Use the 6-digit sign-in code for $email (check spam). Enter it below.';
   }
 
   @override

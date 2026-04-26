@@ -13,9 +13,13 @@ class OtpVerifyScreen extends StatefulWidget {
   const OtpVerifyScreen({
     super.key,
     required this.email,
+    /// When [SignInScreen] already called `requestOtp` successfully, pass the server message here
+    /// (via `GoRouter` `extra`) so we do not send a duplicate OTP email.
+    this.priorOtpSendMessage,
   });
 
   final String email;
+  final String? priorOtpSendMessage;
 
   @override
   State<OtpVerifyScreen> createState() => _OtpVerifyScreenState();
@@ -30,11 +34,21 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
   int _remainingSeconds = _resendCooldownSeconds;
   String? _error;
   String? _info;
+  /// `true` once we either have [priorOtpSendMessage] or finished the initial `request-otp` call.
+  bool _initialOtpRequestResolved = false;
 
   @override
   void initState() {
     super.initState();
-    _info = null;
+    if (widget.priorOtpSendMessage != null && widget.priorOtpSendMessage!.isNotEmpty) {
+      _info = widget.priorOtpSendMessage;
+      _initialOtpRequestResolved = true;
+    } else {
+      _busy = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_bootstrapInitialOtpRequest());
+      });
+    }
     _startCooldown();
   }
 
@@ -57,6 +71,46 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
       }
       setState(() => _remainingSeconds -= 1);
     });
+  }
+
+  Future<void> _bootstrapInitialOtpRequest() async {
+    if (_initialOtpRequestResolved) return;
+    final l10n = AppLocalizations.of(context);
+    setState(() {
+      _busy = true;
+      _error = null;
+      _info = null;
+    });
+    final authApi = AppScope.of(context).authApiService;
+    try {
+      final result = await authApi.requestOtp(email: widget.email);
+      if (!mounted) return;
+      if (!result.ok) {
+        setState(() {
+          _error = l10n.authGenericError;
+          _initialOtpRequestResolved = true;
+        });
+        return;
+      }
+      setState(() {
+        _info = result.message;
+        _initialOtpRequestResolved = true;
+      });
+    } on AuthApiException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = _mapRequestError(error, l10n);
+        _initialOtpRequestResolved = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = l10n.authGenericError;
+        _initialOtpRequestResolved = true;
+      });
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _verify() async {
@@ -107,10 +161,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
       _info = null;
     });
     try {
-      final result = await AppScope.of(context).authApiService.requestOtp(
+      final result = await AppScope.of(context).authApiService.resendOtp(
             email: widget.email,
           );
       if (!mounted) return;
+      if (!result.ok) {
+        setState(() => _error = l10n.authGenericError);
+        return;
+      }
       _startCooldown();
       _otp.clear();
       setState(() => _info = result.message);
@@ -165,17 +223,28 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),
+            if (!_initialOtpRequestResolved && _busy) ...[
+              Row(
+                children: [
+                  const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l10n.authOtpSendingCode,
+                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
             if (_info != null) ...[
               _StatusBanner(
                 message: _info!,
-                color: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimaryContainer,
-                backgroundColor: theme.colorScheme.primaryContainer,
-              ),
-              const SizedBox(height: 16),
-            ] else ...[
-              _StatusBanner(
-                message: l10n.authOtpRequestSuccess,
                 color: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimaryContainer,
                 backgroundColor: theme.colorScheme.primaryContainer,
@@ -193,7 +262,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
             ],
             TextField(
               controller: _otp,
-              enabled: !_busy,
+              enabled: !_busy && _initialOtpRequestResolved,
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.oneTimeCode],
@@ -212,12 +281,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
                 counterText: '',
               ),
               maxLength: 6,
-              onSubmitted: (_) => _busy ? null : _verify(),
+              onSubmitted: (_) =>
+                  _busy || !_initialOtpRequestResolved ? null : _verify(),
             ),
             const SizedBox(height: 24),
             FilledButton(
-              onPressed: _busy ? null : _verify,
-              child: _busy
+              onPressed:
+                  _busy || !_initialOtpRequestResolved ? null : _verify,
+              child: _busy && _initialOtpRequestResolved
                   ? const SizedBox(
                       height: 22,
                       width: 22,
@@ -237,7 +308,11 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: (_busy || _remainingSeconds > 0) ? null : _resend,
+              onPressed: (_busy ||
+                      _remainingSeconds > 0 ||
+                      !_initialOtpRequestResolved)
+                  ? null
+                  : _resend,
               child: Text(l10n.authOtpResendCta),
             ),
             TextButton(

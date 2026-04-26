@@ -242,6 +242,7 @@
   "authOtpEmailIntro": "خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.",
   "authOtpEmailHelp": "هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.",
   "authOtpContinueCta": "کوډ ولېږه",
+  "authOtpSendingCode": "د تایید کوډ لیږل…",
   "authOtpCodeTitle": "کوډ داخل کړئ",
   "authOtpCheckEmail": "خپل انباکس وګورئ",
   "authOtpCodeLabel": "د تایید کوډ",
@@ -254,7 +255,7 @@
   "authOtpResendReady": "اوس کولی شئ نوی کوډ وغواړئ.",
   "authOtpResendCta": "کوډ بیا ولېږه",
   "authOtpChangeEmail": "بل بریښنالیک وکاروئ",
-  "authOtpCodeHelp": "{email} ته ۶ عددي کوډ لېږل شوی دی. د دوام لپاره یې لاندې داخل کړئ.",
+  "authOtpCodeHelp": "د {email} لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ (سپام فولډر هم وګورئ).",
   "@authOtpCodeHelp": {
     "placeholders": {
       "email": {}

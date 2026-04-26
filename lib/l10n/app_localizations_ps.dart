@@ -654,6 +654,9 @@ class AppLocalizationsPs extends AppLocalizations {
   String get authOtpContinueCta => 'کوډ ولېږه';
 
   @override
+  String get authOtpSendingCode => 'د تایید کوډ لیږل…';
+
+  @override
   String get authOtpCodeTitle => 'کوډ داخل کړئ';
 
   @override
@@ -695,7 +698,7 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String authOtpCodeHelp(Object email) {
-    return '$email ته ۶ عددي کوډ لېږل شوی دی. د دوام لپاره یې لاندې داخل کړئ.';
+    return 'د $email لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ (سپام فولډر هم وګورئ).';
   }
 
   @override

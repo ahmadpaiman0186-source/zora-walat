@@ -187,7 +187,12 @@ GoRouter createAppRouter({required AuthSession authSession}) {
           if (email.isEmpty) {
             return const SignInScreen();
           }
-          return OtpVerifyScreen(email: email);
+          final prior = state.extra;
+          final priorMessage = prior is String ? prior : null;
+          return OtpVerifyScreen(
+            email: email,
+            priorOtpSendMessage: priorMessage,
+          );
         },
       ),
       GoRoute(

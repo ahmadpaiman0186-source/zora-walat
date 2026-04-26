@@ -253,3 +253,10 @@ Optional: `Set-Location c:\Users\ahmad\zora_walat\server; node --test --test-con
 
 **Flutter:** `POST /api/recharge/execute` may return **504** when the server waits for terminal fulfillment in queue mode; `ApiService` and `SuccessScreen` treat 504 as a structured in-progress response (not a thrown transport error).
 
+## NEXT SESSION PLAN
+1. Start API → `cd server && npm start`
+2. Verify → `GET /health` (expect `http://127.0.0.1:8787/health` → `{"status":"ok"}`)
+3. Start frontend → from repo root `npm run dev` (port **3000**)
+4. Test OTP (console output) — `OTP_TRANSPORT=console`; watch API log for code after `request-otp`
+5. Resume payment flow debugging
+

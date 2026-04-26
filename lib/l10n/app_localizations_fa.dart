@@ -658,6 +658,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get authOtpContinueCta => 'ارسال کد';
 
   @override
+  String get authOtpSendingCode => 'در حال ارسال کد تأیید…';
+
+  @override
   String get authOtpCodeTitle => 'ورود کد';
 
   @override
@@ -699,7 +702,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String authOtpCodeHelp(Object email) {
-    return 'یک کد ۶ رقمی به $email فرستاده شد. برای ادامه آن را در پایین وارد کنید.';
+    return 'کد ۶ رقمی ورود برای $email را وارد کنید (پوشهٔ هرزنامه را هم ببینید).';
   }
 
   @override
