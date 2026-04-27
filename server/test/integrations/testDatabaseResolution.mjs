@@ -98,6 +98,30 @@ export function applyIntegrationTestDatabaseEnv() {
     process.env.OWNER_ALLOWED_EMAIL = '';
   }
 
+  /**
+   * GitHub Actions `ci.yml` sets `CLIENT_URL` for Stripe checkout `return_url` / `cancel_url` resolution.
+   * If `server/.env` omits it, unverified-user checkout tests can return **400** (unresolved client base)
+   * before `requireEmailVerified` can return **403** — false negative. Default to the same dev base as CI.
+   * Set `ZW_INTEGRATION_RESPECT_CLIENT_URL=true` to keep an empty `CLIENT_URL` for a specific test file.
+   */
+  if (
+    process.env.ZW_INTEGRATION_RESPECT_CLIENT_URL !== 'true' &&
+    !String(process.env.CLIENT_URL ?? '').trim()
+  ) {
+    process.env.CLIENT_URL = 'http://127.0.0.1:3000';
+  }
+
+  /**
+   * Match `test/setupTestEnv.mjs`: after dotenv, `server/.env` may set `NODE_ENV=development`.
+   * `env.allowUnverifiedCheckoutInDev` would then skip `requireEmailVerified` on hosted checkout,
+   * causing false negatives in `verifiedMoneyPath` (200 vs expected 403). Integration preload runs
+   * before `createApp` imports `env.js`.
+   * Set `ZW_INTEGRATION_RESPECT_NODE_ENV=true` to preserve `.env` NODE_ENV for a dedicated run.
+   */
+  if (process.env.ZW_INTEGRATION_RESPECT_NODE_ENV !== 'true') {
+    process.env.NODE_ENV = 'test';
+  }
+
   process.env.ZW_INTEGRATION_TEST_DB_SOURCE = source;
   process.env.ZW_INTEGRATION_TEST_DB_DISPLAY = effective
     ? describePostgresUrlDisplay(effective)
