@@ -10,7 +10,7 @@ import { buildPricingMeta } from '../src/domain/pricing/pricingSnapshotPolicy.js
 
 test('resolveCheckoutPricing matches resolveUnifiedCheckoutPricing (same reference path)', () => {
   const input = {
-    amountUsdCents: 500,
+    amountCents: 500,
     senderCountryCode: 'US',
     riskBufferPercent: 1.25,
   };
@@ -21,7 +21,7 @@ test('resolveCheckoutPricing matches resolveUnifiedCheckoutPricing (same referen
 
 test('resolveCheckoutPricing is stable for repeated calls (US 500)', () => {
   const input = {
-    amountUsdCents: 500,
+    amountCents: 500,
     senderCountryCode: 'US',
     riskBufferPercent: 1.25,
   };

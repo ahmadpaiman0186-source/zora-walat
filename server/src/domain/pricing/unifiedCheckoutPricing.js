@@ -12,13 +12,13 @@ import { resolveCheckoutGovernmentTaxContext } from './taxEngine.js';
  * Single entry for server checkout pricing (quote + session). Behavior matches legacy
  * resolveCheckoutPricing: same inputs → same outputs.
  *
- * @param {{ packageId?: string | null, amountUsdCents?: number | null, riskBufferPercent: number, senderCountryCode: string, billingJurisdiction?: object | null }} input
+ * @param {{ packageId?: string | null, amountCents?: number | null, riskBufferPercent: number, senderCountryCode: string, billingJurisdiction?: object | null }} input
  * @returns {import('./pricingEngine.js').PricingLineSuccess | import('./pricingEngine.js').PricingLineFailure | { ok: false, code: string, message: string }}
  */
 export function resolveUnifiedCheckoutPricing(input) {
   const {
     packageId,
-    amountUsdCents,
+    amountCents,
     riskBufferPercent,
     senderCountryCode,
     billingJurisdiction,
@@ -54,12 +54,12 @@ export function resolveUnifiedCheckoutPricing(input) {
     });
   }
 
-  const n = Number(amountUsdCents);
+  const n = Number(amountCents);
   if (!Number.isInteger(n) || n < 50 || n > 500_000) {
     return {
       ok: false,
       code: 'INVALID_AMOUNT',
-      message: 'Invalid amountUsdCents',
+      message: 'Invalid amountCents',
     };
   }
   if (!ALLOWED_CHECKOUT_USD_CENTS.has(n)) {

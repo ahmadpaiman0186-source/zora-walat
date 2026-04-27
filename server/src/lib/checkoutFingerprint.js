@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
  */
 export function checkoutRequestFingerprint({
   userId,
-  amountUsdCents,
+  amountCents,
   senderCountryCode,
   operatorKey,
   recipientNational,
@@ -14,7 +14,7 @@ export function checkoutRequestFingerprint({
 }) {
   const payload = JSON.stringify({
     u: userId,
-    a: amountUsdCents,
+    a: amountCents,
     s: senderCountryCode ?? null,
     o: operatorKey ?? null,
     p: packageId ?? null,

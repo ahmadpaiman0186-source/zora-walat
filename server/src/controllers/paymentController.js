@@ -175,7 +175,7 @@ export async function createCheckoutSession(req, res) {
 
   const priced = resolveCheckoutPricing({
     packageId: parsed.packageId,
-    amountUsdCents: parsed.amountUsdCents,
+    amountCents: parsed.amountUsdCents,
     riskBufferPercent: sender.riskBufferPercent,
     senderCountryCode: parsed.senderCountry,
     billingJurisdiction: parsed.billingJurisdiction ?? null,
@@ -247,7 +247,7 @@ export async function createCheckoutSession(req, res) {
 
   const fingerprint = checkoutRequestFingerprint({
     userId: authUserId,
-    amountUsdCents: trustedCents,
+    amountCents: trustedCents,
     senderCountryCode: parsed.senderCountry,
     operatorKey: parsed.operatorKey ?? null,
     recipientNational,
@@ -390,7 +390,7 @@ export async function createCheckoutSession(req, res) {
       idempotencyKey,
       fingerprint,
       userId: authUserId,
-      amountUsdCents: trustedCents,
+      amountCents: trustedCents,
       currency: 'usd',
       senderCountryCode: parsed.senderCountry,
       operatorKey: parsed.operatorKey ?? null,
@@ -575,7 +575,7 @@ export async function createCheckoutPricingQuote(req, res) {
 
   const priced = resolveCheckoutPricing({
     packageId: parsed.packageId,
-    amountUsdCents: parsed.amountUsdCents,
+    amountCents: parsed.amountUsdCents,
     riskBufferPercent: sender.riskBufferPercent,
     senderCountryCode: parsed.senderCountry,
     billingJurisdiction: parsed.billingJurisdiction ?? null,

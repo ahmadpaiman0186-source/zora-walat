@@ -18,7 +18,7 @@ async function quoteBreakdown(senderCountry, payload) {
   }
   const priced = resolveCheckoutPricing({
     packageId: payload.packageId,
-    amountUsdCents: payload.amountUsdCents,
+    amountCents: payload.amountUsdCents,
     riskBufferPercent: sender.riskBufferPercent,
     senderCountryCode: senderCountry,
   });

@@ -12,7 +12,7 @@ for (const row of AIRTIME_SKUS) {
   const packageId = `roshan_${row.idSuffix}`;
   const r = resolveCheckoutPricing({
     packageId,
-    amountUsdCents: null,
+    amountCents: null,
     riskBufferPercent: risk,
   });
   if (!r.ok) {
