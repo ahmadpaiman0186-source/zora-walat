@@ -67,10 +67,15 @@ export function buildStripeCheckoutLineItems(pricing) {
  * @param {object} pricing — [computeCheckoutPrice].pricing
  */
 export function pricingBreakdownResponseBody(pricing) {
-  const pv = pricing.customerProductValueCents;
-  const tx = pricing.customerGovernmentTaxCents;
-  const fee = pricing.customerZoraServiceFeeCents;
-  const tot = pricing.finalPriceCents;
+  const pv = Math.round(Number(pricing.customerProductValueCents));
+  const tx = Math.round(Number(pricing.customerGovernmentTaxCents));
+  const fee = Math.round(Number(pricing.customerZoraServiceFeeCents));
+  const tot = Math.round(Number(pricing.finalPriceCents));
+  if (pv + tx + fee !== tot) {
+    throw new Error(
+      `checkout pricing breakdown: product+tax+fee !== total (${pv}+${tx}+${fee} !== ${tot})`,
+    );
+  }
   return {
     productValueUsdCents: pv,
     governmentTaxUsdCents: tx,
@@ -124,16 +129,28 @@ export function pricingBreakdownFromSnapshot(pricingSnapshot, amountUsdCents) {
     const pv = Math.round(Number(snap.customerProductValueUsdCents));
     const tx = Math.round(Number(snap.customerGovernmentTaxUsdCents));
     const fee = Math.round(Number(snap.customerZoraServiceFeeUsdCents));
-    const tot = Math.round(Number(snap.finalPriceUsdCents));
+    const storedTotal = Math.round(Number(snap.finalPriceUsdCents));
+    /** Authoritative total: sum of line items (strict int; matches engine + Stripe line items). */
+    const lineTotal = pv + tx + fee;
+    if (storedTotal !== lineTotal) {
+      console.warn(
+        JSON.stringify({
+          event: 'pricing_snapshot_total_reconciled',
+          storedTotal,
+          lineTotal,
+          msg: 'finalPriceUsdCents != product+tax+fee; using line sum for breakdown',
+        }),
+      );
+    }
     return {
       productValueUsdCents: pv,
       governmentTaxUsdCents: tx,
       zoraServiceFeeUsdCents: fee,
-      totalUsdCents: tot,
+      totalUsdCents: lineTotal,
       productValueUsd: roundUsd(pv),
       taxUsd: roundUsd(tx),
       serviceFeeUsd: roundUsd(fee),
-      totalUsd: roundUsd(tot),
+      totalUsd: roundUsd(lineTotal),
     };
   }
   return legacySingleLineBreakdown(amountUsdCents);
