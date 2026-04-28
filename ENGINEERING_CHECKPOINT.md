@@ -1,5 +1,33 @@
 # Engineering checkpoint (Zora-Walat)
 
+## Post–Stripe account onboarding checkpoint — 2026-04-28 (no real-user launch)
+
+**Purpose:** Safe checkpoint after Stripe onboarding. **Real live payments and real top-ups are not enabled** until you explicitly approve and configure production env.
+
+**Stripe / account (operator attestation — no secrets here):**
+
+- Stripe account onboarding **submitted**.
+- Stripe indicates **payments may be accepted while account review is still pending** (subject to Stripe’s rules and risk controls).
+- **Payouts remain pending** until review completes (expected).
+- **Bank account connected** for payouts when Stripe approves.
+- **2FA enabled** on Stripe Dashboard (and on any operator accounts with access).
+- **No real-user launch yet** — treat as internal / dry-run only until launch checklist is complete.
+
+**Technical guardrails (unchanged in this checkpoint):**
+
+- Live `sk_live_` / `rk_live_` Stripe keys are **refused outside `NODE_ENV=production`** for hosted checkout and embedded PI paths (`server/src/config/stripeEnv.js`).
+- Webhook handler **requires** valid `Stripe-Signature` + `constructEvent` before processing (`server/src/routes/stripeWebhook.routes.js`).
+- **`PAYMENTS_LOCKDOWN_MODE`:** in code this is **`true` only when** `process.env.PAYMENTS_LOCKDOWN_MODE === 'true'` (`server/src/config/env.js`). **Unset = lockdown off.** For accidental-live protection, **keep `PAYMENTS_LOCKDOWN_MODE=true` in production secrets** until you deliberately disable it for go-live.
+- Ledger immutability remains enforced (DB trigger + tests); re-run `npm --prefix server run test:ci` before any money-path change.
+
+**Next human actions before any live money:**
+
+1. Set production secrets (Stripe, Reloadly, DB, JWT) in the host’s secret store — **never** in git.
+2. Confirm `PAYMENTS_LOCKDOWN_MODE` and `PRELAUNCH_LOCKDOWN` match your intended phase (lockdown on until launch).
+3. Run full server + Flutter verification on the release candidate (see commands in section below when recorded).
+
+---
+
 ## Security closeout checkpoint — 2026-04-26 (audit + CI green)
 
 **Date:** 2026-04-26  
