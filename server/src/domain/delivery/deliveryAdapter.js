@@ -3,6 +3,7 @@ import { AIRTIME_OUTCOME, AIRTIME_ERROR_KIND } from '../fulfillment/airtimeFulfi
 import { executeAirtimeFulfillment } from '../fulfillment/executeAirtimeFulfillment.js';
 import { fulfillMockAirtime } from '../fulfillment/mockAirtimeProvider.js';
 import { fulfillReloadlyDelivery } from '../../services/reloadlyClient.js';
+import { shouldBlockPhase1ReloadlyOutbound } from '../fulfillment/fulfillmentOutboundPolicy.js';
 
 /** Mock fallback when Reloadly is selected but unavailable — explicit env only (never NODE_ENV). */
 function allowReloadlyUnavailableMockFallback() {
@@ -25,6 +26,25 @@ function allowReloadlyUnavailableMockFallback() {
  */
 export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
   if (env.airtimeProvider === 'reloadly') {
+    if (
+      shouldBlockPhase1ReloadlyOutbound(process.env.NODE_ENV, {
+        phase1FulfillmentOutboundEnabled: env.phase1FulfillmentOutboundEnabled === true,
+      })
+    ) {
+      return {
+        outcome: AIRTIME_OUTCOME.UNAVAILABLE,
+        providerKey: 'reloadly',
+        failureCode: 'fulfillment_outbound_disabled',
+        failureMessage:
+          'Reloadly outbound execution disabled (set PHASE1_FULFILLMENT_OUTBOUND_ENABLED=true or run under NODE_ENV=test).',
+        errorKind: AIRTIME_ERROR_KIND.CONFIG,
+        requestSummary: {
+          packageId: order.packageId ?? null,
+          gate: 'phase1_outbound_policy',
+        },
+        responseSummary: {},
+      };
+    }
     const r = await fulfillReloadlyDelivery(order, fulfillmentCtx);
     if (r.outcome === AIRTIME_OUTCOME.SUCCESS) {
       return r;

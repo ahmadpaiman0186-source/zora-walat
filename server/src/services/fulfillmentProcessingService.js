@@ -6,6 +6,7 @@ import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatu
 import {
   assertTransition,
   isTerminalOrderStatus,
+  OrderTransitionError,
 } from '../domain/orders/orderLifecycle.js';
 import { writeOrderAudit } from './orderAuditService.js';
 import { resolveAirtimeProviderName } from '../domain/fulfillment/executeAirtimeFulfillment.js';
@@ -24,6 +25,7 @@ import {
   AUTO_RETRY_ENABLED,
   RETRY_POLICY_VERSION,
   isRetryableFulfillmentFailure,
+  transientRetryHintFromProviderResult,
 } from '../domain/fulfillment/retryPolicy.js';
 import { grantLoyaltyPointsForDeliveredOrderInTx } from './loyaltyPointsService.js';
 import {
@@ -78,6 +80,9 @@ import {
   assertCanonicalTransition,
   CANONICAL_ORDER_STATUS,
 } from '../domain/orders/canonicalOrderLifecycle.js';
+import {
+  assertPhase1FulfillmentQueuePreconditions,
+} from '../domain/orders/phase1TransactionStateMachine.js';
 import { emitOrderTransitionLog } from '../lib/orderTransitionLog.js';
 
 function safeJson(obj) {
@@ -118,6 +123,23 @@ function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
  * @param {{ info?: Function, warn?: Function }} [log] — optional webhook/process logger
  */
 export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
+  const orderRow = await tx.paymentCheckout.findUnique({
+    where: { id: orderId },
+  });
+  if (!orderRow) {
+    throw new OrderTransitionError(
+      'Cannot queue fulfillment: PaymentCheckout row missing',
+      'missing_order',
+    );
+  }
+  const pre = assertPhase1FulfillmentQueuePreconditions(orderRow);
+  if (!pre.ok) {
+    throw new OrderTransitionError(
+      `Cannot queue fulfillment: ${pre.reason}${pre.detail != null ? ` (${String(pre.detail)})` : ''}`,
+      'fulfillment_queue_precondition_failed',
+    );
+  }
+
   const already = await tx.fulfillmentAttempt.findFirst({
     where: { orderId, attemptNumber: 1 },
   });
@@ -790,6 +812,7 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
             retryPolicyVersion: RETRY_POLICY_VERSION,
             retryable: isRetryableFulfillmentFailure(providerResult),
             autoRetryEnabled: AUTO_RETRY_ENABLED,
+            transientRetryHint: transientRetryHintFromProviderResult(providerResult),
           },
           ip: null,
         });

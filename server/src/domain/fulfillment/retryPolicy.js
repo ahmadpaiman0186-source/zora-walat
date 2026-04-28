@@ -10,6 +10,24 @@ export const RETRY_POLICY_VERSION = 1;
 /** Explicitly no automatic re-queue in-process (avoid duplicate fulfillment). */
 export const AUTO_RETRY_ENABLED = false;
 
+/** Soft ceiling for future automated follow-up attempts (operator-controlled jobs). */
+export const TRANSIENT_RETRY_ATTEMPT_BUDGET = 3;
+
+/**
+ * Structured metadata for audits when a failure might be transient (no enqueue implied).
+ *
+ * @param {Record<string, unknown> | null | undefined} providerResult
+ */
+export function transientRetryHintFromProviderResult(providerResult) {
+  const retryable = isRetryableFulfillmentFailure(providerResult);
+  return {
+    retryPolicyVersion: RETRY_POLICY_VERSION,
+    transientEligible: retryable,
+    autoRetryEnabled: AUTO_RETRY_ENABLED,
+    budget: TRANSIENT_RETRY_ATTEMPT_BUDGET,
+  };
+}
+
 /**
  * Whether a failed provider result may be worth a manual or batched retry later.
  * Does NOT enqueue work — only classification for audits / future job runners.

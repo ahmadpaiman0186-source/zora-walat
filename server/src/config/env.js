@@ -391,6 +391,12 @@ export const env = {
    */
   reloadlyAllowUnavailableMockFallback:
     process.env.RELOADLY_ALLOW_UNAVAILABLE_MOCK_FALLBACK === 'true',
+  /**
+   * When true: Phase 1 Reloadly outbound HTTP (delivery adapter) may run outside `NODE_ENV=test`.
+   * Mock airtime ignores this flag. Fail-closed for accidental production/network exposure.
+   */
+  phase1FulfillmentOutboundEnabled:
+    process.env.PHASE1_FULFILLMENT_OUTBOUND_ENABLED === 'true',
   /** HTTP timeout for future real provider calls (ms). */
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
