@@ -47,13 +47,47 @@ function buildDatabaseUrlWithPoolCap() {
 
 const effectiveDatabaseUrl = buildDatabaseUrlWithPoolCap();
 
-export const prisma = effectiveDatabaseUrl
+const prismaBase = effectiveDatabaseUrl
   ? new PrismaClient({
       datasources: {
         db: { url: effectiveDatabaseUrl },
       },
     })
   : new PrismaClient();
+
+/**
+ * Ledger immutability guardrail:
+ * Prevent UPDATE/DELETE on `UserWalletLedgerEntry` through Prisma in all environments.
+ * (DB-level immutability is preferred; this is an additional safety net and supports tests.)
+ *
+ * Prisma v6: middleware `$use` is removed; use query extensions instead.
+ */
+export const prisma = prismaBase.$extends({
+  query: {
+    userWalletLedgerEntry: {
+      update() {
+        const e = new Error('immutable_ledger_entry');
+        e.code = 'immutable_ledger_entry';
+        throw e;
+      },
+      updateMany() {
+        const e = new Error('immutable_ledger_entry');
+        e.code = 'immutable_ledger_entry';
+        throw e;
+      },
+      delete() {
+        const e = new Error('immutable_ledger_entry');
+        e.code = 'immutable_ledger_entry';
+        throw e;
+      },
+      deleteMany() {
+        const e = new Error('immutable_ledger_entry');
+        e.code = 'immutable_ledger_entry';
+        throw e;
+      },
+    },
+  },
+});
 
 if (typeof globalThis !== 'undefined') {
   if (globalThis.__ZW_PRISMA_CLIENT__ && globalThis.__ZW_PRISMA_CLIENT__ !== prisma) {

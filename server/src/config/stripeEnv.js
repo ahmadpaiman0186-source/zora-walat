@@ -94,3 +94,21 @@ export function isStripeKeyAllowedForWebTopupCharges() {
   }
   return false;
 }
+
+/**
+ * Hosted Stripe Checkout (redirect) may use test or live keys.
+ * Safety invariant: refuse live keys unless `NODE_ENV=production` to prevent accidental real charges
+ * from preview/dev deployments.
+ */
+export function isStripeKeyAllowedForHostedCheckout() {
+  const secret = getValidatedStripeSecretKey();
+  if (!secret) return false;
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  if (secret.startsWith('sk_test_') || secret.startsWith('rk_test_')) {
+    return true;
+  }
+  if (secret.startsWith('sk_live_') || secret.startsWith('rk_live_')) {
+    return nodeEnv === 'production';
+  }
+  return false;
+}

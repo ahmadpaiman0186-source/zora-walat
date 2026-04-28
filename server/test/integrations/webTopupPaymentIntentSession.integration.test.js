@@ -21,7 +21,10 @@ const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
 
 function topupBody() {
-  const suffix = randomUUID().replace(/-/g, '').slice(0, 6);
+  const suffix = randomUUID()
+    .replace(/\D/g, '')
+    .padEnd(6, '0')
+    .slice(0, 6);
   return {
     originCountry: 'US',
     destinationCountry: 'AF',
