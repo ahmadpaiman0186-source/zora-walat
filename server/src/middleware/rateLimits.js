@@ -48,6 +48,7 @@ const prod = env.nodeEnv === 'production';
  */
 export const webtopFlowPerMinuteMax = (() => {
   if (prod) return 5;
+  if (env.nodeEnv === 'test') return 200;
   if (process.env.CI === 'true') return 200;
   const raw = String(process.env.WEBTOP_FLOW_PER_MINUTE_MAX ?? '').trim();
   const n = Number.parseInt(raw, 10);

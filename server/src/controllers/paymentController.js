@@ -4,6 +4,7 @@ import { ZodError } from 'zod';
 import { getStripeClient } from '../services/stripe.js';
 import {
   getValidatedStripeSecretKey,
+  isStripeKeyAllowedForHostedCheckout,
   isStripeKeyAllowedForWebTopupCharges,
 } from '../config/stripeEnv.js';
 import { env } from '../config/env.js';
@@ -70,6 +71,26 @@ export async function createCheckoutSession(req, res) {
       .json(
         clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
       );
+  }
+
+  if (!getValidatedStripeSecretKey()) {
+    return res.status(503).json(
+      clientErrorBody(
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment (see server/.env.example).',
+        'stripe_not_configured',
+      ),
+    );
+  }
+  if (!isStripeKeyAllowedForHostedCheckout()) {
+    const mode = process.env.NODE_ENV || 'development';
+    return res.status(403).json(
+      clientErrorBody(
+        mode === 'production'
+          ? 'Stripe key mode is not valid for hosted checkout in this deployment.'
+          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for hosted checkout.',
+        'stripe_key_mode_forbidden',
+      ),
+    );
   }
 
   const stripe = getStripeClient();

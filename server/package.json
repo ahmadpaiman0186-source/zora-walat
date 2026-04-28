@@ -51,7 +51,7 @@
     "load:wallet:apply": "node scripts/wallet-topup-load.mjs --mode=apply",
     "smoke:wallet:unauthed": "node scripts/wallet-topup-load.mjs --smoke-unauthed",
     "smoke:wallet:no-idem": "node scripts/wallet-topup-load.mjs --smoke-no-idem",
-    "test:ci": "npm run test && npm run test:integration",
+    "test:ci": "npm run test && node scripts/maybe-migrate-integration-database.mjs && npm run test:integration",
     "ci:integration-verify": "node scripts/ci-integration-verify.mjs",
     "verify:ci-local": "node scripts/ci-verify-local.mjs",
     "reloadly:golden-path-preflight": "node scripts/reloadly-golden-path-preflight.mjs",
