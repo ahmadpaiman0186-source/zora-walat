@@ -53,6 +53,7 @@ import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
 import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { WEBTOPUP_CLIENT_ERROR_CODE } from '../constants/webtopupClientErrors.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { validateControlledStripeLiveProofCheckout } from '../lib/controlledStripeLiveProof.js';
 import { timingSafeEqualUtf8 } from '../lib/timingSafeString.js';
 import { assertPaymentIntentRiskAllowed } from '../services/risk/assertPaymentIntentRisk.js';
 import { orchestrateStripeCall } from '../services/reliability/reliabilityOrchestrator.js';
@@ -264,6 +265,27 @@ export async function createCheckoutSession(req, res) {
         ),
       );
     }
+  }
+
+  const hasOperatorAndRecipient = Boolean(
+    parsed.operatorKey && parsed.recipientPhone,
+  );
+  const proofGate = validateControlledStripeLiveProofCheckout({
+    finalPriceCents: trustedCents,
+    recipientNational,
+    hasOperatorAndRecipient,
+  });
+  if (!proofGate.ok) {
+    req.log?.warn(
+      {
+        securityEvent: 'controlled_stripe_live_proof_rejected',
+        code: proofGate.code,
+      },
+      'security',
+    );
+    return res.status(400).json(
+      clientErrorBody(proofGate.message, proofGate.code),
+    );
   }
 
   const fingerprint = checkoutRequestFingerprint({

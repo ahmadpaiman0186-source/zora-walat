@@ -246,6 +246,38 @@ export const env = {
     .toLowerCase(),
 
   /**
+   * Opt-in local controlled Stripe **live** proof (hosted checkout). When true, extra guards apply in
+   * `POST /create-checkout-session` — see `controlledStripeLiveProof.js`.
+   */
+  controlledStripeLiveProof:
+    process.env.ZW_CONTROLLED_STRIPE_LIVE_PROOF === 'true',
+
+  /**
+   * Max **final** charged USD cents (tax + fees included) when {@link controlledStripeLiveProof} is on.
+   * Unset when not in proof mode; required when proof mode is on (integer ≥ 1).
+   */
+  stripeLiveProofMaxFinalUsdCents: (() => {
+    const raw = process.env.ZW_STRIPE_LIVE_PROOF_MAX_FINAL_USD_CENTS;
+    if (raw == null || String(raw).trim() === '') return null;
+    const n = parseInt(String(raw).trim(), 10);
+    return Number.isFinite(n) && n >= 1 ? n : null;
+  })(),
+
+  /**
+   * Comma-separated recipient national numbers (digits) allowed when {@link controlledStripeLiveProof} is on.
+   */
+  stripeLiveProofAllowedRecipients: (() => {
+    const raw = String(
+      process.env.ZW_STRIPE_LIVE_PROOF_ALLOWED_RECIPIENTS ?? '',
+    ).trim();
+    if (!raw) return [];
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  })(),
+
+  /**
    * When true: `POST /api/wallet/topup` rejects requests without `Idempotency-Key` (UUID).
    * Recommended for scale / production; off by default for older clients.
    */
