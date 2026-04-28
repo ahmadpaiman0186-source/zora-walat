@@ -91,6 +91,16 @@ export function applyIntegrationTestDatabaseEnv() {
   }
 
   /**
+   * Operator `.env` may enable `PAYMENTS_LOCKDOWN_MODE=true`, which yields **503** before route-level
+   * auth/session guards (false negatives vs expected **403** contract tests).
+   * CI/GHA typically does not set this; dotenv overrides must not silently enable lockdown for integration.
+   * Set `ZW_INTEGRATION_RESPECT_PAYMENTS_LOCKDOWN=true` to exercise lockdown in-process.
+   */
+  if (process.env.ZW_INTEGRATION_RESPECT_PAYMENTS_LOCKDOWN !== 'true') {
+    process.env.PAYMENTS_LOCKDOWN_MODE = 'false';
+  }
+
+  /**
    * Integration suites use synthetic emails unless testing owner-only mode.
    * Set `ZW_INTEGRATION_RESPECT_OWNER_ONLY=true` and `OWNER_ALLOWED_EMAIL` to exercise allow/deny.
    */

@@ -26,7 +26,15 @@ import {
  */
 function rateLimitWithOptionalRedis(prefix, options) {
   const store = rateLimitRedisStore(prefix);
-  return rateLimit(store ? { ...options, store } : options);
+  /**
+   * Supertest sometimes omits `req.ip`; express-rate-limit can throw ValidationError (`ERR_ERL_*`),
+   * surfacing as HTTP 500 `internal_error`. CI/test loads real middleware — disable validations only here.
+   */
+  const opts =
+    process.env.CI === 'true' || env.nodeEnv === 'test'
+      ? { ...options, validate: false }
+      : options;
+  return rateLimit(store ? { ...opts, store } : opts);
 }
 
 const prod = env.nodeEnv === 'production';
