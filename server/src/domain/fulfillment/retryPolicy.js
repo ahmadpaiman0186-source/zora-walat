@@ -53,18 +53,6 @@ export function isRetryableFulfillmentFailure(providerResult) {
 }
 
 /**
- * Future: create `FulfillmentAttempt` with `attemptNumber + 1` only when:
- * - order is still recoverable (e.g. FAILED from transient provider error)
- * - no SUCCEEDED attempt exists for orderId
- * - under idempotency key / lease
- *
- * @returns {boolean} always false until explicitly implemented with safeguards.
- */
-export function shouldScheduleFollowUpFulfillmentAttempt(_order, _lastAttempt) {
-  return false;
-}
-
-/**
  * Guards: future follow-up attempts must not resurrect terminal successes/cancels.
  */
 export function orderAllowsFulfillmentRetry(order) {

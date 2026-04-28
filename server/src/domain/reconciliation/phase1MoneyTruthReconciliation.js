@@ -9,6 +9,21 @@ import { FULFILLMENT_ATTEMPT_STATUS } from '../../constants/fulfillmentAttemptSt
 import { evaluatePhase1CompoundIntegrity } from '../orders/phase1TransactionStateMachine.js';
 
 /**
+ * Canonical drift codes emitted by `buildPhase1MoneyTruthSnapshot` / runner (audit/search keys).
+ * `compound:*` entries append a suffix from `evaluatePhase1CompoundIntegrity`.
+ */
+export const PHASE1_RECONCILIATION_DRIFT_CODES = Object.freeze({
+  __catalogVersion: 1,
+  COMPOUND_PREFIX: 'compound:',
+  PAID_LIKE_WITHOUT_PI_OR_EVT: 'paid_like_without_pi_or_completion_evt',
+  ORDER_PAID_PAYMENT_ROW_NOT_SUCCEEDED: 'order_paid_payment_row_not_succeeded',
+  ORDER_FULFILLED_WITHOUT_SUCCEEDED_ATTEMPT: 'order_fulfilled_without_succeeded_attempt',
+  STRIPE_PI_MISMATCH: 'stripe_pi_mismatch',
+  STRIPE_PI_NOT_PAID_LIKE_WHILE_LOCAL_PAID_LIKE:
+    'stripe_pi_not_paid_like_while_local_paid_like',
+});
+
+/**
  * @typedef {{
  *   paymentIntentIdMatchesCheckout?: boolean | null,
  *   paymentIntentStatus?: string | null,
@@ -28,7 +43,7 @@ export function buildPhase1MoneyTruthSnapshot(order, fulfillmentAttempts, stripe
 
   const compound = evaluatePhase1CompoundIntegrity(order, fulfillmentAttempts);
   for (const v of compound.violations) {
-    driftCodes.push(`compound:${v}`);
+    driftCodes.push(`${PHASE1_RECONCILIATION_DRIFT_CODES.COMPOUND_PREFIX}${v}`);
   }
 
   const pi = order.stripePaymentIntentId != null ? String(order.stripePaymentIntentId) : '';
@@ -42,27 +57,25 @@ export function buildPhase1MoneyTruthSnapshot(order, fulfillmentAttempts, stripe
     order.orderStatus === ORDER_STATUS.FULFILLED;
 
   if (paidLike && !hasPi && !hasEvt) {
-    driftCodes.push('paid_like_without_pi_or_completion_evt');
+    driftCodes.push(PHASE1_RECONCILIATION_DRIFT_CODES.PAID_LIKE_WITHOUT_PI_OR_EVT);
   }
 
   if (
     order.orderStatus === ORDER_STATUS.PAID &&
     order.status !== PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED
   ) {
-    driftCodes.push('order_paid_payment_row_not_succeeded');
+    driftCodes.push(PHASE1_RECONCILIATION_DRIFT_CODES.ORDER_PAID_PAYMENT_ROW_NOT_SUCCEEDED);
   }
 
   const succeededAttempt = (fulfillmentAttempts ?? []).some(
     (a) => String(a.status) === FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED,
   );
   if (order.orderStatus === ORDER_STATUS.FULFILLED && !succeededAttempt) {
-    driftCodes.push('order_fulfilled_without_succeeded_attempt');
+    driftCodes.push(PHASE1_RECONCILIATION_DRIFT_CODES.ORDER_FULFILLED_WITHOUT_SUCCEEDED_ATTEMPT);
   }
 
-  if (
-    stripeTruth.paymentIntentIdMatchesCheckout === false
-  ) {
-    driftCodes.push('stripe_pi_mismatch');
+  if (stripeTruth.paymentIntentIdMatchesCheckout === false) {
+    driftCodes.push(PHASE1_RECONCILIATION_DRIFT_CODES.STRIPE_PI_MISMATCH);
   }
 
   if (
@@ -71,7 +84,9 @@ export function buildPhase1MoneyTruthSnapshot(order, fulfillmentAttempts, stripe
     paidLike &&
     !['succeeded', 'processing'].includes(String(stripeTruth.paymentIntentStatus).toLowerCase())
   ) {
-    driftCodes.push('stripe_pi_not_paid_like_while_local_paid_like');
+    driftCodes.push(
+      PHASE1_RECONCILIATION_DRIFT_CODES.STRIPE_PI_NOT_PAID_LIKE_WHILE_LOCAL_PAID_LIKE,
+    );
   }
 
   const aligned = driftCodes.length === 0;

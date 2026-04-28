@@ -1122,9 +1122,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
 /**
  * Drain queued attempts (e.g. cron or recovery if async scheduling missed).
  *
- * Retries: see `domain/fulfillment/retryPolicy.js` — `AUTO_RETRY_ENABLED` is false;
- * `shouldScheduleFollowUpFulfillmentAttempt` is a stub. New attempts must not
- * duplicate paid/fulfilled work (unique constraints + terminal state checks).
+ * Retries: `AUTO_RETRY_ENABLED` is false (`retryPolicy.js`). Safe follow-up eligibility is evaluated by
+ * `evaluatePhase1OperationalRetrySchedule` / `shouldScheduleFollowUpFulfillmentAttempt` in
+ * `domain/fulfillment/phase1OperationalRetry.js`. New attempts must not duplicate paid/fulfilled work
+ * (unique constraints + terminal state checks).
  */
 export async function processPendingPaidOrders({ limit = 10 } = {}) {
   const rows = await prisma.fulfillmentAttempt.findMany({
