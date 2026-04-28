@@ -1,5 +1,5 @@
 /**
- * In-process Express: POST /auth/register then POST /auth/login (same credentials).
+ * In-process Express: POST /api/auth/register then POST /api/auth/login (same credentials).
  * Does **not** exercise a long-running `npm start` — use `smoke-auth-live.mjs` for that.
  *
  * Usage: from server/: node scripts/smoke-auth-http.mjs
@@ -16,7 +16,7 @@ const { port } = server.address();
 const email = `smoke_${Date.now()}@example.com`;
 const password = '12345678901';
 
-const reg = await fetch(`http://127.0.0.1:${port}/auth/register`, {
+const reg = await fetch(`http://127.0.0.1:${port}/api/auth/register`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email, password }),
@@ -29,7 +29,7 @@ if (reg.status !== 201) {
   process.exit(1);
 }
 
-const login = await fetch(`http://127.0.0.1:${port}/auth/login`, {
+const login = await fetch(`http://127.0.0.1:${port}/api/auth/login`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email, password }),

@@ -14,7 +14,7 @@ const base = String(process.env.AUTH_SMOKE_BASE ?? 'http://127.0.0.1:8787').repl
 const email = `live_${Date.now()}@example.com`;
 const password = '12345678901';
 
-const reg = await fetch(`${base}/auth/register`, {
+const reg = await fetch(`${base}/api/auth/register`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email, password }),
@@ -29,7 +29,7 @@ if (reg.status !== 201) {
   process.exit(1);
 }
 
-const login = await fetch(`${base}/auth/login`, {
+const login = await fetch(`${base}/api/auth/login`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ email, password }),

@@ -16,7 +16,12 @@ export function getStripeClient() {
   if (stripeSingleton && stripeSingletonForKey === key) {
     return stripeSingleton;
   }
-  stripeSingleton = new Stripe(key);
+  stripeSingleton = new Stripe(key, {
+    /** Prevent unbounded hangs on Stripe HTTP (client timeout; orchestrator adds bounded retries). */
+    timeout: 25_000,
+    /** Reliability retries live in `orchestrateStripeCall` — avoid double-retry stacks. */
+    maxNetworkRetries: 0,
+  });
   stripeSingletonForKey = key;
   return stripeSingleton;
 }

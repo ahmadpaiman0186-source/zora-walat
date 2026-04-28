@@ -1,5 +1,14 @@
+/**
+ * PostgreSQL-backed wallet: **`topupIdempotent`** is the supported HTTP path (Idempotency-Key).
+ * **`topup`** is legacy (no key); used by compatibility tests and rare callers.
+ *
+ * **Concurrency:** `topupIdempotent` uses an interactive transaction. Losers in a race on the same
+ * `(userId, idempotencyKey)` get `P2002`, the whole transaction rolls back, and the outer `catch`
+ * loads committed state from a new read — not the same failure mode as `catch(P2002)` *inside* a
+ * long-lived webhook transaction (where PostgreSQL requires SAVEPOINT). No inner savepoint is
+ * required here for correctness.
+ */
 import { randomUUID } from 'node:crypto';
-
 import { prisma, Prisma } from '../../db.js';
 import { env } from '../../config/env.js';
 import { DEFAULT_WALLET_USD_CENTS } from '../../constants/walletConstants.js';
@@ -10,6 +19,7 @@ import {
 import { verifyWalletLedgerBalanceConsistency } from '../../lib/walletLedgerBalance.js';
 import { logWalletTopupEvent } from '../../lib/walletTopupStructuredLog.js';
 import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
+import { MONEY_PATH_OUTCOME } from '../../constants/moneyPathOutcome.js';
 
 /** Set `DEBUG_WALLET_TOPUP=true` for verbose stdout. */
 const debugTopup =
@@ -71,73 +81,6 @@ export async function getWalletState(userId) {
 }
 
 /**
- * Legacy path (no client idempotency) — single-flight increment only; retried POSTs can double-credit.
- * Prefer {@link topupIdempotent}.
- */
-export async function topup(userId, amountUsd) {
-  const n = Number(amountUsd);
-  if (!Number.isFinite(n) || n <= 0) {
-    throw new Error('amount must be a positive number');
-  }
-  const addCents = Math.round(n * 100);
-  assertTopupAmountCentsWithinPolicy(addCents);
-  const referenceId = randomUUID();
-
-  if (debugTopup) console.log('TOPUP START', { userId, amount: n, addCents });
-
-  recordMoneyPathOpsSignal('wallet_topup_legacy_no_idempotency_key');
-  await prisma.$transaction(async (tx) => {
-    const prior = await tx.userWallet.findUnique({ where: { userId } });
-    const priorBal = prior?.balanceUsdCents ?? DEFAULT_WALLET_USD_CENTS;
-    const balAfter = priorBal + addCents;
-
-    await tx.userWalletLedgerEntry.create({
-      data: {
-        referenceId,
-        userId,
-        direction: 'CREDIT',
-        reason: USER_WALLET_LEDGER_REASON_WALLET_TOPUP_LEGACY,
-        amountUsdCents: addCents,
-        currency: 'USD',
-        balanceAfterUsdCents: balAfter,
-        idempotencyKey: null,
-        metadataJson: topupMetadataJson('legacy_topup'),
-      },
-    });
-    if (debugTopup) console.log('LEDGER INSERTED');
-
-    await tx.userWallet.upsert({
-      where: { userId },
-      create: {
-        userId,
-        balanceUsdCents: balAfter,
-        currency: 'USD',
-      },
-      update: {
-        balanceUsdCents: { increment: addCents },
-      },
-    });
-    if (debugTopup) console.log('BALANCE UPDATED');
-  });
-
-  if (debugTopup) {
-    const count = await prisma.userWalletLedgerEntry.count({ where: { userId } });
-    console.log('LEDGER COUNT:', count);
-  }
-
-  await assertLedgerMatchesWalletAfterTopup(userId, 'legacy');
-  logWalletTopupEvent({
-    result: 'legacy_ok',
-    userIdSuffix: userId.slice(-8),
-    amountUsd: n,
-    idempotencyKey: null,
-    referenceId,
-  });
-
-  return getWalletState(userId);
-}
-
-/**
  * DB-primary idempotent top-up (Redis never participates). Safe replays under network retries.
  */
 export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
@@ -183,6 +126,7 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
         }
         return {
           idempotentReplay: true,
+          moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
           balance: (stateRow?.balanceUsdCents ?? DEFAULT_WALLET_USD_CENTS) / 100,
           currency: stateRow?.currency ?? 'USD',
           referenceId: null,
@@ -250,6 +194,7 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
 
       return {
         idempotentReplay: false,
+        moneyPathOutcome: MONEY_PATH_OUTCOME.ACCEPTED,
         balance: balAfter / 100,
         currency: prior?.currency ?? 'USD',
         referenceId,
@@ -284,6 +229,7 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
 
     return {
       idempotentReplay: out.idempotentReplay,
+      moneyPathOutcome: out.moneyPathOutcome,
       state: { balance: out.balance, currency: out.currency },
     };
   } catch (e) {
@@ -321,9 +267,69 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
       });
       return {
         idempotentReplay: true,
+        moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
         state: await getWalletState(userId),
       };
     }
     throw e;
   }
+}
+
+/**
+ * Legacy top-up without idempotency key (each call appends a ledger row).
+ * Prefer {@link topupIdempotent} for client-driven retries.
+ */
+export async function topup(userId, amountUsd) {
+  const n = Number(amountUsd);
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error('amount must be a positive number');
+  }
+  const addCents = Math.round(n * 100);
+  assertTopupAmountCentsWithinPolicy(addCents);
+
+  const referenceId = randomUUID();
+
+  await prisma.$transaction(async (tx) => {
+    const prior = await tx.userWallet.findUnique({ where: { userId } });
+    const priorBal = prior?.balanceUsdCents ?? DEFAULT_WALLET_USD_CENTS;
+    const balAfter = priorBal + addCents;
+
+    await tx.userWalletLedgerEntry.create({
+      data: {
+        referenceId,
+        userId,
+        direction: 'CREDIT',
+        reason: USER_WALLET_LEDGER_REASON_WALLET_TOPUP_LEGACY,
+        amountUsdCents: addCents,
+        currency: 'USD',
+        balanceAfterUsdCents: balAfter,
+        idempotencyKey: null,
+        metadataJson: topupMetadataJson('legacy_topup'),
+      },
+    });
+
+    await tx.userWallet.upsert({
+      where: { userId },
+      create: {
+        userId,
+        balanceUsdCents: balAfter,
+        currency: 'USD',
+      },
+      update: {
+        balanceUsdCents: { increment: addCents },
+      },
+    });
+  });
+
+  recordMoneyPathOpsSignal('wallet_topup_legacy_applied');
+  await assertLedgerMatchesWalletAfterTopup(userId, 'legacy');
+  logWalletTopupEvent({
+    result: 'legacy_apply_ok',
+    userIdSuffix: userId.slice(-8),
+    amountUsd: n,
+    addCents,
+    referenceId,
+  });
+
+  return getWalletState(userId);
 }

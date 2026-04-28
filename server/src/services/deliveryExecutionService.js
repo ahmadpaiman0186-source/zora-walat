@@ -2,7 +2,19 @@ import { AIRTIME_OUTCOME } from '../domain/fulfillment/airtimeFulfillmentResult.
 import { validateAirtimeAdapterResult } from '../domain/fulfillment/providerContract.js';
 import { runDeliveryAdapter } from '../domain/delivery/deliveryAdapter.js';
 import { bumpCounter } from '../lib/opsMetrics.js';
+import { buildProviderExecutionCorrelationId } from '../lib/providerExecutionCorrelation.js';
 import { logDeliveryEvent } from './deliveryLogger.js';
+
+function providerExecutionLogBase(orderId, attemptId, providerCorrelationId, traceId) {
+  return {
+    providerExecution: true,
+    orderIdSuffix: String(orderId).slice(-12),
+    attemptIdSuffix: attemptId ? String(attemptId).slice(-12) : null,
+    providerCorrelationId: providerCorrelationId || null,
+    traceId: traceId ?? null,
+    t: new Date().toISOString(),
+  };
+}
 
 /**
  * Delivery execution boundary: payment is already captured; this runs provider I/O only.
@@ -21,6 +33,19 @@ import { logDeliveryEvent } from './deliveryLogger.js';
  */
 export async function executeDelivery(order, fulfillmentCtx = {}) {
   const orderId = order.id;
+  const attemptId = fulfillmentCtx.attemptId;
+  const providerCorrelationId =
+    attemptId && typeof attemptId === 'string'
+      ? buildProviderExecutionCorrelationId(attemptId, orderId)
+      : '';
+
+  console.log(
+    JSON.stringify({
+      ...providerExecutionLogBase(orderId, attemptId, providerCorrelationId, fulfillmentCtx.traceId),
+      event: 'providerRequestSent',
+    }),
+  );
+
   logDeliveryEvent({
     orderId,
     phase: 'delivery_provider_invoke',
@@ -29,7 +54,37 @@ export async function executeDelivery(order, fulfillmentCtx = {}) {
     detail: 'adapter_start',
   });
 
-  const result = await runDeliveryAdapter(order, fulfillmentCtx);
+  let result;
+  try {
+    result = await runDeliveryAdapter(order, {
+      ...fulfillmentCtx,
+      ...(providerCorrelationId ? { providerCorrelationId } : {}),
+    });
+  } catch (e) {
+    console.log(
+      JSON.stringify({
+        ...providerExecutionLogBase(
+          orderId,
+          attemptId,
+          providerCorrelationId,
+          fulfillmentCtx.traceId,
+        ),
+        event: 'providerExecutionFailed',
+        err: String(e?.message ?? e).slice(0, 400),
+      }),
+    );
+    throw e;
+  }
+
+  const mergeSummary = (s) => ({
+    ...(typeof s === 'object' && s !== null && !Array.isArray(s) ? s : {}),
+    ...(providerCorrelationId ? { providerCorrelationId } : {}),
+  });
+  result = {
+    ...result,
+    requestSummary: mergeSummary(result.requestSummary),
+    responseSummary: mergeSummary(result.responseSummary),
+  };
 
   const contractCheck = validateAirtimeAdapterResult(result);
   if (!contractCheck.valid) {
@@ -50,6 +105,19 @@ export async function executeDelivery(order, fulfillmentCtx = {}) {
   const verifying =
     result.outcome === AIRTIME_OUTCOME.PENDING_VERIFICATION ||
     result.outcome === AIRTIME_OUTCOME.AMBIGUOUS;
+
+  console.log(
+    JSON.stringify({
+      ...providerExecutionLogBase(orderId, attemptId, providerCorrelationId, fulfillmentCtx.traceId),
+      event: 'providerResponseReceived',
+      outcome: result.outcome,
+      providerReference: result.providerReference ?? null,
+      providerKey: result.providerKey ?? null,
+      failureCode: result.failureCode ?? null,
+      errorKind: result.errorKind ?? null,
+    }),
+  );
+
   logDeliveryEvent({
     orderId,
     phase: 'delivery_provider_result',

@@ -141,6 +141,14 @@ class AppLocalizationsPs extends AppLocalizations {
   String get checkoutCardRegionLabel => 'ستاسو ځای (کارت)';
 
   @override
+  String get checkoutSenderCountryHint =>
+      'دا ستاسو د کارت د بلینګ سیمه ده (خطر چیک)؛ ترلاسه کوونکی شمیره تل افغانستان موبایل (+۹۳) ده.';
+
+  @override
+  String get telecomRecipientAfghanistanDialHint =>
+      'افغانستان +۹۳ — ځایی موبایل ولیکئ (د ۷ پیل سره).';
+
+  @override
   String get checkoutPricingUsdServerNote =>
       'بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.';
 
@@ -157,10 +165,48 @@ class AppLocalizationsPs extends AppLocalizations {
   }
 
   @override
+  String checkoutReviewTotalChargedHeadline(String amount) {
+    return 'ټول تادیه شوی: $amount';
+  }
+
+  @override
+  String checkoutReviewAirtimeValueSubline(String amount) {
+    return 'د اېرټایم بیه (ترلاسه کوونکی): $amount';
+  }
+
+  @override
+  String get checkoutReviewHeadlinePricingUnavailable =>
+      'بشپړه بیه به د پورته بارېدلو وروسته ښکاري — لاندې د امر لنډیز وګورئ.';
+
+  @override
+  String get checkoutQuoteFailed =>
+      'بیه پورته نشوه. اړیکه مو چیک کړئ او بیا هڅه وکړئ.';
+
+  @override
+  String get checkoutAirtimeValueLabel => 'د اېرټایم بیه';
+
+  @override
+  String get receiptBreakdownLoadingHint => 'د تادیې جزئیات بارېږي…';
+
+  @override
+  String get receiptBreakdownPartialHint =>
+      'د مالیې او فیس بشپړ ردیز نشته؛ لاندې مقدار ستاسو د کارت څخه اخیستل شوی ټول دی.';
+
+  @override
   String get rechargeTrustLine => 'USD نرخونه · خوندي تادیه · افغان موبایل';
 
   @override
   String get recipientNumber => 'د اخیستونکي شمېره';
+
+  @override
+  String get receivingCountryLabel => 'هېواد (ترلاسه‌کوونکی)';
+
+  @override
+  String get rechargeCountryNotSupported =>
+      'د موبایل شارژ یوازې د افغانستان شمېرو لپاره دی. افغانستان غوره کړئ.';
+
+  @override
+  String get phoneLocalDigitsHint => 'ځایی شمېره د هېواد کوډ پرته ولیکئ.';
 
   @override
   String get operator => 'اپراتور';
@@ -220,7 +266,8 @@ class AppLocalizationsPs extends AppLocalizations {
   String get hubTileRechargeTitle => 'د موبایل شارژ';
 
   @override
-  String get hubTileRechargeSub => 'ګړندي بستې · USD بیه';
+  String get hubTileRechargeSub =>
+      'افغانستان اېرټایم · ژوندی کاتالوګ · Stripe تادیه';
 
   @override
   String get hubTileWalletTitle => 'بټوه';
@@ -235,10 +282,10 @@ class AppLocalizationsPs extends AppLocalizations {
   String get hubTileCallingSub => 'ژر راځي';
 
   @override
-  String get hubTileLegacyTitle => 'پلانونه او کاتالوګ';
+  String get hubTileLegacyTitle => 'کلاسیک شارژ';
 
   @override
-  String get hubTileLegacySub => 'اېرټایم او ډیټا';
+  String get hubTileLegacySub => 'لاسي مقدارونه او بیاکتنه (زړې لاره)';
 
   @override
   String get walletScreenTitle => 'بټوه';
@@ -324,8 +371,45 @@ class AppLocalizationsPs extends AppLocalizations {
   String get totalUsd => 'ټول (USD)';
 
   @override
+  String get checkoutProductValueLabel => 'د محصول ارزښت';
+
+  @override
+  String get checkoutSenderTaxLabel => 'مالیه (د لېږونکي سیمه)';
+
+  @override
+  String get checkoutServiceFeeLabel => 'د زورا-ولت خدمت فیس';
+
+  @override
+  String get checkoutTotalChargedLabel => 'ټول تادیه‌شوی';
+
+  @override
+  String get checkoutTaxJurisdictionPhaseNote =>
+      'مالیه د ټاکل شوي لېږونکي هېواد پر اساس محاسبه کېږي. که ایالت، ښار یا پوستي کوډ ورکړئ، زموږ په دې نسخه کې نرخ نه بدلېږي — د راتلونکو مالیاتي ماشینونو او compliance لپاره ساتل کېږي.';
+
+  @override
+  String get checkoutPricingLoading => 'ستاسو سیمې لپاره بیه تازه کېږي…';
+
+  @override
   String get checkoutUsdTotalFootnote =>
       'په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.';
+
+  @override
+  String get checkoutScreenCurrencyHint => 'بیې په امریکایي ډالرو (USD) کې دي.';
+
+  @override
+  String get checkoutScreenServerPricingNote =>
+      'بیه په USD کې زموږ په سرورونو کې ستاسو سیمې لپاره محاسبه کېږي.';
+
+  @override
+  String get checkoutScreenOrderTotalCaption => 'ټول (USD)';
+
+  @override
+  String get checkoutScreenChargeFootnote =>
+      'په USD کې چارج کېږي. که ستاسو کارت USD نه وي، بانک ممکن د بدلون فیس زیات کړي چې موږ نه کنټرولوو.';
+
+  @override
+  String get checkoutScreenStripeSecureNote =>
+      'تاسو په USD کې په Stripe امن پاڼه تادیه کوئ. ټولټال زموږ سرور د پیسو اخیستو دمخه تاییدوي.';
 
   @override
   String get stripeSectionTitle => 'خوندي تادیه';
@@ -384,6 +468,16 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get telecomPhoneHintAirtime => '07X XXX XXXX یا 937…';
+
+  @override
+  String get recipientLocalNumber => 'زموږ موبایل شمېره';
+
+  @override
+  String get phase1AirtimeAfghanistanOnly =>
+      'په فاز ۱ کې یوازې افغانستان. افغانستان غوره کړئ.';
+
+  @override
+  String get checkoutSecuringCheckout => 'تادیه خوندي کیږي…';
 
   @override
   String get telecomDataHeadline => 'ډیټا بستې';
@@ -546,6 +640,73 @@ class AppLocalizationsPs extends AppLocalizations {
   String get authInvalidEmail => 'اعتباری بریښنالیک ولیکئ.';
 
   @override
+  String get authEmailRequired => 'خپل بریښنالیک ولیکئ.';
+
+  @override
+  String get authOtpEmailIntro =>
+      'خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.';
+
+  @override
+  String get authOtpEmailHelp =>
+      'هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.';
+
+  @override
+  String get authOtpContinueCta => 'کوډ ولېږه';
+
+  @override
+  String get authOtpSendingCode => 'د تایید کوډ لیږل…';
+
+  @override
+  String get authOtpCodeTitle => 'کوډ داخل کړئ';
+
+  @override
+  String get authOtpCheckEmail => 'خپل انباکس وګورئ';
+
+  @override
+  String get authOtpCodeLabel => 'د تایید کوډ';
+
+  @override
+  String get authOtpVerifyCta => 'کوډ تایید کړئ';
+
+  @override
+  String get authOtpCodeRequired => '۶ عددي تاییدي کوډ ولیکئ.';
+
+  @override
+  String get authOtpInvalidOrExpired =>
+      'دا کوډ ناسم دی یا موده یې تېره شوې ده. نوی کوډ وغواړئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authOtpTooManyAttempts =>
+      'ډېرې هڅې شوې دي. مهرباني وکړئ لږ تم شئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authNetworkRetry =>
+      'د شبکې ستونزه. خپله اړیکه وګورئ او بیا هڅه وکړئ.';
+
+  @override
+  String get authOtpRequestSuccess =>
+      'که حساب وړ وي، د تایید کوډ استول شوی دی.';
+
+  @override
+  String get authOtpResendReady => 'اوس کولی شئ نوی کوډ وغواړئ.';
+
+  @override
+  String get authOtpResendCta => 'کوډ بیا ولېږه';
+
+  @override
+  String get authOtpChangeEmail => 'بل بریښنالیک وکاروئ';
+
+  @override
+  String authOtpCodeHelp(Object email) {
+    return 'د $email لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ (سپام فولډر هم وګورئ).';
+  }
+
+  @override
+  String authOtpResendIn(Object seconds) {
+    return 'تاسو کولی شئ په $seconds ثانیو کې کوډ بیا وغواړئ.';
+  }
+
+  @override
   String get landingNavBrand => 'زوره‌ولت';
 
   @override
@@ -638,6 +799,15 @@ class AppLocalizationsPs extends AppLocalizations {
   @override
   String get successStripeConfirmedShort =>
       'ستاسو بانک پېرود تایید کړ. موږ اوس ستاسو ټاپ‌آپ بشپړوو.';
+
+  @override
+  String get successMissingReturnParamsHint =>
+      'په دې پته کې د تادیې حواله جزئیات (سشن یا د سفارش پېژند) نشته. که تادیه مو بشپړه کړه، وروستي سفارشونه خلاص کړئ یا د Stripe د تایید برېښنالیک لینک وکاروئ.';
+
+  @override
+  String successBootstrapWarning(String detail) {
+    return 'موږ نشو کولی ژمیز د سفارش حالت تازه کړو. ستاسو تادیه شايد لاهم پروسس کې وي — یو ځل بیا وروستي سفارشونه وګورئ.\n$detail';
+  }
 
   @override
   String get receiptTitle => 'رسيډ';

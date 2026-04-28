@@ -42,7 +42,10 @@ import {
   recordFulfillmentManualInterventionPath,
   recordFulfillmentMoneyPathDurationMs,
 } from '../lib/opsMetrics.js';
+import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
+import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { buildProviderExecutionCorrelationId } from '../lib/providerExecutionCorrelation.js';
 import { logOpsEvent } from '../lib/opsLog.js';
 import {
   buildMarginSnapshotForDeliveredOrder,
@@ -67,9 +70,15 @@ import {
   classifyTransactionFailure,
 } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
+import { operationalClassFromTransactionFailure } from '../lib/operationalErrorClass.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 import { enqueuePhase1FulfillmentJob } from '../queues/phase1FulfillmentProducer.js';
 import { fulfillmentDbLimit } from '../lib/fulfillmentDbLimiter.js';
+import {
+  assertCanonicalTransition,
+  CANONICAL_ORDER_STATUS,
+} from '../domain/orders/canonicalOrderLifecycle.js';
+import { emitOrderTransitionLog } from '../lib/orderTransitionLog.js';
 
 function safeJson(obj) {
   try {
@@ -100,27 +109,86 @@ function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
 /**
  * Create a queued fulfillment attempt (idempotent if attempt #1 already exists).
  * Called inside the Stripe webhook transaction after order → PAID.
+ *
+ * PostgreSQL aborts the whole transaction on a unique violation unless the failing
+ * statement is isolated (savepoint). A naive create + catch(P2002) + findFirst breaks
+ * with 25P02. We: (1) findFirst to skip duplicate inserts in the same tx; (2) wrap
+ * create in SAVEPOINT so concurrent insert races recover cleanly.
+ *
+ * @param {{ info?: Function, warn?: Function }} [log] — optional webhook/process logger
  */
-export async function ensureQueuedFulfillmentAttempt(tx, orderId) {
-  const existing = await tx.fulfillmentAttempt.findFirst({
+export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
+  const already = await tx.fulfillmentAttempt.findFirst({
     where: { orderId, attemptNumber: 1 },
   });
-  if (existing) {
+  if (already) {
+    emitFortressIdempotencyNoop('FULFILLMENT_ATTEMPT_ONE_ALREADY_PRESENT', {
+      orderIdSuffix: String(orderId).slice(-12),
+      attemptIdSuffix: String(already.id).slice(-12),
+    });
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptIdempotent: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(already.id).slice(-12),
+        attemptNumber: 1,
+      },
+      'fulfillment attempt #1 already present (idempotent)',
+    );
+    return already;
+  }
+
+  await tx.$executeRawUnsafe('SAVEPOINT ensure_queued_fulfillment_attempt');
+
+  try {
+    const created = await tx.fulfillmentAttempt.create({
+      data: {
+        orderId,
+        attemptNumber: 1,
+        status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+        provider: resolveAirtimeProviderName(),
+        requestSummary: JSON.stringify({ phase: 'queued', orderId }),
+      },
+    });
+    await tx.$executeRawUnsafe('RELEASE SAVEPOINT ensure_queued_fulfillment_attempt');
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptCreated: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(created.id).slice(-12),
+        attemptNumber: 1,
+        provider: created.provider ?? null,
+      },
+      'fulfillment attempt #1 queued after payment',
+    );
+    return created;
+  } catch (error) {
+    await tx.$executeRawUnsafe('ROLLBACK TO SAVEPOINT ensure_queued_fulfillment_attempt');
+    if (error?.code !== 'P2002') {
+      throw error;
+    }
+    const existing = await tx.fulfillmentAttempt.findFirst({
+      where: { orderId, attemptNumber: 1 },
+    });
+    if (!existing) {
+      throw error;
+    }
     emitFortressIdempotencyNoop('FULFILLMENT_ATTEMPT_ONE_ALREADY_PRESENT', {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(existing.id).slice(-12),
     });
+    log?.info?.(
+      {
+        fulfillmentQueuedAttemptIdempotent: true,
+        orderIdSuffix: String(orderId).slice(-12),
+        attemptIdSuffix: String(existing.id).slice(-12),
+        attemptNumber: 1,
+        via: 'p2002_savepoint_recovery',
+      },
+      'fulfillment attempt #1 already present (idempotent)',
+    );
     return existing;
   }
-  return tx.fulfillmentAttempt.create({
-    data: {
-      orderId,
-      attemptNumber: 1,
-      status: FULFILLMENT_ATTEMPT_STATUS.QUEUED,
-      provider: resolveAirtimeProviderName(),
-      requestSummary: JSON.stringify({ phase: 'queued' }),
-    },
-  });
 }
 
 /**
@@ -185,6 +253,19 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
   }
 
   recordFulfillmentRunStarted();
+  if (process.env.NODE_ENV !== 'test') {
+    const tid = getTraceId();
+    console.log(
+      JSON.stringify({
+        fulfillmentOrchestration: true,
+        t: new Date().toISOString(),
+        event: 'fulfillment_claim_attempt',
+        orderIdSuffix: String(orderId).slice(-12),
+        bullmqAttempt: bullmqAttemptsMade,
+        traceIdSuffix: tid ? String(tid).slice(-10) : null,
+      }),
+    );
+  }
 
   const phase1 = await prisma.$transaction(async (tx) => {
     const order = await tx.paymentCheckout.findUnique({
@@ -289,6 +370,20 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     return;
   }
 
+  {
+    const q2s = assertCanonicalTransition(
+      CANONICAL_ORDER_STATUS.QUEUED,
+      CANONICAL_ORDER_STATUS.SENT,
+    );
+    if (q2s.ok) {
+      emitOrderTransitionLog(undefined, {
+        orderId,
+        from: CANONICAL_ORDER_STATUS.QUEUED,
+        to: CANONICAL_ORDER_STATUS.SENT,
+      });
+    }
+  }
+
   mergeOrderAttemptIntoCorrelation({
     orderId,
     attemptId: phase1.attemptId,
@@ -300,7 +395,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     outcome: 'processing',
     orderId,
     traceId: getTraceId(),
-    extra: { attemptNumber: phase1.attemptNumber },
+    extra: {
+      attemptNumber: phase1.attemptNumber,
+      attemptIdSuffix: String(phase1.attemptId).slice(-12),
+    },
   });
   emitPhase1OperationalEvent('fulfillment_attempt_started', {
     traceId: getTraceId() ?? null,
@@ -362,14 +460,21 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         retrySuggestedBackoffMs: retry.suggestedBackoffMs,
       },
     });
+    const providerCorrelationId = buildProviderExecutionCorrelationId(
+      phase1.attemptId,
+      orderId,
+    );
     providerResult = {
       outcome: AIRTIME_OUTCOME.FAILURE,
       providerKey: resolveAirtimeProviderName(),
       failureCode,
       failureMessage: String(err?.message ?? err).slice(0, 300),
       errorKind,
-      requestSummary: {},
-      responseSummary: { diagnostic: safeErrorDiagnostics(err) },
+      requestSummary: providerCorrelationId ? { providerCorrelationId } : {},
+      responseSummary: {
+        diagnostic: safeErrorDiagnostics(err),
+        ...(providerCorrelationId ? { providerCorrelationId } : {}),
+      },
     };
     providerOutcome = AIRTIME_OUTCOME.FAILURE;
   }
@@ -382,6 +487,8 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     providerResult.outcome != null && providerResult.outcome !== ''
       ? providerResult.outcome
       : AIRTIME_OUTCOME.FAILURE;
+
+  let canonicalPostFulfillmentTransition = null;
 
   try {
     const marginTelemetry = await prisma.$transaction(async (tx) => {
@@ -495,6 +602,12 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
             ip: null,
           });
         }
+
+        canonicalPostFulfillmentTransition = {
+          orderId,
+          from: CANONICAL_ORDER_STATUS.SENT,
+          to: CANONICAL_ORDER_STATUS.DELIVERED,
+        };
 
         return {
           orderId,
@@ -680,6 +793,15 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
           },
           ip: null,
         });
+        canonicalPostFulfillmentTransition = {
+          orderId,
+          from: CANONICAL_ORDER_STATUS.SENT,
+          to: CANONICAL_ORDER_STATUS.FAILED,
+          reason:
+            providerResult.failureCode ??
+            providerResult.errorKind ??
+            'airtime_provider_failure',
+        };
         return null;
       }
 
@@ -724,6 +846,25 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
       }
     });
 
+    if (canonicalPostFulfillmentTransition) {
+      const step = assertCanonicalTransition(
+        canonicalPostFulfillmentTransition.from,
+        canonicalPostFulfillmentTransition.to,
+      );
+      if (!step.ok) {
+        console.error(
+          JSON.stringify({
+            event: 'canonical_transition_denied',
+            orderId: canonicalPostFulfillmentTransition.orderId,
+            denial: step,
+          }),
+        );
+      } else {
+        emitOrderTransitionLog(undefined, canonicalPostFulfillmentTransition);
+      }
+      canonicalPostFulfillmentTransition = null;
+    }
+
     if (marginTelemetry) {
       recordMarginIntelAfterSnapshot(
         marginTelemetry.orderId,
@@ -731,6 +872,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         marginTelemetry.usedApiCost,
         env.marginLowRouteBp,
       );
+      /** Test-only: simulates post-commit follow-up failure (integration proofs). */
+      if (process.env.ZW_TEST_INJECT_POST_COMMIT_FOLLOWUP_THROW === 'true') {
+        throw new Error('zw_test_post_commit_followup');
+      }
       scheduleReferralEvaluationAfterDelivery(orderId, getTraceId());
       scheduleFinancialTruthRecompute(orderId);
       logOpsEvent({
@@ -748,6 +893,46 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     const traceId = getTraceId();
 
     if (providerOutcome === AIRTIME_OUTCOME.SUCCESS) {
+      const orderSnap = await prisma.paymentCheckout.findUnique({
+        where: { id: orderId },
+        select: { orderStatus: true, metadata: true },
+      });
+
+      /**
+       * Delivery row already committed (FULFILLED) but margin/referral/financial hooks failed after commit.
+       * Not silent: audit + integrity event — operators reconcile side effects; money row is not "undone".
+       */
+      if (orderSnap?.orderStatus === ORDER_STATUS.FULFILLED) {
+        await writeOrderAudit(prisma, {
+          event: 'delivery_post_commit_followup_failed',
+          payload: {
+            orderId,
+            attemptId: phase1.attemptId,
+            errorClass: err?.name ?? 'Error',
+            message: String(err?.message ?? err).slice(0, 500),
+          },
+          ip: null,
+        });
+        logFulfillmentIntegrityEvent('fulfillment_post_commit_followup_failed', {
+          orderId,
+          traceId,
+          severity: 'ERROR',
+          extra: {
+            attemptIdSuffix: String(phase1.attemptId).slice(-8),
+            note:
+              'FULFILLED committed; post-commit follow-up (margin intel / referral / financial recompute) failed',
+          },
+        });
+        logManualRequiredAlert({
+          event: 'manual_required_detected',
+          severity: 'WARN',
+          traceId,
+          orderId,
+          extra: { classification: 'post_commit_followup_failed' },
+        });
+        return;
+      }
+
       await prisma.$transaction(async (tx) => {
         const orderNow = await tx.paymentCheckout.findUnique({
           where: { id: orderId },
@@ -894,6 +1079,19 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
       });
     });
 
+    const postOrchestrationFailSnap = await prisma.paymentCheckout.findUnique({
+      where: { id: orderId },
+      select: { orderStatus: true },
+    });
+    if (postOrchestrationFailSnap?.orderStatus === ORDER_STATUS.FAILED) {
+      emitOrderTransitionLog(undefined, {
+        orderId,
+        from: CANONICAL_ORDER_STATUS.SENT,
+        to: CANONICAL_ORDER_STATUS.FAILED,
+        reason: 'fulfillment_processing_error',
+      });
+    }
+
     schedulePushSideEffect(() => emitFulfillmentTerminalSideEffects(orderId), getTraceId());
   }
 }
@@ -927,9 +1125,14 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
 /**
  * @param {string} orderId
  * @param {string | null | undefined} traceId from HTTP/webhook request when known
+ *
+ * **Single fulfillment I/O path:** when the queue is off, enqueue fails, or enqueue returns
+ * `ok: false`, the next step is exactly one `processFulfillmentForOrder` call — same function the
+ * BullMQ worker invokes. No parallel remediation engine; recovery (`processingRecoveryService`)
+ * relies on this for bounded re-dispatch after `revert_paid` / `retry_new_attempt`.
  */
 export function scheduleFulfillmentProcessing(orderId, traceId) {
-  setImmediate(() => {
+  const im = setImmediate(() => {
     (async () => {
       const row = await prisma.paymentCheckout.findUnique({
         where: { id: orderId },
@@ -965,6 +1168,12 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
             orderIdSuffix: String(orderId).slice(-12),
             queueJobId: enq.jobId,
           });
+          emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_QUEUED, {
+            traceId: traceId ?? null,
+            orderIdSuffix: String(orderId).slice(-12),
+            via: 'bullmq',
+            deduped: Boolean(enq.deduped),
+          });
           return;
         }
         emitPhase1OperationalEvent('fulfillment_enqueue_failed_inline_fallback', {
@@ -973,11 +1182,67 @@ export function scheduleFulfillmentProcessing(orderId, traceId) {
           reason: enq.reason,
         });
       }
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        via: 'inline_schedule',
+      });
       await processFulfillmentForOrder(orderId, { traceId });
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_SUCCESS, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        via: 'inline_schedule',
+      });
     })().catch((err) => {
-      console.error('[fulfillment] processFulfillmentForOrder failed', orderId, err);
+      const failureClass = classifyTransactionFailure(err, {
+        surface: 'fulfillment_schedule',
+      });
+      const retryDirective = transactionRetryDirective(failureClass, { attempt: 0 });
+      const operationalClass = operationalClassFromTransactionFailure(failureClass);
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_FAILURE, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        surface: 'fulfillment_schedule',
+        message: String(err?.message ?? err).slice(0, 200),
+      });
+      emitMoneyPathLog(MONEY_PATH_EVENT.RETRY_DECISION, {
+        traceId: traceId ?? null,
+        surface: 'fulfillment_schedule',
+        orderIdSuffix: String(orderId).slice(-12),
+        transactionFailureClass: failureClass,
+        retryMaySchedule: retryDirective.mayScheduleRetry,
+        retryReason: retryDirective.reason,
+      });
+      emitPhase1OperationalEvent('fulfillment_schedule_async_failed', {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        errName: err?.name,
+        errMessage: String(err?.message ?? err).slice(0, 300),
+        transactionFailureClass: failureClass,
+        operationalClass,
+        retryMaySchedule: retryDirective.mayScheduleRetry,
+        retryReason: retryDirective.reason,
+      });
+      logOpsEvent({
+        domain: 'fulfillment_schedule',
+        event: 'async_schedule_failed',
+        outcome: 'error',
+        orderId,
+        traceId,
+        extra: {
+          transactionFailureClass: failureClass,
+          operationalClass,
+        },
+      });
     });
   });
+  if (
+    String(process.env.ZW_INTEGRATION_TEST ?? '').trim() === '1' &&
+    im &&
+    typeof im.unref === 'function'
+  ) {
+    im.unref();
+  }
 }
 
 /** Explicit entry point for paid → processing → provider → terminal state. */

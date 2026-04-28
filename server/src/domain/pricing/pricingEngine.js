@@ -36,13 +36,25 @@ function marginBpFromNet(finalCents, netCents) {
 /**
  * Phase 1 mobile top-up only. Server-priced; never trust client amounts.
  *
+ * Transparent customer charge:
+ *   product value (recipient) + government sales tax (sender) + Zora-Walat service fee = total charged.
+ * COGS-side tax/FX buffers are internal only and do not reduce recipient value.
+ *
  * @param {object} input
  * @param {number} input.providerCostCents
  * @param {number} input.riskBufferPercent Sender-country risk as % of provider cost.
  * @param {string} [input.currency]
+ * @param {number} input.targetRetailUsdCents Product value to recipient (USD cents); from catalog face or allowed ladder amount.
+ * @param {number} [input.governmentTaxBps] Government sales tax on product value (0–10000), from sender country config.
  */
 export function computeCheckoutPrice(input) {
-  const { providerCostCents, riskBufferPercent, currency } = input;
+  const {
+    providerCostCents,
+    riskBufferPercent,
+    currency,
+    targetRetailUsdCents,
+    governmentTaxBps: rawGovTaxBps,
+  } = input;
 
   if (currency != null && currency !== 'usd') {
     return {
@@ -60,11 +72,35 @@ export function computeCheckoutPrice(input) {
     };
   }
 
+  const P = Number(targetRetailUsdCents);
+  if (!Number.isInteger(P) || P <= 0) {
+    return {
+      ok: false,
+      code: 'INVALID_TARGET_RETAIL',
+      message: 'targetRetailUsdCents must be a positive integer (USD cents)',
+    };
+  }
+
+  let govTaxBps = 0;
+  if (rawGovTaxBps != null) {
+    const g = Number(rawGovTaxBps);
+    if (!Number.isFinite(g) || g < 0 || g > 10000) {
+      return {
+        ok: false,
+        code: 'INVALID_GOVERNMENT_TAX_BPS',
+        message: 'governmentTaxBps must be between 0 and 10000',
+      };
+    }
+    govTaxBps = Math.floor(g);
+  }
+
   const fees = getPricingFeeConfig();
   const fxOnlyCents = Math.round((providerCostCents * fees.fxBps) / 10000);
-  const taxCents = Math.round((providerCostCents * fees.taxBps) / 10000);
-  /** Persisted as fx_buffer: regulatory/tax + FX cushion (see pricingSnapshot for split). */
-  const fxBufferCents = fxOnlyCents + taxCents;
+  /** Internal: tax buffer on provider COGS (not customer sales tax). */
+  const providerCostTaxBufferCents = Math.round(
+    (providerCostCents * fees.taxBps) / 10000,
+  );
+  const fxBufferCents = fxOnlyCents + providerCostTaxBufferCents;
 
   const riskPct =
     typeof riskBufferPercent === 'number' && Number.isFinite(riskBufferPercent)
@@ -75,12 +111,11 @@ export function computeCheckoutPrice(input) {
   const landed = landedCogsCents(
     providerCostCents,
     fxOnlyCents,
-    taxCents,
+    providerCostTaxBufferCents,
     riskBufferCents,
   );
 
   const minBp = Math.round(env.phase1MinMarginPercent * 100);
-  const targetBp = Math.round(env.phase1TargetMarginPercent * 100);
 
   const minCheckout = env.phase1MinCheckoutUsdCents;
   const allowSubMin = env.phase1AllowBelowMinimumOrders;
@@ -88,103 +123,100 @@ export function computeCheckoutPrice(input) {
   const stripeBps = fees.stripeFeeBps;
   const stripeFixed = fees.stripeFixedCents;
 
-  const minFloor = Math.max(
-    minCheckout,
-    landed +
-      stripeFeeCents(minCheckout, stripeBps, stripeFixed) +
-      1,
-  );
+  const customerGovernmentTaxCents = Math.round((P * govTaxBps) / 10000);
+
+  const maxFeeSearch = 2_000_000;
 
   /**
-   * Smallest final charge such that net margin (bp) >= [floorBp].
+   * Floor for the customer-visible Zora service fee (integer cents). When wholesale bps
+   * is too low, margin can be satisfied with fee=0; the floor still requires a line item.
+   * Derives from env.phase1MinZoraServiceFeeBps (0 = no floor; default 100 = 1% of P).
    */
-  function bestFinalAtOrAbove(floorBp, startCents) {
-    const cap = Math.max(startCents * 50, landed + 500_000);
-    for (let finalC = startCents; finalC <= cap; finalC += 1) {
-      const net = netProfitCents(finalC, landed, stripeBps, stripeFixed);
-      const bp = marginBpFromNet(finalC, net);
-      if (bp >= floorBp) {
-        return { finalCents: finalC, netCents: net, marginBp: bp };
-      }
+  const minZoraFeeBps = Math.max(
+    0,
+    Math.min(10000, Math.floor(env.phase1MinZoraServiceFeeBps)),
+  );
+  const minZoraServiceFeeCents = Math.min(
+    maxFeeSearch,
+    minZoraFeeBps > 0 ? Math.max(1, Math.ceil((P * minZoraFeeBps) / 10000)) : 0,
+  );
+
+  for (let feeCents = minZoraServiceFeeCents; feeCents <= maxFeeSearch; feeCents += 1) {
+    const finalCents = P + customerGovernmentTaxCents + feeCents;
+    if (!allowSubMin && finalCents < minCheckout) {
+      continue;
     }
-    return null;
-  }
+    const netCents = netProfitCents(
+      finalCents,
+      landed,
+      stripeBps,
+      stripeFixed,
+    );
+    const marginBp = marginBpFromNet(finalCents, netCents);
+    if (marginBp < minBp) {
+      continue;
+    }
 
-  let picked =
-    bestFinalAtOrAbove(targetBp, minFloor) ?? bestFinalAtOrAbove(minBp, minFloor);
+    const stripeComponentCents = stripeFeeCents(
+      finalCents,
+      stripeBps,
+      stripeFixed,
+    );
+    const additiveTargetProfit =
+      finalCents -
+      providerCostCents -
+      stripeComponentCents -
+      fxBufferCents -
+      riskBufferCents;
 
-  if (!picked) {
+    const verifyNet = netProfitCents(
+      finalCents,
+      landed,
+      stripeBps,
+      stripeFixed,
+    );
+    if (verifyNet < 0 || marginBpFromNet(finalCents, verifyNet) < minBp) {
+      continue;
+    }
+
     return {
-      ok: false,
-      code: 'MARGIN_BELOW_FLOOR',
-      message:
-        'Checkout rejected: projected margin below minimum threshold',
-    };
-  }
-
-  let { finalCents, netCents, marginBp } = picked;
-
-  if (!allowSubMin && finalCents < minCheckout) {
-    return {
-      ok: false,
-      code: 'CHECKOUT_BELOW_MINIMUM',
-      message: `Checkout rejected: minimum order is $${(minCheckout / 100).toFixed(2)} USD`,
-    };
-  }
-
-  const stripeComponentCents = stripeFeeCents(
-    finalCents,
-    stripeBps,
-    stripeFixed,
-  );
-
-  const additiveTargetProfit =
-    finalCents -
-    providerCostCents -
-    stripeComponentCents -
-    fxBufferCents -
-    riskBufferCents;
-
-  const verifyNet = netProfitCents(
-    finalCents,
-    landed,
-    stripeBps,
-    stripeFixed,
-  );
-  if (verifyNet < 0 || marginBpFromNet(finalCents, verifyNet) < minBp) {
-    return {
-      ok: false,
-      code: 'MARGIN_BELOW_FLOOR',
-      message:
-        'Checkout rejected: projected margin below minimum threshold',
+      ok: true,
+      pricing: {
+        productType: PRODUCT_TYPES.MOBILE_TOPUP,
+        providerCost: centsToUsdNumber(providerCostCents),
+        stripeFee: centsToUsdNumber(stripeComponentCents),
+        fxCost: centsToUsdNumber(fxBufferCents),
+        taxCost: centsToUsdNumber(0),
+        totalCost: centsToUsdNumber(
+          providerCostCents +
+            stripeComponentCents +
+            fxBufferCents +
+            riskBufferCents,
+        ),
+        appliedMarginPercent: marginBp / 100,
+        appliedProfitAbsolute: centsToUsdNumber(additiveTargetProfit),
+        finalPrice: centsToUsdNumber(finalCents),
+        estimatedProfit: centsToUsdNumber(verifyNet),
+        currency: 'usd',
+        finalPriceCents: finalCents,
+        providerCostCents,
+        fxBufferCents,
+        riskBufferCents,
+        stripeFeeEstimateCents: stripeComponentCents,
+        targetProfitCents: additiveTargetProfit,
+        projectedNetMarginBp: marginBp,
+        taxBufferCents: providerCostTaxBufferCents,
+        fxOnlyCents,
+        customerProductValueCents: P,
+        customerGovernmentTaxCents,
+        customerZoraServiceFeeCents: feeCents,
+      },
     };
   }
 
   return {
-    ok: true,
-    pricing: {
-      productType: PRODUCT_TYPES.MOBILE_TOPUP,
-      providerCost: centsToUsdNumber(providerCostCents),
-      stripeFee: centsToUsdNumber(stripeComponentCents),
-      fxCost: centsToUsdNumber(fxBufferCents),
-      taxCost: centsToUsdNumber(0),
-      totalCost: centsToUsdNumber(
-        providerCostCents + stripeComponentCents + fxBufferCents + riskBufferCents,
-      ),
-      appliedMarginPercent: marginBp / 100,
-      appliedProfitAbsolute: centsToUsdNumber(additiveTargetProfit),
-      finalPrice: centsToUsdNumber(finalCents),
-      estimatedProfit: centsToUsdNumber(netCents),
-      currency: 'usd',
-      finalPriceCents: finalCents,
-      providerCostCents,
-      fxBufferCents,
-      riskBufferCents,
-      stripeFeeEstimateCents: stripeComponentCents,
-      targetProfitCents: additiveTargetProfit,
-      projectedNetMarginBp: marginBp,
-      taxBufferCents: taxCents,
-      fxOnlyCents,
-    },
+    ok: false,
+    code: 'MARGIN_BELOW_FLOOR',
+    message: 'Checkout rejected: projected margin below minimum threshold',
   };
 }

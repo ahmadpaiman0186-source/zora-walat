@@ -11,6 +11,7 @@ abstract final class TrackingMessages {
       case CustomerTrackingStage.delivered:
         return (l10n.trackingHeadlineDelivered, l10n.trackingBodyDelivered);
       case CustomerTrackingStage.failed:
+      case CustomerTrackingStage.failedTerminally:
         return (l10n.trackingHeadlineNeedsHelp, l10n.trackingBodyFailedCalm);
       case CustomerTrackingStage.retrying:
         return (l10n.trackingHeadlineRetrying, l10n.trackingBodyRetrying);

@@ -26,7 +26,11 @@ class AirtimeOffer {
   int get maxLandedCostUsdCents =>
       PricingEngine.maxLandedCostUsdCentsForRetail(retailUsdCents);
 
-  String get labelShort => '$minutes min';
+  /// Whole-dollar SKUs: show face value (matches server catalog).
+  String get labelShort =>
+      retailUsdCents % 100 == 0
+          ? '\$${retailUsdCents ~/ 100}'
+          : '${(retailUsdCents / 100).toStringAsFixed(2)} USD';
 
   factory AirtimeOffer.fromCatalogJson(
     Map<String, dynamic> json,

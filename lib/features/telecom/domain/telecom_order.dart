@@ -23,6 +23,9 @@ class TelecomOrder {
   final String productTitle;
   final int finalUsdCents;
 
+  /// Same as [finalUsdCents] — product face amount in cents for Stripe/catalog.
+  int get finalAmountCents => finalUsdCents;
+
   /// Merged into Stripe PaymentIntent metadata and fulfillment APIs.
   final Map<String, String> metadata;
 }

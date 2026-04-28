@@ -128,6 +128,19 @@ export function mapReloadlyTopupFailureToFulfillmentResult(sendResult) {
   const code = String(sendResult.failureCode ?? '');
   const msg = String(sendResult.failureMessage ?? '').toLowerCase();
 
+  /** Transport / network (fetch catch path) — retryable. */
+  if (
+    code === 'provider_network_error' ||
+    code === 'provider_timeout' ||
+    code === 'provider_exception'
+  ) {
+    return {
+      outcome: 'failed_retryable',
+      errorCode: code,
+      errorMessageSafe: String(sendResult.failureMessage ?? 'Reloadly transport error').slice(0, 200),
+    };
+  }
+
   if (
     code === 'reloadly_topup_timeout' ||
     code === 'reloadly_topup_server_error' ||

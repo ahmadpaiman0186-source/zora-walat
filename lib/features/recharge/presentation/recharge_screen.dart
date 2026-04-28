@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/utils/receiving_country_phone.dart';
 import '../../../core/widgets/language_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/recharge_draft.dart';
@@ -22,7 +24,8 @@ class _RechargeScreenState extends State<RechargeScreen> {
   /// Phase 1: minimum server order $10 USD — presets start at $10.
   static const List<double> _amountPresets = [10, 15, 20, 25];
 
-  final _phone = TextEditingController();
+  final _localPhone = TextEditingController();
+  ReceivingCountry _country = kReceivingCountriesForRecharge.first;
   String _operator = 'roshan';
   double? _amountUsd;
   List<RechargePackage> _packages = [];
@@ -33,9 +36,14 @@ class _RechargeScreenState extends State<RechargeScreen> {
 
   @override
   void dispose() {
-    _phone.dispose();
+    _localPhone.dispose();
     super.dispose();
   }
+
+  String _phonePayload() => RechargePhoneComposer.phonePayloadForApi(
+        country: _country,
+        localRaw: _localPhone.text,
+      );
 
   String _operatorLabel(String key) {
     for (final o in AppConstants.mockOperators) {
@@ -57,7 +65,25 @@ class _RechargeScreenState extends State<RechargeScreen> {
 
   void _continueToReview() {
     final l10n = AppLocalizations.of(context);
-    final phone = _phone.text.trim();
+    if (_country.isoCode != 'AF') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rechargeCountryNotSupported)),
+      );
+      return;
+    }
+    final v = RechargePhoneComposer.validateLocal(
+      l10n,
+      _country,
+      _localPhone.text,
+    );
+    if (v != null) {
+      setState(() {
+        _error = v;
+        _packages = [];
+      });
+      return;
+    }
+    final phone = _phonePayload();
     if (phone.isEmpty) {
       setState(() {
         _error = l10n.enterRecipientError;
@@ -77,6 +103,8 @@ class _RechargeScreenState extends State<RechargeScreen> {
       AppRoutePaths.rechargeReview,
       extra: RechargeDraft(
         phoneE164Style: phone,
+        receivingCountryIso: _country.isoCode,
+        localPhoneRaw: _localPhone.text.trim(),
         operatorKey: _operator,
         operatorLabel: _operatorLabel(_operator),
         amountUsd: _amountUsd!,
@@ -86,7 +114,25 @@ class _RechargeScreenState extends State<RechargeScreen> {
 
   Future<void> _loadPackages() async {
     final l10n = AppLocalizations.of(context);
-    final phone = _phone.text.trim();
+    if (_country.isoCode != 'AF') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rechargeCountryNotSupported)),
+      );
+      return;
+    }
+    final v = RechargePhoneComposer.validateLocal(
+      l10n,
+      _country,
+      _localPhone.text,
+    );
+    if (v != null) {
+      setState(() {
+        _error = v;
+        _packages = [];
+      });
+      return;
+    }
+    final phone = _phonePayload();
     if (phone.isEmpty) {
       setState(() {
         _error = l10n.enterRecipientError;
@@ -126,6 +172,12 @@ class _RechargeScreenState extends State<RechargeScreen> {
 
   Future<void> _buy(RechargePackage p) async {
     final l10n = AppLocalizations.of(context);
+    if (_country.isoCode != 'AF') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.rechargeCountryNotSupported)),
+      );
+      return;
+    }
     setState(() {
       _loading = true;
       _error = null;
@@ -134,7 +186,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
     try {
       final api = AppScope.of(context).apiService;
       final r = await api.createRechargeOrder(
-        phone: _phone.text.trim(),
+        phone: _phonePayload(),
         operator: _operator,
         packageId: p.id,
       );
@@ -222,6 +274,49 @@ class _RechargeScreenState extends State<RechargeScreen> {
                 ),
                 const SizedBox(height: 28),
                 Text(
+                  l10n.receivingCountryLabel,
+                  style: t.textTheme.titleSmall?.copyWith(
+                    color: t.colorScheme.outline,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: t.colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<ReceivingCountry>(
+                      value: _country,
+                      isExpanded: true,
+                      items: [
+                        for (final c in kReceivingCountriesForRecharge)
+                          DropdownMenuItem(
+                            value: c,
+                            child: Text('${c.englishName} (${c.dialCode})'),
+                          ),
+                      ],
+                      onChanged: _loading
+                          ? null
+                          : (v) {
+                              if (v == null) return;
+                              setState(() {
+                                _country = v;
+                                _localPhone.clear();
+                                _error = null;
+                                _packages = [];
+                              });
+                            },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
                   l10n.recipientNumber,
                   style: t.textTheme.titleSmall?.copyWith(
                     color: t.colorScheme.outline,
@@ -229,23 +324,83 @@ class _RechargeScreenState extends State<RechargeScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                TextField(
-                  controller: _phone,
-                  keyboardType: TextInputType.phone,
-                  style: t.textTheme.titleMedium,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: surface,
-                    hintText: '07XXXXXXXX',
-                    prefixIcon: Icon(Icons.phone_android_rounded, color: t.colorScheme.primary),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: t.colorScheme.outline.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.public_rounded,
+                            size: 20,
+                            color: t.colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${_country.dialCode} ',
+                            style: t.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: t.colorScheme.primary, width: 1.5),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _localPhone,
+                        keyboardType: TextInputType.phone,
+                        style: t.textTheme.titleMedium,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: surface,
+                          hintText: _country.isoCode == 'AF'
+                              ? '07XXXXXXXX'
+                              : l10n.phoneLocalDigitsHint,
+                          prefixIcon: Icon(
+                            Icons.phone_android_rounded,
+                            color: t.colorScheme.primary,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: t.colorScheme.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _country.isoCode == 'AF'
+                      ? l10n.telecomRecipientAfghanistanDialHint
+                      : l10n.phoneLocalDigitsHint,
+                  style: t.textTheme.bodySmall?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.35,
                   ),
                 ),
                 const SizedBox(height: 24),

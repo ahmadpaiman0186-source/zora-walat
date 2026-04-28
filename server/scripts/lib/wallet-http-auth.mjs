@@ -38,9 +38,9 @@ export async function obtainAccessToken(base, opts = {}) {
 
   const loginFirst = Boolean(String(opts.email ?? process.env.WALLET_VERIFY_EMAIL ?? '').trim());
 
-  const login = () => postJson(base, '/auth/login', { email, password });
+  const login = () => postJson(base, '/api/auth/login', { email, password });
   const register = () =>
-    postJson(base, '/auth/register', { email, password });
+    postJson(base, '/api/auth/register', { email, password });
 
   if (loginFirst) {
     const log1 = await login();

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Local E2E: JWT auth + POST /api/wallet/topup (idempotency UUID).
- * API routes: /auth/register, /auth/login (not under /api).
+ * API routes: POST /api/auth/register, POST /api/auth/login.
  */
 import '../bootstrap.js';
 
@@ -73,10 +73,10 @@ async function main() {
   let authOk;
 
   if (envEmail) {
-    let log = await postJson('/auth/login', { email, password });
+    let log = await postJson('/api/auth/login', { email, password });
     logResult('login', log.status, log.parsed);
     if (!log.ok) {
-      const reg = await postJson('/auth/register', { email, password });
+      const reg = await postJson('/api/auth/register', { email, password });
       logResult('register', reg.status, reg.parsed);
       if (reg.status !== 201) {
         console.error(
@@ -85,12 +85,12 @@ async function main() {
         );
         process.exit(1);
       }
-      log = await postJson('/auth/login', { email, password });
+      log = await postJson('/api/auth/login', { email, password });
       logResult('login_after_register', log.status, log.parsed);
     }
     authOk = log;
   } else {
-    const reg = await postJson('/auth/register', { email, password });
+    const reg = await postJson('/api/auth/register', { email, password });
     logResult('register', reg.status, reg.parsed);
     if (reg.status !== 201) {
       console.error(
@@ -99,7 +99,7 @@ async function main() {
       );
       process.exit(1);
     }
-    authOk = await postJson('/auth/login', { email, password });
+    authOk = await postJson('/api/auth/login', { email, password });
     logResult('login', authOk.status, authOk.parsed);
   }
 

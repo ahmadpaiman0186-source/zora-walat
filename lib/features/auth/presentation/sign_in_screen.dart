@@ -1,14 +1,12 @@
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/auth/firebase_backend_session_sync.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../services/firebase_auth_service.dart';
+import '../../../services/auth_api_service.dart';
 
-/// Firebase email/password sign-in, then sync JWT for the Node API.
+/// Email-first OTP sign-in entry screen.
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
 
@@ -18,22 +16,21 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _email = TextEditingController();
-  final _password = TextEditingController();
-  final _firebaseAuth = FirebaseAuthService();
   bool _busy = false;
   String? _error;
 
   @override
   void dispose() {
     _email.dispose();
-    _password.dispose();
     super.dispose();
   }
 
+  String _normalizeEmail(String email) => email.trim().toLowerCase();
+
   bool _validateEmail(String email, AppLocalizations l10n) {
-    final t = email.trim();
+    final t = _normalizeEmail(email);
     if (t.isEmpty) {
-      setState(() => _error = l10n.authFillAllFields);
+      setState(() => _error = l10n.authEmailRequired);
       return false;
     }
     final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(t);
@@ -46,13 +43,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
-    final email = _email.text.trim();
-    final password = _password.text;
+    final email = _normalizeEmail(_email.text);
     if (!_validateEmail(email, l10n)) return;
-    if (password.isEmpty) {
-      setState(() => _error = l10n.authFillAllFields);
-      return;
-    }
 
     setState(() {
       _busy = true;
@@ -60,45 +52,34 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     final authApi = AppScope.of(context).authApiService;
-    final session = AppScope.authSessionOf(context);
 
     try {
-      await _firebaseAuth.signInWithEmailPassword(email: email, password: password);
-      try {
-        await syncBackendSessionAfterFirebaseSignIn(
-          authApi: authApi,
-          session: session,
-          email: email,
-          password: password,
-        );
-      } catch (e, st) {
-        await _firebaseAuth.signOut();
-        if (kDebugMode) {
-          debugPrint('backend sync after Firebase sign-in failed: $e');
-          debugPrint('$st');
-        }
-        final message = e is StateError
-            ? e.message
-            : (kDebugMode ? e.toString() : l10n.authGenericError);
-        if (!mounted) return;
-        setState(() => _error = message);
+      final result = await authApi.requestOtp(email: email);
+      if (!mounted) return;
+      if (!result.ok) {
+        setState(() => _error = l10n.authGenericError);
         return;
       }
+      final target =
+          '${AppRoutePaths.signInOtp}?email=${Uri.encodeQueryComponent(email)}';
+      await context.push(target, extra: result.message);
+    } on AuthApiException catch (e) {
       if (!mounted) return;
-      context.go(AppRoutePaths.hub);
-    } on FirebaseAuthServiceException catch (e) {
+      setState(() => _error = _mapRequestError(e, l10n));
+    } on StateError catch (e) {
       if (!mounted) return;
       setState(() => _error = e.message);
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('sign-in failed: $e');
-        debugPrint('$st');
-      }
-      if (!mounted) return;
+    } catch (_) {
       setState(() => _error = l10n.authGenericError);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  String _mapRequestError(AuthApiException error, AppLocalizations l10n) {
+    if (error.isNetworkError) return l10n.authNetworkRetry;
+    if (error.statusCode == 429) return l10n.authOtpTooManyAttempts;
+    return l10n.authGenericError;
   }
 
   @override
@@ -111,7 +92,9 @@ class _SignInScreenState extends State<SignInScreen> {
         title: Text(l10n.authSignInTitle),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.canPop() ? context.pop() : context.go(AppRoutePaths.landing),
+          onPressed: () => context.canPop()
+              ? context.pop()
+              : context.go(AppRoutePaths.landing),
         ),
       ),
       body: SingleChildScrollView(
@@ -128,22 +111,31 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               const SizedBox(height: 16),
             ],
+            Text(
+              l10n.authOtpEmailIntro,
+              style: t.textTheme.bodyMedium?.copyWith(
+                color: t.colorScheme.outline,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.done,
               autocorrect: false,
+              enabled: !_busy,
               decoration: InputDecoration(
                 labelText: l10n.authEmailLabel,
                 border: const OutlineInputBorder(),
               ),
+              onSubmitted: (_) => _busy ? null : _submit(),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _password,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: l10n.authPasswordLabel,
-                border: const OutlineInputBorder(),
+            Text(
+              l10n.authOtpEmailHelp,
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
               ),
             ),
             const SizedBox(height: 24),
@@ -155,7 +147,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       width: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(l10n.authSignInCta),
+                  : Text(l10n.authOtpContinueCta),
             ),
             const SizedBox(height: 16),
             TextButton(

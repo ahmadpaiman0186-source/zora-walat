@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../services/firebase_auth_service.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/language_sheet.dart';
@@ -90,9 +89,6 @@ class MainHomeScreen extends StatelessWidget {
                           );
                     } catch (_) {}
                   }
-                  try {
-                    await FirebaseAuthService().signOut();
-                  } catch (_) {}
                   await auth.clear();
                 } else if (context.mounted) {
                   context.push(AppRoutePaths.signIn);
@@ -103,7 +99,7 @@ class MainHomeScreen extends StatelessWidget {
               icon: Icons.phone_android_rounded,
               title: l10n.hubTileRechargeTitle,
               subtitle: l10n.hubTileRechargeSub,
-              onTap: () => context.go(AppRoutePaths.recharge),
+              onTap: () => context.go(AppRoutePaths.telecom),
             ),
             _Tile(
               icon: Icons.receipt_long_rounded,
@@ -145,7 +141,7 @@ class MainHomeScreen extends StatelessWidget {
               icon: Icons.dashboard_customize_outlined,
               title: l10n.hubTileLegacyTitle,
               subtitle: l10n.hubTileLegacySub,
-              onTap: () => context.push('/telecom'),
+              onTap: () => context.push(AppRoutePaths.recharge),
             ),
           ],
         ),

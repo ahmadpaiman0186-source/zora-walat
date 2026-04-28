@@ -1,6 +1,4 @@
 import bcrypt from 'bcrypt';
-import { randomUUID } from 'node:crypto';
-
 import { prisma } from '../db.js';
 import { HttpError } from '../lib/httpError.js';
 import {
@@ -8,10 +6,32 @@ import {
   refreshTokenStorageHash,
 } from '../lib/authCrypto.js';
 import { signAccessToken } from './authTokenService.js';
+import { issueTokenPairWithTx } from './sessionIssuance.js';
 import { env } from '../config/env.js';
+import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { ensureUserReferralCode } from './referral/referralCodeService.js';
 
 const BCRYPT_ROUNDS = 12;
+
+/**
+ * @param {{ id: string; email: string; role: string; emailVerifiedAt?: Date | null }} user
+ */
+export function userAuthDto(user) {
+  return {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    emailVerified: Boolean(user.emailVerifiedAt),
+  };
+}
+
+async function issueTokenPair(user) {
+  return issueTokenPairWithTx(prisma, user);
+}
+
+export async function issueTokenPairForUser(user) {
+  return issueTokenPair(user);
+}
 
 export async function registerUser({ email, password }) {
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -21,17 +41,20 @@ export async function registerUser({ email, password }) {
         email: email.toLowerCase(),
         passwordHash,
         role: 'user',
+        emailVerifiedAt: null,
       },
     });
     await ensureUserReferralCode(user.id);
     const tokens = await issueTokenPair(user);
     return {
       ...tokens,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: userAuthDto(user),
     };
   } catch (e) {
     if (e?.code === 'P2002') {
-      throw new HttpError(400, 'Invalid request');
+      throw new HttpError(409, 'Account already exists', {
+        code: AUTH_ERROR_CODE.AUTH_EMAIL_EXISTS,
+      });
     }
     throw e;
   }
@@ -42,40 +65,20 @@ export async function loginUser({ email, password }) {
     where: { email: email.toLowerCase() },
   });
   if (!user || !user.isActive) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_CREDENTIALS,
+    });
   }
   const tokens = await issueTokenPair(user);
   return {
     ...tokens,
-    user: { id: user.id, email: user.email, role: user.role },
-  };
-}
-
-async function issueTokenPair(user) {
-  const accessToken = signAccessToken(user);
-  const rawRefresh = generateRefreshTokenRaw();
-  const tokenHash = refreshTokenStorageHash(rawRefresh);
-  const familyId = randomUUID();
-  const expiresAt = new Date(
-    Date.now() + env.refreshTokenTtlSec * 1000,
-  );
-  await prisma.refreshToken.create({
-    data: {
-      tokenHash,
-      userId: user.id,
-      familyId,
-      expiresAt,
-    },
-  });
-  return {
-    accessToken,
-    refreshToken: rawRefresh,
-    expiresIn: env.accessTokenTtlSec,
-    tokenType: 'Bearer',
+    user: userAuthDto(user),
   };
 }
 
@@ -85,23 +88,21 @@ export async function refreshSession(rawRefresh) {
     where: { tokenHash },
     include: { user: true },
   });
-  if (
-    !existing ||
-    existing.revokedAt ||
-    existing.expiresAt < new Date()
-  ) {
-    throw new HttpError(401, 'Authentication required');
+  if (!existing || existing.revokedAt || existing.expiresAt < new Date()) {
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+    });
   }
   const user = existing.user;
   if (!user.isActive) {
-    throw new HttpError(401, 'Authentication required');
+    throw new HttpError(401, 'Authentication required', {
+      code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+    });
   }
 
   const rawNew = generateRefreshTokenRaw();
   const newHash = refreshTokenStorageHash(rawNew);
-  const expiresAt = new Date(
-    Date.now() + env.refreshTokenTtlSec * 1000,
-  );
+  const expiresAt = new Date(Date.now() + env.refreshTokenTtlSec * 1000);
 
   await prisma.$transaction(async (tx) => {
     const revoked = await tx.refreshToken.updateMany({
@@ -109,7 +110,9 @@ export async function refreshSession(rawRefresh) {
       data: { revokedAt: new Date() },
     });
     if (revoked.count === 0) {
-      throw new HttpError(401, 'Authentication required');
+      throw new HttpError(401, 'Authentication required', {
+        code: AUTH_ERROR_CODE.AUTH_REFRESH_INVALID,
+      });
     }
     await tx.refreshToken.create({
       data: {
@@ -123,6 +126,7 @@ export async function refreshSession(rawRefresh) {
 
   const accessToken = signAccessToken(user);
   return {
+    success: true,
     accessToken,
     refreshToken: rawNew,
     expiresIn: env.accessTokenTtlSec,
@@ -132,7 +136,9 @@ export async function refreshSession(rawRefresh) {
 
 export async function logoutRefreshToken(rawRefresh) {
   if (!rawRefresh) {
-    throw new HttpError(400, 'Invalid request');
+    throw new HttpError(400, 'Invalid request', {
+      code: AUTH_ERROR_CODE.AUTH_INVALID_REQUEST,
+    });
   }
   const tokenHash = refreshTokenStorageHash(rawRefresh);
   const existing = await prisma.refreshToken.findUnique({
@@ -144,7 +150,7 @@ export async function logoutRefreshToken(rawRefresh) {
       data: { revokedAt: new Date() },
     });
   }
-  return { ok: true };
+  return { success: true, ok: true };
 }
 
 export async function loadUserForRequest(userId, tokenVersion) {
@@ -154,3 +160,9 @@ export async function loadUserForRequest(userId, tokenVersion) {
   }
   return user;
 }
+
+export {
+  requestEmailOtp,
+  verifyEmailOtp,
+  cleanupStaleAuthOtpChallengesForTests,
+} from './identity/otpChallengeService.js';

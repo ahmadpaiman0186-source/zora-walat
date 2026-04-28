@@ -76,3 +76,21 @@ export function resolveStripeSecretRaw() {
 export function getValidatedStripeSecretKey() {
   return effectiveStripeSecretKey(resolveStripeSecretRaw());
 }
+
+/**
+ * Web top-up (embedded Payment Element + server PI verification) may use test or live
+ * keys. Test/restricted-test keys are allowed in any NODE_ENV. Live/restricted-live
+ * keys are allowed only when NODE_ENV is production so preview/dev cannot charge live.
+ */
+export function isStripeKeyAllowedForWebTopupCharges() {
+  const secret = getValidatedStripeSecretKey();
+  if (!secret) return false;
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  if (secret.startsWith('sk_test_') || secret.startsWith('rk_test_')) {
+    return true;
+  }
+  if (secret.startsWith('sk_live_') || secret.startsWith('rk_live_')) {
+    return nodeEnv === 'production';
+  }
+  return false;
+}

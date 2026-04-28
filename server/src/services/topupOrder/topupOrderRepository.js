@@ -5,6 +5,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import { prisma, Prisma } from '../../db.js';
+import { timingSafeEqualUtf8 } from '../../lib/timingSafeString.js';
 import { FULFILLMENT_STATUS, PAYMENT_STATUS } from '../../domain/topupOrder/statuses.js';
 import { computePhoneAnalyticsHash } from '../topupFulfillment/webtopPhoneAnalytics.js';
 
@@ -26,6 +27,7 @@ export function verifyUpdateToken(record, plainToken) {
 export function rowToRecord(row) {
   return {
     id: row.id,
+    userId: row.userId ?? null,
     sessionKey: row.sessionKey,
     originCountry: row.originCountry,
     destinationCountry: row.destinationCountry,
@@ -50,6 +52,7 @@ export function rowToRecord(row) {
     fulfillmentReference: row.fulfillmentReference,
     fulfillmentErrorCode: row.fulfillmentErrorCode,
     fulfillmentErrorMessageSafe: row.fulfillmentErrorMessageSafe,
+    fulfillmentNextRetryAt: row.fulfillmentNextRetryAt?.toISOString() ?? null,
     lastProviderPayloadHash: row.lastProviderPayloadHash,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -109,6 +112,7 @@ export async function insertTopupOrder(input, idempotencyKey, payloadHash) {
         selectedAmountLabel: input.selectedAmountLabel,
         amountCents: input.amountCents,
         currency: input.currency ?? 'usd',
+        userId: input.userId ?? null,
         paymentIntentId: null,
         paymentStatus: PAYMENT_STATUS.PENDING,
         fulfillmentStatus: FULFILLMENT_STATUS.PENDING,
@@ -155,6 +159,20 @@ export async function getTopupOrderById(id) {
 export async function listTopupOrdersBySession(sessionKey, limit) {
   const rows = await prisma.webTopupOrder.findMany({
     where: { sessionKey },
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  });
+  return rows.map(rowToRecord);
+}
+
+/**
+ * @param {string} userId
+ * @param {number} limit
+ * @returns {Promise<import('./topupOrderTypes.js').TopupOrderRecord[]>}
+ */
+export async function listTopupOrdersByUserId(userId, limit) {
+  const rows = await prisma.webTopupOrder.findMany({
+    where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
   });
@@ -222,6 +240,7 @@ export async function markTopupOrderPaidClientAtomic(
       paymentIntentId,
       paymentStatus: PAYMENT_STATUS.PAID,
       fulfillmentStatus: FULFILLMENT_STATUS.PENDING,
+      paidAt: new Date(),
     },
   });
   if (n.count === 1) {
@@ -231,7 +250,7 @@ export async function markTopupOrderPaidClientAtomic(
   const row = await prisma.webTopupOrder.findUnique({ where: { id: orderId } });
   if (
     row &&
-    row.sessionKey === sessionKey &&
+    timingSafeEqualUtf8(row.sessionKey, sessionKey) &&
     row.paymentStatus === PAYMENT_STATUS.PAID &&
     row.paymentIntentId === paymentIntentId
   ) {

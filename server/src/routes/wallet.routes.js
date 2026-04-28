@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as wallet from '../controllers/walletController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
+import { requireEmailVerified } from '../middleware/requireEmailVerified.js';
 import { requireJsonContentType } from '../middleware/requireJsonContentType.js';
 import {
   authenticatedApiLimiter,
@@ -21,6 +22,7 @@ router.post(
   walletTopupPerMinuteLimiter,
   walletTopupLimiter,
   requireJsonContentType,
+  requireEmailVerified,
   blockMoneyRoutesIfPrelaunch,
   asyncHandler(wallet.postTopup),
 );

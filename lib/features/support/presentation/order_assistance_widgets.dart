@@ -264,6 +264,7 @@ _EscalationCopy? _escalationCopy(
         tint: scheme.secondary,
       );
     case CustomerTrackingStage.failed:
+    case CustomerTrackingStage.failedTerminally:
       return _EscalationCopy(
         title: l10n.supportAssistFailedTitle,
         body: l10n.supportAssistFailedBody,

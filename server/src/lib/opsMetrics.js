@@ -47,6 +47,7 @@ function windowFailureRate(arr) {
  */
 export function bumpCounter(name, delta = 1) {
   counters[name] = (counters[name] ?? 0) + delta;
+  scheduleLegacyCounterIncr(name, delta);
 }
 
 /**
@@ -242,6 +243,16 @@ export function getOpsMetricsSnapshot() {
       pushSamples: windowPush.length,
     },
   };
+}
+
+/** Test-only helper for deterministic counter assertions. */
+export function resetOpsMetricsForTests() {
+  for (const key of Object.keys(counters)) {
+    delete counters[key];
+  }
+  windowPayment.length = 0;
+  windowFulfillment.length = 0;
+  windowPush.length = 0;
 }
 
 export { windowFailureRate };

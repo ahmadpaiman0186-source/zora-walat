@@ -47,6 +47,8 @@
   "phase1OnlyAirtimeSnack": "Phase 1: only mobile airtime is available.",
   "phase1UsdSecureCheckout": "You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.",
   "checkoutCardRegionLabel": "Your location (card)",
+  "checkoutSenderCountryHint": "This is your card’s billing region for risk checks. It does not change the recipient number — Afghanistan mobile (+93) only.",
+  "telecomRecipientAfghanistanDialHint": "Afghanistan +93 — enter the local mobile (starts with 7).",
   "checkoutPricingUsdServerNote": "Pricing is calculated in USD on our servers for your region.",
   "telecomCheckoutAirtimeRowLabel": "Airtime",
   "phase1ValidityDependsOnOperator": "How long credit stays usable depends on the operator — we show it here only when we have a verified value from pricing.",
@@ -58,8 +60,32 @@
       }
     }
   },
+  "checkoutReviewTotalChargedHeadline": "Total charged: {amount}",
+  "@checkoutReviewTotalChargedHeadline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewAirtimeValueSubline": "Airtime value (recipient): {amount}",
+  "@checkoutReviewAirtimeValueSubline": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutReviewHeadlinePricingUnavailable": "Full pricing will appear when the quote loads — check the order summary below.",
+  "checkoutQuoteFailed": "We couldn't load pricing. Check your connection and try again.",
+  "checkoutAirtimeValueLabel": "Airtime value",
+  "receiptBreakdownLoadingHint": "Loading payment breakdown…",
+  "receiptBreakdownPartialHint": "Full line-item breakdown was not available; amount below is the total charged to your card.",
   "rechargeTrustLine": "USD pricing · Secure checkout · Afghanistan mobile",
   "recipientNumber": "Recipient number",
+  "receivingCountryLabel": "Receiving country",
+  "rechargeCountryNotSupported": "Mobile recharge supports Afghanistan numbers only. Select Afghanistan as the receiving country.",
+  "phoneLocalDigitsHint": "Enter the local number without country code.",
   "operator": "Operator",
   "getPackages": "Get packages",
   "packages": "Packages",
@@ -91,13 +117,13 @@
   "apiUnreachableRecharge": "We can’t reach the service. Check your connection and try again.",
   "hubSubtitle": "Recharge · Wallet · Calling",
   "hubTileRechargeTitle": "Mobile recharge",
-  "hubTileRechargeSub": "Instant packages · USD pricing",
+  "hubTileRechargeSub": "Afghanistan airtime · live catalog · Stripe checkout",
   "hubTileWalletTitle": "Wallet",
   "hubTileWalletSub": "Balance & top-up",
   "hubTileCallingTitle": "International calling",
   "hubTileCallingSub": "Coming soon",
-  "hubTileLegacyTitle": "Plans & catalog",
-  "hubTileLegacySub": "Airtime & data",
+  "hubTileLegacyTitle": "Classic recharge",
+  "hubTileLegacySub": "Manual amounts & review (legacy path)",
   "walletScreenTitle": "Wallet",
   "balanceHeroLabel": "Account balance",
   "availableLabel": "Available",
@@ -115,7 +141,7 @@
   "telecomHomeSubtitle": "Afghanistan mobile · USD checkout · Secure payments",
   "aboutTitle": "About Zora-Walat",
   "aboutBody": "Pricing is shown in USD. Card payments are processed securely; airtime and data are delivered through your configured carrier integrations.",
-  "aboutDevHint": "Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass PAYMENTS_API_BASE_URL at build time if your API is not localhost.",
+  "aboutDevHint": "Developers: set the Stripe publishable key in lib/stripe_keys.dart; pass API_BASE_URL via --dart-define when using a non-default backend.",
   "tabAirtime": "Airtime",
   "tabDataPackages": "Data packages",
   "tabIntlCalling": "Int'l calling",
@@ -130,7 +156,18 @@
   "operatorLabel": "Operator",
   "packageLabel": "Package",
   "totalUsd": "Total (USD)",
+  "checkoutProductValueLabel": "Product value",
+  "checkoutSenderTaxLabel": "Tax (sender jurisdiction)",
+  "checkoutServiceFeeLabel": "Zora-Walat service fee",
+  "checkoutTotalChargedLabel": "Total charged",
+  "checkoutTaxJurisdictionPhaseNote": "Tax on the product value uses your selected sender country. If you add state, city, or ZIP, it is stored for compliance and for future tax engines; it does not change the tax rate in this app version yet.",
+  "checkoutPricingLoading": "Updating price for your region…",
   "checkoutUsdTotalFootnote": "Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.",
+  "checkoutScreenCurrencyHint": "Prices in US dollars (USD).",
+  "checkoutScreenServerPricingNote": "Pricing is calculated in USD on our servers for your region.",
+  "checkoutScreenOrderTotalCaption": "Total (USD)",
+  "checkoutScreenChargeFootnote": "Charged in USD. If your card is not USD, your bank may add conversion or fees we do not control.",
+  "checkoutScreenStripeSecureNote": "You pay in USD on Stripe’s secure checkout. The total is confirmed by our server before you are charged.",
   "stripeSectionTitle": "Secure payment",
   "stripeKeyMissing": "Stripe publishable key not configured for this build.",
   "stripeKeyLoaded": "Card payments ready. Your server creates the PaymentIntent and returns the client secret.",
@@ -155,6 +192,10 @@
   "telecomMinuteBundlesTitle": "Minute bundles (USD)",
   "telecomEnterNumberForAmounts": "Enter a valid number and confirm the operator to see amounts.",
   "telecomPhoneHintAirtime": "07X XXX XXXX or 937…",
+  "receivingCountryLabel": "Receiving country",
+  "recipientLocalNumber": "Local mobile number",
+  "phase1AirtimeAfghanistanOnly": "Phase 1 airtime is available for Afghanistan only. Select Afghanistan to continue.",
+  "checkoutSecuringCheckout": "Securing checkout…",
   "telecomDataHeadline": "Data packages",
   "telecomDataSubtitle": "Daily, weekly, and monthly bundles. All prices in USD.",
   "telecomPhoneHintData": "07X XXX XXXX",
@@ -232,6 +273,35 @@
   "authGenericError": "Something went wrong. Please try again.",
   "authFillAllFields": "Enter your email and password.",
   "authInvalidEmail": "Enter a valid email address.",
+  "authEmailRequired": "Enter your email address.",
+  "authOtpEmailIntro": "Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.",
+  "authOtpEmailHelp": "Use the same email address you use for your Zora-Walat account.",
+  "authOtpContinueCta": "Send code",
+  "authOtpSendingCode": "Sending verification code…",
+  "authOtpCodeTitle": "Enter code",
+  "authOtpCheckEmail": "Check your inbox",
+  "authOtpCodeLabel": "Verification code",
+  "authOtpVerifyCta": "Verify code",
+  "authOtpCodeRequired": "Enter the 6-digit verification code.",
+  "authOtpInvalidOrExpired": "That code is invalid or has expired. Request a new code and try again.",
+  "authOtpTooManyAttempts": "Too many attempts. Please wait a moment before trying again.",
+  "authNetworkRetry": "Network error. Check your connection and try again.",
+  "authOtpRequestSuccess": "If the account is eligible, a verification code has been sent.",
+  "authOtpResendReady": "You can request a new code now.",
+  "authOtpResendCta": "Resend code",
+  "authOtpChangeEmail": "Use a different email",
+  "authOtpCodeHelp": "Use the 6-digit sign-in code for {email} (check spam). Enter it below.",
+  "@authOtpCodeHelp": {
+    "placeholders": {
+      "email": {}
+    }
+  },
+  "authOtpResendIn": "You can resend a code in {seconds}s.",
+  "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "landingNavBrand": "Zora-Walat",
   "landingHeroTitle": "Send airtime to Afghanistan in seconds",
   "landingHeroSubtitle": "International mobile top-up for Afghan numbers — built for families abroad who need a fast, trustworthy way to stay connected.",
@@ -260,6 +330,13 @@
   "successScreenTitle": "You’re all set",
   "successPaymentConfirmed": "Payment received",
   "successStripeConfirmedShort": "Your bank authorized this purchase. We’re completing your top-up now.",
+  "successMissingReturnParamsHint": "This address is missing payment reference details (session or order id). If you completed checkout, open Recent orders or use the link from Stripe’s confirmation email.",
+  "successBootstrapWarning": "We couldn’t refresh live order status yet. Your payment may still be processing — check Recent orders in a moment.\n{detail}",
+  "@successBootstrapWarning": {
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
   "receiptTitle": "Receipt",
   "receiptOrderRef": "Order reference",
   "receiptPaymentStatus": "Payment",

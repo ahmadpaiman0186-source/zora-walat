@@ -1,9 +1,16 @@
 'use client';
 
-import { Elements } from '@stripe/react-stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { useLocale } from '@/components/i18n/localeContext';
@@ -25,12 +32,30 @@ import {
   operatorsForDestination,
 } from '@/topup/catalog';
 import type { ProductType } from '@/topup/catalog';
+import {
+  composeTopupPhoneDigits,
+  formatDialDisplay,
+  getDestinationPhoneMeta,
+  migrateNationalPhoneOnDestinationChange,
+} from '@/topup/destinationPhoneMeta';
+
+import { parseApiErrorBody } from '@/lib/api/readApiError';
+import {
+  describeStripePublishableKey,
+  getPublicApiBaseUrl,
+  getStripePublishableKey,
+} from '@/lib/env/publicRuntime';
 
 import { OrderSuccessPanel } from './OrderSuccessPanel';
-import { PaymentConfirmForm } from './PaymentConfirmForm';
+import { StripeCheckoutElements } from './StripeCheckoutElements';
+import { CHECKOUT_FETCH_TIMEOUT_MS, fetchWithTimeout } from './apiFetch';
 import styles from './ZoraWalatTopUp.module.css';
 
-const defaultApiBase = 'http://127.0.0.1:8787';
+const STRIPE_RETURN_PENDING_KEY = 'zw_stripe_return_pending';
+
+function readApiErrorMessage(data: unknown, fallback: string): string {
+  return parseApiErrorBody(data, fallback).message;
+}
 
 function formatUsd(cents: number, locale: UiLocale): string {
   const tag =
@@ -39,10 +64,6 @@ function formatUsd(cents: number, locale: UiLocale): string {
     style: 'currency',
     currency: 'USD',
   });
-}
-
-function normalizePhoneDigits(raw: string): string {
-  return raw.replace(/\D/g, '');
 }
 
 function isPhonePlausible(digits: string): boolean {
@@ -68,19 +89,58 @@ function productLabel(
 export function ZoraWalatTopUp() {
   const { messages: m, locale } = useLocale();
 
-  const stripePublishableKey =
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? '';
+  const stripePublishableKey = getStripePublishableKey();
 
   const stripePromise = useMemo(
     () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
     [stripePublishableKey],
   );
 
+  /** Resolved Stripe.js instance. Passing a Promise into `<Elements>` leaves `elements` null until async resolve, so `<PaymentElement>` never mounts and `onReady` never fires. */
+  const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
+  const [stripeJsError, setStripeJsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!stripePromise) {
+      setStripeInstance(null);
+      setStripeJsError(null);
+      return;
+    }
+    let cancelled = false;
+    setStripeJsError(null);
+    void stripePromise
+      .then((stripe) => {
+        if (cancelled) return;
+        if (!stripe) {
+          setStripeInstance(null);
+          setStripeJsError('Payment SDK could not load.');
+          return;
+        }
+        setStripeInstance(stripe);
+        if (process.env.NODE_ENV !== 'production') {
+          console.info('[zora_stripe] loadStripe resolved', describeStripePublishableKey());
+        }
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setStripeInstance(null);
+        const msg =
+          e instanceof Error ? e.message : 'Failed to load Stripe.js';
+        setStripeJsError(msg);
+        console.error('[zora_stripe] loadStripe rejected', e);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [stripePromise, stripePublishableKey]);
+
   const [countryFrom, setCountryFrom] = useState('US');
   const [countryTo, setCountryTo] = useState('AF');
   const [productType, setProductType] = useState<ProductType>('airtime');
   const [operatorId, setOperatorId] = useState('');
-  const [phone, setPhone] = useState('');
+  /** National subscriber digits only; country calling code shown separately from `countryTo`. */
+  const [phoneNational, setPhoneNational] = useState('');
+  const prevDestinationRef = useRef(countryTo);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(
     null,
   );
@@ -102,9 +162,7 @@ export function ZoraWalatTopUp() {
     paymentIntentId: string | null;
   }>({ orderId: null, updateToken: null, paymentIntentId: null });
 
-  const apiBase = (
-    process.env.NEXT_PUBLIC_API_URL ?? defaultApiBase
-  ).replace(/\/+$/, '');
+  const apiBase = getPublicApiBaseUrl();
 
   const operatorChoices = useMemo(
     () => operatorsForDestination(countryTo, productType),
@@ -114,6 +172,21 @@ export function ZoraWalatTopUp() {
   useEffect(() => {
     setOperatorId('');
   }, [countryTo, productType]);
+
+  useEffect(() => {
+    if (prevDestinationRef.current === countryTo) return;
+    const from = prevDestinationRef.current;
+    prevDestinationRef.current = countryTo;
+    setPhoneNational((prev) =>
+      migrateNationalPhoneOnDestinationChange(prev, from, countryTo),
+    );
+  }, [countryTo]);
+
+  const destinationPhoneMeta = useMemo(
+    () => getDestinationPhoneMeta(countryTo),
+    [countryTo],
+  );
+  const dialDisplay = formatDialDisplay(destinationPhoneMeta.dialDigits);
 
   const offer = useMemo(
     () =>
@@ -133,7 +206,7 @@ export function ZoraWalatTopUp() {
     priceOptions.find((o) => o.id === selectedOptionId) ?? priceOptions[0];
   const amountCents = selectedOption?.priceUsdCents ?? 0;
 
-  const digits = normalizePhoneDigits(phone);
+  const digits = composeTopupPhoneDigits(countryTo, phoneNational);
   const formValid =
     operatorId.length > 0 &&
     isPhonePlausible(digits) &&
@@ -181,6 +254,11 @@ export function ZoraWalatTopUp() {
       setErrorMessage(m.error.stripeInit);
       return;
     }
+    if (!apiBase) {
+      setStep('error');
+      setErrorMessage(m.error.configApi);
+      return;
+    }
 
     setStep('loading_intent');
     checkoutContextRef.current = {
@@ -188,10 +266,22 @@ export function ZoraWalatTopUp() {
       updateToken: null,
       paymentIntentId: null,
     };
+    let reachedTerminalStep = false;
     try {
+      if (stripePromise) {
+        const stripeReady = await stripePromise;
+        if (!stripeReady) {
+          setErrorMessage(stripeJsError ?? m.error.stripeInit);
+          setStep('error');
+          reachedTerminalStep = true;
+          return;
+        }
+      }
       const sessionKey = getOrCreateCheckoutSessionKey();
       const idempotencyKey = crypto.randomUUID();
-      const createRes = await fetch(`${apiBase}/api/topup-orders`, {
+      const createRes = await fetchWithTimeout(
+        `${apiBase}/api/topup-orders`,
+        {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,18 +301,17 @@ export function ZoraWalatTopUp() {
           amountCents,
           currency: 'usd',
         }),
-      });
+        },
+        CHECKOUT_FETCH_TIMEOUT_MS,
+      );
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('[zora_topup_checkout] topup-orders', createRes.status);
+      }
       const createData: unknown = await createRes.json().catch(() => ({}));
       if (!createRes.ok) {
-        const msg =
-          typeof createData === 'object' &&
-          createData !== null &&
-          'error' in createData &&
-          typeof (createData as { error: unknown }).error === 'string'
-            ? (createData as { error: string }).error
-            : m.error.orderCreate;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(createData, m.error.orderCreate));
         setStep('error');
+        reachedTerminalStep = true;
         return;
       }
       const created = createData as {
@@ -234,6 +323,7 @@ export function ZoraWalatTopUp() {
       if (!created.order?.id) {
         setErrorMessage(m.error.orderCreate);
         setStep('error');
+        reachedTerminalStep = true;
         return;
       }
       const resolvedToken =
@@ -243,6 +333,7 @@ export function ZoraWalatTopUp() {
       if (!resolvedToken) {
         setErrorMessage(m.error.orderCreate);
         setStep('error');
+        reachedTerminalStep = true;
         return;
       }
       saveCheckoutSessionKey(created.sessionKey ?? sessionKey);
@@ -250,26 +341,35 @@ export function ZoraWalatTopUp() {
       checkoutContextRef.current.updateToken = resolvedToken;
       saveTopupUpdateToken(created.order.id, resolvedToken);
 
-      const res = await fetch(`${apiBase}/create-payment-intent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: amountCents,
-          orderId: created.order.id,
-        }),
-      });
+      const webtopupSession = created.sessionKey ?? sessionKey;
+      const piIdempotencyKey = crypto.randomUUID();
+      const res = await fetchWithTimeout(
+        `${apiBase}/create-payment-intent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': piIdempotencyKey,
+            ...(webtopupSession
+              ? { 'X-ZW-WebTopup-Session': webtopupSession }
+              : {}),
+          },
+          body: JSON.stringify({
+            amount: amountCents,
+            orderId: created.order.id,
+          }),
+        },
+        CHECKOUT_FETCH_TIMEOUT_MS,
+      );
+      if (process.env.NODE_ENV !== 'production') {
+        console.info('[zora_topup_checkout] create-payment-intent', res.status);
+      }
       const data: unknown = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        const msg =
-          typeof data === 'object' &&
-          data !== null &&
-          'error' in data &&
-          typeof (data as { error: unknown }).error === 'string'
-            ? (data as { error: string }).error
-            : `HTTP ${res.status}`;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(data, `HTTP ${res.status}`));
         setStep('error');
+        reachedTerminalStep = true;
         return;
       }
 
@@ -293,16 +393,28 @@ export function ZoraWalatTopUp() {
       if (!secret || !paymentIntentId) {
         setErrorMessage(m.error.noSecret);
         setStep('error');
+        reachedTerminalStep = true;
         return;
       }
 
       checkoutContextRef.current.paymentIntentId = paymentIntentId;
       setClientSecret(secret);
       setStep('checkout');
+      reachedTerminalStep = true;
     } catch (e) {
       console.error('[checkout] create order / payment-intent failed', e);
-      setErrorMessage(m.error.network);
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      setErrorMessage(aborted ? m.error.requestTimeout : m.error.network);
       setStep('error');
+      reachedTerminalStep = true;
+    } finally {
+      if (!reachedTerminalStep) {
+        console.error(
+          '[checkout] unexpected exit from startPayment while loading_intent — forcing error state',
+        );
+        setErrorMessage(m.error.network);
+        setStep('error');
+      }
     }
   }, [
     amountCents,
@@ -310,8 +422,10 @@ export function ZoraWalatTopUp() {
     countryFrom,
     countryTo,
     digits,
+    m.error.configApi,
     m.error.configStripe,
     m.error.network,
+    m.error.requestTimeout,
     m.error.noSecret,
     m.error.stripeInit,
     m.error.orderCreate,
@@ -324,6 +438,7 @@ export function ZoraWalatTopUp() {
     operatorId,
     productType,
     selectedOption,
+    stripeJsError,
     stripePromise,
     stripePublishableKey,
   ]);
@@ -334,9 +449,13 @@ export function ZoraWalatTopUp() {
       setErrorMessage(m.error.orderFinalize);
       return;
     }
+    if (!apiBase) {
+      setErrorMessage(m.error.configApi);
+      return;
+    }
     const sessionKey = getOrCreateCheckoutSessionKey();
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `${apiBase}/api/topup-orders/${encodeURIComponent(ctx.orderId)}/mark-paid`,
         {
           method: 'POST',
@@ -347,17 +466,11 @@ export function ZoraWalatTopUp() {
             sessionKey,
           }),
         },
+        CHECKOUT_FETCH_TIMEOUT_MS,
       );
       const data: unknown = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const msg =
-          typeof data === 'object' &&
-          data !== null &&
-          'error' in data &&
-          typeof (data as { error: unknown }).error === 'string'
-            ? (data as { error: string }).error
-            : m.error.orderFinalize;
-        setErrorMessage(msg);
+        setErrorMessage(readApiErrorMessage(data, m.error.orderFinalize));
         return;
       }
       const body = data as { order?: PublicTopupOrder };
@@ -371,15 +484,172 @@ export function ZoraWalatTopUp() {
       setStep('success');
     } catch (e) {
       console.error('[checkout] mark-paid failed', e);
-      setErrorMessage(m.error.orderFinalize);
+      const aborted = e instanceof Error && e.name === 'AbortError';
+      setErrorMessage(aborted ? m.error.requestTimeout : m.error.orderFinalize);
     }
-  }, [apiBase, m.error.orderFinalize]);
+  }, [apiBase, m.error.configApi, m.error.orderFinalize, m.error.requestTimeout]);
+
+  /** Stable for Stripe subtree — avoids new function identity every parent render. */
+  const handleStripePaymentError = useCallback((msg: string) => {
+    setErrorMessage(msg);
+  }, []);
+
+  const processingStripeReturnRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      const clientSecret = url.searchParams.get('payment_intent_client_secret');
+      const redirectStatus = url.searchParams.get('redirect_status');
+      const paymentIntentId = url.searchParams.get('payment_intent');
+      if (!clientSecret || !redirectStatus || !paymentIntentId) return;
+      sessionStorage.setItem(
+        STRIPE_RETURN_PENDING_KEY,
+        JSON.stringify({
+          clientSecret,
+          redirectStatus,
+          paymentIntentId,
+        }),
+      );
+      url.searchParams.delete('payment_intent_client_secret');
+      url.searchParams.delete('redirect_status');
+      url.searchParams.delete('payment_intent');
+      const qs = url.searchParams.toString();
+      window.history.replaceState(
+        {},
+        '',
+        `${url.pathname}${qs ? `?${qs}` : ''}${url.hash}`,
+      );
+    } catch (e) {
+      console.error('[checkout] capture stripe return url failed', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = sessionStorage.getItem(STRIPE_RETURN_PENDING_KEY);
+    if (!raw) return;
+    if (!stripePublishableKey || !stripePromise) return;
+    if (!apiBase) {
+      sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      setErrorMessage(m.error.configApi);
+      setStep('error');
+      return;
+    }
+    if (processingStripeReturnRef.current) return;
+    processingStripeReturnRef.current = true;
+
+    type ReturnPayload = {
+      clientSecret: string;
+      redirectStatus: string;
+      paymentIntentId: string;
+    };
+    let payload: ReturnPayload;
+    try {
+      payload = JSON.parse(raw) as ReturnPayload;
+    } catch {
+      sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      processingStripeReturnRef.current = false;
+      return;
+    }
+
+    setStep('loading_intent');
+    setErrorMessage(null);
+
+    void (async () => {
+      try {
+        const stripe = await stripePromise;
+        if (!stripe) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.stripeInit);
+          setStep('error');
+          return;
+        }
+        const { error, paymentIntent } = await stripe.retrievePaymentIntent(
+          payload.clientSecret,
+        );
+        if (error || !paymentIntent) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(error?.message ?? m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        const piMeta = paymentIntent as {
+          metadata?: Record<string, string> | null | undefined;
+        };
+        const orderIdMeta = piMeta.metadata?.topup_order_id;
+        const orderId =
+          typeof orderIdMeta === 'string' && orderIdMeta.length > 0
+            ? orderIdMeta
+            : null;
+        if (!orderId) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        const updateToken = getTopupUpdateToken(orderId);
+        if (!updateToken) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(m.error.orderFinalize);
+          setStep('error');
+          return;
+        }
+
+        checkoutContextRef.current = {
+          orderId,
+          updateToken,
+          paymentIntentId: paymentIntent.id,
+        };
+
+        const succeeded =
+          payload.redirectStatus === 'succeeded' &&
+          paymentIntent.status === 'succeeded';
+
+        if (!succeeded) {
+          sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+          setErrorMessage(
+            payload.redirectStatus === 'failed'
+              ? m.error.paymentRedirectFailed
+              : m.error.orderFinalize,
+          );
+          setStep('error');
+          return;
+        }
+
+        await finalizePaidOrder();
+        sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+      } catch (e) {
+        console.error('[checkout] stripe return finalize failed', e);
+        sessionStorage.removeItem(STRIPE_RETURN_PENDING_KEY);
+        setErrorMessage(m.error.network);
+        setStep('error');
+      } finally {
+        processingStripeReturnRef.current = false;
+      }
+    })();
+  }, [
+    apiBase,
+    finalizePaidOrder,
+    m.error.configApi,
+    m.error.network,
+    m.error.orderFinalize,
+    m.error.paymentRedirectFailed,
+    m.error.stripeInit,
+    stripePromise,
+    stripePublishableKey,
+  ]);
 
   const busyIntent = step === 'loading_intent';
   const showContinue =
     step === 'idle' || step === 'error' || step === 'loading_intent';
   const showStripe =
-    step === 'checkout' && stripePromise && clientSecret;
+    step === 'checkout' && Boolean(stripeInstance) && Boolean(clientSecret);
+  const showCheckoutAwaitingStripeSdk =
+    step === 'checkout' && Boolean(clientSecret) && !stripeInstance;
 
   const maskedRecipient =
     digits.length >= 4 ? `•••• ${digits.slice(-4)}` : m.summary.notSet;
@@ -392,6 +662,7 @@ export function ZoraWalatTopUp() {
     setErrorMessage(null);
     setFormError(null);
     setCompletedOrder(null);
+    setPhoneNational('');
     checkoutContextRef.current = {
       orderId: null,
       updateToken: null,
@@ -594,17 +865,29 @@ export function ZoraWalatTopUp() {
                     </label>
                     <span className={styles.hint}>{m.form.phoneHint}</span>
                   </div>
-                  <input
-                    id="phone"
-                    type="tel"
-                    className={styles.input}
-                    inputMode="tel"
-                    autoComplete="tel"
-                    placeholder="+971 50 000 0000"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    aria-invalid={!isPhonePlausible(digits) && phone.length > 0}
-                  />
+                  <div className={styles.phoneFieldRow}>
+                    <span
+                      className={styles.dialPrefix}
+                      aria-hidden
+                      title={dialDisplay}
+                    >
+                      {dialDisplay}
+                    </span>
+                    <input
+                      id="phone"
+                      type="tel"
+                      className={`${styles.input} ${styles.phoneNationalInput}`}
+                      inputMode="numeric"
+                      autoComplete="tel-national"
+                      placeholder={destinationPhoneMeta.nationalPlaceholder}
+                      value={phoneNational}
+                      onChange={(e) => setPhoneNational(e.target.value)}
+                      aria-invalid={
+                        !isPhonePlausible(digits) && phoneNational.length > 0
+                      }
+                      aria-label={`${m.form.phone} (${toLabel})`}
+                    />
+                  </div>
                 </div>
 
                 <div className={styles.field}>
@@ -738,33 +1021,29 @@ export function ZoraWalatTopUp() {
                   </div>
                 </div>
 
-                {showStripe ? (
-                  <Elements
-                    stripe={stripePromise}
-                    options={{
-                      clientSecret,
-                      appearance: {
-                        theme: 'night',
-                        variables: {
-                          colorPrimary: '#10b981',
-                          borderRadius: '10px',
-                          fontFamily: 'var(--font-sans), system-ui, sans-serif',
-                        },
-                      },
-                    }}
-                  >
-                    <PaymentConfirmForm
-                      payButtonLabel={`${m.payment.payWithAmount} ${formatUsd(amountCents, locale)}`}
-                      processingLabel={m.payment.processing}
-                      onSuccess={finalizePaidOrder}
-                      onError={(msg) => setErrorMessage(msg)}
-                    />
-                  </Elements>
+                {showStripe && stripeInstance && clientSecret ? (
+                  <StripeCheckoutElements
+                    stripe={stripeInstance}
+                    clientSecret={clientSecret}
+                    payButtonLabel={`${m.payment.payWithAmount} ${formatUsd(amountCents, locale)}`}
+                    processingLabel={m.payment.processing}
+                    onSuccess={finalizePaidOrder}
+                    onError={handleStripePaymentError}
+                  />
                 ) : (
                   <div className={styles.stripePlaceholder}>
                     {step === 'loading_intent'
                       ? m.form.continuing
-                      : m.payment.subtitle}
+                      : showCheckoutAwaitingStripeSdk
+                        ? stripeJsError
+                          ? stripeJsError
+                          : (
+                              <>
+                                <span className={styles.spinner} aria-hidden />
+                                {m.payment.loadingStripeSdk}
+                              </>
+                            )
+                        : m.payment.subtitle}
                   </div>
                 )}
               </article>

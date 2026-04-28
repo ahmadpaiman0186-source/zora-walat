@@ -1,7 +1,9 @@
 import { ZodError } from 'zod';
 
 import { env } from '../config/env.js';
+import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
 import { HttpError } from '../lib/httpError.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 
 /** express-rate-limit throws this name when validations fail (e.g. undefined req.ip). */
 function isRateLimitValidationError(err) {
@@ -24,7 +26,23 @@ function isJsonBodyParseError(err) {
 
 export function errorHandler(err, req, res, _next) {
   if (err instanceof HttpError) {
-    return res.status(err.status).json({ error: err.message });
+    if (err.operationalClass) {
+      req.log?.info?.(
+        {
+          httpError: true,
+          status: err.status,
+          code: err.code ?? null,
+          operationalClass: err.operationalClass,
+          traceId: req.traceId ?? null,
+        },
+        'http_error',
+      );
+    }
+    const body = clientErrorBody(
+      err.message,
+      err.code != null ? String(err.code) : 'http_error',
+    );
+    return res.status(err.status).json(body);
   }
 
   if (isJsonBodyParseError(err)) {
@@ -37,15 +55,23 @@ export function errorHandler(err, req, res, _next) {
       },
       'security',
     );
-    return res.status(400).json({ error: 'Invalid JSON body' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid JSON body', API_CONTRACT_CODE.INVALID_JSON_BODY),
+      );
   }
 
   if (err instanceof ZodError) {
     if (env.nodeEnv === 'production') {
-      return res.status(400).json({ error: 'Invalid request body' });
+      return res
+        .status(400)
+        .json(
+          clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
+        );
     }
     return res.status(400).json({
-      error: 'Invalid request body',
+      ...clientErrorBody('Invalid request body', API_CONTRACT_CODE.VALIDATION_ERROR),
       details: err.flatten(),
     });
   }
@@ -58,21 +84,40 @@ export function errorHandler(err, req, res, _next) {
     if (env.nodeEnv !== 'production') {
       console.error('[errorHandler] rate-limit validation:', err.code, err.message);
     }
-    return res.status(500).json({ error: 'Internal server error' });
+    return res
+      .status(500)
+      .json(
+        clientErrorBody('Internal server error', API_CONTRACT_CODE.INTERNAL_ERROR),
+      );
   }
 
   if (isStripeError(err)) {
     const status = typeof err.statusCode === 'number' ? err.statusCode : 400;
     req.log?.warn(
-      { stripeType: err.type, code: err.code, message: err.message },
+      {
+        stripeType: err.type,
+        code: err.code,
+        message: err.message,
+        contractCode: API_CONTRACT_CODE.PAYMENT_PROVIDER_ERROR,
+      },
       'stripe error',
     );
     if (env.nodeEnv === 'production') {
-      return res.status(status).json({ error: 'Payment provider error' });
+      return res
+        .status(status)
+        .json(
+          clientErrorBody(
+            'Payment provider error',
+            API_CONTRACT_CODE.PAYMENT_PROVIDER_ERROR,
+          ),
+        );
     }
     return res.status(status).json({
-      error: err.message || 'Payment provider error',
-      code: err.code ?? undefined,
+      ...clientErrorBody(
+        err.message || 'Payment provider error',
+        API_CONTRACT_CODE.PAYMENT_PROVIDER_ERROR,
+      ),
+      stripeCode: err.code ?? undefined,
     });
   }
 
@@ -86,5 +131,9 @@ export function errorHandler(err, req, res, _next) {
   if (env.nodeEnv !== 'production') {
     console.error('[errorHandler] unhandled:', err?.name, String(msg).slice(0, 500));
   }
-  return res.status(500).json({ error: 'Internal server error' });
+  return res
+    .status(500)
+    .json(
+      clientErrorBody('Internal server error', API_CONTRACT_CODE.INTERNAL_ERROR),
+    );
 }

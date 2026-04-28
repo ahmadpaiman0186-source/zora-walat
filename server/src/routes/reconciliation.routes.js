@@ -1,5 +1,11 @@
 import { Router } from 'express';
 
+import {
+  API_CONTRACT_CODE,
+  RECHARGE_ERROR_CODE,
+} from '../constants/apiContractCodes.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { runReconciliationScan } from '../services/reconciliationService.js';
@@ -67,13 +73,25 @@ router.get(
   asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     if (!isValidTopupOrderId(orderId)) {
-      return res.status(400).json({ error: 'Invalid order id' });
+      return res.status(400).json(staffApiErrorBody('Invalid order id', 400));
     }
     const result = await reconcileWebTopupOrder(orderId, req.log);
     res.setHeader('Cache-Control', 'no-store');
     if (!result.ok) {
-      const code = result.error === 'not_found' ? 404 : 400;
-      return res.status(code).json(result);
+      const http = result.error === 'not_found' ? 404 : 400;
+      const message =
+        result.error === 'not_found'
+          ? 'Not found'
+          : result.error === 'invalid_order_id'
+            ? 'Invalid order id'
+            : 'Reconciliation failed';
+      const machineCode =
+        result.error === 'not_found'
+          ? API_CONTRACT_CODE.NOT_FOUND
+          : result.error === 'invalid_order_id'
+            ? RECHARGE_ERROR_CODE.INVALID_ORDER_ID
+            : API_CONTRACT_CODE.VALIDATION_ERROR;
+      return res.status(http).json(clientErrorBody(message, machineCode));
     }
     return res.status(200).json(result);
   }),

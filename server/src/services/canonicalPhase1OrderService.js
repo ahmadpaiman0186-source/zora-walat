@@ -161,6 +161,8 @@ export function toCanonicalPhase1OrderDto(checkout, latestAttempt, options = {})
     stripePaymentIntentId: checkout.stripePaymentIntentId ?? null,
     stripeCheckoutSessionId: checkout.stripeCheckoutSessionId ?? null,
     completedByStripeWebhookEventId: checkout.completedByWebhookEventId ?? null,
+    fulfillmentAttemptId: latestAttempt?.id ?? null,
+    latestProviderReference: latestAttemptProviderReference,
   });
 
   const marginUsd = computePhase1MarginUsdSurface(checkout);

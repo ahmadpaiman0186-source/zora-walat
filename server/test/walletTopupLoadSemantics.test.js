@@ -46,6 +46,16 @@ describe('classifyWalletTopupResult', () => {
     );
   });
 
+  it('403 email verification required', () => {
+    assert.equal(
+      classifyWalletTopupResult(403, {
+        code: 'auth_verification_required',
+        message: 'Email verification is required for this action.',
+      }).kind,
+      'verification_required',
+    );
+  });
+
   it('400 amount policy', () => {
     assert.equal(
       classifyWalletTopupResult(400, {

@@ -29,13 +29,13 @@ void main() {
     final log = TransactionLogStore(prefs);
     final orderHistory = LocalOrderHistoryStore(prefs);
     final httpClient = http.Client();
-    const base = 'http://localhost:0';
+    const base = 'https://example.invalid';
     final authSession = AuthSession(prefs);
     await authSession.restore();
     final authApi = AuthApiService(client: httpClient, baseUrl: base);
     final apiService = ApiService(
       client: httpClient,
-      baseUrl: base,
+      baseUrlOverride: base,
       authSession: authSession,
       authApi: authApi,
     );

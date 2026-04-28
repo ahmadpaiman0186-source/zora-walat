@@ -1,10 +1,11 @@
 import { FULFILLMENT_STATUS } from '../../domain/topupOrder/statuses.js';
-import { FULFILLMENT_DB_ERROR } from '../../domain/topupOrder/fulfillmentErrors.js';
+import { persistedFulfillmentErrorCode } from '../../domain/topupOrder/webtopFulfillmentFailureSemantics.js';
 
 /** @typedef {import('./providers/topupProviderTypes.js').TopupFulfillmentResult} TopupFulfillmentResult */
 
 /**
  * Maps normalized provider result to DB patch fields (pure — for tests).
+ * `fulfillmentErrorCode` prefers provider `errorCode` when set, else stable bucket codes.
  * @param {TopupFulfillmentResult} result
  * @param {string} payloadHash
  */
@@ -31,7 +32,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         fulfillmentReference: result.providerReference ?? null,
         fulfillmentCompletedAt: null,
         fulfillmentFailedAt: null,
-        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.PROVIDER_VERIFYING,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe:
           result.errorMessageSafe ?? 'Verifying top-up with provider',
       };
@@ -40,7 +41,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         ...base,
         fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
         fulfillmentFailedAt: new Date(),
-        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.RETRYABLE,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe: result.errorMessageSafe ?? 'Retryable failure',
         fulfillmentReference: result.providerReference ?? null,
         fulfillmentCompletedAt: null,
@@ -50,7 +51,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         ...base,
         fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
         fulfillmentFailedAt: new Date(),
-        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.TERMINAL,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe: result.errorMessageSafe ?? 'Terminal failure',
         fulfillmentReference: null,
         fulfillmentCompletedAt: null,
@@ -60,7 +61,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         ...base,
         fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
         fulfillmentFailedAt: new Date(),
-        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.UNSUPPORTED_ROUTE,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe: result.errorMessageSafe ?? 'Unsupported route',
         fulfillmentReference: null,
         fulfillmentCompletedAt: null,
@@ -70,10 +71,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         ...base,
         fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
         fulfillmentFailedAt: new Date(),
-        fulfillmentErrorCode:
-          result.errorCode === 'AMOUNT_MISMATCH'
-            ? FULFILLMENT_DB_ERROR.AMOUNT_MISMATCH
-            : FULFILLMENT_DB_ERROR.INVALID_PRODUCT,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe: result.errorMessageSafe ?? 'Invalid request',
         fulfillmentReference: null,
         fulfillmentCompletedAt: null,
@@ -83,7 +81,7 @@ export function fulfillmentResultToStatePatch(result, payloadHash) {
         ...base,
         fulfillmentStatus: FULFILLMENT_STATUS.FAILED,
         fulfillmentFailedAt: new Date(),
-        fulfillmentErrorCode: FULFILLMENT_DB_ERROR.TERMINAL,
+        fulfillmentErrorCode: persistedFulfillmentErrorCode(result),
         fulfillmentErrorMessageSafe: 'Unknown provider outcome',
         fulfillmentReference: null,
         fulfillmentCompletedAt: null,

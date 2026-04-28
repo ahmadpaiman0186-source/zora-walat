@@ -6,6 +6,7 @@ import { writeOrderAudit } from './orderAuditService.js';
 import { ensureQueuedFulfillmentAttempt } from './fulfillmentProcessingService.js';
 import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
+import { evaluateStripeCheckoutSessionRowIntegrity } from '../lib/paymentCompletionLinkage.js';
 
 const PAYMENT_PRE_SUCCESS = [
   PAYMENT_CHECKOUT_STATUS.INITIATED,
@@ -45,6 +46,14 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
 
   const raw = session.metadata?.internalCheckoutId;
   if (!raw) {
+    log?.info?.(
+      {
+        phase1CheckoutSessionCompletedNoInternalMetadata: true,
+        stripeSessionIdSuffix:
+          typeof session?.id === 'string' ? session.id.slice(-12) : null,
+      },
+      'stripe webhook: checkout.session.completed without internalCheckoutId metadata',
+    );
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -85,6 +94,63 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
       paymentIntentIdsForFeeCapture,
     };
   }
+
+  const integrity = evaluateStripeCheckoutSessionRowIntegrity(row, session);
+  if (!integrity.ok) {
+    if (integrity.securityEvent) {
+      log?.warn?.(
+        {
+          securityEvent: integrity.securityEvent,
+          reason: integrity.reason,
+          orderIdSuffix: String(raw).slice(-12),
+          stripeSessionIdSuffix:
+            typeof session?.id === 'string' ? session.id.slice(-12) : null,
+        },
+        'security',
+      );
+    } else {
+      log?.warn?.(
+        { reason: integrity.reason, orderIdSuffix: String(raw).slice(-12) },
+        'stripe webhook: checkout session integrity',
+      );
+    }
+    if (integrity.reason === 'stripe_checkout_session_id_mismatch' && row.orderStatus === ORDER_STATUS.PENDING) {
+      const payTrans = validatePaymentCheckoutStatusTransition(
+        row.status,
+        PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+      );
+      if (payTrans.ok) {
+        assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
+        await tx.paymentCheckout.updateMany({
+          where: {
+            id: raw,
+            orderStatus: ORDER_STATUS.PENDING,
+          },
+          data: {
+            orderStatus: ORDER_STATUS.FAILED,
+            status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+            failedAt: new Date(),
+            failureReason: 'stripe_checkout_session_mismatch',
+          },
+        });
+        await writeOrderAudit(tx, {
+          event: 'order_status_changed',
+          payload: {
+            orderId: raw,
+            to: ORDER_STATUS.FAILED,
+            reason: 'stripe_checkout_session_mismatch',
+          },
+          ip: null,
+        });
+      }
+    }
+    return {
+      orderIdToScheduleFulfillment,
+      checkoutAmountMismatchOrderId,
+      paymentIntentIdsForFeeCapture,
+    };
+  }
+  const stripeSessionId = integrity.stripeSessionId;
 
   const total = session.amount_total;
   const sessionCurrency = String(session.currency ?? 'usd').toLowerCase();
@@ -210,6 +276,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
     data: {
       orderStatus: ORDER_STATUS.PAID,
       status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+      stripeCheckoutSessionId: stripeSessionId,
       stripePaymentIntentId: piId,
       stripeCustomerId: custId,
       completedByWebhookEventId: eventId,
@@ -232,13 +299,24 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
     paymentIntentIdsForFeeCapture.push(piId);
   }
 
+  log?.info?.(
+    {
+      phase1PaymentCompletionPersisted: true,
+      orderIdSuffix: String(raw).slice(-12),
+      stripeEventIdSuffix: String(eventId).slice(-12),
+      stripeSessionIdSuffix: stripeSessionId.slice(-12),
+      paymentIntentIdSuffix: piId ? piId.slice(-12) : null,
+    },
+    'phase1 payment completion persisted',
+  );
+
   await writeOrderAudit(tx, {
     event: 'order_status_changed',
     payload: { orderId: raw, to: ORDER_STATUS.PAID },
     ip: null,
   });
 
-  await ensureQueuedFulfillmentAttempt(tx, raw);
+  await ensureQueuedFulfillmentAttempt(tx, raw, log);
   await writeOrderAudit(tx, {
     event: 'payment_completed',
     payload: { orderId: raw },

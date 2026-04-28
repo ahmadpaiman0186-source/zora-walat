@@ -320,6 +320,33 @@ a.navLink:hover {
   color: rgba(100, 116, 139, 0.95);
 }
 
+.phoneFieldRow {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.dialPrefix {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(16, 185, 129, 0.95);
+  background: rgba(3, 7, 18, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-right: none;
+  border-radius: 0.7rem 0 0 0.7rem;
+}
+
+.phoneNationalInput {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0 0.7rem 0.7rem 0;
+}
+
 .select,
 .input {
   width: 100%;
@@ -604,6 +631,13 @@ a.navLink:hover {
 
 .paymentElementWrap {
   margin-bottom: 1rem;
+}
+
+.paymentElementStatus {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: rgba(148, 163, 184, 0.95);
+  line-height: 1.45;
 }
 
 .stripeForm {

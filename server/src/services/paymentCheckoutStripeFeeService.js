@@ -1,5 +1,6 @@
 import { prisma } from '../db.js';
 import { getStripeClient } from './stripe.js';
+import { orchestrateStripeCall } from './reliability/reliabilityOrchestrator.js';
 import { recomputeFinancialTruthForPaymentCheckout } from './financialTruthService.js';
 import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
@@ -54,13 +55,22 @@ export function computeActualNetMarginBp(
 
 /**
  * Retrieve Balance Transaction for a succeeded PaymentIntent (USD only).
+ * Read-safe: Stripe GETs behind orchestrator (bounded retry + circuit).
  * @param {import('stripe').Stripe} stripe
  * @param {string} paymentIntentId
+ * @param {{ traceId?: string | null, log?: { warn?: Function, info?: Function } }} [ctx]
  * @returns {Promise<{ feeCents: number, amountCents: number, netCents: number, balanceTransactionId: string } | null>}
  */
-export async function fetchUsdFeeFromPaymentIntent(stripe, paymentIntentId) {
-  const pi = await stripe.paymentIntents.retrieve(paymentIntentId, {
-    expand: ['latest_charge.balance_transaction'],
+export async function fetchUsdFeeFromPaymentIntent(stripe, paymentIntentId, ctx = {}) {
+  const { traceId = null, log } = ctx;
+  const pi = await orchestrateStripeCall({
+    operationName: 'paymentIntents.retrieve.fee_expand',
+    traceId,
+    log,
+    fn: () =>
+      stripe.paymentIntents.retrieve(paymentIntentId, {
+        expand: ['latest_charge.balance_transaction'],
+      }),
   });
 
   const cur = String(pi.currency ?? 'usd').toLowerCase();
@@ -75,7 +85,13 @@ export async function fetchUsdFeeFromPaymentIntent(stripe, paymentIntentId) {
 
   let bt = charge.balance_transaction;
   if (typeof bt === 'string') {
-    bt = await stripe.balanceTransactions.retrieve(bt);
+    const btId = bt;
+    bt = await orchestrateStripeCall({
+      operationName: 'balanceTransactions.retrieve.fee',
+      traceId,
+      log,
+      fn: () => stripe.balanceTransactions.retrieve(btId),
+    });
   }
 
   const parsed = parseUsdBalanceTransaction(bt, cur);
@@ -127,9 +143,10 @@ export async function recordPaymentCheckoutStripeFee(
         },
         'stripe_fee_payment_checkout',
       );
-      setTimeout(() => {
+      const t = setTimeout(() => {
         void recordPaymentCheckoutStripeFee(paymentIntentId, log, attempt + 1);
       }, delay);
+      if (typeof t.unref === 'function') t.unref();
       return 'retry';
     }
     log?.warn?.(
@@ -160,7 +177,10 @@ export async function recordPaymentCheckoutStripeFee(
 
   let feeData;
   try {
-    feeData = await fetchUsdFeeFromPaymentIntent(stripe, paymentIntentId);
+    feeData = await fetchUsdFeeFromPaymentIntent(stripe, paymentIntentId, {
+      traceId: null,
+      log,
+    });
   } catch (e) {
     const fc = classifyTransactionFailure(e, { surface: 'stripe_fee_capture' });
     const rd = transactionRetryDirective(fc, { attempt });
@@ -178,9 +198,10 @@ export async function recordPaymentCheckoutStripeFee(
     );
     if (attempt < MAX_ATTEMPTS - 1) {
       const delay = RETRY_DELAYS_MS[attempt + 1] ?? 60_000;
-      setTimeout(() => {
+      const t = setTimeout(() => {
         void recordPaymentCheckoutStripeFee(paymentIntentId, log, attempt + 1);
       }, delay);
+      if (typeof t.unref === 'function') t.unref();
       return 'retry';
     }
     return 'skip';
@@ -197,9 +218,10 @@ export async function recordPaymentCheckoutStripeFee(
         },
         'stripe_fee_payment_checkout',
       );
-      setTimeout(() => {
+      const t = setTimeout(() => {
         void recordPaymentCheckoutStripeFee(paymentIntentId, log, attempt + 1);
       }, delay);
+      if (typeof t.unref === 'function') t.unref();
       return 'retry';
     }
     log?.warn?.(

@@ -1,7 +1,14 @@
+import { ORDER_API_ERROR_CODE } from '../constants/apiContractCodes.js';
 import { prisma } from '../db.js';
+import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { deriveCustomerFulfillmentView } from '../lib/customerVisibleOrderStatus.js';
 import { getCanonicalPhase1OrderForUser } from '../services/canonicalPhase1OrderService.js';
+import { pricingBreakdownFromSnapshot } from '../lib/checkoutPricingBreakdown.js';
+import {
+  deriveCustomerTrackingStageForOrder,
+  derivePublicLifecycleStage,
+} from '../services/transactionsService.js';
 
 const publicSelect = {
   id: true,
@@ -22,6 +29,7 @@ const publicSelect = {
   clientOrigin: true,
   createdAt: true,
   updatedAt: true,
+  pricingSnapshot: true,
 };
 
 /**
@@ -30,6 +38,16 @@ const publicSelect = {
  */
 function toPublicOrder(row, latestAttempt = null) {
   const customerVisible = deriveCustomerFulfillmentView(row, latestAttempt);
+  const pricingBreakdown = pricingBreakdownFromSnapshot(
+    row.pricingSnapshot,
+    row.amountUsdCents,
+  );
+  const trackingStageKey = deriveCustomerTrackingStageForOrder(row, latestAttempt);
+  const lifecycleStageKey = derivePublicLifecycleStage(
+    trackingStageKey,
+    row,
+    latestAttempt,
+  );
   return {
     id: row.id,
     orderStatus: row.orderStatus,
@@ -49,6 +67,10 @@ function toPublicOrder(row, latestAttempt = null) {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     customerVisible,
+    pricingBreakdown,
+    /** Mirrors `/api/transactions` + execute payloads — Flutter success hydration uses GET /api/orders/:id. */
+    trackingStageKey,
+    lifecycleStageKey,
   };
 }
 
@@ -61,16 +83,33 @@ export async function listOrders(req, res) {
     where: { userId },
     orderBy: { createdAt: 'desc' },
     take: limit,
-    select: publicSelect,
+    select: {
+      ...publicSelect,
+      fulfillmentAttempts: {
+        orderBy: { attemptNumber: 'desc' },
+        take: 1,
+        select: { status: true, failureReason: true },
+      },
+    },
   });
 
-  res.json({ orders: rows.map(toPublicOrder) });
+  res.json({
+    orders: rows.map((r) => {
+      const latest = r.fulfillmentAttempts?.[0] ?? null;
+      const { fulfillmentAttempts: _fa, ...rest } = r;
+      return toPublicOrder(rest, latest);
+    }),
+  });
 }
 
 export async function getOrderById(req, res) {
   const id = req.params.id;
   if (!isLikelyPaymentCheckoutId(id)) {
-    return res.status(400).json({ error: 'Invalid order id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid order id', ORDER_API_ERROR_CODE.INVALID_ORDER_ID),
+      );
   }
   const userId = req.user.id;
 
@@ -86,7 +125,9 @@ export async function getOrderById(req, res) {
     },
   });
   if (!row) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   const latest = row.fulfillmentAttempts?.[0] ?? null;
   const { fulfillmentAttempts: _fa, ...rest } = row;
@@ -98,7 +139,11 @@ const SESSION_ID_RE = /^cs_[a-zA-Z0-9]+$/;
 export async function getOrderByStripeSession(req, res) {
   const sessionId = req.params.sessionId;
   if (!SESSION_ID_RE.test(sessionId)) {
-    return res.status(400).json({ error: 'Invalid session id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid session id', ORDER_API_ERROR_CODE.INVALID_SESSION_ID),
+      );
   }
   const userId = req.user.id;
 
@@ -114,7 +159,9 @@ export async function getOrderByStripeSession(req, res) {
     },
   });
   if (!row) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   const latest = row.fulfillmentAttempts?.[0] ?? null;
   const { fulfillmentAttempts: _fa, ...rest } = row;
@@ -128,7 +175,11 @@ export async function getOrderByStripeSession(req, res) {
 export async function getPhase1CanonicalOrder(req, res) {
   const id = req.params.id;
   if (!isLikelyPaymentCheckoutId(id)) {
-    return res.status(400).json({ error: 'Invalid order id' });
+    return res
+      .status(400)
+      .json(
+        clientErrorBody('Invalid order id', ORDER_API_ERROR_CODE.INVALID_ORDER_ID),
+      );
   }
   const userId = req.user.id;
   req.log?.info?.(
@@ -141,7 +192,9 @@ export async function getPhase1CanonicalOrder(req, res) {
   );
   const phase1 = await getCanonicalPhase1OrderForUser(id, userId);
   if (!phase1) {
-    return res.status(404).json({ error: 'Not found' });
+    return res
+      .status(404)
+      .json(clientErrorBody('Not found', ORDER_API_ERROR_CODE.NOT_FOUND));
   }
   res.json({ phase1Order: phase1 });
 }

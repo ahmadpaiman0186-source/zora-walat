@@ -27,6 +27,8 @@ export function sanitizeBoundedString(s, max) {
 export function computeTopupOrderPayloadHash(p) {
   const canonical = {
     sessionKey: p.sessionKey ?? null,
+    /** Distinguishes anonymous vs authenticated idempotent creates (same idempotency key + different binding → 409). */
+    boundUserId: p.boundUserId ?? null,
     originCountry: String(p.originCountry ?? '').toUpperCase(),
     destinationCountry: String(p.destinationCountry ?? '').toUpperCase(),
     productType: p.productType,

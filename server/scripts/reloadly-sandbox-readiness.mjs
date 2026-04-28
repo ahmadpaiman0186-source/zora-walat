@@ -3,6 +3,7 @@
  * Usage: npm run reloadly:sandbox-readiness
  */
 import '../bootstrap.js';
+import { env } from '../src/config/env.js';
 
 function present(name) {
   const v = process.env[name];
@@ -27,7 +28,7 @@ const rows = [
 
 const timeoutOptional = present('AIRTIME_PROVIDER_TIMEOUT_MS');
 
-const sandboxFlag = process.env.RELOADLY_SANDBOX === 'true';
+const sandboxFlag = env.reloadlySandbox;
 const sandboxSafe = sandboxFlag;
 
 const reloadlyCredsOk =

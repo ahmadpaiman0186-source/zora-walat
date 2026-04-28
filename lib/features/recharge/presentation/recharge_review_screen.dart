@@ -1,13 +1,18 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/auth/email_verification_required_exception.dart';
 import '../../../core/auth/unauthorized_exception.dart';
 import '../../../core/business/sender_country.dart';
 import '../../../core/di/app_scope.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/widgets/trust_strip.dart';
+import '../../../models/checkout_pricing_quote_response.dart';
 import '../../../models/recharge_draft.dart';
 
 /// Review → pay: in-app PaymentSheet (non-web) or Stripe Checkout redirect (web).
@@ -33,6 +38,9 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
   _PaymentPhase _phase = _PaymentPhase.idle;
   String? _errorMessage;
   late String _senderCountry;
+  /// Server quote for the same request shape as [startCheckout] (product + tax + fee = total).
+  CheckoutPricingQuoteResponse? _pricingQuote;
+  bool _quoteBusy = false;
 
   @override
   void initState() {
@@ -40,6 +48,67 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
     _senderCountry = inferSenderCountryCodeFromLocale(
       WidgetsBinding.instance.platformDispatcher.locale.countryCode,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_loadPricingQuote());
+    });
+  }
+
+  Future<void> _loadPricingQuote() async {
+    if (!mounted) return;
+    setState(() => _quoteBusy = true);
+    final paymentService = AppScope.of(context).paymentService;
+    final cents = (widget.draft.amountUsd * 100).round();
+    final q = await paymentService.fetchCheckoutPricingQuote(
+      amountCents: cents,
+      senderCountry: _senderCountry,
+      operatorKey: widget.draft.operatorKey,
+      recipientPhone: widget.draft.phoneE164Style,
+    );
+    if (!mounted) return;
+    setState(() {
+      _pricingQuote = q;
+      _quoteBusy = false;
+    });
+  }
+
+  /// Pay CTA and Stripe must match [CheckoutPricingBreakdown.totalUsd] when the quote exists.
+  String _payAmountDisplay(BuildContext context) {
+    final b = _pricingQuote?.breakdown;
+    if (b != null) {
+      final fmt = NumberFormat.currency(
+        locale: Localizations.localeOf(context).toString(),
+        symbol: r'$',
+      );
+      return fmt.format(b.totalUsd);
+    }
+    return _amountLabel;
+  }
+
+  List<_Row> _pricingSummaryRows(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    final fmt = NumberFormat.currency(
+      locale: Localizations.localeOf(context).toString(),
+      symbol: r'$',
+    );
+    if (_quoteBusy) {
+      return [
+        _Row(l10n.checkoutPricingLoading, '—'),
+      ];
+    }
+    final b = _pricingQuote?.breakdown;
+    if (b != null) {
+      return [
+        _Row(l10n.checkoutProductValueLabel, fmt.format(b.productValueUsd)),
+        _Row(l10n.checkoutSenderTaxLabel, fmt.format(b.taxUsd)),
+        _Row(l10n.checkoutServiceFeeLabel, fmt.format(b.serviceFeeUsd)),
+        _Row(l10n.checkoutTotalChargedLabel, fmt.format(b.totalUsd)),
+      ];
+    }
+    return [
+      _Row(l10n.selectAmount, _amountLabel),
+    ];
   }
 
   String get _amountLabel {
@@ -60,31 +129,43 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
       _errorMessage = null;
     });
 
-    await log.append({
-      'event': 'recharge_payment_attempt',
-      'amount_usd_cents': cents,
-      'operator': widget.draft.operatorKey,
-    });
+    unawaited(
+      log
+          .append({
+            'event': 'recharge_payment_attempt',
+            'amount_usd_cents': cents,
+            'operator': widget.draft.operatorKey,
+          })
+          .catchError((_) {}),
+    );
 
     try {
       await paymentService.startCheckout(
-        amountUsdCents: cents,
+        amountCents: cents,
         senderCountry: _senderCountry,
         currency: 'usd',
         operatorKey: widget.draft.operatorKey,
         recipientPhone: widget.draft.phoneE164Style,
       );
-      await log.append({
-        'event': 'recharge_checkout_redirect',
-        'amount_usd_cents': cents,
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_checkout_redirect',
+              'amount_usd_cents': cents,
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       setState(() => _phase = _PaymentPhase.hostedCheckout);
     } on UnauthorizedException catch (_) {
-      await log.append({
-        'event': 'recharge_payment_failure',
-        'message': 'unauthorized',
-      });
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': 'unauthorized',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       setState(() {
         _phase = _PaymentPhase.failure;
@@ -94,11 +175,36 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
         SnackBar(content: Text(l10n.authRequiredMessage)),
       );
       if (mounted) router.push(AppRoutePaths.signIn);
-    } catch (e) {
-      await log.append({
-        'event': 'recharge_payment_failure',
-        'message': '$e',
+    } on EmailVerificationRequiredException catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': 'email_verification_required',
+            })
+            .catchError((_) {}),
+      );
+      if (!mounted) return;
+      final email = AppScope.authSessionOf(context).userEmail ?? '';
+      setState(() {
+        _phase = _PaymentPhase.failure;
+        _errorMessage = e.message;
       });
+      messenger?.showSnackBar(SnackBar(content: Text(e.message)));
+      if (email.isNotEmpty && mounted) {
+        router.push(
+          '${AppRoutePaths.signInOtp}?email=${Uri.encodeComponent(email)}',
+        );
+      }
+    } catch (e) {
+      unawaited(
+        log
+            .append({
+              'event': 'recharge_payment_failure',
+              'message': '$e',
+            })
+            .catchError((_) {}),
+      );
       if (!mounted) return;
       final msg = kReleaseMode ? l10n.authGenericError : '$e';
       setState(() {
@@ -130,6 +236,16 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
         children: [
+          Icon(Icons.info_outline, color: t.colorScheme.secondary, size: 22),
+          const SizedBox(height: 8),
+          Text(
+            l10n.hubTileLegacySub,
+            style: t.textTheme.bodyMedium?.copyWith(
+              color: t.colorScheme.outline,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
           if (_phase == _PaymentPhase.processing) ...[
             const LinearProgressIndicator(),
             const SizedBox(height: 16),
@@ -328,26 +444,41 @@ class _RechargeReviewScreenState extends State<RechargeReviewScreen> {
                       onChanged: _phase == _PaymentPhase.processing
                           ? null
                           : (v) {
-                              if (v != null) setState(() => _senderCountry = v);
+                              if (v != null) {
+                                setState(() => _senderCountry = v);
+                                unawaited(_loadPricingQuote());
+                              }
                             },
                     ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.checkoutSenderCountryHint,
+                  style: t.textTheme.bodySmall?.copyWith(
+                    color: t.colorScheme.outline,
+                    height: 1.35,
                   ),
                 ),
                 const SizedBox(height: 16),
                 _SummaryCard(
                   rows: [
-                    _Row(l10n.recipientNumber, widget.draft.phoneE164Style),
+                    _Row(l10n.recipientNumber, widget.draft.recipientDisplayPhone),
                     _Row(l10n.operator, widget.draft.operatorLabel),
-                    _Row(l10n.selectAmount, _amountLabel),
+                    ..._pricingSummaryRows(context, l10n),
                   ],
                 ),
                 const SizedBox(height: 28),
                 FilledButton(
-                  onPressed: _phase == _PaymentPhase.processing ? null : _pay,
+                  onPressed: _phase == _PaymentPhase.processing || _quoteBusy
+                      ? null
+                      : _pay,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(54),
                   ),
-                  child: Text(l10n.paymentPayWithCard(_amountLabel)),
+                  child: Text(
+                    l10n.paymentPayWithCard(_payAmountDisplay(context)),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(

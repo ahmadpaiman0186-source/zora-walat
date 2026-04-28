@@ -1,0 +1,5 @@
+﻿{
+  "port8787": {"listeningPid": 9396, "lines": ["see ports-8787.txt"]},
+  "stripeProcesses": {"count": 3, "pids": [2316, 6848, 16312]},
+  "note": "Only one LISTENING on 8787; multiple stripe.exe — avoid duplicate stripe listen + whsec drift"
+}
