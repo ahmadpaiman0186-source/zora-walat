@@ -4,6 +4,10 @@ import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { assertTransition } from '../domain/orders/orderLifecycle.js';
 import { writeOrderAudit } from './orderAuditService.js';
 import { ensureQueuedFulfillmentAttempt } from './fulfillmentProcessingService.js';
+import {
+  emitPhase1FulfillmentQueued,
+  emitPhase1PaymentSucceeded,
+} from '../infrastructure/logging/phase1Observability.js';
 import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 import { evaluateStripeCheckoutSessionRowIntegrity } from '../lib/paymentCompletionLinkage.js';
@@ -316,7 +320,22 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
     ip: null,
   });
 
-  await ensureQueuedFulfillmentAttempt(tx, raw, log);
+  const queuedAttempt = await ensureQueuedFulfillmentAttempt(tx, raw, log);
+  emitPhase1PaymentSucceeded({
+    id: raw,
+    stripePaymentIntentId: piId,
+    orderStatus: ORDER_STATUS.PAID,
+    status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+  });
+  emitPhase1FulfillmentQueued(
+    {
+      id: raw,
+      stripePaymentIntentId: piId,
+      orderStatus: ORDER_STATUS.PAID,
+    },
+    queuedAttempt,
+    { provider: queuedAttempt?.provider ?? null },
+  );
   await writeOrderAudit(tx, {
     event: 'payment_completed',
     payload: { orderId: raw },

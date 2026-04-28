@@ -9,6 +9,12 @@ import { isFulfillmentQueueEnabled } from './queueEnabled.js';
 import { PHASE1_FULFILLMENT_QUEUE_NAME } from './phase1FulfillmentQueueName.js';
 import { resolvePhase1FulfillmentWorkerConcurrency } from './phase1FulfillmentWorkerConcurrency.js';
 import { processFulfillmentForOrder } from '../services/fulfillmentProcessingService.js';
+import {
+  emitPhase1FulfillmentAttempted,
+  emitPhase1FulfillmentFailed,
+  emitPhase1FulfillmentSucceeded,
+} from '../infrastructure/logging/phase1Observability.js';
+import { resolveAirtimeProviderName } from '../domain/fulfillment/executeAirtimeFulfillment.js';
 import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
 import { isTransientTransactionFailureClass } from '../constants/transactionFailureClass.js';
 import { formatPhase1FulfillmentFailedJobFingerprint } from './phase1FulfillmentReplayDiscipline.js';
@@ -76,6 +82,14 @@ export function startPhase1FulfillmentWorker() {
         bullmqJobId: job.id != null ? String(job.id) : null,
         attempt: job.attemptsMade ?? 0,
       });
+      emitPhase1FulfillmentAttempted(
+        { id: orderId },
+        {
+          provider: resolveAirtimeProviderName(),
+          traceId,
+          bullmqJobId: job.id != null ? String(job.id) : null,
+        },
+      );
       try {
         await processFulfillmentForOrder(orderId, {
           traceId,
@@ -86,12 +100,29 @@ export function startPhase1FulfillmentWorker() {
           orderIdSuffix: orderId.slice(-12),
           bullmqJobId: job.id != null ? String(job.id) : null,
         });
+        emitPhase1FulfillmentSucceeded(
+          { id: orderId },
+          {
+            provider: resolveAirtimeProviderName(),
+            traceId,
+            bullmqJobId: job.id != null ? String(job.id) : null,
+          },
+        );
       } catch (err) {
         emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_FAILURE, {
           traceId,
           orderIdSuffix: orderId.slice(-12),
           message: String(err?.message ?? err).slice(0, 200),
         });
+        emitPhase1FulfillmentFailed(
+          { id: orderId },
+          {
+            provider: resolveAirtimeProviderName(),
+            errorCode: 'worker_exception',
+            traceId,
+            bullmqJobId: job.id != null ? String(job.id) : null,
+          },
+        );
         const failureClass = classifyTransactionFailure(err, {
           surface: 'fulfillment_worker',
         });

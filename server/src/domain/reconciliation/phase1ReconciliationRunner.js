@@ -7,6 +7,10 @@ import {
   buildPhase1MoneyTruthSnapshot,
   PHASE1_RECONCILIATION_DRIFT_CODES,
 } from './phase1MoneyTruthReconciliation.js';
+import {
+  buildPhase1SafeRefs,
+  finalizePhase1ReconciliationObservation,
+} from '../../infrastructure/logging/phase1Observability.js';
 
 export const PHASE1_RECONCILIATION_RUNNER_VERSION = 1;
 
@@ -17,6 +21,7 @@ export const PHASE1_RECONCILIATION_RUNNER_VERSION = 1;
  */
 export function runPhase1ReconciliationReport(order, fulfillmentAttempts, stripeTruth = {}) {
   const snapshot = buildPhase1MoneyTruthSnapshot(order, fulfillmentAttempts, stripeTruth);
+  finalizePhase1ReconciliationObservation(snapshot, buildPhase1SafeRefs(order));
   return {
     ...snapshot,
     runnerVersion: PHASE1_RECONCILIATION_RUNNER_VERSION,

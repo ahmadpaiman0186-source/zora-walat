@@ -83,6 +83,12 @@ import {
 import {
   assertPhase1FulfillmentQueuePreconditions,
 } from '../domain/orders/phase1TransactionStateMachine.js';
+import {
+  buildPhase1SafeRefs,
+  emitPhase1DuplicateFulfillmentBlocked,
+  emitPhase1FulfillmentFailed,
+  emitPhase1PaymentSucceededButFulfillmentFailedAlert,
+} from '../infrastructure/logging/phase1Observability.js';
 import { emitOrderTransitionLog } from '../lib/orderTransitionLog.js';
 
 function safeJson(obj) {
@@ -148,6 +154,13 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(already.id).slice(-12),
     });
+    emitPhase1DuplicateFulfillmentBlocked(
+      buildPhase1SafeRefs({
+        id: orderId,
+        stripePaymentIntentId: orderRow.stripePaymentIntentId,
+      }),
+      { via: 'already_present' },
+    );
     log?.info?.(
       {
         fulfillmentQueuedAttemptIdempotent: true,
@@ -199,6 +212,13 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
       orderIdSuffix: String(orderId).slice(-12),
       attemptIdSuffix: String(existing.id).slice(-12),
     });
+    emitPhase1DuplicateFulfillmentBlocked(
+      buildPhase1SafeRefs({
+        id: orderId,
+        stripePaymentIntentId: orderRow.stripePaymentIntentId,
+      }),
+      { via: 'p2002_savepoint_recovery' },
+    );
     log?.info?.(
       {
         fulfillmentQueuedAttemptIdempotent: true,
@@ -816,6 +836,39 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
           },
           ip: null,
         });
+        emitPhase1FulfillmentFailed(
+          {
+            id: orderId,
+            stripePaymentIntentId: order.stripePaymentIntentId,
+          },
+          {
+            provider: providerResult.providerKey ?? att.provider ?? null,
+            errorCode:
+              providerResult.failureCode ??
+              providerResult.errorKind ??
+              'airtime_provider_failure',
+          },
+          att,
+        );
+        if (
+          typeof order.stripePaymentIntentId === 'string' &&
+          order.stripePaymentIntentId.startsWith('pi_')
+        ) {
+          emitPhase1PaymentSucceededButFulfillmentFailedAlert({
+            ...buildPhase1SafeRefs(
+              {
+                id: orderId,
+                stripePaymentIntentId: order.stripePaymentIntentId,
+              },
+              att,
+            ),
+            provider: providerResult.providerKey ?? att.provider ?? null,
+            errorCode:
+              providerResult.failureCode ??
+              providerResult.errorKind ??
+              'airtime_provider_failure',
+          });
+        }
         canonicalPostFulfillmentTransition = {
           orderId,
           from: CANONICAL_ORDER_STATUS.SENT,
