@@ -1,5 +1,38 @@
 # Engineering checkpoint (Zora-Walat)
 
+## Security closeout checkpoint — 2026-04-26 (audit + CI green)
+
+**Date:** 2026-04-26  
+**Role:** Root security/stability audit only; no auth, webhook, lockdown, or rate-limit relaxations.
+
+| Area | Result | Notes |
+|------|--------|--------|
+| SECURITY CHECK | **PASS** | Pattern scan: no committed live Stripe keys / real `whsec_` material; only docs, placeholders, test/smoke passwords. |
+| SERVER (unit + CI) | **GREEN** | `npm --prefix server test`: 458 pass / 0 fail. `npm --prefix server run test:ci`: exit 0. |
+| FLUTTER | **GREEN** | `flutter test`: all passed (17). `flutter analyze`: no issues. |
+| MONEY PATH (local pricing) | **GREEN** | `npm --prefix server run verify:local-pricing`: exit 0; `sumEqualsTotal: true`; `totalUsdCents: 226`; `zoraServiceFeeUsdCents: 26`; `feePolicyVersion: phase1_margin_search_min_zora_fee_v1`. |
+
+**Recent security/payment-related HEAD (pre closeout commit):** `55d3138` — `fix(ci): JWT fallback + rate-limit CI safe + correct 403 vs 503 ordering`  
+**Files in that commit:** `server/src/controllers/paymentController.js`, `server/src/middleware/rateLimits.js`, `server/test/integrations/testDatabaseResolution.mjs`
+
+**Commands run (this closeout):**
+
+- `git status --short`
+- Repo grep for high-risk secret patterns (Stripe live keys, whsec, etc.)
+- `npm --prefix server test`
+- `npm --prefix server run test:ci`
+- `npm --prefix server run verify:local-pricing`
+- `flutter test`
+- `flutter analyze`
+
+**Artifacts updated:** `SESSION_STATE.txt` (new/updated), this section in `ENGINEERING_CHECKPOINT.md`  
+**Commit message (checkpoint):** `chore: final security closeout checkpoint`  
+**Push:** not performed (per operator request).
+
+**Tomorrow resume:** Same as `SESSION_STATE.txt` — optional remote CI after push; re-run the five commands before any payment or release merge; keep webhook secret aligned with `stripe listen`.
+
+---
+
 ## Emergency local dev stabilization — 2026-04-26 (15 min timebox)
 
 **Timestamp (UTC-7):** 2026-04-26 (session)  

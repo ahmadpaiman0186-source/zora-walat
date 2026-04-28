@@ -1,0 +1,23 @@
+# Session state — Zora-Walat (security closeout audit)
+# Date (authoritative per user session): 2026-04-26 (local)
+
+## Git
+- HEAD (at audit run, pre-checkpoint commit): 55d3138 — "fix(ci): JWT fallback + rate-limit CI safe + correct 403 vs 503 ordering"
+- Branch: 2026-04-11-qrw0
+- Working tree before checkpoint: clean (git status --short empty)
+
+## Security / stability audit (2026-04-26)
+- Secrets scan (pattern sweep: sk_live_, rk_live_, whsec_, hardcoded api key patterns): no committed live Stripe keys or real whsec strings; matches were docs, placeholders, stripeEnv replace string, smoke script test credentials, integration test passwords only.
+- Security/payment-relevant recent commit (55d3138): server/src/controllers/paymentController.js, server/src/middleware/rateLimits.js, server/test/integrations/testDatabaseResolution.mjs — CI/test stability; do not weaken production auth or webhooks.
+
+## CI / test green (evidence — all exit 0)
+- npm --prefix server test — 458 pass, 0 fail
+- npm --prefix server run test:ci — pass (6 tests in Stripe webhook chaos suite + full suite)
+- npm --prefix server run verify:local-pricing — sumEqualsTotal true; total 226; fee 26; feePolicyVersion phase1_margin_search_min_zora_fee_v1
+- flutter test — All tests passed (17)
+- flutter analyze — No issues found
+
+## Tomorrow resume
+- Optional: confirm GitHub Actions green for same branch after push (if you push).
+- Continue product work; re-run server test + test:ci + verify:local-pricing + flutter test/analyze before any money-path or release merge.
+- Do not commit .dart_tool or local env files; keep STRIPE_WEBHOOK_SECRET aligned with active stripe listen (see server bootstrap logs).
