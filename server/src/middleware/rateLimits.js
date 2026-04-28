@@ -24,16 +24,19 @@ import {
  * @param {string} prefix
  * @param {import('express-rate-limit').Options} options
  */
+/**
+ * Supertest sometimes omits `req.ip`; express-rate-limit can throw ValidationError (`ERR_ERL_*`),
+ * surfacing as HTTP 500 `internal_error`. Production is unchanged.
+ */
+function withTestOrCiValidateFalse(options) {
+  return process.env.CI === 'true' || env.nodeEnv === 'test'
+    ? { ...options, validate: false }
+    : options;
+}
+
 function rateLimitWithOptionalRedis(prefix, options) {
   const store = rateLimitRedisStore(prefix);
-  /**
-   * Supertest sometimes omits `req.ip`; express-rate-limit can throw ValidationError (`ERR_ERL_*`),
-   * surfacing as HTTP 500 `internal_error`. CI/test loads real middleware — disable validations only here.
-   */
-  const opts =
-    process.env.CI === 'true' || env.nodeEnv === 'test'
-      ? { ...options, validate: false }
-      : options;
+  const opts = withTestOrCiValidateFalse(options);
   return rateLimit(store ? { ...opts, store } : opts);
 }
 
@@ -253,22 +256,24 @@ function walletTopupPerMinuteHandler(req, res, _next, options) {
  * Rolling 1-minute cap per user+IP on POST /api/wallet/topup (fraud/velocity).
  * `WALLET_TOPUP_PER_MINUTE_MAX` overrides (see env.walletTopupPerMinuteMax).
  */
-export const walletTopupPerMinuteLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: () => env.walletTopupPerMinuteMax,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => {
-    const ip = clientIpKey(req);
-    const uid = req.user?.id;
-    return uid ? `wallet_topup_1m:${ip}:${uid}` : `wallet_topup_1m:${ip}`;
-  },
-  message: {
-    code: 'wallet_topup_per_minute_limited',
-    error: 'Too many wallet top-ups per minute; try again shortly.',
-  },
-  handler: walletTopupPerMinuteHandler,
-});
+export const walletTopupPerMinuteLimiter = rateLimit(
+  withTestOrCiValidateFalse({
+    windowMs: 60 * 1000,
+    max: () => env.walletTopupPerMinuteMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      const ip = clientIpKey(req);
+      const uid = req.user?.id;
+      return uid ? `wallet_topup_1m:${ip}:${uid}` : `wallet_topup_1m:${ip}`;
+    },
+    message: {
+      code: 'wallet_topup_per_minute_limited',
+      error: 'Too many wallet top-ups per minute; try again shortly.',
+    },
+    handler: walletTopupPerMinuteHandler,
+  }),
+);
 
 /**
  * Post-payment fulfillment kick (`POST /api/recharge/execute`) — tighter than generic wallet/recharge.

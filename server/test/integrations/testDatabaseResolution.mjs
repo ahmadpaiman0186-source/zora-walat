@@ -43,6 +43,26 @@ export function loadServerDotenv() {
 export function applyIntegrationTestDatabaseEnv() {
   loadServerDotenv();
 
+  /**
+   * GitHub Actions does not inject JWT secrets by default; `jsonwebtoken` fails on empty secret
+   * during `register` / `verify-otp` — **500** `internal_error`. Only set when `CI=true` and
+   * secrets are missing/short (before `src/config/env.js` is first imported in the test process).
+   * Never overwrites non-empty secrets. Production/runtime is unchanged.
+   */
+  if (process.env.CI === 'true') {
+    const min = 32;
+    const a = String(process.env.JWT_ACCESS_SECRET ?? '').trim();
+    const b = String(process.env.JWT_REFRESH_SECRET ?? '').trim();
+    if (a.length < min) {
+      process.env.JWT_ACCESS_SECRET =
+        'ci_jwt_access_only_integration_test_process_zzzzzzzzzz';
+    }
+    if (b.length < min) {
+      process.env.JWT_REFRESH_SECRET =
+        'ci_jwt_refresh_only_integration_test_process_zzzzzzzzz';
+    }
+  }
+
   const testUrl = String(process.env.TEST_DATABASE_URL ?? '').trim();
   const baseUrl = String(process.env.DATABASE_URL ?? '').trim();
   const source =

@@ -620,36 +620,6 @@ export async function createCheckoutPricingQuote(req, res) {
  * Optional `Authorization: Bearer` adds non-blocking metadata (`optional_app_user_id`, …).
  */
 export async function createTestPaymentIntent(req, res) {
-  if (!getValidatedStripeSecretKey()) {
-    return res.status(503).json(
-      clientErrorBody(
-        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
-        'stripe_not_configured',
-      ),
-    );
-  }
-  if (!isStripeKeyAllowedForWebTopupCharges()) {
-    const mode = process.env.NODE_ENV || 'development';
-    return res.status(403).json(
-      clientErrorBody(
-        mode === 'production'
-          ? 'Stripe key mode is not valid for embedded checkout in this deployment.'
-          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for embedded checkout.',
-        'stripe_key_mode_forbidden',
-      ),
-    );
-  }
-
-  const stripe = getStripeClient();
-  if (!stripe) {
-    return res.status(503).json(
-      clientErrorBody(
-        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
-        'stripe_not_configured',
-      ),
-    );
-  }
-
   let parsed;
   try {
     parsed = createPaymentIntentBodySchema.parse(req.body ?? {});
@@ -693,6 +663,11 @@ export async function createTestPaymentIntent(req, res) {
     traceId: req.traceId ?? null,
   });
 
+  /**
+   * Order-bound PaymentIntent: enforce possession proof **before** Stripe availability checks so
+   * integration / CI without STRIPE_SECRET_KEY still receives **403** for invalid session (contract),
+   * not **503** stripe_not_configured.
+   */
   let metadata = { source: 'zora_walat_next_test' };
   if (parsed.orderId != null && parsed.orderId !== '') {
     let orderRow;
@@ -755,6 +730,36 @@ export async function createTestPaymentIntent(req, res) {
         ),
       );
     }
+  }
+
+  if (!getValidatedStripeSecretKey()) {
+    return res.status(503).json(
+      clientErrorBody(
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
+        'stripe_not_configured',
+      ),
+    );
+  }
+  if (!isStripeKeyAllowedForWebTopupCharges()) {
+    const mode = process.env.NODE_ENV || 'development';
+    return res.status(403).json(
+      clientErrorBody(
+        mode === 'production'
+          ? 'Stripe key mode is not valid for embedded checkout in this deployment.'
+          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for embedded checkout.',
+        'stripe_key_mode_forbidden',
+      ),
+    );
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return res.status(503).json(
+      clientErrorBody(
+        'Stripe not configured. Set STRIPE_SECRET_KEY in server environment.',
+        'stripe_not_configured',
+      ),
+    );
   }
 
   const auth = req.webtopupAuthUser;
