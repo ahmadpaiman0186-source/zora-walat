@@ -28,8 +28,7 @@ export function getPhase1FulfillmentQueue() {
       defaultJobOptions: {
         attempts: Math.max(1, env.fulfillmentJobMaxAttempts),
         backoff: {
-          type: 'exponential',
-          delay: Math.max(200, env.fulfillmentJobBackoffMs),
+          type: 'custom',
         },
         removeOnComplete: { count: 25_000 },
         removeOnFail: false,

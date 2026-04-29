@@ -1,6 +1,13 @@
 /**
  * Phase 1 transaction state machine — PaymentCheckout + primary fulfillment attempt.
  *
+ * Canonical money path (narrative labels vs stored enums):
+ * - **CREATED** → `PaymentCheckout` **PENDING** + pre-success payment row statuses.
+ * - **PAID** → `orderStatus=PAID` + `status=PAYMENT_SUCCEEDED`.
+ * - **QUEUED** → `FulfillmentAttempt` #1 `QUEUED` (created in webhook txn; no provider I/O there).
+ * - **SENT** → `FulfillmentAttempt` **PROCESSING** + order **PROCESSING** (claimed before adapter).
+ * - **SUCCESS / FAILED** → attempt **SUCCEEDED** / **FAILED** + order terminal / recovery edges.
+ *
  * Text diagram ( happy path ):
  *
  *   [PENDING + INITIATED…CHECKOUT_CREATED…PAYMENT_PENDING]
@@ -88,6 +95,42 @@ const NON_TERMINAL_ATTEMPT = new Set([
   FULFILLMENT_ATTEMPT_STATUS.QUEUED,
   FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
 ]);
+
+const FULFILLMENT_ATTEMPT_EDGE_OK = new Set([
+  `${FULFILLMENT_ATTEMPT_STATUS.QUEUED}->${FULFILLMENT_ATTEMPT_STATUS.PROCESSING}`,
+  `${FULFILLMENT_ATTEMPT_STATUS.PROCESSING}->${FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED}`,
+  `${FULFILLMENT_ATTEMPT_STATUS.PROCESSING}->${FULFILLMENT_ATTEMPT_STATUS.FAILED}`,
+  `${FULFILLMENT_ATTEMPT_STATUS.PROCESSING}->${FULFILLMENT_ATTEMPT_STATUS.QUEUED}`,
+]);
+
+/**
+ * @param {string | null | undefined} from
+ * @param {string | null | undefined} to
+ * @returns {{ ok: true, noop?: boolean } | { ok: false, denial: string, detail?: string }}
+ */
+export function validateFulfillmentAttemptStatusTransition(from, to) {
+  const f = from != null ? String(from) : '';
+  const t = to != null ? String(to) : '';
+  if (!f || !t) {
+    return {
+      ok: false,
+      denial: 'FULFILLMENT_ATTEMPT_TRANSITION_INVALID',
+      detail: 'missing_from_or_to',
+    };
+  }
+  if (f === t) {
+    return { ok: true, noop: true };
+  }
+  const key = `${f}->${t}`;
+  if (!FULFILLMENT_ATTEMPT_EDGE_OK.has(key)) {
+    return {
+      ok: false,
+      denial: 'FULFILLMENT_ATTEMPT_TRANSITION_NOT_ALLOWED',
+      detail: key,
+    };
+  }
+  return { ok: true };
+}
 
 /**
  * Impossible or high-risk compound states (drift / abuse / bug detection).

@@ -34,6 +34,7 @@ export async function enqueuePhase1FulfillmentJob(orderId, traceId) {
     }
     const rawPayload = {
       orderId: id,
+      idempotencyKey: id,
       traceId: traceId ?? null,
       v: 1,
     };

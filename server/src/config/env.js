@@ -11,6 +11,7 @@ import {
   RELOADLY_OPERATOR_ID_DEFAULTS,
 } from './reloadlyOperatorIdDefaults.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
+import { parseFulfillmentJobRetryDelaysMsFromEnv } from './fulfillmentJobRetryConfig.js';
 
 function parseList(raw, fallback) {
   const s = String(raw ?? '').trim();
@@ -443,6 +444,14 @@ export const env = {
    */
   phase1FulfillmentOutboundEnabled:
     process.env.PHASE1_FULFILLMENT_OUTBOUND_ENABLED === 'true',
+
+  /**
+   * When true: `checkout.session.completed` still creates `FulfillmentAttempt` **QUEUED** in the DB txn,
+   * but the webhook **does not** invoke `scheduleFulfillmentProcessing` (no inline provider path, no BullMQ enqueue from webhook).
+   * Drain QUEUED rows via worker / `processPendingPaidOrders` / ops tools on your schedule.
+   */
+  phase1WebhookSkipFulfillmentDispatch:
+    process.env.PHASE1_WEBHOOK_SKIP_FULFILLMENT_DISPATCH === 'true',
   /** HTTP timeout for future real provider calls (ms). */
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
@@ -647,13 +656,19 @@ export const env = {
     process.env.FULFILLMENT_WORKER_CONCURRENCY,
     32,
   ),
+  /** BullMQ attempts = initial run + retries (default 4 = one run + three retries). */
   fulfillmentJobMaxAttempts: parsePositiveInt(
     process.env.FULFILLMENT_JOB_MAX_ATTEMPTS,
-    8,
+    4,
   ),
+  /** Legacy exponential backoff base (ms) — unused when custom backoff is active; kept for compatibility. */
   fulfillmentJobBackoffMs: parsePositiveInt(
     process.env.FULFILLMENT_JOB_BACKOFF_MS,
     2000,
+  ),
+  /** Custom inter-attempt delays for BullMQ `backoff: { type: 'custom' }` (see `phase1FulfillmentWorker`). */
+  fulfillmentJobRetryDelaysMs: parseFulfillmentJobRetryDelaysMsFromEnv(
+    process.env.FULFILLMENT_JOB_RETRY_DELAYS_MS,
   ),
   /** Client `postExecute` wait for terminal `orderStatus` when queue mode is on. */
   fulfillmentClientExecuteWaitMs: parsePositiveInt(

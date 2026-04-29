@@ -33,6 +33,32 @@ let workerSingleton = null;
 /** @type {import('ioredis').default | null} */
 let workerConnectionSingleton = null;
 
+/**
+ * BullMQ `backoff: { type: 'custom' }` delays between attempts (after attempt 1 fails → delay[0], …).
+ * @param {number} attemptsMade
+ * @param {string | undefined} type
+ * @returns {number}
+ */
+function phase1FulfillmentBackoffMs(attemptsMade, type) {
+  const delays = env.fulfillmentJobRetryDelaysMs;
+  const t = String(type ?? '');
+  if (t === 'custom' || t === '') {
+    const idx = Math.min(
+      Math.max(attemptsMade - 1, 0),
+      Math.max(0, delays.length - 1),
+    );
+    return delays[idx] ?? 5000;
+  }
+  if (t === 'exponential') {
+    const base = Math.max(200, env.fulfillmentJobBackoffMs);
+    return 2 ** Math.max(attemptsMade - 1, 0) * base;
+  }
+  if (t === 'fixed') {
+    return Math.max(200, env.fulfillmentJobBackoffMs);
+  }
+  return Math.max(200, env.fulfillmentJobBackoffMs);
+}
+
 function logWorkerStructured(payload) {
   console.log(
     JSON.stringify({
@@ -75,9 +101,10 @@ export function startPhase1FulfillmentWorker() {
       if (!parsed.ok) {
         throw new UnrecoverableError(`invalid_job_payload:${parsed.reason}`);
       }
-      const { orderId, traceId } = parsed.payload;
+      const { orderId, traceId, idempotencyKey } = parsed.payload;
       emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
         traceId,
+        idempotencyKeySuffix: String(idempotencyKey).slice(-12),
         orderIdSuffix: orderId.slice(-12),
         bullmqJobId: job.id != null ? String(job.id) : null,
         attempt: job.attemptsMade ?? 0,
@@ -162,6 +189,10 @@ export function startPhase1FulfillmentWorker() {
       concurrency: workerConcurrency,
       lockDuration: 60_000,
       stalledInterval: 30_000,
+      settings: {
+        backoffStrategy: (attemptsMade, type) =>
+          phase1FulfillmentBackoffMs(attemptsMade, type),
+      },
     },
   );
   workerSingleton.on('failed', (job, err) => {

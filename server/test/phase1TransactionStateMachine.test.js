@@ -11,6 +11,7 @@ import {
   canPhase1PaymentRowTransition,
   evaluatePhase1CompoundIntegrity,
   listPhase1OrderLifecycleEdges,
+  validateFulfillmentAttemptStatusTransition,
 } from '../src/domain/orders/phase1TransactionStateMachine.js';
 import { OrderTransitionError } from '../src/domain/orders/orderLifecycle.js';
 import { transientRetryHintFromProviderResult } from '../src/domain/fulfillment/retryPolicy.js';
@@ -111,5 +112,50 @@ describe('phase1TransactionStateMachine', () => {
     });
     assert.equal(hint.transientEligible, true);
     assert.equal(hint.autoRetryEnabled, false);
+  });
+
+  it('validateFulfillmentAttemptStatusTransition allows QUEUED→PROCESSING and terminal edges', () => {
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+      ).ok,
+      true,
+    );
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED,
+      ).ok,
+      true,
+    );
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        FULFILLMENT_ATTEMPT_STATUS.FAILED,
+      ).ok,
+      true,
+    );
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+      ).ok,
+      true,
+    );
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.QUEUED,
+        FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED,
+      ).ok,
+      false,
+    );
+    assert.equal(
+      validateFulfillmentAttemptStatusTransition(
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+      ).noop,
+      true,
+    );
   });
 });

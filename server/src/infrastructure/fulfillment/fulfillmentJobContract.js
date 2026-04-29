@@ -3,7 +3,14 @@
  * Version field allows future payload evolution without silent misreads.
  */
 
-/** @typedef {{ orderId: string, traceId?: string | null, v?: number }} Phase1FulfillmentJobPayload */
+/**
+ * @typedef {{
+ *   orderId: string,
+ *   idempotencyKey: string,
+ *   traceId?: string | null,
+ *   v?: number,
+ * }} Phase1FulfillmentJobPayload
+ */
 
 const JOB_SCHEMA_VERSION = 1;
 
@@ -30,12 +37,28 @@ export function parsePhase1FulfillmentJobPayload(data) {
       : typeof o.traceId === 'string'
         ? o.traceId
         : null;
+  const explicitIdem =
+    typeof o.idempotencyKey === 'string' ? o.idempotencyKey.trim() : '';
+  const idempotencyKey = explicitIdem || orderId;
+  if (!idempotencyKey) {
+    return { ok: false, reason: 'missing_idempotencyKey' };
+  }
   return {
     ok: true,
-    payload: { orderId, traceId, v: JOB_SCHEMA_VERSION },
+    payload: {
+      orderId,
+      idempotencyKey,
+      traceId,
+      v: JOB_SCHEMA_VERSION,
+    },
   };
 }
 
 export function phase1FulfillmentJobPayloadExample() {
-  return { orderId: 'paychk_…', traceId: null, v: JOB_SCHEMA_VERSION };
+  return {
+    orderId: 'paychk_…',
+    idempotencyKey: 'paychk_…',
+    traceId: null,
+    v: JOB_SCHEMA_VERSION,
+  };
 }

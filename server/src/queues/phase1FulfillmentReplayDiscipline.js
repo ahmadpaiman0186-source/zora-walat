@@ -3,7 +3,7 @@
  *
  * ## Current model
  * - Job id === PaymentCheckout.id (dedupe key).
- * - Transient failures rethrow → BullMQ retries with **exponential backoff** (`FULFILLMENT_JOB_BACKOFF_MS`, `FULFILLMENT_JOB_MAX_ATTEMPTS` on the primary queue).
+ * - Transient failures rethrow → BullMQ retries with **custom** backoff (`FULFILLMENT_JOB_RETRY_DELAYS_MS`, default 5s / 30s / 2m) and `FULFILLMENT_JOB_MAX_ATTEMPTS` (default 4). Legacy jobs may still carry exponential metadata; the worker maps those delays too.
  * - Non-transient failures → `UnrecoverableError` (no retry).
  * - Exhausted retries: Redis list DLQ (`phase1FulfillmentDlqService`) **+** BullMQ queue `phase1-fulfillment-dlq-v1` snapshot job; primary job remains in Bull failed set with attempts metadata.
  *
@@ -12,7 +12,7 @@
  * 2. Confirm `orderStatus` is PAID or PROCESSING — not FULFILLED / CANCELLED unless re-driving a stuck edge case with staff approval.
  * 3. If `metadata.manualRequired === true`, do not replay until manual review clears.
  * 4. Prefer `enqueuePhase1FulfillmentJob(orderId)` / admin kick — **never** run provider I/O twice without checking latest FulfillmentAttempt.
- * 5. Correlate using: `orderId`, Bull `jobId` (same as orderId), `traceId` on job payload, Stripe PI id on checkout.
+ * 5. Correlate using: `orderId`, Bull `jobId` (same as orderId), `traceId` + `idempotencyKey` on job payload, Stripe PI id on checkout.
  *
  * ## Unsafe
  * - Replaying when latest attempt is SUCCEEDED but order row not FULFILLED (data defect — fix row first).

@@ -183,6 +183,13 @@ router.post('/', async (req, res) => {
           eventId: event.id,
           session,
           log: req.log,
+          traceId: req.traceId ?? null,
+          requestId:
+            req.traceId ??
+            (typeof req.headers['x-request-id'] === 'string'
+              ? req.headers['x-request-id']
+              : null),
+          stripeEventType: event.type,
         });
         if (r.orderIdToScheduleFulfillment) {
           orderIdToScheduleFulfillment = r.orderIdToScheduleFulfillment;
@@ -427,7 +434,25 @@ router.post('/', async (req, res) => {
         traceId: req.traceId,
       });
       evaluateRollingAlerts();
-      scheduleFulfillmentProcessing(orderIdToScheduleFulfillment, req.traceId);
+      if (!env.phase1WebhookSkipFulfillmentDispatch) {
+        scheduleFulfillmentProcessing(orderIdToScheduleFulfillment, req.traceId);
+      } else {
+        webTopupLog(req.log, 'info', 'phase1_webhook_fulfillment_dispatch_skipped', {
+          traceId: req.traceId ?? null,
+          requestId:
+            req.traceId ??
+            (typeof req.headers['x-request-id'] === 'string'
+              ? req.headers['x-request-id']
+              : null),
+          stripeEventType: event.type,
+          orderIdSuffix: safeSuffix(orderIdToScheduleFulfillment, 10),
+          reason: 'PHASE1_WEBHOOK_SKIP_FULFILLMENT_DISPATCH',
+        });
+        emitPhase1OperationalEvent('checkout_paid_fulfillment_dispatch_skipped', {
+          traceId: req.traceId ?? null,
+          orderIdSuffix: safeSuffix(orderIdToScheduleFulfillment, 10),
+        });
+      }
       schedulePushSideEffect(
         () => emitPaymentSuccessSideEffect(orderIdToScheduleFulfillment),
         req.traceId,

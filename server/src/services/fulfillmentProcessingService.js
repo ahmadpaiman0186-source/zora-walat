@@ -82,6 +82,7 @@ import {
 } from '../domain/orders/canonicalOrderLifecycle.js';
 import {
   assertPhase1FulfillmentQueuePreconditions,
+  validateFulfillmentAttemptStatusTransition,
 } from '../domain/orders/phase1TransactionStateMachine.js';
 import {
   buildPhase1SafeRefs,
@@ -336,6 +337,17 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     });
     if (!attempt) {
       return null;
+    }
+
+    const queuedToProcessing = validateFulfillmentAttemptStatusTransition(
+      attempt.status,
+      FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+    );
+    if (!queuedToProcessing.ok) {
+      throw new OrderTransitionError(
+        `Fulfillment attempt transition denied: ${queuedToProcessing.detail ?? queuedToProcessing.denial}`,
+        'invalid_fulfillment_attempt_transition',
+      );
     }
 
     const claim = await tx.fulfillmentAttempt.updateMany({
@@ -606,6 +618,17 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
           return null;
         }
 
+        const toSucceeded = validateFulfillmentAttemptStatusTransition(
+          att.status,
+          FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED,
+        );
+        if (!toSucceeded.ok) {
+          throw new OrderTransitionError(
+            `Fulfillment attempt transition denied: ${toSucceeded.detail ?? toSucceeded.denial}`,
+            'invalid_fulfillment_attempt_transition',
+          );
+        }
+
         await tx.fulfillmentAttempt.update({
           where: { id: att.id },
           data: {
@@ -793,6 +816,17 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
             }),
           });
           return null;
+        }
+
+        const toFailed = validateFulfillmentAttemptStatusTransition(
+          att.status,
+          FULFILLMENT_ATTEMPT_STATUS.FAILED,
+        );
+        if (!toFailed.ok) {
+          throw new OrderTransitionError(
+            `Fulfillment attempt transition denied: ${toFailed.detail ?? toFailed.denial}`,
+            'invalid_fulfillment_attempt_transition',
+          );
         }
 
         await tx.fulfillmentAttempt.update({

@@ -1,5 +1,6 @@
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
+import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
 import { assertTransition } from '../domain/orders/orderLifecycle.js';
 import { writeOrderAudit } from './orderAuditService.js';
@@ -40,10 +41,17 @@ export function stripeSessionCustomerId(session) {
  * @param {object} opts
  * @param {string} opts.eventId Stripe `evt_…`
  * @param {object} opts.session Stripe Checkout Session payload
- * @param {{ warn?: Function, error?: Function }} [opts.log]
+ * @param {{ warn?: Function, error?: Function, info?: Function }} [opts.log]
+ * @param {string | null} [opts.traceId]
+ * @param {string | null} [opts.requestId] Correlation id (often same as trace / `x-request-id`)
+ * @param {string} [opts.stripeEventType]
  * @returns {Promise<{ orderIdToScheduleFulfillment: string | null, checkoutAmountMismatchOrderId: string | null, paymentIntentIdsForFeeCapture: string[] }>}
  */
-export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session, log }) {
+export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
+  const { eventId, session, log } = opts;
+  const traceId = opts.traceId ?? null;
+  const requestId = opts.requestId ?? traceId;
+  const stripeEventType = opts.stripeEventType ?? 'checkout.session.completed';
   let orderIdToScheduleFulfillment = null;
   let checkoutAmountMismatchOrderId = null;
   const paymentIntentIdsForFeeCapture = [];
@@ -248,6 +256,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
 
   assertTransition(row.orderStatus, ORDER_STATUS.PAID);
 
+  const paymentStatusBeforePaid = row.status;
   const payToSucceeded = validatePaymentCheckoutStatusTransition(
     row.status,
     PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
@@ -321,6 +330,22 @@ export async function applyPhase1CheckoutSessionCompleted(tx, { eventId, session
   });
 
   const queuedAttempt = await ensureQueuedFulfillmentAttempt(tx, raw, log);
+  log?.info?.(
+    {
+      requestId,
+      traceId,
+      stripeEventType,
+      stripeEventIdSuffix: String(eventId).slice(-12),
+      orderIdSuffix: String(raw).slice(-12),
+      statusTransitions: {
+        paymentCheckoutStatus: `${paymentStatusBeforePaid}->${PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED}`,
+        orderStatus: `${ORDER_STATUS.PENDING}->${ORDER_STATUS.PAID}`,
+        fulfillmentAttempt: `attempt#${queuedAttempt?.attemptNumber ?? 1}->${queuedAttempt?.status ?? FULFILLMENT_ATTEMPT_STATUS.QUEUED}`,
+      },
+      phase1CheckoutPaidFulfillmentQueuedOnly: true,
+    },
+    'phase1 checkout.session.completed: PAID + fulfillment attempt QUEUED (webhook txn; provider I/O not here)',
+  );
   emitPhase1PaymentSucceeded({
     id: raw,
     stripePaymentIntentId: piId,
