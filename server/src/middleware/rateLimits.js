@@ -359,6 +359,18 @@ export const apiIpLimiter = rateLimitWithOptionalRedis('api_ip_15m', {
   handler: rateLimitHandler,
 });
 
+/** Per-IP short window for all `/api/auth/*` (runs before [authLimiter]). */
+export const authPerMinuteIpLimiter = rateLimitWithOptionalRedis('auth_1m_ip', {
+  windowMs: 60_000,
+  max:
+    prod ? 10 : env.nodeEnv === 'test' ? 2000 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => clientIpKey(req),
+  message: { error: 'Too many authentication attempts; try again later.' },
+  handler: authRateLimitHandler,
+});
+
 /** Auth endpoints (login/register/refresh) — stricter abuse control. */
 export const authLimiter = rateLimitWithOptionalRedis('auth_15m', {
   windowMs: 15 * 60 * 1000,

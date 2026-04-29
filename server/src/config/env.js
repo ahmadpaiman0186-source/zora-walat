@@ -147,6 +147,13 @@ export const env = {
    * Development: defaults to local Flutter web ports.
    */
   corsOrigins: resolveCorsOrigins(),
+  /**
+   * When `NODE_ENV=production` and true: allow browser `Origin` on **`http:` only** for `localhost` /
+   * `127.0.0.1` with any port (Flutter web). Not `https:` on loopback. Default false — real production
+   * should use explicit `CORS_ORIGINS` / `CLIENT_URL` and keep this unset.
+   */
+  allowLocalFlutterWebCorsInProduction:
+    process.env.ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS === 'true',
   logLevel: process.env.LOG_LEVEL || 'info',
   /**
    * Express `trust proxy` hop count in production only — required for correct `req.ip`
@@ -244,6 +251,13 @@ export const env = {
   ownerAllowedEmail: String(process.env.OWNER_ALLOWED_EMAIL ?? '')
     .trim()
     .toLowerCase(),
+
+  /**
+   * When true: fail startup if `OWNER_ALLOWED_EMAIL` is empty (operator / private deploys).
+   * Default false so CI and open dev sandboxes still boot.
+   */
+  requireOwnerAllowedEmail:
+    process.env.ZW_REQUIRE_OWNER_ALLOWED_EMAIL === 'true',
 
   /**
    * Opt-in local controlled Stripe **live** proof (hosted checkout). When true, extra guards apply in

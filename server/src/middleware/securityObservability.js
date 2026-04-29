@@ -1,5 +1,5 @@
 import {
-  isCorsOriginAllowed,
+  getCorsAllowDecision,
   originHostnameForLog,
 } from '../lib/corsPolicy.js';
 
@@ -9,7 +9,7 @@ import {
  */
 export function logCorsRejected(req, _res, next) {
   const origin = req.headers.origin;
-  if (origin && !isCorsOriginAllowed(origin)) {
+  if (origin && !getCorsAllowDecision(origin).allowed) {
     req.log?.warn(
       {
         securityEvent: 'cors_origin_rejected',

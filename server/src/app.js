@@ -6,8 +6,9 @@ import pinoHttp from 'pino-http';
 
 import { env } from './config/env.js';
 import { PINO_HTTP_REDACT_PATHS } from './config/loggingRedact.js';
-import { isCorsOriginAllowed } from './lib/corsPolicy.js';
+import { getCorsAllowDecision } from './lib/corsPolicy.js';
 import { logCorsRejected } from './middleware/securityObservability.js';
+import { corsRequestDebugLog } from './middleware/corsRequestDebugLog.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
 import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
@@ -38,6 +39,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import {
   apiIpLimiter,
   authLimiter,
+  authPerMinuteIpLimiter,
   catalogLimiter,
   stripeWebhookLimiter,
 } from './middleware/rateLimits.js';
@@ -70,8 +72,8 @@ function logStripeWebhookIngress(req, res, next) {
 
 function corsOrigin(origin, callback) {
   if (!origin) return callback(null, true);
-  if (isCorsOriginAllowed(origin)) return callback(null, true);
-  return callback(null, false);
+  const d = getCorsAllowDecision(origin);
+  return callback(null, d.allowed);
 }
 
 export function createApp() {
@@ -91,6 +93,20 @@ export function createApp() {
     helmet({
       contentSecurityPolicy: false,
       crossOriginResourcePolicy: { policy: 'cross-origin' },
+      frameguard: { action: 'deny' },
+      referrerPolicy: { policy: 'no-referrer' },
+      /** HSTS only when the configured public client URL is https (never force HSTS for local http). */
+      strictTransportSecurity: (() => {
+        try {
+          const u = new URL(env.clientUrl || 'http://localhost');
+          if (env.nodeEnv === 'production' && u.protocol === 'https:') {
+            return { maxAge: 15_552_000, includeSubDomains: true, preload: false };
+          }
+        } catch {
+          /* ignore */
+        }
+        return false;
+      })(),
     }),
   );
   app.use(
@@ -131,6 +147,7 @@ export function createApp() {
     );
   }
 
+  app.use(corsRequestDebugLog);
   app.use(logCorsRejected);
 
   /**
@@ -152,7 +169,7 @@ export function createApp() {
 
   /** Root liveness (`GET /health`), readiness (`GET /ready`), Prometheus (`GET /metrics`). */
   app.use(healthRoutes);
-  app.use('/api/auth', authLimiter, authRoutes);
+  app.use('/api/auth', authPerMinuteIpLimiter, authLimiter, authRoutes);
   /** Payment routes at root (`/create-checkout-session`, `/checkout-pricing-quote`, …). */
   app.use(paymentRoutes);
   /** Alias: same routes under `/api/*` for clients that prefix the API path. */

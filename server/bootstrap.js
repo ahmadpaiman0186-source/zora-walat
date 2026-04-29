@@ -62,6 +62,10 @@ const isPrismaCliTooling =
   String(process.env.ZW_PRISMA_CLI ?? '').trim() === '1';
 
 if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
+  console.log(
+    `[env] ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS=${String(process.env.ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS ?? '')}`,
+  );
+  console.log(`[env] NODE_ENV=${String(process.env.NODE_ENV ?? '')}`);
   const port = String(process.env.PORT ?? '').trim();
   if (!port) {
     console.log('[env] PORT unset — using default 8787 (set PORT=8787 in server/.env if you want it explicit)');

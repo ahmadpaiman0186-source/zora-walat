@@ -19,6 +19,7 @@ import { getLaunchSubsystemSnapshot } from '../config/launchSubsystemSnapshot.js
 import { webTopupLog } from '../lib/webTopupObservability.js';
 import { isReloadlyConfigured } from '../services/reloadlyClient.js';
 import {
+  assertLocalCorsOverrideWiredOrExit,
   corsOriginsHaveNoWildcards,
   corsOriginsMatchPrelaunchAllowlist,
 } from '../lib/corsPolicy.js';
@@ -43,6 +44,45 @@ import { logCheckoutPricingQuoteRouteProof } from '../lib/expressRouteInventory.
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
+}
+
+/**
+ * @returns {void}
+ */
+function logOwnerIdentityEnv() {
+  if (process.env.NODE_ENV === 'test') return;
+  const o = String(env.ownerAllowedEmail ?? '').trim();
+  if (!o) {
+    console.log('[env] OWNER_ALLOWED_EMAIL=(empty)');
+    return;
+  }
+  const at = o.indexOf('@');
+  const domain = at >= 0 ? o.slice(at + 1) : '?';
+  console.log(
+    `[env] OWNER_ALLOWED_EMAIL=set (domain=${domain}, len=${o.length})`,
+  );
+}
+
+/**
+ * ZW_REQUIRE_OWNER_ALLOWED_EMAIL enforces a non-empty operator identity (fail-closed for private mode).
+ * Does not hardcode a specific address — set OWNER_ALLOWED_EMAIL in the environment.
+ */
+function validateOwnerIdentityGatesOrExit() {
+  logOwnerIdentityEnv();
+  if (!env.requireOwnerAllowedEmail) return;
+  const o = String(env.ownerAllowedEmail ?? '').trim();
+  if (!o) {
+    console.error(
+      '[fatal] ZW_REQUIRE_OWNER_ALLOWED_EMAIL=true but OWNER_ALLOWED_EMAIL is empty',
+    );
+    process.exit(1);
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(o)) {
+    console.error(
+      '[fatal] OWNER_ALLOWED_EMAIL must be a valid email when ZW_REQUIRE_OWNER_ALLOWED_EMAIL is true',
+    );
+    process.exit(1);
+  }
 }
 
 function validateJwtSecretsOrExit() {
@@ -247,6 +287,8 @@ export function validateServerRuntimeOrExit() {
   validateJwtSecretsOrExit();
   logLaunchValidation();
   validateDatabaseConfigOrExit();
+  validateOwnerIdentityGatesOrExit();
+  assertLocalCorsOverrideWiredOrExit();
   assertProductionDeploymentContractOrExit();
   logRuntimeTopologyOnce();
 
