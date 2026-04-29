@@ -1,3 +1,0 @@
-﻿> verify:local-pricing
-{"verify":"local-pricing","productValueUsdCents":200,"zoraServiceFeeUsdCents":26,"governmentTaxUsdCents":0,"totalUsdCents":226,"sumEqualsTotal":true,"feePolicyVersion":"phase1_margin_search_min_zora_fee_v1"}
-PRICING_EXIT=0

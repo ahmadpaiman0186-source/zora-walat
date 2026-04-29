@@ -5,6 +5,13 @@ prisma/dev.db
 prisma/dev.db-journal
 *.log
 
+# Local compliance scans / scratch under debug/ (tracked *.md reports stay explicit adds)
+debug/*.txt
+debug/_*
+debug/iran-scan-*.txt
+debug/session-*/
+debug/logs/
+
 # Local test / debug output captures
 chaos-test-out.txt
 tap-out.txt

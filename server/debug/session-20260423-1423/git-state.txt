@@ -1,2 +1,0 @@
-﻿branch: 2026-04-11-qrw0
-HEAD: de487f84fa9d3bf3ec66bf5fc3617153abc603c1

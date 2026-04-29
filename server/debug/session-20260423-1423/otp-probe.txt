@@ -1,1 +1,0 @@
-﻿OTP: stub path PASS (tokens issued). Real SMTP: EAUTH 535 BadCredentials — see full console in run log.

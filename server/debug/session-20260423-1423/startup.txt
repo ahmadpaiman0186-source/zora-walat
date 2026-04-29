@@ -1,1 +1,0 @@
-﻿Checkpoint: 2026-04-23. Health OK via curl. Full npm start banner not captured; use netstat+health+verify:local-pricing as runtime proof.

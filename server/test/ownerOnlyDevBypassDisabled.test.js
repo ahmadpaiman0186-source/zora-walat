@@ -16,7 +16,7 @@ describe('owner-only disables dev bypass (isolated subprocess)', () => {
         ...process.env,
         NODE_ENV: 'development',
         PRELAUNCH_LOCKDOWN: 'false',
-        OWNER_ALLOWED_EMAIL: 'ahmadpaimaiman0186@gmail.com',
+        OWNER_ALLOWED_EMAIL: 'owner-only-enforced@example.test',
         JWT_ACCESS_SECRET: 'x'.repeat(32),
         JWT_REFRESH_SECRET: 'y'.repeat(32),
         DEV_CHECKOUT_AUTH_BYPASS: 'true',

@@ -133,16 +133,15 @@ This file is a **resumable baseline**: how to start the API, what was verified i
 
 | Check | Result | Evidence |
 |--------|--------|----------|
-| `GET /health` | **PASS** | `{"status":"ok"}` → `server/debug/session-20260423-1423/health.json` |
-| `npm run verify:local-pricing` | **PASS** | Exit 0; `zoraServiceFeeUsdCents=26`, `totalUsdCents=226`, `feePolicyVersion=phase1_margin_search_min_zora_fee_v1` → `verify-local-pricing.txt` (named `.txt` so it can be committed; `*.log` is gitignored) |
-| `npm run auth:check-user` | **PASS (eligibility)** | User exists, `isActive: true` → `otp-check-user.txt` in same folder |
-| `npm run auth:probe-otp` | **PARTIAL** | Stub path: **PASS** (tokens). Real SMTP: **FAIL** `EAUTH` / Gmail `535-5.7.8` BadCredentials → `otp-probe.txt` + full lines in `otp-check-user.txt` / probe console |
-| Port **8787** | **PASS (single listener)** | PID **9396** `node start.js` (IPv4+IPv6 same PID) → `ports-8787.txt` |
-| **Stripe CLI** | **RISK** | **3** `stripe` processes (PIDs 2316, 6848, 16312) — avoid multiple `stripe listen` / `whsec` drift; keep one forwarder. → `processes.json` / `stripe-cli-processes.json` |
+| `GET /health` | **PASS** | `{"status":"ok"}` (historical session JSON snapshots were removed from git April 2026 for hygiene — re-run locally and capture under `server/debug/` **without committing**) |
+| `npm run verify:local-pricing` | **PASS** | Exit 0; `zoraServiceFeeUsdCents=26`, `totalUsdCents=226`, `feePolicyVersion=phase1_margin_search_min_zora_fee_v1` |
+| `npm run auth:check-user` | **PASS (eligibility)** | User exists, `isActive: true` |
+| `npm run auth:probe-otp` | **PARTIAL** | Stub path: **PASS** (tokens). Real SMTP: **FAIL** `EAUTH` / Gmail `535-5.7.8` BadCredentials |
+| Port **8787** | **PASS (single listener)** | PID **9396** `node start.js` (IPv4+IPv6 same PID) |
+| **Stripe CLI** | **RISK** | **3** `stripe` processes (PIDs 2316, 6848, 16312) — avoid multiple `stripe listen` / `whsec` drift; keep one forwarder. |
 | Webhook / security | **Not modified** | No change to signature verification or flags in this checkpoint |
 
-**Snapshot path:** `server/debug/session-20260423-1423/`  
-**Artifacts:** `health.json`, `verify-local-pricing.txt`, `otp-probe.txt`, `otp-check-user.txt`, `processes.json`, `env-redacted.txt`, `git-state.txt`, `startup.txt` (partial — full `npm start` banner not re-captured), `ports-8787.txt`, `processes-raw.json`, `stripe-cli-processes.json`
+**Snapshot path:** *(removed from repository April 2026 — do not commit env/process/session captures; see `server/debug/FINAL_SECURITY_COMPLIANCE_PRODUCTION_CLOSEOUT.md`.)*
 
 **Commands executed (exact):**
 
@@ -229,7 +228,7 @@ If this fails with connection errors, the API is not running on `PORT`. If it pa
 | **HIGH (config)** | `STRIPE_WEBHOOK_SECRET` and other duplicates: `.env.local` wins; `stripe listen` must match the **active** whsec. | **Documented at startup** in env bootstrap. **No code change** required if operators follow restart discipline. |
 | **MEDIUM** | Liveness/health is minimal JSON (`sendLivenessJsonOk`) — no pricing or config echo. | **By design** for liveness; use startup logs + quote smoke for config truth. |
 | **MEDIUM** | `PHASE1_GOVERNMENT_SALES_TAX_BPS_BY_SENDER` unset → 0% tax for all senders until configured. | **Observable** in startup log; not a bug if Stage 1 policy is intentional. |
-| **MEDIUM (repo hygiene)** | Untracked `server/debug/` and similar may hold **local** logs or env fragments. | **Do not** add secrets; review before any commit; consider adding to `.gitignore` if these are always local-only. |
+| **MEDIUM (repo hygiene)** | Session snapshots under `server/debug/` were **removed from git** (April 2026 closeout); `.gitignore` ignores scratch patterns — keep captures local-only. |
 | **INFO** | `POST` `checkout-pricing-quote` registered twice in express inventory (root + `/api` paths) — same handler, two paths. | **Expected** per `moneyRoutePolicy` / `paymentController` comments. |
 
 **CRITICAL (none newly confirmed in this pass):** No new CRITICAL defect was **proven** beyond known operational class (stale process / webhook mismatch), which are mitigated by runbook behavior and existing logging — not a silent code bug fixed here without a broader integration proof.
