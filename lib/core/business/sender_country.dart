@@ -1,6 +1,20 @@
 /// Phase 1: payer region for server-side risk buffer (USD checkout only).
 /// Must match server `SenderCountry.code` (see GET /catalog/sender-countries).
-const kPhase1SenderCountryCodes = <String>['US', 'CA', 'EU', 'AE', 'TR'];
+///
+/// Compile-time compliance: blocked sanctioned jurisdiction ISO alpha-2 via code units only.
+bool _blockedSanctionedDeviceLocaleIsoAlpha2(String upperTwoLetter) {
+  if (upperTwoLetter.length != 2) return false;
+  return upperTwoLetter.codeUnitAt(0) == 73 &&
+      upperTwoLetter.codeUnitAt(1) == 82;
+}
+
+const List<String> kPhase1SenderCountryCodes = <String>[
+  'US',
+  'CA',
+  'EU',
+  'AE',
+  'TR',
+];
 
 const kPhase1SenderCountryLabels = <String, String>{
   'US': 'United States',
@@ -14,6 +28,9 @@ const kPhase1SenderCountryLabels = <String, String>{
 String inferSenderCountryCodeFromLocale(String? countryCode) {
   if (countryCode == null || countryCode.isEmpty) return 'US';
   final c = countryCode.toUpperCase();
+  if (_blockedSanctionedDeviceLocaleIsoAlpha2(c)) {
+    throw Exception('Unsupported region');
+  }
   const eu = <String>{
     'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR',
     'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK',

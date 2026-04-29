@@ -9,6 +9,7 @@ import { PINO_HTTP_REDACT_PATHS } from './config/loggingRedact.js';
 import { getCorsAllowDecision } from './lib/corsPolicy.js';
 import { logCorsRejected } from './middleware/securityObservability.js';
 import { corsRequestDebugLog } from './middleware/corsRequestDebugLog.js';
+import { blockRestrictedCountries } from './middleware/blockRestrictedCountries.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
 import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
@@ -163,6 +164,9 @@ export function createApp() {
   );
 
   app.use(express.json({ limit: '32kb', strict: true }));
+
+  /** Sanctioned / restricted region guard (runs after JSON parse; skips webhooks + health). */
+  app.use(blockRestrictedCountries);
 
   /** Prefix-only liveness (`GET /api/health`); `POST /api/checkout-pricing-quote` comes from `paymentRoutes` below. */
   app.use('/api', apiRoutes);

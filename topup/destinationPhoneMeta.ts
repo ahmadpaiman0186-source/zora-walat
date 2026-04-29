@@ -1,3 +1,5 @@
+import { isRestrictedDestinationIso } from './compliance/restrictedCodes';
+
 /**
  * ITU-style dial digits (no leading +) and national-format hints per receiving country.
  * Used as the single source of truth for placeholder + API composition (dial + national digits).
@@ -17,11 +19,6 @@ const BY_CODE: Record<string, DestinationPhoneMeta> = {
     dialDigits: '93',
     nationalPlaceholder: '70 123 4567',
     exampleNationalDigits: '701234567',
-  },
-  IR: {
-    dialDigits: '98',
-    nationalPlaceholder: '912 345 6789',
-    exampleNationalDigits: '9123456789',
   },
   TR: {
     dialDigits: '90',
@@ -69,7 +66,6 @@ const FALLBACK: DestinationPhoneMeta = {
 /** Every receiving country in the catalog must have an entry above (startup check in dev). */
 const REQUIRED_DESTINATION_CODES = [
   'AF',
-  'IR',
   'TR',
   'AE',
   'SA',
@@ -92,6 +88,9 @@ if (process.env.NODE_ENV === 'development') {
 
 export function getDestinationPhoneMeta(countryCode: string): DestinationPhoneMeta {
   const k = String(countryCode ?? '').trim().toUpperCase();
+  if (isRestrictedDestinationIso(k)) {
+    throw new Error('Unsupported region');
+  }
   return BY_CODE[k] ?? FALLBACK;
 }
 

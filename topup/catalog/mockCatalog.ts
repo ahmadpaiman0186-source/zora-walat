@@ -40,11 +40,6 @@ export const OPERATORS_BY_DESTINATION: Record<string, Op[]> = {
     { key: 'mtn-af', label: 'MTN Afghanistan' },
     { key: 'salaam', label: 'Salaam' },
   ],
-  IR: [
-    { key: 'mci', label: 'MCI' },
-    { key: 'irancell', label: 'Irancell' },
-    { key: 'rightel', label: 'Rightel' },
-  ],
   TR: [
     { key: 'turkcell', label: 'Turkcell' },
     { key: 'vodafone-tr', label: 'Vodafone Turkey' },

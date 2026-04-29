@@ -1,3 +1,4 @@
+import { isRestrictedDestinationIso } from '../compliance/restrictedCodes';
 import { MOCK_CATALOG, normalizeOffer } from './mockCatalog';
 import type { CatalogRow, CountryOption, ProductType } from './types';
 
@@ -11,10 +12,9 @@ export const ORIGIN_COUNTRIES: CountryOption[] = [
   { code: 'SA', label: 'Saudi Arabia' },
 ];
 
-/** Receive / top-up destinations. */
-export const DESTINATION_COUNTRIES: CountryOption[] = [
+/** Receive / top-up destinations (sanctioned jurisdictions excluded per denylist). */
+const DESTINATION_COUNTRIES_ALL: CountryOption[] = [
   { code: 'AF', label: 'Afghanistan' },
-  { code: 'IR', label: 'Iran' },
   { code: 'TR', label: 'Turkey' },
   { code: 'AE', label: 'United Arab Emirates' },
   { code: 'SA', label: 'Saudi Arabia' },
@@ -23,6 +23,8 @@ export const DESTINATION_COUNTRIES: CountryOption[] = [
   { code: 'OM', label: 'Oman' },
   { code: 'BH', label: 'Bahrain' },
 ];
+export const DESTINATION_COUNTRIES: CountryOption[] =
+  DESTINATION_COUNTRIES_ALL.filter((c) => !isRestrictedDestinationIso(c.code));
 
 export const PRODUCT_TYPE_IDS: ProductType[] = ['airtime', 'data', 'calling'];
 
