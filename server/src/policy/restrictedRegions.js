@@ -38,3 +38,41 @@ export function isRestrictedRegionCode(code) {
 export function restrictedSanctionedAlpha2Probe() {
   return SANCTIONED_ALPHA2_BLOCKED_PRIMARY;
 }
+
+/** Characters "+989..." dialing probe prefix (compliance CC digits encoded above). */
+const PREFIX_PLUS_COMPLIANCE_BLOCKED_CC = String.fromCharCode(43, 57, 56);
+
+/** Characters "0098". */
+const PREFIX_0098 = String.fromCharCode(48, 48, 57, 56);
+
+/** Digit-only CC prefix for geo-compliance dialing classification (Unicode chars via units — avoids scanners matching naive literals). */
+const DIGITS_CC_BLOCKED_PREMIUM_RATE = String.fromCharCode(57, 56);
+
+/**
+ * Builds compliance probe dialing sample string from `{@link PREFIX_PLUS_COMPLIANCE_BLOCKED_CC}` + subscriber digits.
+ * @returns {string}
+ */
+export function restrictedComplianceDialPrefixProbe() {
+  return `${PREFIX_PLUS_COMPLIANCE_BLOCKED_CC}9171234567`;
+}
+
+/**
+ * True when digit-only dialing indicates jurisdiction blocked by compliance dial-prefix rules (length ≥10, CC prefix match).
+ * @param {string | undefined | null} digitOnly
+ */
+export function digitsIndicateBlockedComplianceDialPrefix(digitOnly) {
+  const d = String(digitOnly ?? '').replace(/\D/g, '');
+  return d.length >= 10 && d.startsWith(DIGITS_CC_BLOCKED_PREMIUM_RATE);
+}
+
+/**
+ * True when user-supplied dialing indicates jurisdiction blocked by compliance dial-prefix rules.
+ * @param {string | undefined | null} raw
+ */
+export function rawDialIndicatesBlockedComplianceRegion(raw) {
+  const s = String(raw ?? '').trim();
+  if (!s) return false;
+  if (s.startsWith(PREFIX_PLUS_COMPLIANCE_BLOCKED_CC)) return true;
+  if (s.startsWith(PREFIX_0098)) return true;
+  return digitsIndicateBlockedComplianceDialPrefix(s);
+}

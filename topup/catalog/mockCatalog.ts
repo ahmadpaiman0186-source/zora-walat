@@ -1,9 +1,8 @@
 import type { CatalogAmountOption, CatalogRow } from './types';
-
-const AIRTIME_CENTS = [500, 1000, 1500, 2000, 3000, 5000] as const;
+import { PHASE1_LADDER_USD_CENTS } from '../pricing/phase1LadderUsdCents';
 
 function airtimeOptions(): CatalogAmountOption[] {
-  return AIRTIME_CENTS.map((c) => ({
+  return PHASE1_LADDER_USD_CENTS.map((c) => ({
     id: `air-${c}`,
     label: `$${(c / 100).toFixed(c % 100 === 0 ? 0 : 2)}`,
     priceUsdCents: c,
@@ -22,11 +21,17 @@ function dataOptionsProfile(
 }
 
 function callingOptions(): CatalogAmountOption[] {
-  return [
-    { id: 'call-500', label: '$5 bundle', priceUsdCents: 500, detail: '~60 min*' },
-    { id: 'call-1000', label: '$10 bundle', priceUsdCents: 1000, detail: '~130 min*' },
-    { id: 'call-2000', label: '$20 bundle', priceUsdCents: 2000, detail: '~280 min*' },
+  const tiers: readonly [number, string][] = [
+    [500, '~60 min*'],
+    [1100, '~130 min*'],
+    [2000, '~280 min*'],
   ];
+  return tiers.map(([c, detail]) => ({
+    id: `call-${c}`,
+    label: `$${(c / 100).toFixed(0)} bundle`,
+    priceUsdCents: c,
+    detail,
+  }));
 }
 
 type Op = { key: string; label: string };
@@ -73,11 +78,12 @@ export const OPERATORS_BY_DESTINATION: Record<string, Op[]> = {
   ],
 };
 
+/** Data-bundle retail faces — ladder-aligned USD cents only (same grid as airtime). */
 const DATA_TIERS = dataOptionsProfile([
-  { id: 'd1', label: '1 GB', cents: 799, detail: '30 days' },
-  { id: 'd2', label: '3 GB', cents: 1899, detail: '30 days' },
-  { id: 'd3', label: '5 GB', cents: 2799, detail: '30 days' },
-  { id: 'd4', label: '10 GB', cents: 4499, detail: '30 days' },
+  { id: 'd1', label: '1 GB', cents: 500, detail: '30 days' },
+  { id: 'd2', label: '3 GB', cents: 900, detail: '30 days' },
+  { id: 'd3', label: '5 GB', cents: 1500, detail: '30 days' },
+  { id: 'd4', label: '10 GB', cents: 2500, detail: '30 days' },
 ]);
 
 function buildRowsForOp(

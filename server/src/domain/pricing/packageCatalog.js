@@ -6,18 +6,18 @@
 export const MOCK_PACKAGE_ECONOMICS = {
   mock_data_500mb: {
     productType: 'data_bundle',
-    faceValueUsdCents: 499,
+    faceValueUsdCents: 500,
     providerUsdCents: 420,
   },
   mock_data_1gb: {
     productType: 'data_bundle',
-    faceValueUsdCents: 1199,
+    faceValueUsdCents: 1100,
     providerUsdCents: 1000,
   },
   mock_airtime_10: {
     productType: 'airtime',
-    faceValueUsdCents: 1000,
-    providerUsdCents: 900,
+    faceValueUsdCents: 900,
+    providerUsdCents: 810,
   },
   mock_airtime_25: {
     productType: 'airtime',
@@ -26,7 +26,7 @@ export const MOCK_PACKAGE_ECONOMICS = {
   },
   mock_intl_weekly: {
     productType: 'international_call_weekly',
-    faceValueUsdCents: 999,
+    faceValueUsdCents: 900,
     providerUsdCents: 720,
   },
 };

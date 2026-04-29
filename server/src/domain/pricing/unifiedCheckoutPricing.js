@@ -58,14 +58,14 @@ export function resolveUnifiedCheckoutPricing(input) {
   if (!Number.isInteger(n) || n < 50 || n > 500_000) {
     return {
       ok: false,
-      code: 'INVALID_AMOUNT',
+      code: 'invalid_amount',
       message: 'Invalid amountCents',
     };
   }
   if (!ALLOWED_CHECKOUT_USD_CENTS.has(n)) {
     return {
       ok: false,
-      code: 'AMOUNT_NOT_ALLOWED',
+      code: 'invalid_amount',
       message: 'Amount not in allowed price list',
     };
   }

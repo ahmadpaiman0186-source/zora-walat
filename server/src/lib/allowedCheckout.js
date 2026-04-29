@@ -1,4 +1,5 @@
 import { AIRTIME_SKUS, getAirtimeSku } from './pricing.js';
+import { PHASE1_LADDER_USD_CENTS } from './phase1PriceLadder.js';
 import { getDataPackageRetailUsdCents } from './dataPackagePricing.js';
 import { MOCK_PACKAGE_ECONOMICS } from '../domain/pricing/packageCatalog.js';
 
@@ -28,6 +29,7 @@ function uniqueSorted(ints) {
 /** All cent amounts the server will accept for amount-only Checkout (Phase 1: no data bundles). */
 export const ALLOWED_CHECKOUT_USD_CENTS = new Set(
   uniqueSorted([
+    ...PHASE1_LADDER_USD_CENTS,
     ...AIRTIME_SKUS.map((r) => r.retailUsdCents),
     ...Object.values(MOCK_PACKAGE_FACE_CENTS),
   ]),
