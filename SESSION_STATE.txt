@@ -1,23 +1,45 @@
-# Session state — Zora-Walat (security closeout audit)
-# Date (authoritative per user session): 2026-04-26 (local)
+SESSION CHECKPOINT — Zora-Walat production-readiness sweep
+Updated: 2026-04-30 (local)
 
-## Git
-- HEAD (at audit run, pre-checkpoint commit): 55d3138 — "fix(ci): JWT fallback + rate-limit CI safe + correct 403 vs 503 ordering"
-- Branch: 2026-04-11-qrw0
-- Working tree before checkpoint: clean (git status --short empty)
+BRANCH
+  main (tracking origin/main)
 
-## Security / stability audit (2026-04-26)
-- Secrets scan (pattern sweep: sk_live_, rk_live_, whsec_, hardcoded api key patterns): no committed live Stripe keys or real whsec strings; matches were docs, placeholders, stripeEnv replace string, smoke script test credentials, integration test passwords only.
-- Security/payment-relevant recent commit (55d3138): server/src/controllers/paymentController.js, server/src/middleware/rateLimits.js, server/test/integrations/testDatabaseResolution.mjs — CI/test stability; do not weaken production auth or webhooks.
+LATEST COMMIT (at sweep time)
+  d91b8488ccec8d5c85e674d5712bad3a6013dabe
 
-## CI / test green (evidence — all exit 0)
-- npm --prefix server test — 458 pass, 0 fail
-- npm --prefix server run test:ci — pass (6 tests in Stripe webhook chaos suite + full suite)
-- npm --prefix server run verify:local-pricing — sumEqualsTotal true; total 226; fee 26; feePolicyVersion phase1_margin_search_min_zora_fee_v1
-- flutter test — All tests passed (17)
-- flutter analyze — No issues found
+FILES CHANGED THIS SESSION (working tree, not committed)
+  - .gitignore — removed NUL-byte corruption on last lines; added explicit ignores:
+      server/debug/
+      _backup/
 
-## Tomorrow resume
-- Optional: confirm GitHub Actions green for same branch after push (if you push).
-- Continue product work; re-run server test + test:ci + verify:local-pricing + flutter test/analyze before any money-path or release merge.
-- Do not commit .dart_tool or local env files; keep STRIPE_WEBHOOK_SECRET aligned with active stripe listen (see server bootstrap logs).
+TESTS RUN + RESULT
+  - server: npm test  → PASS (exit 0)
+  - flutter: flutter test → PASS (18 tests)
+  - flutter analyze → No issues found
+  - dart analyze → No issues found
+  - npm run test:ci (server) → NOT run (timebox); run before deploy/merge if desired
+
+GIT HYGIENE NOTES
+  - Nothing staged.
+  - server/debug/* and _backup/* are now ignored (previously broken .gitignore line did not match).
+  - Still untracked (review before any add): server/scripts/dev-otp-dry-run.mjs,
+    server/scripts/probe-otp-user.mjs, server/test/otpPublicContractAndConsole.test.js
+
+SECURITY / CONFIG SANITY (spot-check, not exhaustive)
+  - No sk_live / whsec secrets in app source beyond docs, tests, sanitizers, stripeEnv guards.
+  - Stripe webhook route still uses constructEvent(raw body, signature, secret) — not modified.
+  - Restricted-region middleware/policy files still present — not modified.
+
+REMAINING RISKS / TOMORROW
+  - Decide whether to track otpPublicContractAndConsole.test.js and OTP helper scripts or add
+    script patterns to .gitignore.
+  - Run server npm run test:ci before release if not already green in CI.
+  - Confirm production env: NODE_ENV=production, OTP_TRANSPORT not console, live keys only where intended.
+
+NEXT STARTING STEP
+  1) git status — confirm only intended .gitignore change remains to stage.
+  2) Optionally run: cd server && npm run test:ci
+  3) Review untracked server/test + server/scripts; commit separately if approved.
+
+COMMIT
+  Do not commit until explicitly approved after review.
