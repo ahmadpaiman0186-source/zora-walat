@@ -10,7 +10,11 @@ import { PrismaClient } from '@prisma/client';
 
 import { AUTH_ERROR_CODE } from '../../src/constants/authErrors.js';
 import { HttpError } from '../../src/lib/httpError.js';
-import { otpHashFor } from '../../src/services/identity/otpChallengeService.js';
+import { env } from '../../src/config/env.js';
+import {
+  otpHashFor,
+  buildPublicOtpRequestExpectedBody,
+} from '../../src/services/identity/otpChallengeService.js';
 import {
   cleanupStaleAuthOtpChallengesForTests,
   requestEmailOtp,
@@ -20,6 +24,7 @@ import {
   getOpsMetricsSnapshot,
   resetOpsMetricsForTests,
 } from '../../src/lib/opsMetrics.js';
+import { resetOtpDeliverySloAlertForTests } from '../../src/lib/opsAlerts.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for OTP integration tests');
@@ -80,6 +85,22 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     return getOpsMetricsSnapshot().counters[`auth_otp_${name}`] ?? 0;
   }
 
+  it('returns identical generic public body for unknown email (anti-enumeration)', async () => {
+    const email = `ghost_${randomUUID()}@test.invalid`;
+    const out = await requestEmailOtp(
+      { email },
+      {
+        sendOtp: async () => {
+          assert.fail('sendOtp must not run for unknown email');
+        },
+      },
+    );
+    assert.deepEqual(
+      out,
+      buildPublicOtpRequestExpectedBody(env.authOtpResendCooldownSec),
+    );
+  });
+
   it('enforces resend cooldown and per-email request cap', async () => {
     const email = await makeUser('otp-issue');
     /** @type {string[]} */
@@ -89,11 +110,10 @@ describe('auth OTP lifecycle (integration)', { skip: !runIntegration }, () => {
     };
 
     const first = await requestEmailOtp({ email }, { sendOtp });
-    assert.deepEqual(first, {
-      success: true,
-      ok: true,
-      message: 'If the account is eligible, an OTP email will be sent.',
-    });
+    assert.deepEqual(
+      first,
+      buildPublicOtpRequestExpectedBody(env.authOtpResendCooldownSec),
+    );
     assert.equal(sentOtps.length, 1);
 
     const cooldown = await requestEmailOtp({ email }, { sendOtp });

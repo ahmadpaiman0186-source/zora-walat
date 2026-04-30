@@ -62,7 +62,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
       final target =
           '${AppRoutePaths.signInOtp}?email=${Uri.encodeQueryComponent(email)}';
-      await context.push(target, extra: result.message);
+      await context.push(target, extra: result);
     } on AuthApiException catch (e) {
       if (!mounted) return;
       setState(() => _error = _mapRequestError(e, l10n));

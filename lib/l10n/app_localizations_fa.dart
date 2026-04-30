@@ -648,23 +648,24 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get authOtpEmailIntro =>
-      'نشانی ایمیل خود را وارد کنید تا در صورت واجد شرایط بودن حساب، یک کد ۶ رقمی ورود برای شما ارسال شود.';
+      'نشانی ایمیل را وارد کنید. در صورت واجد شرایط بودن این حساب، یک کد ورود ارسال خواهد شد.';
 
   @override
   String get authOtpEmailHelp =>
       'از همان ایمیلی استفاده کنید که برای حساب زوره‌ولت خود دارید.';
 
   @override
-  String get authOtpContinueCta => 'ارسال کد';
+  String get authOtpContinueCta => 'درخواست کد';
 
   @override
-  String get authOtpSendingCode => 'در حال ارسال کد تأیید…';
+  String get authOtpSendingCode => 'در حال ثبت درخواست…';
 
   @override
   String get authOtpCodeTitle => 'ورود کد';
 
   @override
-  String get authOtpCheckEmail => 'صندوق ایمیل خود را بررسی کنید';
+  String get authOtpCheckEmail =>
+      'در صورت ارسال کد، صندوق ورودی و پوشهٔ هرزنامه را بررسی کنید.';
 
   @override
   String get authOtpCodeLabel => 'کد تأیید';
@@ -689,10 +690,14 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get authOtpRequestSuccess =>
-      'اگر حساب واجد شرایط باشد، کد تأیید ارسال شده است.';
+      'در صورت واجد شرایط بودن این حساب، یک کد ورود ارسال خواهد شد.';
 
   @override
-  String get authOtpResendReady => 'اکنون می‌توانید یک کد تازه درخواست کنید.';
+  String get authOtpSecurityNote =>
+      'به‌خاطر امنیت، نمی‌توانیم تأیید کنیم که برای این ایمیل حسابی وجود دارد.';
+
+  @override
+  String get authOtpResendReady => 'اکنون می‌توانید کد دیگری درخواست کنید.';
 
   @override
   String get authOtpResendCta => 'ارسال دوباره کد';
@@ -707,7 +712,12 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String authOtpResendIn(Object seconds) {
-    return 'می‌توانید تا $seconds ثانیه دیگر کد را دوباره بفرستید.';
+    return 'می‌توانید پس از $seconds ثانیه کد دیگری درخواست کنید.';
+  }
+
+  @override
+  String authOtpCheckEmailOrRetry(Object seconds) {
+    return 'در صورت ارسال کد، صندوق ورودی و هرزنامه را بررسی کنید، یا پس از $seconds ثانیه دوباره تلاش کنید.';
   }
 
   @override

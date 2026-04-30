@@ -20,6 +20,7 @@ import '../../features/recharge/presentation/recharge_screen.dart';
 import '../../features/telecom/domain/telecom_order.dart';
 import '../../features/telecom/presentation/checkout_screen.dart';
 import '../../features/wallet/presentation/wallet_screen.dart';
+import '../../services/auth_api_service.dart';
 import '../../features/auth/presentation/sign_in_screen.dart';
 import '../../features/auth/presentation/otp_verify_screen.dart';
 import '../../features/auth/presentation/sign_up_screen.dart';
@@ -188,10 +189,17 @@ GoRouter createAppRouter({required AuthSession authSession}) {
             return const SignInScreen();
           }
           final prior = state.extra;
-          final priorMessage = prior is String ? prior : null;
+          final priorOtpRequestSucceeded = prior is OtpRequestResult ||
+              (prior is String && prior.trim().isNotEmpty);
+          final initialCooldown = prior is OtpRequestResult
+              ? prior.retryAfterSeconds
+              : null;
+          final showOtpEntrySnack = prior is OtpRequestResult;
           return OtpVerifyScreen(
             email: email,
-            priorOtpSendMessage: priorMessage,
+            priorOtpRequestSucceeded: priorOtpRequestSucceeded,
+            initialRetryAfterSeconds: initialCooldown,
+            showOtpEntrySnack: showOtpEntrySnack,
           );
         },
       ),

@@ -274,30 +274,37 @@
   "authFillAllFields": "Enter your email and password.",
   "authInvalidEmail": "Enter a valid email address.",
   "authEmailRequired": "Enter your email address.",
-  "authOtpEmailIntro": "Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.",
+  "authOtpEmailIntro": "Enter your email address. If this account is eligible, a sign-in code will be sent.",
   "authOtpEmailHelp": "Use the same email address you use for your Zora-Walat account.",
-  "authOtpContinueCta": "Send code",
-  "authOtpSendingCode": "Sending verification code…",
+  "authOtpContinueCta": "Request code",
+  "authOtpSendingCode": "Submitting your request…",
   "authOtpCodeTitle": "Enter code",
-  "authOtpCheckEmail": "Check your inbox",
+  "authOtpCheckEmail": "Check your inbox and spam folder if a code was sent.",
   "authOtpCodeLabel": "Verification code",
   "authOtpVerifyCta": "Verify code",
   "authOtpCodeRequired": "Enter the 6-digit verification code.",
   "authOtpInvalidOrExpired": "That code is invalid or has expired. Request a new code and try again.",
   "authOtpTooManyAttempts": "Too many attempts. Please wait a moment before trying again.",
   "authNetworkRetry": "Network error. Check your connection and try again.",
-  "authOtpRequestSuccess": "If the account is eligible, a verification code has been sent.",
-  "authOtpResendReady": "You can request a new code now.",
+  "authOtpRequestSuccess": "If this account is eligible, a sign-in code will be sent.",
+  "authOtpSecurityNote": "For security, we cannot confirm whether an account exists for this email.",
+  "authOtpResendReady": "You can request another code now.",
   "authOtpResendCta": "Resend code",
   "authOtpChangeEmail": "Use a different email",
-  "authOtpCodeHelp": "Use the 6-digit sign-in code for {email} (check spam). Enter it below.",
+  "authOtpCodeHelp": "If you received one, enter the 6-digit sign-in code for {email} below. Check spam too.",
   "@authOtpCodeHelp": {
     "placeholders": {
       "email": {}
     }
   },
-  "authOtpResendIn": "You can resend a code in {seconds}s.",
+  "authOtpResendIn": "You can request another code in {seconds}s.",
   "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "authOtpCheckEmailOrRetry": "Check your inbox and spam folder if a code was sent, or try again in {seconds}s.",
+  "@authOtpCheckEmailOrRetry": {
     "placeholders": {
       "seconds": {}
     }

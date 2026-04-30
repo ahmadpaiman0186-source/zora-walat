@@ -13,36 +13,47 @@ class OtpVerifyScreen extends StatefulWidget {
   const OtpVerifyScreen({
     super.key,
     required this.email,
-    /// When [SignInScreen] already called `requestOtp` successfully, pass the server message here
-    /// (via `GoRouter` `extra`) so we do not send a duplicate OTP email.
-    this.priorOtpSendMessage,
+    /// When [SignInScreen] already completed `requestOtp` (HTTP 200), set true so we skip a duplicate
+    /// request and show neutral copy from [AppLocalizations] (never raw API `message`).
+    this.priorOtpRequestSucceeded = false,
+    /// Server `retryAfterSeconds` (same for all 200 responses). Drives resend cooldown timer.
+    this.initialRetryAfterSeconds,
+    /// When [SignIn] passed [OtpRequestResult] as `extra`, show one UX snackbar on open.
+    this.showOtpEntrySnack = false,
   });
 
   final String email;
-  final String? priorOtpSendMessage;
+  final bool priorOtpRequestSucceeded;
+  final int? initialRetryAfterSeconds;
+  final bool showOtpEntrySnack;
 
   @override
   State<OtpVerifyScreen> createState() => _OtpVerifyScreenState();
 }
 
 class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
-  static const int _resendCooldownSeconds = 60;
-
   final _otp = TextEditingController();
   Timer? _timer;
   bool _busy = false;
-  int _remainingSeconds = _resendCooldownSeconds;
+  late int _cooldownDuration;
+  late int _remainingSeconds;
   String? _error;
   String? _info;
-  /// `true` once we either have [priorOtpSendMessage] or finished the initial `request-otp` call.
+  /// `true` once we either have a prior successful request from sign-in or finished bootstrap `request-otp`.
   bool _initialOtpRequestResolved = false;
 
   @override
   void initState() {
     super.initState();
-    if (widget.priorOtpSendMessage != null && widget.priorOtpSendMessage!.isNotEmpty) {
-      _info = widget.priorOtpSendMessage;
+    _cooldownDuration = widget.initialRetryAfterSeconds ?? 60;
+    _remainingSeconds = _cooldownDuration;
+    if (widget.priorOtpRequestSucceeded) {
       _initialOtpRequestResolved = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context);
+        setState(() => _info = l10n.authOtpRequestSuccess);
+      });
     } else {
       _busy = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,6 +61,22 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
       });
     }
     _startCooldown();
+    if (widget.showOtpEntrySnack) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showOtpUxSnack();
+      });
+    }
+  }
+
+  void _showOtpUxSnack() {
+    final l10n = AppLocalizations.of(context);
+    final sec = widget.initialRetryAfterSeconds ?? 60;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.authOtpCheckEmailOrRetry(sec)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -61,7 +88,7 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
 
   void _startCooldown() {
     _timer?.cancel();
-    setState(() => _remainingSeconds = _resendCooldownSeconds);
+    setState(() => _remainingSeconds = _cooldownDuration);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
       if (_remainingSeconds <= 1) {
@@ -92,10 +119,20 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
         });
         return;
       }
+      _cooldownDuration = result.retryAfterSeconds;
       setState(() {
-        _info = result.message;
+        _info = l10n.authOtpRequestSuccess;
         _initialOtpRequestResolved = true;
       });
+      _startCooldown();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.authOtpCheckEmailOrRetry(result.retryAfterSeconds)),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } on AuthApiException catch (error) {
       if (!mounted) return;
       setState(() {
@@ -169,9 +206,18 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
         setState(() => _error = l10n.authGenericError);
         return;
       }
+      _cooldownDuration = result.retryAfterSeconds;
       _startCooldown();
       _otp.clear();
-      setState(() => _info = result.message);
+      setState(() => _info = l10n.authOtpRequestSuccess);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.authOtpRequestSuccess),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } on AuthApiException catch (error) {
       if (!mounted) return;
       setState(() => _error = _mapRequestError(error, l10n));
@@ -215,6 +261,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
                 height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.authOtpSecurityNote,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
+                height: 1.35,
               ),
             ),
             const SizedBox(height: 8),
@@ -307,13 +361,14 @@ class _OtpVerifyScreenState extends State<OtpVerifyScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            TextButton(
+            FilledButton.tonalIcon(
               onPressed: (_busy ||
                       _remainingSeconds > 0 ||
                       !_initialOtpRequestResolved)
                   ? null
                   : _resend,
-              child: Text(l10n.authOtpResendCta),
+              icon: const Icon(Icons.mark_email_unread_outlined, size: 20),
+              label: Text(l10n.authOtpResendCta),
             ),
             TextButton(
               onPressed: _busy ? null : () => context.pop(),

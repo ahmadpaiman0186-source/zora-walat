@@ -1237,7 +1237,7 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpEmailIntro.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.'**
+  /// **'Enter your email address. If this account is eligible, a sign-in code will be sent.'**
   String get authOtpEmailIntro;
 
   /// No description provided for @authOtpEmailHelp.
@@ -1249,13 +1249,13 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpContinueCta.
   ///
   /// In en, this message translates to:
-  /// **'Send code'**
+  /// **'Request code'**
   String get authOtpContinueCta;
 
   /// No description provided for @authOtpSendingCode.
   ///
   /// In en, this message translates to:
-  /// **'Sending verification code…'**
+  /// **'Submitting your request…'**
   String get authOtpSendingCode;
 
   /// No description provided for @authOtpCodeTitle.
@@ -1267,7 +1267,7 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpCheckEmail.
   ///
   /// In en, this message translates to:
-  /// **'Check your inbox'**
+  /// **'Check your inbox and spam folder if a code was sent.'**
   String get authOtpCheckEmail;
 
   /// No description provided for @authOtpCodeLabel.
@@ -1309,13 +1309,19 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpRequestSuccess.
   ///
   /// In en, this message translates to:
-  /// **'If the account is eligible, a verification code has been sent.'**
+  /// **'If this account is eligible, a sign-in code will be sent.'**
   String get authOtpRequestSuccess;
+
+  /// No description provided for @authOtpSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For security, we cannot confirm whether an account exists for this email.'**
+  String get authOtpSecurityNote;
 
   /// No description provided for @authOtpResendReady.
   ///
   /// In en, this message translates to:
-  /// **'You can request a new code now.'**
+  /// **'You can request another code now.'**
   String get authOtpResendReady;
 
   /// No description provided for @authOtpResendCta.
@@ -1333,14 +1339,20 @@ abstract class AppLocalizations {
   /// No description provided for @authOtpCodeHelp.
   ///
   /// In en, this message translates to:
-  /// **'Use the 6-digit sign-in code for {email} (check spam). Enter it below.'**
+  /// **'If you received one, enter the 6-digit sign-in code for {email} below. Check spam too.'**
   String authOtpCodeHelp(Object email);
 
   /// No description provided for @authOtpResendIn.
   ///
   /// In en, this message translates to:
-  /// **'You can resend a code in {seconds}s.'**
+  /// **'You can request another code in {seconds}s.'**
   String authOtpResendIn(Object seconds);
+
+  /// No description provided for @authOtpCheckEmailOrRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your inbox and spam folder if a code was sent, or try again in {seconds}s.'**
+  String authOtpCheckEmailOrRetry(Object seconds);
 
   /// No description provided for @landingNavBrand.
   ///

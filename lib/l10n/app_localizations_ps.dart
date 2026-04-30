@@ -644,23 +644,24 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get authOtpEmailIntro =>
-      'خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.';
+      'خپل بریښنالیک ولیکئ. که دا حساب وړ وي، به د ننوتلو ۶ عددي کوډ ولېږل شي.';
 
   @override
   String get authOtpEmailHelp =>
       'هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.';
 
   @override
-  String get authOtpContinueCta => 'کوډ ولېږه';
+  String get authOtpContinueCta => 'کوډ وغواړئ';
 
   @override
-  String get authOtpSendingCode => 'د تایید کوډ لیږل…';
+  String get authOtpSendingCode => 'غوښتنه سپارل کیږي…';
 
   @override
   String get authOtpCodeTitle => 'کوډ داخل کړئ';
 
   @override
-  String get authOtpCheckEmail => 'خپل انباکس وګورئ';
+  String get authOtpCheckEmail =>
+      'که کوډ لیږل شوی وي، انباکس او سپام فولډر وګورئ.';
 
   @override
   String get authOtpCodeLabel => 'د تایید کوډ';
@@ -685,10 +686,14 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get authOtpRequestSuccess =>
-      'که حساب وړ وي، د تایید کوډ استول شوی دی.';
+      'که دا حساب وړ وي، به ننوتلو کوډ ولېږل شي.';
 
   @override
-  String get authOtpResendReady => 'اوس کولی شئ نوی کوډ وغواړئ.';
+  String get authOtpSecurityNote =>
+      'د امنیت لپاره مو نشو کولی تایید چې د دې بریښنالیک لپاره حساب شته.';
+
+  @override
+  String get authOtpResendReady => 'اوس کولی شئ بل کوډ وغواړئ.';
 
   @override
   String get authOtpResendCta => 'کوډ بیا ولېږه';
@@ -698,12 +703,17 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String authOtpCodeHelp(Object email) {
-    return 'د $email لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ (سپام فولډر هم وګورئ).';
+    return 'که مو کوم کوډ ترلاسه کړ، د $email لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ. سپام هم وګورئ.';
   }
 
   @override
   String authOtpResendIn(Object seconds) {
     return 'تاسو کولی شئ په $seconds ثانیو کې کوډ بیا وغواړئ.';
+  }
+
+  @override
+  String authOtpCheckEmailOrRetry(Object seconds) {
+    return 'که کوډ لیږل شوی وي، انباکس او سپام وګورئ، یا په $seconds ثانیو کې بیا هڅه وکړئ.';
   }
 
   @override

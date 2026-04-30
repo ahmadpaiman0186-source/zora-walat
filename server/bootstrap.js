@@ -66,6 +66,18 @@ if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
     `[env] ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS=${String(process.env.ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS ?? '')}`,
   );
   console.log(`[env] NODE_ENV=${String(process.env.NODE_ENV ?? '')}`);
+  if (process.env.NODE_ENV !== 'test') {
+    const ot = String(process.env.OTP_TRANSPORT ?? '')
+      .trim()
+      .toLowerCase();
+    console.log(
+      `[env] OTP_TRANSPORT=${ot || '(unset)'} — ${
+        ot === 'console'
+          ? 'verification codes print on this Node process (not the Flutter terminal).'
+          : 'for local OTP in this terminal, set OTP_TRANSPORT=console in server/.env.local'
+      }`,
+    );
+  }
   const port = String(process.env.PORT ?? '').trim();
   if (!port) {
     console.log('[env] PORT unset — using default 8787 (set PORT=8787 in server/.env if you want it explicit)');

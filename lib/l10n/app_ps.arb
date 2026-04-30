@@ -239,23 +239,24 @@
   "authFillAllFields": "بریښنالیک او پټنوم ولیکئ.",
   "authInvalidEmail": "اعتباری بریښنالیک ولیکئ.",
   "authEmailRequired": "خپل بریښنالیک ولیکئ.",
-  "authOtpEmailIntro": "خپل بریښنالیک ولیکئ څو که حساب وړ وي، تاسو ته د ننوتلو ۶ عددي کوډ واستول شي.",
+  "authOtpEmailIntro": "خپل بریښنالیک ولیکئ. که دا حساب وړ وي، به د ننوتلو ۶ عددي کوډ ولېږل شي.",
   "authOtpEmailHelp": "هماغه بریښنالیک وکاروئ چې د خپل زوره‌ولت حساب لپاره مو کارولی دی.",
-  "authOtpContinueCta": "کوډ ولېږه",
-  "authOtpSendingCode": "د تایید کوډ لیږل…",
+  "authOtpContinueCta": "کوډ وغواړئ",
+  "authOtpSendingCode": "غوښتنه سپارل کیږي…",
   "authOtpCodeTitle": "کوډ داخل کړئ",
-  "authOtpCheckEmail": "خپل انباکس وګورئ",
+  "authOtpCheckEmail": "که کوډ لیږل شوی وي، انباکس او سپام فولډر وګورئ.",
   "authOtpCodeLabel": "د تایید کوډ",
   "authOtpVerifyCta": "کوډ تایید کړئ",
   "authOtpCodeRequired": "۶ عددي تاییدي کوډ ولیکئ.",
   "authOtpInvalidOrExpired": "دا کوډ ناسم دی یا موده یې تېره شوې ده. نوی کوډ وغواړئ او بیا هڅه وکړئ.",
   "authOtpTooManyAttempts": "ډېرې هڅې شوې دي. مهرباني وکړئ لږ تم شئ او بیا هڅه وکړئ.",
   "authNetworkRetry": "د شبکې ستونزه. خپله اړیکه وګورئ او بیا هڅه وکړئ.",
-  "authOtpRequestSuccess": "که حساب وړ وي، د تایید کوډ استول شوی دی.",
-  "authOtpResendReady": "اوس کولی شئ نوی کوډ وغواړئ.",
+  "authOtpRequestSuccess": "که دا حساب وړ وي، به ننوتلو کوډ ولېږل شي.",
+  "authOtpSecurityNote": "د امنیت لپاره مو نشو کولی تایید چې د دې بریښنالیک لپاره حساب شته.",
+  "authOtpResendReady": "اوس کولی شئ بل کوډ وغواړئ.",
   "authOtpResendCta": "کوډ بیا ولېږه",
   "authOtpChangeEmail": "بل بریښنالیک وکاروئ",
-  "authOtpCodeHelp": "د {email} لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ (سپام فولډر هم وګورئ).",
+  "authOtpCodeHelp": "که مو کوم کوډ ترلاسه کړ، د {email} لپاره ۶ عددي ننوتلو کوډ لاندې داخل کړئ. سپام هم وګورئ.",
   "@authOtpCodeHelp": {
     "placeholders": {
       "email": {}
@@ -263,6 +264,12 @@
   },
   "authOtpResendIn": "تاسو کولی شئ په {seconds} ثانیو کې کوډ بیا وغواړئ.",
   "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "authOtpCheckEmailOrRetry": "که کوډ لیږل شوی وي، انباکس او سپام وګورئ، یا په {seconds} ثانیو کې بیا هڅه وکړئ.",
+  "@authOtpCheckEmailOrRetry": {
     "placeholders": {
       "seconds": {}
     }

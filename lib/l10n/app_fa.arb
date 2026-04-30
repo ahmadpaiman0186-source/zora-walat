@@ -207,20 +207,21 @@
   "authFillAllFields": "ایمیل و رمز عبور را وارد کنید.",
   "authInvalidEmail": "یک نشانی ایمیل معتبر وارد کنید.",
   "authEmailRequired": "نشانی ایمیل خود را وارد کنید.",
-  "authOtpEmailIntro": "نشانی ایمیل خود را وارد کنید تا در صورت واجد شرایط بودن حساب، یک کد ۶ رقمی ورود برای شما ارسال شود.",
+  "authOtpEmailIntro": "نشانی ایمیل را وارد کنید. در صورت واجد شرایط بودن این حساب، یک کد ورود ارسال خواهد شد.",
   "authOtpEmailHelp": "از همان ایمیلی استفاده کنید که برای حساب زوره‌ولت خود دارید.",
-  "authOtpContinueCta": "ارسال کد",
-  "authOtpSendingCode": "در حال ارسال کد تأیید…",
+  "authOtpContinueCta": "درخواست کد",
+  "authOtpSendingCode": "در حال ثبت درخواست…",
   "authOtpCodeTitle": "ورود کد",
-  "authOtpCheckEmail": "صندوق ایمیل خود را بررسی کنید",
+  "authOtpCheckEmail": "در صورت ارسال کد، صندوق ورودی و پوشهٔ هرزنامه را بررسی کنید.",
   "authOtpCodeLabel": "کد تأیید",
   "authOtpVerifyCta": "تأیید کد",
   "authOtpCodeRequired": "کد تأیید ۶ رقمی را وارد کنید.",
   "authOtpInvalidOrExpired": "این کد نامعتبر است یا منقضی شده. یک کد تازه درخواست کرده و دوباره تلاش کنید.",
   "authOtpTooManyAttempts": "تلاش‌های زیادی انجام شده است. لطفاً کمی صبر کرده و دوباره امتحان کنید.",
   "authNetworkRetry": "خطای شبکه. اتصال خود را بررسی کرده و دوباره تلاش کنید.",
-  "authOtpRequestSuccess": "اگر حساب واجد شرایط باشد، کد تأیید ارسال شده است.",
-  "authOtpResendReady": "اکنون می‌توانید یک کد تازه درخواست کنید.",
+  "authOtpRequestSuccess": "در صورت واجد شرایط بودن این حساب، یک کد ورود ارسال خواهد شد.",
+  "authOtpSecurityNote": "به‌خاطر امنیت، نمی‌توانیم تأیید کنیم که برای این ایمیل حسابی وجود دارد.",
+  "authOtpResendReady": "اکنون می‌توانید کد دیگری درخواست کنید.",
   "authOtpResendCta": "ارسال دوباره کد",
   "authOtpChangeEmail": "استفاده از ایمیل دیگر",
   "authOtpCodeHelp": "کد ۶ رقمی ورود برای {email} را وارد کنید (پوشهٔ هرزنامه را هم ببینید).",
@@ -229,8 +230,14 @@
       "email": {}
     }
   },
-  "authOtpResendIn": "می‌توانید تا {seconds} ثانیه دیگر کد را دوباره بفرستید.",
+  "authOtpResendIn": "می‌توانید پس از {seconds} ثانیه کد دیگری درخواست کنید.",
   "@authOtpResendIn": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "authOtpCheckEmailOrRetry": "در صورت ارسال کد، صندوق ورودی و هرزنامه را بررسی کنید، یا پس از {seconds} ثانیه دوباره تلاش کنید.",
+  "@authOtpCheckEmailOrRetry": {
     "placeholders": {
       "seconds": {}
     }

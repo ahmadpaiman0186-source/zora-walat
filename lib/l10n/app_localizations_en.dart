@@ -654,23 +654,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authOtpEmailIntro =>
-      'Enter your email address and we’ll send a 6-digit sign-in code if the account is eligible.';
+      'Enter your email address. If this account is eligible, a sign-in code will be sent.';
 
   @override
   String get authOtpEmailHelp =>
       'Use the same email address you use for your Zora-Walat account.';
 
   @override
-  String get authOtpContinueCta => 'Send code';
+  String get authOtpContinueCta => 'Request code';
 
   @override
-  String get authOtpSendingCode => 'Sending verification code…';
+  String get authOtpSendingCode => 'Submitting your request…';
 
   @override
   String get authOtpCodeTitle => 'Enter code';
 
   @override
-  String get authOtpCheckEmail => 'Check your inbox';
+  String get authOtpCheckEmail =>
+      'Check your inbox and spam folder if a code was sent.';
 
   @override
   String get authOtpCodeLabel => 'Verification code';
@@ -695,10 +696,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get authOtpRequestSuccess =>
-      'If the account is eligible, a verification code has been sent.';
+      'If this account is eligible, a sign-in code will be sent.';
 
   @override
-  String get authOtpResendReady => 'You can request a new code now.';
+  String get authOtpSecurityNote =>
+      'For security, we cannot confirm whether an account exists for this email.';
+
+  @override
+  String get authOtpResendReady => 'You can request another code now.';
 
   @override
   String get authOtpResendCta => 'Resend code';
@@ -708,12 +713,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String authOtpCodeHelp(Object email) {
-    return 'Use the 6-digit sign-in code for $email (check spam). Enter it below.';
+    return 'If you received one, enter the 6-digit sign-in code for $email below. Check spam too.';
   }
 
   @override
   String authOtpResendIn(Object seconds) {
-    return 'You can resend a code in ${seconds}s.';
+    return 'You can request another code in ${seconds}s.';
+  }
+
+  @override
+  String authOtpCheckEmailOrRetry(Object seconds) {
+    return 'Check your inbox and spam folder if a code was sent, or try again in ${seconds}s.';
   }
 
   @override

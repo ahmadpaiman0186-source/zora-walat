@@ -15,6 +15,18 @@ const windowPayment = [];
 const windowFulfillment = [];
 /** @type {{ t: number, ok: boolean }[]} */
 const windowPush = [];
+/** Rolling window: OTP delivery attempts (sendOtp invoked) — ok=true when delivered. */
+/** @type {{ t: number, ok: boolean }[]} */
+const windowOtpIssue = [];
+
+/** Valid internal OTP request classifications (server-only; never exposed on HTTP). */
+export const OTP_REQUEST_OUTCOMES = Object.freeze([
+  'issued',
+  'user_missing',
+  'cooldown',
+  'window_limit',
+  'delivery_failed',
+]);
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_SAMPLES = 200;
@@ -39,6 +51,14 @@ function windowFailureRate(arr) {
   if (arr.length < 8) return null;
   const fails = arr.filter((x) => !x.ok).length;
   return fails / arr.length;
+}
+
+/** Rolling success ratio for OTP delivery attempts (sendOtp path only). */
+function computeOtpIssueRollingSuccessRate() {
+  prune(windowOtpIssue);
+  if (windowOtpIssue.length === 0) return null;
+  const okn = windowOtpIssue.filter((x) => x.ok).length;
+  return okn / windowOtpIssue.length;
 }
 
 /**
@@ -174,13 +194,77 @@ export function recordPushDelivery(kind, failureCount = 0) {
   pushWindow(windowPush, ok);
 }
 
+/**
+ * Per-request OTP outcome (anti-enumeration paths). Drives `otp_issue_rate` / `otp_cooldown_hit_rate`.
+ * @param {typeof OTP_REQUEST_OUTCOMES[number]} outcome
+ */
+export function recordOtpRequestOutcome(outcome) {
+  if (!OTP_REQUEST_OUTCOMES.includes(outcome)) return;
+  bumpCounter(`otp_outcome_${outcome}_total`);
+  bumpCounter('otp_request_classified_total');
+}
+
+/**
+ * Rolling delivery window stats (only when sendOtp ran).
+ * @returns {{ rate: number | null, samples: number }}
+ */
+export function getOtpDeliveryRollingSnapshot() {
+  prune(windowOtpIssue);
+  return {
+    rate: computeOtpIssueRollingSuccessRate(),
+    samples: windowOtpIssue.length,
+  };
+}
+
+function computeOtpRequestRatesFromCounters() {
+  const denom = counters.otp_request_classified_total ?? 0;
+  if (denom === 0) {
+    return {
+      otp_issue_rate: null,
+      otp_cooldown_hit_rate: null,
+      otp_request_classified_total: 0,
+    };
+  }
+  const issued = counters.otp_outcome_issued_total ?? 0;
+  const cooldown = counters.otp_outcome_cooldown_total ?? 0;
+  return {
+    otp_issue_rate: issued / denom,
+    otp_cooldown_hit_rate: cooldown / denom,
+    otp_request_classified_total: denom,
+  };
+}
+
 /** For alert evaluation (read-only references to rolling windows). */
 export function getOpsAlertWindows() {
   return {
     payment: windowPayment,
     fulfillment: windowFulfillment,
     push: windowPush,
+    otpIssue: windowOtpIssue,
   };
+}
+
+/**
+ * After sendOtp resolves (success or failure). Drives rolling `otp_issue_success_rate`.
+ * @param {boolean} delivered — true when sendOtp completed without error
+ */
+export function recordOtpIssueOutcome(delivered) {
+  pushWindow(windowOtpIssue, Boolean(delivered));
+  const rate = computeOtpIssueRollingSuccessRate();
+  const rq = computeOtpRequestRatesFromCounters();
+  console.log(
+    JSON.stringify({
+      t: new Date().toISOString(),
+      level: 'info',
+      subsystem: 'auth_otp_metrics',
+      event: 'otp_issue_success_rate',
+      otp_issue_success_rate: rate,
+      otp_delivery_success_rate: rate,
+      otp_issue_rate: rq.otp_issue_rate,
+      otp_cooldown_hit_rate: rq.otp_cooldown_hit_rate,
+      windowSampleCount: windowOtpIssue.length,
+    }),
+  );
 }
 
 /**
@@ -241,6 +325,14 @@ export function getOpsMetricsSnapshot() {
       paymentSamples: windowPayment.length,
       fulfillmentSamples: windowFulfillment.length,
       pushSamples: windowPush.length,
+      otpIssueSuccessRate: computeOtpIssueRollingSuccessRate(),
+      otpIssueSamples: windowOtpIssue.length,
+      /** Derived from process-lifetime counters (classified OTP requests only). */
+      otpMetrics: {
+        ...computeOtpRequestRatesFromCounters(),
+        otp_delivery_success_rate: computeOtpIssueRollingSuccessRate(),
+        otp_delivery_window_samples: windowOtpIssue.length,
+      },
     },
   };
 }
@@ -253,6 +345,7 @@ export function resetOpsMetricsForTests() {
   windowPayment.length = 0;
   windowFulfillment.length = 0;
   windowPush.length = 0;
+  windowOtpIssue.length = 0;
 }
 
 export { windowFailureRate };

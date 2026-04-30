@@ -49,10 +49,16 @@ class OtpRequestResult {
   OtpRequestResult({
     required this.ok,
     required this.message,
+    this.hint,
+    this.retryAfterSeconds = 60,
   });
 
   final bool ok;
   final String message;
+  /// Server UX hint (same for all 200 responses — anti-enumeration).
+  final String? hint;
+  /// Cooldown for resend UI; from server `retryAfterSeconds` (same value for all 200s).
+  final int retryAfterSeconds;
 }
 
 class AuthApiException implements Exception {
@@ -244,11 +250,17 @@ class AuthApiService {
       final msg = map['message']?.toString() ?? 'Request failed';
       throw AuthApiException(message: msg, statusCode: res.statusCode);
     }
+    final retryRaw = map['retryAfterSeconds'];
+    final retry = retryRaw is int
+        ? retryRaw
+        : int.tryParse(retryRaw?.toString() ?? '') ?? 60;
     return OtpRequestResult(
       ok: true,
       message:
           map['message'] as String? ??
-          'If the account is eligible, an OTP email will be sent.',
+          'If this account is eligible, a sign-in code will be sent.',
+      hint: map['hint'] as String?,
+      retryAfterSeconds: retry.clamp(1, 3600),
     );
   }
 
@@ -284,11 +296,17 @@ class AuthApiService {
       final msg = map['message']?.toString() ?? 'Request failed';
       throw AuthApiException(message: msg, statusCode: res.statusCode);
     }
+    final retryRaw = map['retryAfterSeconds'];
+    final retry = retryRaw is int
+        ? retryRaw
+        : int.tryParse(retryRaw?.toString() ?? '') ?? 60;
     return OtpRequestResult(
       ok: true,
       message:
           map['message'] as String? ??
-          'If the account is eligible, an OTP email will be sent.',
+          'If this account is eligible, a sign-in code will be sent.',
+      hint: map['hint'] as String?,
+      retryAfterSeconds: retry.clamp(1, 3600),
     );
   }
 

@@ -2,7 +2,12 @@ import { createHash, randomInt } from 'node:crypto';
 
 import { prisma } from '../../db.js';
 import { HttpError } from '../../lib/httpError.js';
-import { bumpCounter } from '../../lib/opsMetrics.js';
+import {
+  bumpCounter,
+  recordOtpIssueOutcome,
+  recordOtpRequestOutcome,
+} from '../../lib/opsMetrics.js';
+import { maybeEmitOtpDeliverySuccessWarn } from '../../lib/opsAlerts.js';
 import { issueTokenPairWithTx } from '../sessionIssuance.js';
 import { env } from '../../config/env.js';
 import { AUTH_ERROR_CODE } from '../../constants/authErrors.js';
@@ -77,12 +82,84 @@ export function generateOtpCode() {
   return String(randomInt(0, 1_000_000)).padStart(6, '0');
 }
 
+/** Same message for every HTTP 200 from request-otp (anti-enumeration). */
+export const PUBLIC_OTP_REQUEST_MESSAGE =
+  'If the account is eligible, an OTP email will be sent.';
+
+/** UX hint — identical for all 200 responses; does not reveal account existence. */
+export const PUBLIC_OTP_REQUEST_HINT = 'if account exists, OTP sent';
+
+/**
+ * Expected shape for tests (retryAfterSeconds comes from env at runtime).
+ * @param {number} retryAfterSeconds
+ */
+export function buildPublicOtpRequestExpectedBody(retryAfterSeconds) {
+  return {
+    success: true,
+    ok: true,
+    message: PUBLIC_OTP_REQUEST_MESSAGE,
+    hint: PUBLIC_OTP_REQUEST_HINT,
+    retryAfterSeconds,
+  };
+}
+
 function publicOtpResponse() {
   return {
     success: true,
     ok: true,
-    message: 'If the account is eligible, an OTP email will be sent.',
+    message: PUBLIC_OTP_REQUEST_MESSAGE,
+    hint: PUBLIC_OTP_REQUEST_HINT,
+    retryAfterSeconds: env.authOtpResendCooldownSec,
   };
+}
+
+/** Development-only structured events (never include raw email). Production: not emitted. */
+export const OTP_DEV_EVENTS = Object.freeze({
+  USER_MISSING_OR_INACTIVE: 'user_missing_or_inactive',
+  RESEND_COOLDOWN_ACTIVE: 'resend_cooldown_active',
+  REQUEST_WINDOW_LIMIT_REACHED: 'request_window_limit_reached',
+  OTP_DELIVERY_FAILED: 'otp_delivery_failed',
+  OTP_ISSUED_CONSOLE: 'otp_issued_console',
+});
+
+/**
+ * @param {string} devEvent One of `OTP_DEV_EVENTS` values.
+ * @param {{ emailHash: string } & Record<string, unknown>} fields
+ */
+function logOtpDevDiagnostics(devEvent, fields) {
+  if (env.nodeEnv !== 'development') return;
+  const { emailHash, ...rest } = fields;
+  console.warn(
+    JSON.stringify({
+      t: new Date().toISOString(),
+      level: 'info',
+      subsystem: 'auth_otp',
+      devDiagnostic: true,
+      dev_event: devEvent,
+      emailHash,
+      ...rest,
+    }),
+  );
+}
+
+/**
+ * Canonical structured `otp_request` line + counters. Anti-enumeration: same HTTP for all branches.
+ * @param {OtpRequestObservedOutcome} outcome
+ * @param {string} emailHash
+ */
+function logOtpRequestObserved(outcome, emailHash) {
+  console.log(
+    JSON.stringify({
+      event: 'otp_request',
+      outcome,
+      emailHash,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+  recordOtpRequestOutcome(outcome);
+  if (env.nodeEnv === 'development') {
+    console.log(`[OTP_DEBUG] outcome=${outcome}`);
+  }
 }
 
 async function cleanupExpiredOtpChallenges(now = new Date()) {
@@ -167,6 +244,7 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
   if (!existingUser || !existingUser.isActive) {
     recordOtpCounter('request_unknown_identity_total');
     logOtpEvent('info', 'otp_request_ignored_unknown_identity', { emailHash });
+    logOtpDevDiagnostics(OTP_DEV_EVENTS.USER_MISSING_OR_INACTIVE, { emailHash });
     return publicOtpResponse();
   }
 
@@ -190,14 +268,21 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
     challenge.requestCount >= env.authOtpMaxRequestsPerWindow
   ) {
     recordOtpCounter('request_window_limit_total');
-    logOtpEvent('warn', 'otp_request_window_limit', { emailHash });
-    // Same public response as success (anti-enumeration); metrics carry ops signal.
+    logOtpRequestObserved(OTP_REQUEST_OUTCOME.WINDOW_LIMIT, emailHash);
+    logOtpDevDiagnostics(OTP_DEV_EVENTS.REQUEST_WINDOW_LIMIT_REACHED, {
+      emailHash,
+      requestCount: challenge?.requestCount ?? null,
+    });
     return publicOtpResponse();
   }
 
   if (challenge?.resendAfter && challenge.resendAfter > now) {
     recordOtpCounter('request_cooldown_total');
-    logOtpEvent('warn', 'otp_request_cooldown', { emailHash });
+    logOtpRequestObserved(OTP_REQUEST_OUTCOME.COOLDOWN, emailHash);
+    logOtpDevDiagnostics(OTP_DEV_EVENTS.RESEND_COOLDOWN_ACTIVE, {
+      emailHash,
+      resendAfterIso: challenge.resendAfter.toISOString(),
+    });
     return publicOtpResponse();
   }
 
@@ -238,7 +323,13 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
 
   try {
     await sendOtp(normalizedEmail, otp);
+    logOtpRequestObserved(OTP_REQUEST_OUTCOME.ISSUED, emailHash);
+    recordOtpIssueOutcome(true);
+    maybeEmitOtpDeliverySuccessWarn();
   } catch (error) {
+    logOtpRequestObserved(OTP_REQUEST_OUTCOME.DELIVERY_FAILED, emailHash);
+    recordOtpIssueOutcome(false);
+    maybeEmitOtpDeliverySuccessWarn();
     await prisma.authOtpChallenge.deleteMany({
       where: {
         email: normalizedEmail,
@@ -250,6 +341,10 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
       emailHash,
       errorCode: error?.code ?? 'unknown',
     });
+    logOtpDevDiagnostics(OTP_DEV_EVENTS.OTP_DELIVERY_FAILED, {
+      emailHash,
+      errorCode: String(error?.code ?? 'unknown'),
+    });
     return publicOtpResponse();
   }
 
@@ -258,6 +353,15 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
     emailHash,
     expiresInMs: otpTtlMs(),
   });
+  if (
+    env.nodeEnv === 'development' &&
+    String(process.env.OTP_TRANSPORT ?? '').trim().toLowerCase() === 'console'
+  ) {
+    logOtpDevDiagnostics(OTP_DEV_EVENTS.OTP_ISSUED_CONSOLE, {
+      emailHash,
+      hint: 'Plain OTP line emitted by emailService sendOTP (this Node process stdout)',
+    });
+  }
   return publicOtpResponse();
 }
 
