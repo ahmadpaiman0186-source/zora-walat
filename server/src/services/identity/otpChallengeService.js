@@ -122,6 +122,15 @@ export const OTP_DEV_EVENTS = Object.freeze({
   OTP_ISSUED_CONSOLE: 'otp_issued_console',
 });
 
+/** Server-only observability outcomes (never in HTTP responses). */
+export const OTP_REQUEST_OUTCOME = Object.freeze({
+  ISSUED: 'issued',
+  USER_MISSING: 'user_missing',
+  COOLDOWN: 'cooldown',
+  WINDOW_LIMIT: 'window_limit',
+  DELIVERY_FAILED: 'delivery_failed',
+});
+
 /**
  * @param {string} devEvent One of `OTP_DEV_EVENTS` values.
  * @param {{ emailHash: string } & Record<string, unknown>} fields
