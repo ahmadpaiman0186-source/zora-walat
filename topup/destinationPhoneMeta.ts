@@ -13,55 +13,19 @@ export type DestinationPhoneMeta = {
   exampleNationalDigits: string;
 };
 
-/** Keys must cover every `DESTINATION_COUNTRIES` code in `catalog/queries.ts`. */
-const BY_CODE: Record<string, DestinationPhoneMeta> = {
-  AF: {
-    dialDigits: '93',
-    nationalPlaceholder: '70 123 4567',
-    exampleNationalDigits: '701234567',
-  },
-  TR: {
-    dialDigits: '90',
-    nationalPlaceholder: '532 123 4567',
-    exampleNationalDigits: '5321234567',
-  },
-  AE: {
-    dialDigits: '971',
-    nationalPlaceholder: '50 123 4567',
-    exampleNationalDigits: '501234567',
-  },
-  SA: {
-    dialDigits: '966',
-    nationalPlaceholder: '50 123 4567',
-    exampleNationalDigits: '501234567',
-  },
-  QA: {
-    dialDigits: '974',
-    nationalPlaceholder: '3312 3456',
-    exampleNationalDigits: '33123456',
-  },
-  KW: {
-    dialDigits: '965',
-    nationalPlaceholder: '5123 4567',
-    exampleNationalDigits: '51234567',
-  },
-  OM: {
-    dialDigits: '968',
-    nationalPlaceholder: '9212 3456',
-    exampleNationalDigits: '92123456',
-  },
-  BH: {
-    dialDigits: '973',
-    nationalPlaceholder: '3612 3456',
-    exampleNationalDigits: '36123456',
-  },
+/** Phase 1: only Afghanistan receiving; aligns with `DESTINATION_COUNTRIES` in `catalog/queries.ts`. */
+const AF_META: DestinationPhoneMeta = {
+  dialDigits: '93',
+  nationalPlaceholder: '70 123 4567',
+  exampleNationalDigits: '701234567',
 };
 
-const FALLBACK: DestinationPhoneMeta = {
-  dialDigits: '1',
-  nationalPlaceholder: '201 555 0123',
-  exampleNationalDigits: '2015550123',
+const BY_CODE: Record<string, DestinationPhoneMeta> = {
+  AF: AF_META,
 };
+
+/** Same as AF — unknown codes should not occur when UI is AF-only; avoids wrong CC if misrouted. */
+const FALLBACK: DestinationPhoneMeta = { ...AF_META };
 
 /** Every destination offered in `DESTINATION_COUNTRIES` must have an entry above (dev check). */
 const REQUIRED_DESTINATION_CODES = ['AF'] as const;

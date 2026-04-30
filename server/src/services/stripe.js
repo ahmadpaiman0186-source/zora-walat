@@ -26,17 +26,20 @@ export function getStripeClient() {
   return stripeSingleton;
 }
 
-/** Safe log line — never prints key material; production omits length/prefix hints. */
+/**
+ * Safe log line — fixed tokens only (`Stripe: OK` | `Stripe: configured` | `Stripe: NOT CONFIGURED`).
+ * Never prints key length, prefix, suffix, or path.
+ */
 export function stripeKeyStatusLog() {
   const key = getValidatedStripeSecretKey();
+
   if (!key) {
-    if (env.nodeEnv === 'production') {
-      return 'Stripe: NOT CONFIGURED';
-    }
-    return 'Stripe: NOT CONFIGURED (set STRIPE_SECRET_KEY in server/.env or server/stripe_secret.key — Restricted keys: rk_test_/rk_live_)';
+    return 'Stripe: NOT CONFIGURED';
   }
+
   if (env.nodeEnv === 'production') {
     return 'Stripe: configured';
   }
-  return `Stripe: OK (length=${key.length}, prefix=${key.slice(0, 12)}…)`;
+
+  return 'Stripe: OK';
 }

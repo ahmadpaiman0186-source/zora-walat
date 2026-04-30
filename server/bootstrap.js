@@ -85,7 +85,7 @@ if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
   const sk = String(process.env.STRIPE_SECRET_KEY ?? '').trim();
   if (!sk) {
     console.error(
-      '❌ STRIPE_SECRET_KEY missing — copy sk_test_… from the Stripe Dashboard into server/.env and restart the server.',
+      '❌ STRIPE_SECRET_KEY missing — add your Stripe test secret from the Dashboard to server/.env and restart the server.',
     );
   }
   if (envLocalLoaded) {

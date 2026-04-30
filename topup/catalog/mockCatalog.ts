@@ -36,7 +36,10 @@ function callingOptions(): CatalogAmountOption[] {
 
 type Op = { key: string; label: string };
 
-/** Mock operators per destination — replace with provider directory later. */
+/**
+ * Mock operators per destination — Phase 1 receiving is Afghanistan only
+ * (`DESTINATION_COUNTRIES` in `queries.ts`); catalog rows are built only from this map.
+ */
 export const OPERATORS_BY_DESTINATION: Record<string, Op[]> = {
   AF: [
     { key: 'awcc', label: 'Afghan Wireless (AWCC)' },
@@ -44,37 +47,6 @@ export const OPERATORS_BY_DESTINATION: Record<string, Op[]> = {
     { key: 'etisalat-af', label: 'Etisalat Afghanistan' },
     { key: 'mtn-af', label: 'MTN Afghanistan' },
     { key: 'salaam', label: 'Salaam' },
-  ],
-  TR: [
-    { key: 'turkcell', label: 'Turkcell' },
-    { key: 'vodafone-tr', label: 'Vodafone Turkey' },
-    { key: 'turk-telekom', label: 'Türk Telekom' },
-  ],
-  AE: [
-    { key: 'etisalat-ae', label: 'Etisalat' },
-    { key: 'du', label: 'du' },
-  ],
-  SA: [
-    { key: 'stc-sa', label: 'STC' },
-    { key: 'mobily', label: 'Mobily' },
-    { key: 'zain-sa', label: 'Zain KSA' },
-  ],
-  QA: [
-    { key: 'ooredoo-qa', label: 'Ooredoo Qatar' },
-    { key: 'vodafone-qa', label: 'Vodafone Qatar' },
-  ],
-  KW: [
-    { key: 'zain-kw', label: 'Zain Kuwait' },
-    { key: 'ooredoo-kw', label: 'Ooredoo Kuwait' },
-    { key: 'stc-kw', label: 'STC Kuwait' },
-  ],
-  OM: [
-    { key: 'omantel', label: 'Omantel' },
-    { key: 'ooredoo-om', label: 'Ooredoo Oman' },
-  ],
-  BH: [
-    { key: 'batelco', label: 'Batelco' },
-    { key: 'zain-bh', label: 'Zain Bahrain' },
   ],
 };
 

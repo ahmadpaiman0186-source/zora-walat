@@ -89,7 +89,7 @@ export async function createCheckoutSession(req, res) {
       clientErrorBody(
         mode === 'production'
           ? 'Stripe key mode is not valid for hosted checkout in this deployment.'
-          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for hosted checkout.',
+          : 'Live Stripe keys are refused when NODE_ENV is not production. Use test-mode keys from the Stripe Dashboard for hosted checkout.',
         'stripe_key_mode_forbidden',
       ),
     );
@@ -797,7 +797,7 @@ export async function createTestPaymentIntent(req, res) {
       clientErrorBody(
         mode === 'production'
           ? 'Stripe key mode is not valid for embedded checkout in this deployment.'
-          : 'Live Stripe keys are refused when NODE_ENV is not production. Use sk_test_… (or rk_test_…) for embedded checkout.',
+          : 'Live Stripe keys are refused when NODE_ENV is not production. Use test-mode keys from the Stripe Dashboard for embedded checkout.',
         'stripe_key_mode_forbidden',
       ),
     );
