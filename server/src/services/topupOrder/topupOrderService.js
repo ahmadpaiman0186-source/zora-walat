@@ -22,6 +22,10 @@ import { env } from '../../config/env.js';
 import { MONEY_PATH_OUTCOME } from '../../constants/moneyPathOutcome.js';
 import { buildWebtopUserFacingOrderFields } from '../../lib/webtopUserFacingStatus.js';
 import { timingSafeEqualUtf8 } from '../../lib/timingSafeString.js';
+import {
+  assertWebTopupMoneyPathComplianceOrThrow,
+  assertWebTopupStoredOrderComplianceOrThrow,
+} from '../../lib/topupComplianceAssert.js';
 
 /** @typedef {import('./topupOrderTypes.js').TopupOrderRecord} TopupOrderRecord */
 
@@ -128,6 +132,12 @@ export async function createTopupOrder(rawInput, idempotencyKey, options = {}) {
     currency: String(rawInput.currency ?? 'usd').toLowerCase(),
   };
 
+  assertWebTopupMoneyPathComplianceOrThrow({
+    originCountry: input.originCountry,
+    destinationCountry: input.destinationCountry,
+    phoneNumber: input.phoneNumber,
+  });
+
   await assertWebTopupOrderCreateRiskOrThrow({
     sessionKey,
     rawInput: {
@@ -191,6 +201,7 @@ export async function assertTopupOrderEligibleForPaymentIntent(orderId, amountCe
     err.code = 'not_found';
     throw err;
   }
+  assertWebTopupStoredOrderComplianceOrThrow(row);
   if (row.paymentStatus !== PAYMENT_STATUS.PENDING) {
     const err = new Error('order_not_pending');
     err.code = 'order_not_pending';

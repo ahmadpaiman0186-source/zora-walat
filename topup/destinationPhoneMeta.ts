@@ -63,17 +63,8 @@ const FALLBACK: DestinationPhoneMeta = {
   exampleNationalDigits: '2015550123',
 };
 
-/** Every receiving country in the catalog must have an entry above (startup check in dev). */
-const REQUIRED_DESTINATION_CODES = [
-  'AF',
-  'TR',
-  'AE',
-  'SA',
-  'QA',
-  'KW',
-  'OM',
-  'BH',
-] as const;
+/** Every destination offered in `DESTINATION_COUNTRIES` must have an entry above (dev check). */
+const REQUIRED_DESTINATION_CODES = ['AF'] as const;
 
 if (process.env.NODE_ENV === 'development') {
   for (const code of REQUIRED_DESTINATION_CODES) {

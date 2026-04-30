@@ -12,16 +12,14 @@ export const ORIGIN_COUNTRIES: CountryOption[] = [
   { code: 'SA', label: 'Saudi Arabia' },
 ];
 
-/** Receive / top-up destinations (sanctioned jurisdictions excluded per denylist). */
+/**
+ * Receiving In (`#country-to` on localhost:3000) — **Afghanistan only**.
+ * Phase 1 money path credits Afghan mobile lines; this list is the single runtime source
+ * for that `<select>` (`components/topup/ZoraWalatTopUp.tsx`). No other ISO codes are offered,
+ * so sanctioned jurisdictions (including IR) cannot appear from this catalog slice.
+ */
 const DESTINATION_COUNTRIES_ALL: CountryOption[] = [
   { code: 'AF', label: 'Afghanistan' },
-  { code: 'TR', label: 'Turkey' },
-  { code: 'AE', label: 'United Arab Emirates' },
-  { code: 'SA', label: 'Saudi Arabia' },
-  { code: 'QA', label: 'Qatar' },
-  { code: 'KW', label: 'Kuwait' },
-  { code: 'OM', label: 'Oman' },
-  { code: 'BH', label: 'Bahrain' },
 ];
 export const DESTINATION_COUNTRIES: CountryOption[] =
   DESTINATION_COUNTRIES_ALL.filter((c) => !isRestrictedDestinationIso(c.code));

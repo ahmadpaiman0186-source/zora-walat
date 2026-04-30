@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { ZodError } from 'zod';
 
+import { HttpError } from '../lib/httpError.js';
 import { getStripeClient } from '../services/stripe.js';
 import {
   getValidatedStripeSecretKey,
@@ -755,6 +756,13 @@ export async function createTestPaymentIntent(req, res) {
         return res
           .status(400)
           .json(clientErrorBody('Amount does not match order', 'topup_order_amount_mismatch'));
+      }
+      if (e instanceof HttpError && e.status === 403 && e.code === 'restricted_region') {
+        return res.status(403).json(
+          clientErrorBody(e.message, 'restricted_region', {
+            moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+          }),
+        );
       }
       throw e;
     }
