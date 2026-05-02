@@ -7,6 +7,9 @@ import 'telecom_catalog_local.dart';
 ///
 /// Implementations should call your BFF or aggregator SDK and map responses to
 /// [AirtimeOffer] / [DataPackageOffer]. The placeholder uses an in-memory catalog.
+///
+/// **Contract:** [fetchAirtimeDenominations] / [fetchDataPackages] must complete with a
+/// non-null list (use `[]` when unavailable); callers must not rely on `null`.
 abstract class TelecomService {
   const TelecomService();
 
@@ -26,15 +29,23 @@ class PlaceholderTelecomService extends TelecomService {
   Future<List<AirtimeOffer>> fetchAirtimeDenominations(
     MobileOperator operator,
   ) async {
-    await Future<void>.delayed(const Duration(milliseconds: 40));
-    return TelecomCatalogLocal.airtimeFor(operator);
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      return TelecomCatalogLocal.airtimeFor(operator);
+    } catch (_) {
+      return <AirtimeOffer>[];
+    }
   }
 
   @override
   Future<List<DataPackageOffer>> fetchDataPackages(
     MobileOperator operator,
   ) async {
-    await Future<void>.delayed(const Duration(milliseconds: 40));
-    return TelecomCatalogLocal.dataFor(operator);
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      return TelecomCatalogLocal.dataFor(operator);
+    } catch (_) {
+      return <DataPackageOffer>[];
+    }
   }
 }

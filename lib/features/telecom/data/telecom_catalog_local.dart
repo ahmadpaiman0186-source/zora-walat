@@ -106,8 +106,8 @@ abstract final class TelecomCatalogLocal {
     }
     final updated = <DataPackageOffer>[];
     for (final p in DataPackagePeriod.values) {
-      final list = byPeriod[p]!;
-      if (list.isEmpty) continue;
+      final list = byPeriod[p];
+      if (list == null || list.isEmpty) continue;
       var bestIdx = 0;
       var bestScore = -1.0;
       for (var i = 0; i < list.length; i++) {

@@ -46,7 +46,13 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
 
   void _goCheckout(DataPackageOffer offer, AppLocalizations l10n) {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final national = AfghanPhoneUtils.normalizeNational(_phoneCtrl.text)!;
+    final national = AfghanPhoneUtils.normalizeNational(_phoneCtrl.text);
+    if (national == null || national.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.phoneValidationInvalid)),
+      );
+      return;
+    }
     final masked = AfghanPhoneUtils.maskForLog(national);
 
     final order = TelecomOrder(
@@ -282,7 +288,8 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              ...sections[p]!.map((offer) {
+                              ...(sections[p] ?? const <DataPackageOffer>[])
+                                  .map((offer) {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: DataPackageTile(
@@ -308,7 +315,11 @@ class _DataPackagesTabState extends State<DataPackagesTab> {
             label: l10n.reviewPayTitle,
             icon: Icons.lock_outline_rounded,
             onPressed: _canReviewPay(l10n)
-                ? () => _goCheckout(_selected!, l10n)
+                ? () {
+                    final sel = _selected;
+                    if (sel == null) return;
+                    _goCheckout(sel, l10n);
+                  }
                 : null,
           ),
         ],

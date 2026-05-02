@@ -20,14 +20,22 @@ class RemoteTelecomService extends TelecomService {
   Future<List<AirtimeOffer>> fetchAirtimeDenominations(
     MobileOperator operator,
   ) async {
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-    return TelecomCatalogLocal.airtimeFor(operator);
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      return TelecomCatalogLocal.airtimeFor(operator);
+    } catch (_) {
+      return <AirtimeOffer>[];
+    }
   }
 
   @override
   Future<List<DataPackageOffer>> fetchDataPackages(
     MobileOperator operator,
   ) async {
-    return TelecomCatalogLocal.dataFor(operator);
+    try {
+      return TelecomCatalogLocal.dataFor(operator);
+    } catch (_) {
+      return <DataPackageOffer>[];
+    }
   }
 }
