@@ -73,8 +73,8 @@ if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
     console.log(
       `[env] OTP_TRANSPORT=${ot || '(unset)'} — ${
         ot === 'console'
-          ? 'verification codes print on this Node process (not the Flutter terminal).'
-          : 'for local OTP in this terminal, set OTP_TRANSPORT=console in server/.env.local'
+          ? 'codes print on this Node process only (not email).'
+          : 'SMTP send path; set OTP_TRANSPORT=console for terminal-only codes in dev.'
       }`,
     );
   }

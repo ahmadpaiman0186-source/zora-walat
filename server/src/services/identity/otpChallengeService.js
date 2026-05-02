@@ -2,6 +2,7 @@ import { createHash, randomInt } from 'node:crypto';
 
 import { prisma } from '../../db.js';
 import { HttpError } from '../../lib/httpError.js';
+import { EmailServiceError } from '../../../services/emailService.js';
 import {
   bumpCounter,
   recordOtpIssueOutcome,
@@ -354,6 +355,24 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
       emailHash,
       errorCode: String(error?.code ?? 'unknown'),
     });
+    const exposeSmtpMisconfiguration =
+      process.env.NODE_ENV !== 'production' ||
+      String(process.env.OTP_EXPOSE_SMTP_ERRORS ?? '')
+        .trim()
+        .toLowerCase() === 'true';
+    if (
+      exposeSmtpMisconfiguration &&
+      error instanceof EmailServiceError &&
+      (error.code === 'email_missing_env' ||
+        error.code === 'email_invalid_port' ||
+        error.code === 'otp_delivery_misconfigured')
+    ) {
+      throw new HttpError(
+        503,
+        'OTP email is not configured. Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS (and valid EMAIL_PORT). Use OTP_TRANSPORT=console only when you want codes in this server log.',
+        { code: 'otp_delivery_misconfigured' },
+      );
+    }
     return publicOtpResponse();
   }
 

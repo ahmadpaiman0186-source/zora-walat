@@ -184,7 +184,7 @@ function normalizeNonEmpty(value, fieldName) {
   return normalized;
 }
 
-function getEmailConfig() {
+export function getEmailConfig() {
   const host = requireEnv('EMAIL_HOST', DEFAULT_EMAIL_HOST);
   const port = parseEmailPort(process.env.EMAIL_PORT);
   const user = requireEnv('EMAIL_USER', DEFAULT_EMAIL_SENDER);
@@ -331,6 +331,91 @@ async function sendEmail({ to, subject, text, html, template }) {
   });
 }
 
+/**
+ * Safe snapshot for startup / verify script — no secrets, no network I/O.
+ * @returns {{
+ *   otpTransport: 'console' | 'email',
+ *   smtpConfigPresent: boolean,
+ *   smtpMissingKeys: string[],
+ *   smtpPortValid: boolean,
+ * }}
+ */
+export function getOtpEmailReadinessSnapshot() {
+  const raw = String(process.env.OTP_TRANSPORT ?? '').trim().toLowerCase();
+  const consoleMode = raw === 'console';
+  /** @type {string[]} */
+  const missing = [];
+  let portParseOk = true;
+  if (!consoleMode) {
+    for (const k of ['EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASS']) {
+      if (!String(process.env[k] ?? '').trim()) missing.push(k);
+    }
+    try {
+      parseEmailPort(process.env.EMAIL_PORT);
+    } catch {
+      missing.push('EMAIL_PORT');
+      portParseOk = false;
+    }
+  }
+  const smtpConfigPresent =
+    consoleMode ||
+    (missing.length === 0 && String(process.env.EMAIL_PASS ?? '').trim() !== '');
+  const smtpPortValid = consoleMode ? true : portParseOk && !missing.includes('EMAIL_PORT');
+  return {
+    otpTransport: consoleMode ? 'console' : 'email',
+    smtpConfigPresent,
+    smtpMissingKeys: [...new Set(missing)],
+    smtpPortValid,
+  };
+}
+
+/**
+ * One-line startup line (exact fields for ops / grep). No secrets.
+ * Call after `server/bootstrap.js` dotenv and from `startApiRuntime` before `listen`.
+ */
+export function logOtpEmailTransportStartup() {
+  if (process.env.NODE_ENV === 'test') return;
+  const s = getOtpEmailReadinessSnapshot();
+  console.log(
+    `[env] otp_transport=${s.otpTransport} smtp_config_present=${s.smtpConfigPresent} smtp_missing_keys=${JSON.stringify(s.smtpMissingKeys)} smtp_port_valid=${s.smtpPortValid}`,
+  );
+}
+
+/**
+ * Nodemailer transport object can be built (uses real auth from env — no logging).
+ * @returns {{ ok: boolean, skipped?: boolean }}
+ */
+export function probeNodemailerTransportConstructs() {
+  const snap = getOtpEmailReadinessSnapshot();
+  if (snap.otpTransport === 'console') {
+    return { ok: true, skipped: true };
+  }
+  if (!snap.smtpConfigPresent || !snap.smtpPortValid) {
+    return { ok: false, skipped: false };
+  }
+  try {
+    const cfg = getEmailConfig();
+    nodemailer.createTransport({
+      host: cfg.host,
+      port: cfg.port,
+      secure: false,
+      requireTLS: true,
+      auth: { user: cfg.user, pass: cfg.pass },
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 20_000,
+      tls: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true,
+        servername: cfg.host,
+      },
+    });
+    return { ok: true, skipped: false };
+  } catch {
+    return { ok: false, skipped: false };
+  }
+}
+
 export async function sendOTP(email, code) {
   const normalizedCode = normalizeNonEmpty(code, 'OTP code');
   if (String(process.env.OTP_TRANSPORT ?? '').trim().toLowerCase() === 'console') {
@@ -344,6 +429,15 @@ export async function sendOTP(email, code) {
     );
     return { messageId: null, accepted: [], rejected: [], response: 'console' };
   }
+
+  const snap = getOtpEmailReadinessSnapshot();
+  if (!snap.smtpConfigPresent || !snap.smtpPortValid) {
+    throw new EmailServiceError(
+      'SMTP configuration is incomplete for email OTP delivery.',
+      { code: 'otp_delivery_misconfigured' },
+    );
+  }
+
   return sendEmail({
     to: email,
     subject: 'Your Zora-Walat verification code',

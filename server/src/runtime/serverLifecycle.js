@@ -41,6 +41,7 @@ import {
 } from './runtimeContext.js';
 import { jwtSecretLooksTrivial } from '../lib/jwtSecretQuality.js';
 import { logCheckoutPricingQuoteRouteProof } from '../lib/expressRouteInventory.js';
+import { logOtpEmailTransportStartup } from '../../services/emailService.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -263,13 +264,14 @@ function logLaunchValidation() {
     webTopupProviderId === PROVIDER_ID.RELOADLY ||
     airtimeProviderId === PROVIDER_ID.RELOADLY;
 
+  const airtimeReloadlySnapshot = getAirtimeReloadlyDiagnosticsSnapshot();
   webTopupLog(undefined, 'info', 'provider_config_validated', {
     webTopupFulfillmentProvider: webTopupProviderId,
     airtimeProvider: airtimeProviderId,
     reloadlyCredentialsPresent:
       !reloadlyAirtimeOrWebtopup || isReloadlyConfigured(),
     reloadlySandboxMode: reloadlyAirtimeOrWebtopup ? env.reloadlySandbox : null,
-    airtimeReloadly: getAirtimeReloadlyDiagnosticsSnapshot(),
+    airtimeReloadly: airtimeReloadlySnapshot,
     launchSubsystems: getLaunchSubsystemSnapshot(),
   });
   if (process.env.NODE_ENV !== 'test') {
@@ -278,6 +280,9 @@ function logLaunchValidation() {
         (reloadlyAirtimeOrWebtopup
           ? ` reloadly_creds=${isReloadlyConfigured() ? 'present' : 'missing'} sandbox=${env.reloadlySandbox}`
           : ''),
+    );
+    console.log(
+      `[startup] phase1_airtime provider=${airtimeReloadlySnapshot.airtimeProvider} reloadly_sandbox=${airtimeReloadlySnapshot.reloadlySandbox} phase1_outbound_enabled=${airtimeReloadlySnapshot.phase1FulfillmentOutboundEnabled} reloadly_http_blocked=${airtimeReloadlySnapshot.reloadlyOutboundHttpBlocked}`,
     );
     logReloadlyEnvQualityWarningsIfDev();
   }
@@ -478,6 +483,9 @@ function attachStdioPipeSurvivalForLongRunningApi() {
 
 export function startApiRuntime() {
   attachStdioPipeSurvivalForLongRunningApi();
+  if (process.env.NODE_ENV !== 'test') {
+    logOtpEmailTransportStartup();
+  }
   const kind = getRuntimeKind();
   if (kind !== RUNTIME_KIND.API) {
     console.error(
