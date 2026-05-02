@@ -62,7 +62,9 @@
     "fortress:concurrency-probe": "node scripts/transaction-fortress-concurrency-probe.mjs",
     "gate:check": "node scripts/gate-check.mjs",
     "gate:check:strict": "node scripts/gate-check.mjs --strict",
-    "gate:check:scale": "node scripts/gate-check.mjs --strict --scale"
+    "gate:check:scale": "node scripts/gate-check.mjs --strict --scale",
+    "doctor:super-system": "node scripts/doctor-super-system.mjs",
+    "repair:local-safe": "node scripts/repair-local-safe.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
