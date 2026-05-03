@@ -26,6 +26,7 @@ import {
   assertWebTopupMoneyPathComplianceOrThrow,
   assertWebTopupStoredOrderComplianceOrThrow,
 } from '../../lib/topupComplianceAssert.js';
+import { mirrorCanonicalWebTopupOrder } from '../canonicalTransactionSync.js';
 
 /** @typedef {import('./topupOrderTypes.js').TopupOrderRecord} TopupOrderRecord */
 
@@ -298,6 +299,10 @@ export async function markTopupOrderPaidFromStripe(
     row.paymentStatus === PAYMENT_STATUS.PAID &&
     row.paymentIntentId === paymentIntentId
   ) {
+    const fresh = await prisma.webTopupOrder.findUnique({ where: { id: orderId } });
+    if (fresh) {
+      await mirrorCanonicalWebTopupOrder(prisma, fresh, undefined);
+    }
     return { order: toPublicTopupOrder(row), markPaidReplay: true };
   }
 

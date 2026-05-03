@@ -33,6 +33,7 @@ import {
 } from './topupProviderCircuit.js';
 import { persistWebTopupRiskAssessment } from '../webtopRiskEngine.js';
 import { evaluateWebTopupFinancialGuardrails } from './webtopFinancialGuardrails.js';
+import { mirrorCanonicalWebTopupOrderById } from '../canonicalTransactionSync.js';
 
 /** @typedef {import('./providers/topupProviderTypes.js').TopupFulfillmentRequest} TopupFulfillmentRequest */
 
@@ -83,6 +84,7 @@ async function saveFulfillmentOutcome(orderId, patch) {
       fulfillmentNextRetryAt: patch.fulfillmentNextRetryAt,
     },
   });
+  await mirrorCanonicalWebTopupOrderById(prisma, orderId, undefined);
 }
 
 function applyMockFailsim(providerId) {

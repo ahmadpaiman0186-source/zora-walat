@@ -12,6 +12,7 @@ import {
 import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
 import { evaluateStripeCheckoutSessionRowIntegrity } from '../lib/paymentCompletionLinkage.js';
+import { mirrorCanonicalPaymentCheckoutById } from './canonicalTransactionSync.js';
 
 const PAYMENT_PRE_SUCCESS = [
   PAYMENT_CHECKOUT_STATUS.INITIATED,
@@ -156,6 +157,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
         });
       }
     }
+    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -230,6 +232,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
         ip: null,
       });
     }
+    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -247,6 +250,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
         orderStatus: row.orderStatus,
       });
     }
+    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -270,6 +274,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
       },
       'phase1 webhook: payment row transition denied (paid path)',
     );
+    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -301,6 +306,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
     emitFortressIdempotencyNoop('CHECKOUT_SESSION_PAID_TRANSITION_RACE', {
       orderIdSuffix: String(raw).slice(-12),
     });
+    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
       checkoutAmountMismatchOrderId,
@@ -367,6 +373,8 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
     ip: null,
   });
   orderIdToScheduleFulfillment = raw;
+
+  await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
 
   return {
     orderIdToScheduleFulfillment,

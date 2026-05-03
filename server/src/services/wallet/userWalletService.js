@@ -20,6 +20,7 @@ import { verifyWalletLedgerBalanceConsistency } from '../../lib/walletLedgerBala
 import { logWalletTopupEvent } from '../../lib/walletTopupStructuredLog.js';
 import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
 import { MONEY_PATH_OUTCOME } from '../../constants/moneyPathOutcome.js';
+import { mirrorCanonicalWalletLedgerEntry } from '../canonicalTransactionSync.js';
 
 /** Set `DEBUG_WALLET_TOPUP=true` for verbose stdout. */
 const debugTopup =
@@ -124,6 +125,12 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
             idempotencyKeySuffix: key.slice(-8),
           });
         }
+        const ledgerReplay = await tx.userWalletLedgerEntry.findFirst({
+          where: { userId, idempotencyKey: key },
+        });
+        if (ledgerReplay) {
+          await mirrorCanonicalWalletLedgerEntry(tx, ledgerReplay, undefined);
+        }
         return {
           idempotentReplay: true,
           moneyPathOutcome: MONEY_PATH_OUTCOME.REPLAYED,
@@ -191,6 +198,11 @@ export async function topupIdempotent(userId, amountUsd, idempotencyKey) {
         },
       });
       if (debugTopup) console.log('BALANCE UPDATED');
+
+      const ledgerRow = await tx.userWalletLedgerEntry.findUniqueOrThrow({
+        where: { referenceId },
+      });
+      await mirrorCanonicalWalletLedgerEntry(tx, ledgerRow, undefined);
 
       return {
         idempotentReplay: false,

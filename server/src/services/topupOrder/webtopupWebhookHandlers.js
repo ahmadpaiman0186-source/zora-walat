@@ -9,6 +9,10 @@ import {
   webTopupLog,
 } from '../../lib/webTopupObservability.js';
 import { recordMoneyPathOpsSignal } from '../../lib/opsMetrics.js';
+import {
+  mirrorCanonicalWebTopupOrder,
+  mirrorCanonicalWebTopupOrderById,
+} from '../canonicalTransactionSync.js';
 
 const TW_ORD = /^tw_ord_[0-9a-f-]{36}$/i;
 
@@ -114,6 +118,12 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log, c
       applied: attachPaid.count >= 1,
       idempotentStripeEventAttach: attachPaid.count === 0,
     });
+    const refreshedPaid = await tx.webTopupOrder.findUnique({
+      where: { id: orderId },
+    });
+    if (refreshedPaid) {
+      await mirrorCanonicalWebTopupOrder(tx, refreshedPaid, log);
+    }
     return { scheduleWebTopupFulfillment: null };
   }
 
@@ -197,6 +207,7 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log, c
       orderIdSuffix: orderId.slice(-8),
       reason: 'amount_mismatch',
     });
+    await mirrorCanonicalWebTopupOrderById(tx, orderId, log);
     return { scheduleWebTopupFulfillment: null };
   }
 
@@ -247,6 +258,10 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log, c
       applied: true,
       idempotent: false,
     });
+    const rFresh = await tx.webTopupOrder.findUnique({ where: { id: orderId } });
+    if (rFresh) {
+      await mirrorCanonicalWebTopupOrder(tx, rFresh, log);
+    }
     return { scheduleWebTopupFulfillment: orderId };
   }
 
@@ -281,6 +296,10 @@ export async function handleWebTopupPaymentIntentSucceeded(tx, event, pi, log, c
       applied: true,
       idempotent: true,
     });
+  }
+  const rTail = await tx.webTopupOrder.findUnique({ where: { id: orderId } });
+  if (rTail) {
+    await mirrorCanonicalWebTopupOrder(tx, rTail, log);
   }
   return { scheduleWebTopupFulfillment: null };
 }
@@ -352,4 +371,7 @@ export async function handleWebTopupPaymentIntentFailed(tx, pi, log) {
     orderIdSuffix: orderId.slice(-8),
     paymentIntentIdSuffix: safeSuffix(pi.id, 10),
   });
+  if (n.count >= 1) {
+    await mirrorCanonicalWebTopupOrderById(tx, orderId, log);
+  }
 }

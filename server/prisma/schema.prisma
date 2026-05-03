@@ -323,6 +323,46 @@ model StripeWebhookEvent {
   receivedAt DateTime @default(now())
 }
 
+/// Source aggregate for canonical transaction mirror (additive Phase 4 engine).
+enum CanonicalTransactionSourceModel {
+  WEBTOPUP
+  PHASE1
+  WALLET
+}
+
+/// Unified lifecycle projection — mirrored from domain tables, not a second SoT for money movement.
+enum CanonicalTransactionPhase {
+  PENDING
+  PAYMENT_INITIATED
+  PAYMENT_CONFIRMED
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+/// DB-backed canonical transaction row — **mirror only**; domain tables remain authoritative.
+/// Rollback: drop table + enums via migration revert (no impact on payments/orders).
+model CanonicalTransaction {
+  id                String                        @id @default(uuid())
+  sourceModel       CanonicalTransactionSourceModel
+  sourceId          String
+  userId            String?
+  amount            Int
+  currency          String                        @default("usd")
+  provider          String?
+  externalPaymentId String?
+  idempotencyKey    String                        @unique
+  phase             CanonicalTransactionPhase
+  createdAt         DateTime                      @default(now())
+  updatedAt         DateTime                      @updatedAt
+
+  @@unique([sourceModel, sourceId])
+  @@index([phase, updatedAt])
+  @@index([externalPaymentId])
+  @@index([userId])
+}
+
 /// Per-user balance for mock wallet — PostgreSQL-backed (multi-instance safe).
 model UserWallet {
   userId          String   @id

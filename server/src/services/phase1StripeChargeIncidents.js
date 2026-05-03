@@ -3,6 +3,7 @@ import { POST_PAYMENT_INCIDENT_MAP_SOURCE } from '../constants/postPaymentIncide
 import { writeOrderAudit } from './orderAuditService.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 import { orchestrateStripeCall } from './reliability/reliabilityOrchestrator.js';
+import { mirrorCanonicalPaymentCheckoutById } from './canonicalTransactionSync.js';
 
 /**
  * @param {unknown} obj Stripe Charge or similar
@@ -84,6 +85,7 @@ export async function applyPhase1ChargeRefunded(tx, charge, eventId) {
     orderIdSuffix: row.id.slice(-10),
     traceId: null,
   });
+  await mirrorCanonicalPaymentCheckoutById(tx, row.id, undefined);
   return { updated: 1, orderId: row.id };
 }
 

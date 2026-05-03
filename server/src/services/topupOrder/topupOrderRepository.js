@@ -8,6 +8,7 @@ import { prisma, Prisma } from '../../db.js';
 import { timingSafeEqualUtf8 } from '../../lib/timingSafeString.js';
 import { FULFILLMENT_STATUS, PAYMENT_STATUS } from '../../domain/topupOrder/statuses.js';
 import { computePhoneAnalyticsHash } from '../topupFulfillment/webtopPhoneAnalytics.js';
+import { mirrorCanonicalWebTopupOrder } from '../canonicalTransactionSync.js';
 
 /** @typedef {import('./topupOrderTypes.js').TopupOrderRecord} TopupOrderRecord */
 
@@ -77,6 +78,7 @@ export async function insertTopupOrder(input, idempotencyKey, payloadHash) {
         err.code = 'idempotency_conflict';
         throw err;
       }
+      await mirrorCanonicalWebTopupOrder(prisma, existing, undefined);
       return {
         record: rowToRecord(existing),
         updateToken: null,
@@ -119,11 +121,12 @@ export async function insertTopupOrder(input, idempotencyKey, payloadHash) {
         updateTokenHash: tokenHash,
       },
     });
+    await mirrorCanonicalWebTopupOrder(prisma, row, undefined);
     return {
-      record: rowToRecord(row),
-      updateToken,
-      idempotentReplay: false,
-    };
+        record: rowToRecord(row),
+        updateToken,
+        idempotentReplay: false,
+      };
   } catch (e) {
     if (
       e instanceof Prisma.PrismaClientKnownRequestError &&
@@ -134,6 +137,7 @@ export async function insertTopupOrder(input, idempotencyKey, payloadHash) {
         where: { idempotencyKey },
       });
       if (raced && raced.payloadHash === payloadHash) {
+        await mirrorCanonicalWebTopupOrder(prisma, raced, undefined);
         return {
           record: rowToRecord(raced),
           updateToken: null,
@@ -191,6 +195,7 @@ export async function updateTopupOrder(id, patch) {
         ...patch,
       },
     });
+    await mirrorCanonicalWebTopupOrder(prisma, row, undefined);
     return rowToRecord(row);
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
@@ -217,6 +222,10 @@ export async function linkTopupOrderPaymentIntent(orderId, paymentIntentId) {
     },
     data: { paymentIntentId },
   });
+  if (n.count === 1) {
+    const row = await prisma.webTopupOrder.findUnique({ where: { id: orderId } });
+    if (row) await mirrorCanonicalWebTopupOrder(prisma, row, undefined);
+  }
   return n.count === 1;
 }
 
@@ -245,6 +254,7 @@ export async function markTopupOrderPaidClientAtomic(
   });
   if (n.count === 1) {
     const row = await prisma.webTopupOrder.findUnique({ where: { id: orderId } });
+    if (row) await mirrorCanonicalWebTopupOrder(prisma, row, undefined);
     return row ? { record: rowToRecord(row), transitioned: true } : null;
   }
   const row = await prisma.webTopupOrder.findUnique({ where: { id: orderId } });
@@ -254,6 +264,7 @@ export async function markTopupOrderPaidClientAtomic(
     row.paymentStatus === PAYMENT_STATUS.PAID &&
     row.paymentIntentId === paymentIntentId
   ) {
+    await mirrorCanonicalWebTopupOrder(prisma, row, undefined);
     return { record: rowToRecord(row), transitioned: false };
   }
   return null;

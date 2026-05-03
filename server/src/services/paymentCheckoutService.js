@@ -2,6 +2,10 @@ import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { prisma } from '../db.js';
 import { buildPricingPolicySnapshotFields } from '../domain/pricing/pricingSnapshotPolicy.js';
+import {
+  mirrorCanonicalPaymentCheckout,
+  mirrorCanonicalPaymentCheckoutById,
+} from './canonicalTransactionSync.js';
 
 /**
  * @param {object} params
@@ -76,7 +80,7 @@ export async function createInitiatedRow({
     source: 'checkout_api',
     phase: 'mobile_topup',
   };
-  return prisma.paymentCheckout.create({
+  const row = await prisma.paymentCheckout.create({
     data: {
       idempotencyKey,
       requestFingerprint: fingerprint,
@@ -122,8 +126,9 @@ export async function createInitiatedRow({
       clientOrigin: clientOrigin ?? null,
       metadata: meta,
     },
-    select: { id: true },
   });
+  await mirrorCanonicalPaymentCheckout(prisma, row, undefined);
+  return { id: row.id };
 }
 
 export async function getCheckoutByIdempotencyKey(idempotencyKey) {
@@ -145,6 +150,7 @@ export async function markCheckoutCreated(
       status: PAYMENT_CHECKOUT_STATUS.CHECKOUT_CREATED,
     },
   });
+  await mirrorCanonicalPaymentCheckoutById(prisma, id, undefined);
 }
 
 export async function markCheckoutFailed(id) {
@@ -157,4 +163,5 @@ export async function markCheckoutFailed(id) {
       failureReason: 'stripe_checkout_session_creation_failed',
     },
   });
+  await mirrorCanonicalPaymentCheckoutById(prisma, id, undefined);
 }

@@ -1,4 +1,5 @@
 import { env } from './env.js';
+import { shouldBlockPhase1ReloadlyOutbound } from '../domain/fulfillment/fulfillmentOutboundPolicy.js';
 import { isReloadlyConfigured } from '../services/reloadlyClient.js';
 
 /**
@@ -26,10 +27,19 @@ export function getAirtimeReloadlyDiagnosticsSnapshot() {
     (v) => String(v ?? '').trim() !== '',
   ).length;
   const reloadlyAirtimeSandboxActive = provider === 'reloadly' && env.reloadlySandbox === true;
+  const phase1FulfillmentOutboundEnabled = env.phase1FulfillmentOutboundEnabled === true;
+  const reloadlyOutboundHttpBlocked = shouldBlockPhase1ReloadlyOutbound(
+    process.env.NODE_ENV,
+    { phase1FulfillmentOutboundEnabled },
+  );
 
   return {
     airtimeProvider: provider,
     reloadlySandbox: env.reloadlySandbox,
+    /** Explicit gate: Reloadly HTTP only runs when true (non-test) — see `fulfillmentOutboundPolicy.js`. */
+    phase1FulfillmentOutboundEnabled,
+    /** When true, `runDeliveryAdapter` returns `fulfillment_outbound_disabled` before any Reloadly call. */
+    reloadlyOutboundHttpBlocked,
     reloadlyCredentialsPresent: credsPresent,
     reloadlyTopupsAudienceConfigured: Boolean(String(env.reloadlyBaseUrl ?? '').trim()),
     mockFallbackExplicitlyAllowed: env.reloadlyAllowUnavailableMockFallback === true,
