@@ -432,6 +432,8 @@ class _AirtimeTabState extends State<AirtimeTab> {
       key: _formKey,
       child: SingleChildScrollView(
         key: const PageStorageKey<String>('airtime_tab_scroll'),
+        // Avoid PrimaryScrollController conflicts with nested hub scroll (web layout collapse).
+        primary: false,
         padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

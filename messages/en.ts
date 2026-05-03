@@ -118,6 +118,7 @@ export const en = {
     refresh: 'Refresh',
   },
   error: {
+    /** @deprecated UI uses `buildStripePublishableKeySetupMessage` / diagnostics */
     configStripe: 'Missing publishable key in environment.',
     configApi:
       'Payment API URL is not configured. Set NEXT_PUBLIC_API_URL for this deployment.',

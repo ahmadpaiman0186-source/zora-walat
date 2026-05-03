@@ -253,11 +253,57 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final phonePretty =
         AfghanPhoneUtils.displayInternational(o.phone.raw);
 
+    final stripeKeyMissing = StripeKeys.publishableKey.trim().isEmpty;
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.reviewPayTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
+          if (stripeKeyMissing)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Material(
+                color: t.colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: t.colorScheme.onErrorContainer,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.stripeKeyMissing,
+                              style: t.textTheme.titleSmall?.copyWith(
+                                color: t.colorScheme.onErrorContainer,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.aboutDevHint,
+                              style: t.textTheme.bodySmall?.copyWith(
+                                color: t.colorScheme.onErrorContainer,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           Text(
             l10n.checkoutYourOrder,
             style: t.textTheme.headlineSmall?.copyWith(

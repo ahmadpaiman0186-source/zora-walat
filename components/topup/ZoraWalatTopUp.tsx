@@ -41,9 +41,11 @@ import {
 
 import { parseApiErrorBody } from '@/lib/api/readApiError';
 import {
+  buildStripePublishableKeySetupMessage,
   describeStripePublishableKey,
+  getEffectiveStripePublishableKey,
   getPublicApiBaseUrl,
-  getStripePublishableKey,
+  getStripePublishableKeyDiagnostics,
 } from '@/lib/env/publicRuntime';
 
 import { OrderSuccessPanel } from './OrderSuccessPanel';
@@ -89,7 +91,9 @@ function productLabel(
 export function ZoraWalatTopUp() {
   const { messages: m, locale } = useLocale();
 
-  const stripePublishableKey = getStripePublishableKey();
+  const stripeDiag = useMemo(() => getStripePublishableKeyDiagnostics(), []);
+  const stripePublishableKey = getEffectiveStripePublishableKey();
+  const stripeEnvFault = !stripeDiag.present || stripeDiag.malformed;
 
   const stripePromise = useMemo(
     () => (stripePublishableKey ? loadStripe(stripePublishableKey) : null),
@@ -99,6 +103,17 @@ export function ZoraWalatTopUp() {
   /** Resolved Stripe.js instance. Passing a Promise into `<Elements>` leaves `elements` null until async resolve, so `<PaymentElement>` never mounts and `onReady` never fires. */
   const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
   const [stripeJsError, setStripeJsError] = useState<string | null>(null);
+
+  /** Env fault: block checkout and drop half‑started payment state (safe reset). */
+  useEffect(() => {
+    if (!stripeEnvFault) return;
+    setClientSecret(null);
+    setFormError(null);
+    setErrorMessage(null);
+    setStep((s) =>
+      s === 'checkout' || s === 'loading_intent' || s === 'error' ? 'idle' : s,
+    );
+  }, [stripeEnvFault]);
 
   useEffect(() => {
     if (!stripePromise) {
@@ -246,7 +261,7 @@ export function ZoraWalatTopUp() {
 
     if (!stripePublishableKey) {
       setStep('error');
-      setErrorMessage(m.error.configStripe);
+      setErrorMessage(buildStripePublishableKeySetupMessage(stripeDiag));
       return;
     }
     if (!stripePromise) {
@@ -423,7 +438,6 @@ export function ZoraWalatTopUp() {
     countryTo,
     digits,
     m.error.configApi,
-    m.error.configStripe,
     m.error.network,
     m.error.requestTimeout,
     m.error.noSecret,
@@ -438,6 +452,7 @@ export function ZoraWalatTopUp() {
     operatorId,
     productType,
     selectedOption,
+    stripeDiag,
     stripeJsError,
     stripePromise,
     stripePublishableKey,
@@ -639,6 +654,7 @@ export function ZoraWalatTopUp() {
     m.error.orderFinalize,
     m.error.paymentRedirectFailed,
     m.error.stripeInit,
+    stripeDiag,
     stripePromise,
     stripePublishableKey,
   ]);
@@ -750,6 +766,12 @@ export function ZoraWalatTopUp() {
             <div className={styles.loadingBanner} role="status">
               <span className={styles.spinner} aria-hidden />
               {m.form.continuing}
+            </div>
+          )}
+
+          {stripeEnvFault && step === 'idle' && (
+            <div className={styles.alertError} role="alert">
+              {buildStripePublishableKeySetupMessage(stripeDiag)}
             </div>
           )}
 
@@ -935,7 +957,13 @@ export function ZoraWalatTopUp() {
                     <button
                       type="button"
                       className={styles.ctaPrimary}
-                      disabled={busyIntent || !formValid}
+                      disabled={
+                        busyIntent ||
+                        !formValid ||
+                        stripeEnvFault ||
+                        !apiBase ||
+                        Boolean(stripeJsError)
+                      }
                       onClick={startPayment}
                     >
                       {busyIntent ? m.form.continuing : m.form.continueCta}
