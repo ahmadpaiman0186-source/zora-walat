@@ -21,6 +21,10 @@ Operational checklist only; not a substitute for your hosting provider’s runbo
 - Use `docs/PHASE1_INCIDENT_PLAYBOOK.md`, `GET /api/admin/ops/phase1-report`, `GET /api/orders/:id/phase1-truth` (owner), and structured `phase1Ops` logs.
 - Re-run reconciliation scripts if your ops process requires it (`scripts/reconciliation-scan.mjs`).
 
+## Database disaster recovery (separate from app rollback)
+
+Application rollback (redeploy) **does not** prove you can restore PostgreSQL from backups. For a rehearsed, ledger-safe procedure — validation via read-only scans and approved scripts only; **never** `UPDATE`/`DELETE` on `LedgerJournalEntry` / `LedgerJournalLine` in real environments — see **`docs/runbooks/BACKUP_RESTORE_DRILL.md`**. L25 tracking: **`docs/L25_BACKUP_RESTORE_READINESS.md`** (gate **NOT CLOSED** until drill evidence exists).
+
 ## Honesty note
 
 Rollback **credibility** depends on DB backups, deploy automation, and measured RTO/RPO — not on this document alone.

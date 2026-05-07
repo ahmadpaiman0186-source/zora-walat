@@ -24,7 +24,7 @@
 | Gate | Status |
 |------|--------|
 | **L1–L24** | **CLOSED** |
-| **Next step** | **L25 —** *(define next gate in tracker)* |
+| **L25 — Production safety foundation (backup / restore / readiness)** | **IN PROGRESS — NOT CLOSED** — Docs/runbooks in repo (`server/docs/runbooks/BACKUP_RESTORE_DRILL.md`, `server/docs/L25_BACKUP_RESTORE_READINESS.md`). **Pending:** staging restore drill + redacted evidence per runbook; external readiness remains governed by **`ZORA_WALAT_EXTERNAL_READINESS_AUDIT_2026-05-06.md`** (do not mark VERIFIED from docs alone). |
 
 ---
 
@@ -56,12 +56,13 @@
 - **L22 — Distributed tracing / correlation — PASS/CLOSED —** Key proof: `server/docs/L22_DISTRIBUTED_TRACING.md`; `getTraceId()` correlation bridge; `l7Observability` / sanitization tests — Risk: OTEL SDK not wired; stdout JSON remains primary signal.
 - **L23 — Auto-scaling infrastructure — PASS/CLOSED —** Key proof: `server/docs/L23_AUTO_SCALING.md`; API/worker split; advisory locks; Redis/scale gates — Risk: Redis/DB still regional SPOFs until infra HA.
 - **L24 — Multi-region failover readiness — PASS/CLOSED —** Key proof: `server/docs/L24_MULTI_REGION_FAILOVER.md` (active-primary + warm-standby; no false active-active claim) — Risk: actual RTO/RPO depend on cloud replication/backups; queue state may be lost on Redis disaster without rehearsal.
+- **L25 — Production safety foundation (backup / restore / readiness) — IN PROGRESS —** Key proof **pending:** staging backup restore drill + redacted evidence (`server/docs/runbooks/BACKUP_RESTORE_DRILL.md`). Docs slice: `server/docs/L25_BACKUP_RESTORE_READINESS.md`. — Risk: backups never rehearsed; treating Redis/BullMQ as durable without reconciliation; **never** `UPDATE`/`DELETE` ledger journal rows for DR “cleanup”.
 
 ---
 
 ## Next step
 
-**L25 —** *(define in internal tracker — e.g. compliance, SLO hardening, or production DR drill.)*
+Complete **L25** staging restore rehearsal and evidence pack; then reconcile **`ZORA_WALAT_EXTERNAL_READINESS_AUDIT_2026-05-06.md`** Postgres backup rows with operator dashboards (repo docs do **not** substitute for VERIFIED). Do **not** advance **L26** until **L25** is PASS/CLOSED per progression rule.
 
 ---
 

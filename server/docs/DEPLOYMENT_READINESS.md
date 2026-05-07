@@ -5,6 +5,7 @@ Use this checklist before scaling traffic (target: high concurrency, multi-repli
 ## 1. Database
 
 - [ ] All Prisma migrations applied: `npm run db:migrate` against production `DATABASE_URL`.
+- [ ] Managed Postgres **automated backups** enabled; retention and region documented per provider policy (see **`docs/runbooks/BACKUP_RESTORE_DRILL.md`**). **L25** closure additionally requires a **staging restore rehearsal** and redacted evidence — **`docs/L25_BACKUP_RESTORE_READINESS.md`** (do not claim DR readiness from CI alone).
 - [ ] Connection pooling configured at the proxy (PgBouncer / Neon / RDS pooler) — avoid unbounded serverless connections.
 - [ ] Fulfillment claim safety: PostgreSQL `pg_advisory_xact_lock(hashtext(order_id))` runs inside the same transaction as `QUEUED` → `PROCESSING` claim (see `fulfillmentOrderPgAdvisoryLock.js`). No duplicate fulfillment for one checkout under concurrent workers.
 
@@ -77,6 +78,7 @@ Use this checklist before scaling traffic (target: high concurrency, multi-repli
 
 - **Application**: redeploy the **previous container/image tag** or revert the release commit; API and **worker** must stay on the **same** build for queue/job compatibility.
 - **Database**: prefer **forward** migrations (`npm run db:migrate` with a fix) over `migrate resolve --rolled-back` unless runbook-tested; keep backups before risky migrations.
+- **Backup / restore rehearsal**: operator drill and evidence pack — **`docs/runbooks/BACKUP_RESTORE_DRILL.md`**; L25 gate status — **`docs/L25_BACKUP_RESTORE_READINESS.md`**. Immutable ledger tables remain **append-only** after restore (no convenience `UPDATE`/`DELETE` on journal rows in prod/staging).
 - **Money-path freeze without redeploy**: set **`PAYMENTS_LOCKDOWN_MODE=true`** and/or **`PRELAUNCH_LOCKDOWN=true`** so new checkouts/top-ups return **503** while webhooks continue (see `env.js`).
 - **Stripe**: Dashboard → disable or rotate webhook endpoint / signing secret during incident response.
 - **Secrets**: rotate leaked keys in the vault first; then redeploy with new env (see **`docs/SECRETS_MANAGEMENT.md`**).
