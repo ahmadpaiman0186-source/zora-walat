@@ -13,9 +13,19 @@ import { normalizeTopupPhone } from '../lib/topupOrderPayload.js';
 import { webTopupLog } from '../lib/webTopupObservability.js';
 import { clientIpKey } from './rateLimits.js';
 
+/**
+ * Runtime abuse threshold overrides via `process.env` are **tests-only** signals:
+ * - `npm test` forces `NODE_ENV=test` via `test/setupTestEnv.mjs`.
+ * - Bare `node --test` does not set `NODE_ENV=test`, but Node's test runner sets
+ *   `NODE_TEST_CONTEXT` (see Node.js test runner); production processes do not.
+ * Production (`NODE_ENV=production`) never reads these ephemeral overrides.
+ */
 function allowWebtopTestEnvOverrides() {
+  if (process.env.NODE_ENV === 'production') return false;
   return (
-    process.env.NODE_ENV === 'test' || process.env.npm_lifecycle_event === 'test'
+    process.env.NODE_ENV === 'test' ||
+    process.env.npm_lifecycle_event === 'test' ||
+    Boolean(process.env.NODE_TEST_CONTEXT)
   );
 }
 

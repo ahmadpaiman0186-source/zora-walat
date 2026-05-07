@@ -32,6 +32,18 @@ export function sanitizePhase1ObservabilityValue(v, depth = 0) {
   const out = {};
   for (const [k, val] of Object.entries(v)) {
     const kl = k.toLowerCase();
+    if (kl === 'emailverified' || kl === 'email_verified' || kl === 'isemailverified') {
+      out[k] = sanitizePhase1ObservabilityValue(val, depth + 1);
+      continue;
+    }
+    if (
+      kl.includes('email') &&
+      kl !== 'emailverified' &&
+      kl !== 'email_verified'
+    ) {
+      out[k] = redactEmailLike(val);
+      continue;
+    }
     if (
       kl.includes('secret') ||
       kl.includes('password') ||
@@ -41,7 +53,9 @@ export function sanitizePhase1ObservabilityValue(v, depth = 0) {
       kl.includes('card') ||
       kl.includes('cvv') ||
       kl === 'stripesignature' ||
-      kl.includes('webhook_secret')
+      kl.includes('webhook_secret') ||
+      kl === 'jwt' ||
+      kl.includes('bearer')
     ) {
       continue;
     }
@@ -67,6 +81,19 @@ function redactPhoneLike(v) {
   const digits = String(v).replace(/\D/g, '');
   if (digits.length < 6) return '[redacted]';
   return `***${digits.slice(-4)}`;
+}
+
+/**
+ * @param {unknown} v
+ */
+function redactEmailLike(v) {
+  if (v == null) return null;
+  if (typeof v !== 'string') return sanitizePhase1ObservabilityValue(v, 0);
+  const s = v.trim();
+  const at = s.indexOf('@');
+  if (at <= 0) return '[redacted_email]';
+  const domain = s.slice(at + 1).slice(0, 120);
+  return domain ? `***@${domain}` : '[redacted_email]';
 }
 
 /**

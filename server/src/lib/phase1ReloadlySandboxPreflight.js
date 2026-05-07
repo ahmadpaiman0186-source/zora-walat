@@ -52,7 +52,7 @@ export function collectPhase1ReloadlySandboxBlockers(order, queuedAttempt) {
 
   const map = env.reloadlyOperatorMap ?? {};
   if (order && typeof order.operatorKey === 'string' && order.operatorKey.trim()) {
-    const key = order.operatorKey.trim();
+    const key = order.operatorKey.trim().toLowerCase();
     const id = map[key];
     if (id == null || String(id).trim() === '') {
       blockers.push(

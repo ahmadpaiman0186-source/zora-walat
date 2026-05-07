@@ -5,6 +5,7 @@ import { validateControlledStripeLiveProofCheckout } from '../src/lib/controlled
 
 const baseEv = {
   controlledStripeLiveProof: true,
+  localControlledStripeLiveProofBypass: false,
   phase1FulfillmentOutboundEnabled: false,
   stripeLiveProofMaxFinalUsdCents: 100,
   stripeLiveProofAllowedRecipients: ['701234567'],
@@ -71,4 +72,44 @@ test('rejects missing operator/recipient pair', () => {
   );
   assert.equal(r.ok, false);
   assert.equal(r.code, 'stripe_live_proof_recipient_required');
+});
+
+test('local bypass skips amount cap and recipient allow-list', () => {
+  const ev = { ...baseEv, localControlledStripeLiveProofBypass: true };
+  const overCap = validateControlledStripeLiveProofCheckout(
+    {
+      finalPriceCents: 9_999_999,
+      recipientNational: '0701234567',
+      hasOperatorAndRecipient: true,
+    },
+    ev,
+  );
+  assert.equal(overCap.ok, true);
+
+  const notListed = validateControlledStripeLiveProofCheckout(
+    {
+      finalPriceCents: 50,
+      recipientNational: '0799999999',
+      hasOperatorAndRecipient: true,
+    },
+    ev,
+  );
+  assert.equal(notListed.ok, true);
+});
+
+test('local bypass still rejects outbound fulfillment enabled', () => {
+  const r = validateControlledStripeLiveProofCheckout(
+    {
+      finalPriceCents: 50,
+      recipientNational: '701234567',
+      hasOperatorAndRecipient: true,
+    },
+    {
+      ...baseEv,
+      localControlledStripeLiveProofBypass: true,
+      phase1FulfillmentOutboundEnabled: true,
+    },
+  );
+  assert.equal(r.ok, false);
+  assert.equal(r.code, 'stripe_live_proof_outbound');
 });

@@ -29,6 +29,34 @@ if (!String(process.env.PRISMA_CONNECTION_LIMIT ?? '').trim()) {
   process.env.PRISMA_CONNECTION_LIMIT = '3';
 }
 
+/**
+ * Unit tests hit `/webhooks/stripe` with signed payloads. CI may omit keys; local `.env.local`
+ * may override with an empty token, a non-whsec placeholder, or a too-short `whsec_` string.
+ * In `NODE_ENV=test` only, normalize to a fixed synthetic signing secret when the effective value
+ * is not usable — same verification semantics as a real whsec (Stripe SDK); never written to disk.
+ */
+const SYNTHETIC_STRIPE_WEBHOOK_SECRET_FOR_UNIT_TESTS =
+  'whsec_test_synthetic_signature_rejection_secret_123456';
+
+function stripeWebhookSecretIsUsableForUnitTests(raw) {
+  const s = String(raw ?? '').trim();
+  if (!s.startsWith('whsec_')) return false;
+  // Align with bootstrap: real CLI secrets are longer; short values are placeholders / typos.
+  if (s.length < 20) return false;
+  return true;
+}
+
+if (!stripeWebhookSecretIsUsableForUnitTests(process.env.STRIPE_WEBHOOK_SECRET)) {
+  process.env.STRIPE_WEBHOOK_SECRET = SYNTHETIC_STRIPE_WEBHOOK_SECRET_FOR_UNIT_TESTS;
+}
+
+/**
+ * Synthetic secret key only when unset (do not clobber operator Dashboard keys from dotenv).
+ */
+if (!String(process.env.STRIPE_SECRET_KEY ?? '').trim()) {
+  process.env.STRIPE_SECRET_KEY = `rk_test_${'k'.repeat(90)}`;
+}
+
 after(async () => {
   try {
     const { resetRedisClientForTests } = await import('../src/services/redisClient.js');

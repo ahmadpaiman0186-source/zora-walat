@@ -4,8 +4,10 @@ import { requireAuth, requireAdmin } from '../middleware/authMiddleware.js';
 import { staffApiErrorBody } from '../lib/staffApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
+  kickAdminOrderFulfillment,
   listAdminOrders,
   inspectAdminOrder,
+  markAdminOrderRecoveryResolved,
   retryPreviewAdminOrder,
 } from '../services/adminOrdersService.js';
 
@@ -73,6 +75,54 @@ router.get(
 
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json(result);
+  }),
+);
+
+router.post(
+  '/orders/:id/kick-fulfillment',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const reason =
+      req.body && typeof req.body.reason === 'string' ? req.body.reason : '';
+    const out = await kickAdminOrderFulfillment({
+      id: req.params.id,
+      actorUserId: req.user.id,
+      reason,
+      ip: req.ip ? String(req.ip).slice(0, 64) : null,
+    });
+    if (!out.ok) {
+      res
+        .status(out.status ?? 400)
+        .json(staffApiErrorBody(out.error, out.status ?? 400));
+      return;
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).json(out);
+  }),
+);
+
+router.post(
+  '/orders/:id/mark-recovery-resolved',
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const reason =
+      req.body && typeof req.body.reason === 'string' ? req.body.reason : '';
+    const out = await markAdminOrderRecoveryResolved({
+      id: req.params.id,
+      actorUserId: req.user.id,
+      reason,
+      ip: req.ip ? String(req.ip).slice(0, 64) : null,
+    });
+    if (!out.ok) {
+      res
+        .status(out.status ?? 400)
+        .json(staffApiErrorBody(out.error, out.status ?? 400));
+      return;
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).json(out);
   }),
 );
 

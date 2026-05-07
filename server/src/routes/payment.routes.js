@@ -9,6 +9,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   apiIpLimiter,
   checkoutAuthenticatedLimiter,
+  checkoutPaymentAttemptLimiter,
+  checkoutPerUserLimiter,
   paymentIntentEndpointLimiter,
   webtopTopupsPerMinuteLimiter,
 } from '../middleware/rateLimits.js';
@@ -24,6 +26,17 @@ import {
   blockMoneyRoutesIfPrelaunch,
   blockPaymentsIfLockdownMode,
 } from '../middleware/prelaunchMoneyBlock.js';
+import {
+  attachAnonymousPricingQuoteTrustContext,
+  requireMoneyPathIdentity,
+} from '../middleware/requireMoneyPathIdentity.js';
+import { requireBasicClientIntegrity } from '../middleware/basicClientIntegrity.js';
+import { validateRequest } from '../middleware/validateRequest.js';
+import {
+  checkoutPricingQuoteEdgeSchema,
+  normalizeCheckoutQuoteEdge,
+  toCheckoutSessionParseInput,
+} from '../validators/checkoutSchema.js';
 
 /**
  * Email verification gate for hosted checkout. In production always enforced.
@@ -70,6 +83,7 @@ router.post(
   paymentIntentEndpointLimiter,
   requireJsonContentType,
   optionalAuthOrRequireOwnerForMoneyAdjacency,
+  requireMoneyPathIdentity({ mode: 'embedded_pi' }),
   asyncHandler(createTestPaymentIntent),
 );
 
@@ -78,9 +92,14 @@ router.post(
   requireJsonContentType,
   requireAuth,
   requireEmailVerifiedForCheckout,
+  requireMoneyPathIdentity({ mode: 'strict_authenticated' }),
   blockMoneyRoutesIfPrelaunch,
   blockPaymentsIfLockdownMode,
+  apiIpLimiter,
+  checkoutPerUserLimiter,
+  checkoutPaymentAttemptLimiter,
   checkoutAuthenticatedLimiter,
+  requireBasicClientIntegrity,
   asyncHandler(createCheckoutSession),
 );
 
@@ -90,6 +109,10 @@ router.post(
   requireJsonContentType,
   blockMoneyRoutesIfPrelaunch,
   apiIpLimiter,
+  attachAnonymousPricingQuoteTrustContext,
+  validateRequest(checkoutPricingQuoteEdgeSchema, (d) =>
+    toCheckoutSessionParseInput(normalizeCheckoutQuoteEdge(d)),
+  ),
   asyncHandler(createCheckoutPricingQuote),
 );
 

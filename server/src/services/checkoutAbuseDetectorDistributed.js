@@ -20,6 +20,9 @@ const MAX_USER_ATTEMPTS_WINDOW_HIGH = 10;
 const MAX_IP_ATTEMPTS_WINDOW_MED = 6;
 const MAX_IP_ATTEMPTS_WINDOW_HIGH = 10;
 
+const MAX_RECIP_IP_MED = 10;
+const MAX_RECIP_IP_HIGH = 16;
+
 const REDIS_PREFIX = 'zora_walat:abuse:checkout:v1';
 
 function nowMs(now) {
@@ -32,6 +35,11 @@ function normIpPart(ip) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '_')
     .slice(0, 80);
+}
+
+function normRecipientDigits(recipientNational) {
+  const d = String(recipientNational ?? '').replace(/\D/g, '');
+  return d.length >= 8 ? d.slice(-15) : '';
 }
 
 function extractIdempotencyKeyFromMember(member) {
@@ -67,6 +75,7 @@ function computeClassificationFromMetrics(metrics) {
     fpFastStreakDevice,
     fpDistinctIdem,
     fpDistinctIdemDevice,
+    recipIpCount = 0,
   } = metrics;
 
   const lenIpMax = Math.max(userIpCount, userIpDeviceCount);
@@ -135,6 +144,14 @@ function computeClassificationFromMetrics(metrics) {
     reasonCodes.push('recipient_amount_operator_replay');
   }
 
+  if (recipIpCount >= MAX_RECIP_IP_HIGH) {
+    severity = 'high';
+    reasonCodes.push('excessive_recipient_ip_replay');
+  } else if (recipIpCount >= MAX_RECIP_IP_MED) {
+    if (severity !== 'high') severity = 'medium';
+    reasonCodes.push('excessive_recipient_ip_replay');
+  }
+
   const recommendedAction =
     severity === 'high'
       ? 'Throttle checkout creation; if payment is still pending, retry by reusing the same Idempotency-Key or wait.'
@@ -158,6 +175,7 @@ function computeClassificationFromMetrics(metrics) {
     `fpFastStreakDevice=${fpFastStreakDevice}`,
     `fpDistinctIdem=${fpDistinctIdem}`,
     `fpDistinctIdemDevice=${fpDistinctIdemDevice}`,
+    `recipIpCount=${recipIpCount}`,
   ].join(' | ');
 
   return {
@@ -176,6 +194,7 @@ async function classifyCheckoutAbuseRedis({
   fingerprint,
   deviceFingerprintHash,
   idempotencyKey,
+  recipientNational = null,
   now,
 }) {
   const t = nowMs(now);
@@ -185,6 +204,10 @@ async function classifyCheckoutAbuseRedis({
 
   const ipPart = normIpPart(ip);
   const devicePart = String(deviceFingerprintHash ?? 'none').slice(0, 64);
+  const recipDigits = normRecipientDigits(recipientNational);
+  const ripKey = recipDigits
+    ? `${REDIS_PREFIX}:rip:${ipPart}:${recipDigits}`
+    : null;
 
   const userIpKey = `${REDIS_PREFIX}:userip:${userId}:${ipPart}`;
   const userIpDeviceKey = `${REDIS_PREFIX}:useripd:${userId}:${ipPart}:${devicePart}`;
@@ -221,6 +244,27 @@ async function classifyCheckoutAbuseRedis({
     await client.sendCommand(['ZADD', fpDeviceKey, String(t), member]);
     await client.sendCommand(['EXPIRE', fpDeviceKey, String(fpTtlSeconds)]);
 
+    if (ripKey) {
+      await client.sendCommand(['ZADD', ripKey, String(t), member]);
+      await client.sendCommand(['EXPIRE', ripKey, String(userTtlSeconds)]);
+    }
+
+    const countCommands = [
+      ['ZCOUNT', userIpKey, String(userMin), String(max)],
+      ['ZCOUNT', userIpDeviceKey, String(userMin), String(max)],
+      ['ZCOUNT', userOnlyKey, String(userMin), String(max)],
+      ['ZCOUNT', ipOnlyKey, String(userMin), String(max)],
+      ['ZCOUNT', fpKey, String(fpMin), String(max)],
+      ['ZCOUNT', fpDeviceKey, String(fpMin), String(max)],
+    ];
+    if (ripKey) {
+      countCommands.push(['ZCOUNT', ripKey, String(userMin), String(max)]);
+    }
+
+    const countResults = await Promise.all(
+      countCommands.map((cmd) => client.sendCommand(cmd)),
+    );
+
     const [
       userIpCount,
       userIpDeviceCount,
@@ -228,34 +272,27 @@ async function classifyCheckoutAbuseRedis({
       ipOnlyCount,
       fpCount,
       fpDeviceCount,
-    ] = await Promise.all([
-      client.sendCommand([
-        'ZCOUNT',
-        userIpKey,
-        String(userMin),
-        String(max),
-      ]),
-      client.sendCommand([
-        'ZCOUNT',
-        userIpDeviceKey,
-        String(userMin),
-        String(max),
-      ]),
-      client.sendCommand([
-        'ZCOUNT',
-        userOnlyKey,
-        String(userMin),
-        String(max),
-      ]),
-      client.sendCommand(['ZCOUNT', ipOnlyKey, String(userMin), String(max)]),
-      client.sendCommand(['ZCOUNT', fpKey, String(fpMin), String(max)]),
-      client.sendCommand([
-        'ZCOUNT',
-        fpDeviceKey,
-        String(fpMin),
-        String(max),
-      ]),
-    ]);
+      recipIpCountRaw,
+    ] = ripKey
+      ? [
+          countResults[0],
+          countResults[1],
+          countResults[2],
+          countResults[3],
+          countResults[4],
+          countResults[5],
+          countResults[6],
+        ]
+      : [
+          countResults[0],
+          countResults[1],
+          countResults[2],
+          countResults[3],
+          countResults[4],
+          countResults[5],
+          '0',
+        ];
+    const recipIpCount = Number(recipIpCountRaw) || 0;
 
     const maxEvents = MAX_ATTEMPTS_WINDOW_HIGH;
 
@@ -324,6 +361,7 @@ async function classifyCheckoutAbuseRedis({
       fpFastStreakDevice,
       fpDistinctIdem,
       fpDistinctIdemDevice,
+      recipIpCount,
     });
   }).then((r) => {
     if (!r.ok) throw new Error(r.error);

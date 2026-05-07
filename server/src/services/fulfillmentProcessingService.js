@@ -49,6 +49,7 @@ import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 import { buildProviderExecutionCorrelationId } from '../lib/providerExecutionCorrelation.js';
 import { logOpsEvent } from '../lib/opsLog.js';
+import { postFulfillmentRevenueLedger } from '../ledger/ledgerService.js';
 import {
   buildMarginSnapshotForDeliveredOrder,
   extractProviderCostUsdCentsFromResponse,
@@ -67,6 +68,7 @@ import {
   reloadlyFulfillmentBaseFields,
 } from '../lib/reloadlyFulfillmentObservability.js';
 import { canOrderProceedToFulfillment } from '../lib/phase1FulfillmentPaymentGate.js';
+import { assertFulfillmentPaymentGateOrThrow } from '../payment/paymentFulfillmentGuard.js';
 import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
 import {
   classifyTransactionFailure,
@@ -80,17 +82,21 @@ import {
   assertCanonicalTransition,
   CANONICAL_ORDER_STATUS,
 } from '../domain/orders/canonicalOrderLifecycle.js';
-import {
-  assertPhase1FulfillmentQueuePreconditions,
-  validateFulfillmentAttemptStatusTransition,
-} from '../domain/orders/phase1TransactionStateMachine.js';
+import { validateFulfillmentAttemptStatusTransition } from '../domain/orders/phase1TransactionStateMachine.js';
 import {
   buildPhase1SafeRefs,
   emitPhase1DuplicateFulfillmentBlocked,
   emitPhase1FulfillmentFailed,
   emitPhase1PaymentSucceededButFulfillmentFailedAlert,
 } from '../infrastructure/logging/phase1Observability.js';
+import {
+  recordMissionFulfillmentFailed,
+  recordMissionFulfillmentStarted,
+  recordMissionFulfillmentSucceeded,
+} from '../infrastructure/observability/phase1MissionObservability.js';
 import { emitOrderTransitionLog } from '../lib/orderTransitionLog.js';
+import { evaluateFulfillmentMoneyGate } from '../lib/financialSafetyGate.js';
+import { acquireFulfillmentOrderPgAdvisoryLock } from '../lib/fulfillmentOrderPgAdvisoryLock.js';
 
 function safeJson(obj) {
   try {
@@ -98,6 +104,86 @@ function safeJson(obj) {
   } catch {
     return '{}';
   }
+}
+
+/**
+ * Mandatory structured fulfillment guard log (FinTech ops / replay audits).
+ * @param {string} orderId
+ * @param {'processing' | 'success' | 'failed'} status
+ * @param {Record<string, unknown>} [extra]
+ */
+function emitFulfillmentProcessingGuard(orderId, status, extra = {}) {
+  console.log(
+    JSON.stringify({
+      fulfillmentProcessingGuard: true,
+      orderId,
+      stage: 'fulfillment',
+      status,
+      t: new Date().toISOString(),
+      traceId: getTraceId() ?? null,
+      ...extra,
+    }),
+  );
+}
+
+/**
+ * Worker redelivery / crash recovery: order already PROCESSING with an in-flight attempt, no
+ * provider reference yet, and idle long enough → one winner refreshes `startedAt` (lease) and may
+ * re-run provider I/O. Losers exit without double-send while the lease is fresh.
+ *
+ * @param {string} orderId
+ * @returns {Promise<{ attemptId: string, attemptNumber: number, fromStuckResume: true } | null>}
+ */
+async function tryAcquireStuckProcessingFulfillmentResume(orderId) {
+  const stuckMs = Math.max(1, Number(env.fulfillmentInlineStuckResumeMs) || 120_000);
+  const cutoff = new Date(Date.now() - stuckMs);
+  const noProvRef = {
+    OR: [{ providerReference: null }, { providerReference: '' }],
+  };
+  const staleOrMissingStarted = {
+    OR: [{ startedAt: null }, { startedAt: { lt: cutoff } }],
+  };
+
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.paymentCheckout.findUnique({
+      where: { id: orderId },
+      select: { orderStatus: true },
+    });
+    if (!order || order.orderStatus !== ORDER_STATUS.PROCESSING) {
+      return null;
+    }
+
+    const attempt = await tx.fulfillmentAttempt.findFirst({
+      where: {
+        orderId,
+        status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        AND: [noProvRef, staleOrMissingStarted],
+      },
+      orderBy: { attemptNumber: 'desc' },
+    });
+    if (!attempt) {
+      return null;
+    }
+
+    const bump = await tx.fulfillmentAttempt.updateMany({
+      where: {
+        id: attempt.id,
+        orderId,
+        status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+        AND: [noProvRef, staleOrMissingStarted],
+      },
+      data: { startedAt: new Date() },
+    });
+    if (bump.count === 0) {
+      return null;
+    }
+
+    return {
+      attemptId: attempt.id,
+      attemptNumber: attempt.attemptNumber,
+      fromStuckResume: /** @type {const} */ (true),
+    };
+  });
 }
 
 function fulfillmentAttemptJsonSuggestsReloadlyTimeoutOrRateLimit(summary) {
@@ -139,13 +225,7 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
       'missing_order',
     );
   }
-  const pre = assertPhase1FulfillmentQueuePreconditions(orderRow);
-  if (!pre.ok) {
-    throw new OrderTransitionError(
-      `Cannot queue fulfillment: ${pre.reason}${pre.detail != null ? ` (${String(pre.detail)})` : ''}`,
-      'fulfillment_queue_precondition_failed',
-    );
-  }
+  assertFulfillmentPaymentGateOrThrow(orderRow);
 
   const already = await tx.fulfillmentAttempt.findFirst({
     where: { orderId, attemptNumber: 1 },
@@ -237,6 +317,10 @@ export async function ensureQueuedFulfillmentAttempt(tx, orderId, log) {
 /**
  * Claim PAID + QUEUED attempt → PROCESSING + order PAID → PROCESSING, then airtime provider adapter.
  * Safe under concurrency: `updateMany` claim is atomic; duplicate workers get count 0.
+ *
+ * Crash / worker redelivery: if the row is already `PROCESSING` with an in-flight attempt, no
+ * `providerReference`, and `startedAt` is older than `env.fulfillmentInlineStuckResumeMs`, a single
+ * worker may reclaim the lease and continue provider I/O (see `tryAcquireStuckProcessingFulfillmentResume`).
  * @param {string} orderId
  * @param {{ traceId?: string | null, bullmqAttemptsMade?: number }} [opts]
  */
@@ -310,7 +394,8 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     );
   }
 
-  const phase1 = await prisma.$transaction(async (tx) => {
+  let phase1 = await prisma.$transaction(async (tx) => {
+    await acquireFulfillmentOrderPgAdvisoryLock(tx, orderId);
     const order = await tx.paymentCheckout.findUnique({
       where: { id: orderId },
     });
@@ -324,6 +409,19 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         orderIdSuffix: String(orderId).slice(-12),
         denial: gate.denial,
         detail: gate.detail ?? null,
+      });
+      return null;
+    }
+
+    const moneyGate = evaluateFulfillmentMoneyGate(order);
+    if (!moneyGate.ok) {
+      emitFortressIdempotencyNoop('FULFILLMENT_GATE_BLOCKS_MONEY_GATE', {
+        orderIdSuffix: String(orderId).slice(-12),
+        denial: moneyGate.code,
+      });
+      emitFulfillmentProcessingGuard(orderId, 'skipped', {
+        reason: 'money_gate',
+        code: moneyGate.code,
       });
       return null;
     }
@@ -413,15 +511,29 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
 
     await writeOrderAudit(tx, {
       event: 'delivery_started',
-      payload: { orderId, attemptId: attempt.id, phase: 'processing' },
+      payload: {
+        orderId,
+        attemptId: attempt.id,
+        phase: 'processing',
+        traceId: getTraceId() ?? null,
+      },
       ip: null,
     });
 
-    return { attemptId: attempt.id, attemptNumber: attempt.attemptNumber };
+    return { attemptId: attempt.id, attemptNumber: attempt.attemptNumber, fromStuckResume: false };
   });
 
   if (!phase1) {
-    return;
+    const resumed = await tryAcquireStuckProcessingFulfillmentResume(orderId);
+    if (!resumed) {
+      return;
+    }
+    phase1 = resumed;
+    emitFulfillmentProcessingGuard(orderId, 'processing', {
+      outcome: 'stuck_processing_resume_acquired',
+      attemptIdSuffix: String(phase1.attemptId).slice(-12),
+      attemptNumber: phase1.attemptNumber,
+    });
   }
 
   {
@@ -459,11 +571,29 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
     orderIdSuffix: String(orderId).slice(-12),
     attemptNumber: phase1.attemptNumber,
   });
+  emitFulfillmentProcessingGuard(orderId, 'processing', {
+    outcome: phase1.fromStuckResume ? 'claimed_stuck_resume' : 'claimed_paid_to_processing',
+    attemptIdSuffix: String(phase1.attemptId).slice(-12),
+    attemptNumber: phase1.attemptNumber,
+  });
+  if (!phase1.fromStuckResume) {
+    recordMissionFulfillmentStarted(orderId, getTraceId() ?? null);
+  }
 
   const orderRow = await prisma.paymentCheckout.findUnique({
     where: { id: orderId },
   });
-  if (!orderRow || orderRow.orderStatus !== ORDER_STATUS.PROCESSING) {
+  if (!orderRow) {
+    return;
+  }
+  if (orderRow.orderStatus === ORDER_STATUS.FULFILLED) {
+    emitFulfillmentProcessingGuard(orderId, 'success', {
+      outcome: 'idempotent_skip_already_delivered',
+      attemptIdSuffix: String(phase1.attemptId).slice(-12),
+    });
+    return;
+  }
+  if (orderRow.orderStatus !== ORDER_STATUS.PROCESSING) {
     return;
   }
 
@@ -479,6 +609,11 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
   let providerResult;
   let providerOutcome = AIRTIME_OUTCOME.FAILURE;
   const tDelivery = Date.now();
+  emitFulfillmentProcessingGuard(orderId, 'processing', {
+    outcome: 'before_provider_io',
+    attemptIdSuffix: String(phase1.attemptId).slice(-12),
+    attemptNumber: phase1.attemptNumber,
+  });
   try {
     providerResult = await executeDelivery(orderRow, {
       attemptId: phase1.attemptId,
@@ -513,6 +648,11 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         retryReason: retry.reason,
         retrySuggestedBackoffMs: retry.suggestedBackoffMs,
       },
+    });
+    emitFulfillmentProcessingGuard(orderId, 'failed', {
+      outcome: 'provider_io_exception',
+      attemptIdSuffix: String(phase1.attemptId).slice(-12),
+      failureCode,
     });
     const providerCorrelationId = buildProviderExecutionCorrelationId(
       phase1.attemptId,
@@ -649,6 +789,17 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
             providerReference: providerResult.providerReference ?? null,
           },
           ip: null,
+        });
+
+        await postFulfillmentRevenueLedger(tx, {
+          orderId: order.id,
+          attemptId: att.id,
+          completedByWebhookEventId: order.completedByWebhookEventId,
+          snapshot: {
+            marginSellUsdCents: snapshot.marginSellUsdCents,
+            marginPaymentFeeUsdCents: snapshot.marginPaymentFeeUsdCents,
+            marginProviderCostUsdCents: snapshot.marginProviderCostUsdCents,
+          },
         });
 
         if (env.loyaltyAutoGrantOnDelivery) {
@@ -881,9 +1032,11 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
               providerResult.failureCode ??
               providerResult.errorKind ??
               'airtime_provider_failure',
+            traceId: getTraceId() ?? null,
           },
           att,
         );
+        recordMissionFulfillmentFailed(orderId, getTraceId() ?? null);
         if (
           typeof order.stripePaymentIntentId === 'string' &&
           order.stripePaymentIntentId.startsWith('pi_')
@@ -994,6 +1147,10 @@ async function processFulfillmentForOrderInner(orderId, innerOpts = {}) {
         outcome: 'ok',
         orderId: marginTelemetry.orderId,
         traceId: getTraceId(),
+      });
+      emitFulfillmentProcessingGuard(marginTelemetry.orderId, 'success', {
+        outcome: 'delivered_persisted',
+        attemptIdSuffix: String(phase1.attemptId).slice(-12),
       });
     }
 
@@ -1234,6 +1391,93 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
 }
 
 /**
+ * Awaitable fulfillment dispatch (queue or inline). Shared by HTTP scheduling and `recovery:scan-once`.
+ *
+ * @param {string} orderId
+ * @param {string | null | undefined} traceId
+ */
+export async function runFulfillmentDispatchForOrder(orderId, traceId) {
+  const row = await prisma.paymentCheckout.findUnique({
+    where: { id: orderId },
+    select: {
+      orderStatus: true,
+      status: true,
+      productType: true,
+      currency: true,
+      amountUsdCents: true,
+      stripePaymentIntentId: true,
+      completedByWebhookEventId: true,
+      postPaymentIncidentStatus: true,
+      trustScore: true,
+      fraudRiskScore: true,
+      providerTruthStatus: true,
+      reconciliationStatus: true,
+    },
+  });
+  const gate = canOrderProceedToFulfillment(row, { lifecycle: 'PAID_ONLY' });
+  if (!gate.ok) {
+    emitFortressIdempotencyNoop('FULFILLMENT_SCHEDULE_SKIPPED_GATE', {
+      orderIdSuffix: String(orderId).slice(-12),
+      denial: gate.denial,
+    });
+    emitPhase1OperationalEvent('fulfillment_schedule_skipped', {
+      traceId: traceId ?? null,
+      orderIdSuffix: String(orderId).slice(-12),
+      denial: gate.denial,
+    });
+    return;
+  }
+  const moneyGate = evaluateFulfillmentMoneyGate(row);
+  if (!moneyGate.ok) {
+    emitFortressIdempotencyNoop('FULFILLMENT_SCHEDULE_SKIPPED_MONEY_GATE', {
+      orderIdSuffix: String(orderId).slice(-12),
+      denial: moneyGate.code,
+      trustScore: row.trustScore,
+      fraudRiskScore: row.fraudRiskScore,
+    });
+    emitPhase1OperationalEvent('fulfillment_schedule_skipped', {
+      traceId: traceId ?? null,
+      orderIdSuffix: String(orderId).slice(-12),
+      denial: moneyGate.code,
+    });
+    return;
+  }
+  if (env.fulfillmentQueueEnabled) {
+    const enq = await enqueuePhase1FulfillmentJob(orderId, traceId);
+    if (enq.ok) {
+      emitPhase1OperationalEvent('fulfillment_enqueued', {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        queueJobId: enq.jobId,
+      });
+      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_QUEUED, {
+        traceId: traceId ?? null,
+        orderIdSuffix: String(orderId).slice(-12),
+        via: 'bullmq',
+        deduped: Boolean(enq.deduped),
+      });
+      return;
+    }
+    emitPhase1OperationalEvent('fulfillment_enqueue_failed_inline_fallback', {
+      traceId: traceId ?? null,
+      orderIdSuffix: String(orderId).slice(-12),
+      reason: enq.reason,
+    });
+  }
+  emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
+    traceId: traceId ?? null,
+    orderIdSuffix: String(orderId).slice(-12),
+    via: 'inline_schedule',
+  });
+  await processFulfillmentForOrder(orderId, { traceId });
+  emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_SUCCESS, {
+    traceId: traceId ?? null,
+    orderIdSuffix: String(orderId).slice(-12),
+    via: 'inline_schedule',
+  });
+}
+
+/**
  * @param {string} orderId
  * @param {string | null | undefined} traceId from HTTP/webhook request when known
  *
@@ -1244,67 +1488,7 @@ export async function processPendingPaidOrders({ limit = 10 } = {}) {
  */
 export function scheduleFulfillmentProcessing(orderId, traceId) {
   const im = setImmediate(() => {
-    (async () => {
-      const row = await prisma.paymentCheckout.findUnique({
-        where: { id: orderId },
-        select: {
-          orderStatus: true,
-          status: true,
-          productType: true,
-          currency: true,
-          amountUsdCents: true,
-          stripePaymentIntentId: true,
-          completedByWebhookEventId: true,
-          postPaymentIncidentStatus: true,
-        },
-      });
-      const gate = canOrderProceedToFulfillment(row, { lifecycle: 'PAID_ONLY' });
-      if (!gate.ok) {
-        emitFortressIdempotencyNoop('FULFILLMENT_SCHEDULE_SKIPPED_GATE', {
-          orderIdSuffix: String(orderId).slice(-12),
-          denial: gate.denial,
-        });
-        emitPhase1OperationalEvent('fulfillment_schedule_skipped', {
-          traceId: traceId ?? null,
-          orderIdSuffix: String(orderId).slice(-12),
-          denial: gate.denial,
-        });
-        return;
-      }
-      if (env.fulfillmentQueueEnabled) {
-        const enq = await enqueuePhase1FulfillmentJob(orderId, traceId);
-        if (enq.ok) {
-          emitPhase1OperationalEvent('fulfillment_enqueued', {
-            traceId: traceId ?? null,
-            orderIdSuffix: String(orderId).slice(-12),
-            queueJobId: enq.jobId,
-          });
-          emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_QUEUED, {
-            traceId: traceId ?? null,
-            orderIdSuffix: String(orderId).slice(-12),
-            via: 'bullmq',
-            deduped: Boolean(enq.deduped),
-          });
-          return;
-        }
-        emitPhase1OperationalEvent('fulfillment_enqueue_failed_inline_fallback', {
-          traceId: traceId ?? null,
-          orderIdSuffix: String(orderId).slice(-12),
-          reason: enq.reason,
-        });
-      }
-      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_DISPATCH_START, {
-        traceId: traceId ?? null,
-        orderIdSuffix: String(orderId).slice(-12),
-        via: 'inline_schedule',
-      });
-      await processFulfillmentForOrder(orderId, { traceId });
-      emitMoneyPathLog(MONEY_PATH_EVENT.FULFILLMENT_SUCCESS, {
-        traceId: traceId ?? null,
-        orderIdSuffix: String(orderId).slice(-12),
-        via: 'inline_schedule',
-      });
-    })().catch((err) => {
+    runFulfillmentDispatchForOrder(orderId, traceId).catch((err) => {
       const failureClass = classifyTransactionFailure(err, {
         surface: 'fulfillment_schedule',
       });

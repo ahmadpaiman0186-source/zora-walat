@@ -1,8 +1,20 @@
+import { randomUUID } from 'node:crypto';
+
 import { prisma } from '../db.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
 import { RECONCILIATION_ISSUE } from '../constants/reconciliationIssue.js';
+import { PAYMENT_FULFILLMENT_RECON_STATUS } from '../constants/paymentFulfillmentReconciliationStatus.js';
 import { env } from '../config/env.js';
+import { LEDGER_EVENT_TYPE } from '../ledger/ledgerService.js';
+import { evaluatePaymentFulfillmentReconciliationRow } from './paymentFulfillmentReconciliationEval.js';
+import { scheduleFulfillmentProcessing } from './fulfillmentProcessingService.js';
+import {
+  bumpMetric,
+  emitResilienceStructuredLog,
+  trackRecoverySample,
+} from '../utils/metrics.js';
+import { emitMoneyPathAlert } from './moneyPathAlertService.js';
 import {
   REFERRAL_STATUS,
   REFERRAL_REWARD_TX_STATUS,
@@ -618,4 +630,123 @@ function finalizeReport(issues, now, t, scanMeta) {
     scan: scanMeta,
     issues,
   };
+}
+
+/**
+ * Idempotent tick: align `PaymentCheckout.reconciliationStatus` with ledger + fulfillment invariants;
+ * optionally re-dispatch fulfillment when safe (never posts ledger; never touches Stripe).
+ *
+ * @param {{ limit?: number, traceId?: string | null }} [opts]
+ * @returns {Promise<{ scanned: number, updated: number, enqueued: number, ms: number }>}
+ */
+export async function runPaymentFulfillmentReconciliationTick(opts = {}) {
+  const t0 = Date.now();
+  const traceId = opts.traceId ?? randomUUID();
+  const limit = Math.min(Math.max(opts.limit ?? 25, 1), 200);
+  const stuckProcessingMs = env.fulfillmentInlineStuckResumeMs;
+
+  const rows = await prisma.paymentCheckout.findMany({
+    where: {
+      orderStatus: { in: [ORDER_STATUS.PAID, ORDER_STATUS.PROCESSING] },
+    },
+    take: limit,
+    orderBy: { updatedAt: 'asc' },
+    include: {
+      fulfillmentAttempts: { where: { attemptNumber: 1 } },
+      ledgerJournalEntries: {
+        where: { eventType: LEDGER_EVENT_TYPE.PAYMENT_CAPTURED },
+        take: 1,
+      },
+    },
+  });
+
+  let updated = 0;
+  let enqueued = 0;
+
+  for (const row of rows) {
+    const evaluated = evaluatePaymentFulfillmentReconciliationRow(row, {
+      stuckProcessingMs,
+      now: new Date(),
+    });
+    const cur = String(
+      row.reconciliationStatus ?? PAYMENT_FULFILLMENT_RECON_STATUS.OK,
+    ).trim();
+
+    let next = evaluated.nextStatus;
+    if (
+      next === PAYMENT_FULFILLMENT_RECON_STATUS.OK &&
+      cur === PAYMENT_FULFILLMENT_RECON_STATUS.REQUIRED
+    ) {
+      next = PAYMENT_FULFILLMENT_RECON_STATUS.REPAIRED;
+    } else if (
+      next === PAYMENT_FULFILLMENT_RECON_STATUS.OK &&
+      cur === PAYMENT_FULFILLMENT_RECON_STATUS.REPAIRED
+    ) {
+      next = PAYMENT_FULFILLMENT_RECON_STATUS.OK;
+    }
+
+    if (next !== cur) {
+      const res = await prisma.paymentCheckout.updateMany({
+        where: { id: row.id, reconciliationStatus: cur },
+        data: { reconciliationStatus: next },
+      });
+      if (res.count > 0) {
+        updated += 1;
+        bumpMetric('reconciliation_status_transitions', 1);
+        emitResilienceStructuredLog({
+          orderId: row.id,
+          checkoutId: row.id,
+          stage: 'reconciliation',
+          status: next,
+          latencyMs: Date.now() - t0,
+          traceId,
+          extra: {
+            previousReconciliationStatus: cur,
+            reasons: evaluated.reasons,
+          },
+        });
+        if (next === PAYMENT_FULFILLMENT_RECON_STATUS.REQUIRED) {
+          bumpMetric('reconciliation_required_total', 1);
+        }
+        if (evaluated.reasons.includes('missing_payment_captured_ledger')) {
+          emitMoneyPathAlert('critical', 'missing_ledger', {
+            orderId: row.id,
+            traceId,
+            extra: { reasons: evaluated.reasons },
+          });
+        }
+        if (
+          evaluated.reasons.includes(
+            'processing_without_provider_reference_beyond_threshold',
+          )
+        ) {
+          emitMoneyPathAlert('warn', 'stuck_processing_over_threshold', {
+            orderId: row.id,
+            traceId,
+            extra: { reasons: evaluated.reasons },
+          });
+        }
+      }
+    }
+
+    if (evaluated.enqueueFulfillment) {
+      scheduleFulfillmentProcessing(row.id, traceId);
+      enqueued += 1;
+      trackRecoverySample(true);
+    }
+  }
+
+  emitResilienceStructuredLog({
+    stage: 'reconciliation',
+    status: 'tick_complete',
+    latencyMs: Date.now() - t0,
+    traceId,
+    extra: {
+      scanned: rows.length,
+      updated,
+      enqueued,
+    },
+  });
+
+  return { scanned: rows.length, updated, enqueued, ms: Date.now() - t0 };
 }

@@ -253,14 +253,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final phonePretty =
         AfghanPhoneUtils.displayInternational(o.phone.raw);
 
-    final stripeKeyMissing = StripeKeys.publishableKey.trim().isEmpty;
+    final stripeKeyMissing = !StripeKeys.isPublishableKeyConfigured;
+    final showStripePkReleaseWarning = stripeKeyMissing && kReleaseMode;
+    final showStripePkDevInfo = stripeKeyMissing && !kReleaseMode;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.reviewPayTitle)),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
-          if (stripeKeyMissing)
+          if (showStripePkReleaseWarning)
             Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Material(
@@ -293,6 +295,50 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               l10n.aboutDevHint,
                               style: t.textTheme.bodySmall?.copyWith(
                                 color: t.colorScheme.onErrorContainer,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (showStripePkDevInfo)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Material(
+                color: t.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(14),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        color: t.colorScheme.primary,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.stripePublishableKeyDevBannerTitle,
+                              style: t.textTheme.titleSmall?.copyWith(
+                                color: t.colorScheme.onSurface,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.stripePublishableKeyDevBannerBody,
+                              style: t.textTheme.bodySmall?.copyWith(
+                                color: t.colorScheme.onSurfaceVariant,
                                 height: 1.4,
                               ),
                             ),
@@ -643,15 +689,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  StripeKeys.publishableKey.trim().isEmpty
-                      ? l10n.stripeKeyMissing
+                  !StripeKeys.isPublishableKeyConfigured
+                      ? (kReleaseMode
+                          ? l10n.stripeKeyMissing
+                          : l10n.stripePublishableKeyDevStripeSectionNote)
                       : l10n.checkoutPaymentSecureNote,
                   style: t.textTheme.bodySmall?.copyWith(
                     color: t.colorScheme.outline,
                     height: 1.45,
                   ),
                 ),
-                if (StripeKeys.publishableKey.trim().isNotEmpty) ...[
+                if (StripeKeys.isPublishableKeyConfigured) ...[
                   const SizedBox(height: 12),
                   Text(
                     l10n.checkoutTrustCallout,

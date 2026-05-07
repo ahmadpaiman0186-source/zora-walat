@@ -28,6 +28,11 @@ const MAX_USER_ATTEMPTS_WINDOW_HIGH = 10;
 const MAX_IP_ATTEMPTS_WINDOW_MED = 6;
 const MAX_IP_ATTEMPTS_WINDOW_HIGH = 10;
 
+/** Same recipient + client IP, many distinct checkouts (multi-account / scripted probing). */
+const RECIP_IP_WINDOW_MS = WINDOW_MS;
+const MAX_RECIP_IP_MED = 10;
+const MAX_RECIP_IP_HIGH = 16;
+
 /**
  * @typedef {{ t: number, idem: string }} Event
  * @typedef {{ events: Event[] }} Track
@@ -75,6 +80,7 @@ function computeFastGapStreak(events) {
  * @param {string} p.ip
  * @param {string} p.fingerprint
  * @param {string} p.idempotencyKey
+ * @param {string | null} [p.recipientNational] E.164 national digits tail (e.g. Afghan MSISDN)
  * @param {Date} p.now
  * @returns {{
  *   severity: 'low'|'medium'|'high',
@@ -83,11 +89,17 @@ function computeFastGapStreak(events) {
  *   riskLevel: 'low'|'medium'|'high'
  * }}
  */
+function normRecipientDigits(recipientNational) {
+  const d = String(recipientNational ?? '').replace(/\D/g, '');
+  return d.length >= 8 ? d.slice(-15) : '';
+}
+
 export function classifyCheckoutAbuse({
   userId,
   ip,
   fingerprint,
   idempotencyKey,
+  recipientNational = null,
   now,
 }) {
   const t = nowMs(now);
@@ -111,6 +123,16 @@ export function classifyCheckoutAbuse({
   userOnlyTrack.events.push({ t, idem: idempotencyKey });
   ipOnlyTrack.events.push({ t, idem: idempotencyKey });
   fpTrack.events.push({ t, idem: idempotencyKey });
+
+  const recipTail = normRecipientDigits(recipientNational);
+  let ripEvents = [];
+  if (recipTail) {
+    const ripKey = `rip:${ip}|r:${recipTail}`;
+    const ripTrack = getTrack(ripKey);
+    ripTrack.events = pruneEvents(ripTrack.events, t - RECIP_IP_WINDOW_MS);
+    ripTrack.events.push({ t, idem: idempotencyKey });
+    ripEvents = ripTrack.events;
+  }
 
   const userEvents = userTrack.events;
   const userOnlyEvents = userOnlyTrack.events;
@@ -187,6 +209,14 @@ export function classifyCheckoutAbuse({
     reasonCodes.push('recipient_amount_operator_replay');
   }
 
+  if (recipTail && ripEvents.length >= MAX_RECIP_IP_HIGH) {
+    severity = 'high';
+    reasonCodes.push('excessive_recipient_ip_replay');
+  } else if (recipTail && ripEvents.length >= MAX_RECIP_IP_MED) {
+    if (severity !== 'high') severity = 'medium';
+    reasonCodes.push('excessive_recipient_ip_replay');
+  }
+
   const recommendedAction =
     severity === 'high'
       ? 'Throttle checkout creation; if payment is still pending, retry by reusing the same Idempotency-Key or wait.'
@@ -202,6 +232,7 @@ export function classifyCheckoutAbuse({
     `userOnlyEvents=${userOnlyEvents.length}`,
     `ipOnlyEvents=${ipOnlyEvents.length}`,
     `fingerprintEvents=${fpEvents.length}`,
+    `recipientIpEvents=${ripEvents.length}`,
   ].join(' | ');
 
   return {

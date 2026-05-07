@@ -1,13 +1,37 @@
 import { env } from '../../config/env.js';
+import { bumpCounter } from '../../lib/opsMetrics.js';
+import { emitPhase1OperationalEvent } from '../../lib/phase1OperationalEvents.js';
 import { AIRTIME_OUTCOME, AIRTIME_ERROR_KIND } from '../fulfillment/airtimeFulfillmentResult.js';
 import { executeAirtimeFulfillment } from '../fulfillment/executeAirtimeFulfillment.js';
 import { fulfillMockAirtime } from '../fulfillment/mockAirtimeProvider.js';
 import { fulfillReloadlyDelivery } from '../../services/reloadlyClient.js';
 import { shouldBlockPhase1ReloadlyOutbound } from '../fulfillment/fulfillmentOutboundPolicy.js';
+import {
+  explicitReloadlyMockFallbackEnabled,
+  liveSimulationProofAllowsOutboundMock,
+  reloadlyOutcomeEligibleForUnavailableMockFallback,
+} from './providerFallbackPolicy.js';
 
 /** Mock fallback when Reloadly is selected but unavailable — explicit env only (never NODE_ENV). */
 function allowReloadlyUnavailableMockFallback() {
-  return env.reloadlyAllowUnavailableMockFallback === true;
+  return explicitReloadlyMockFallbackEnabled(env);
+}
+
+/** Controlled local proof: outbound is pinned off, so adapter must not leave orders stuck in PROCESSING. */
+function allowMockWhenReloadlyOutboundBlocked() {
+  return (
+    allowReloadlyUnavailableMockFallback() || liveSimulationProofAllowsOutboundMock(process.env)
+  );
+}
+
+function recordMockFallback(orderId, reason) {
+  bumpCounter('fulfillment_provider_reloadly_mock_fallback_total');
+  emitPhase1OperationalEvent('provider_mock_fallback', {
+    orderIdSuffix: String(orderId ?? '').slice(-12),
+    primaryProvider: 'reloadly',
+    secondaryProvider: 'mock',
+    fallbackReason: String(reason ?? '').slice(0, 120),
+  });
 }
 
 /**
@@ -31,6 +55,14 @@ export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
         phase1FulfillmentOutboundEnabled: env.phase1FulfillmentOutboundEnabled === true,
       })
     ) {
+      if (allowMockWhenReloadlyOutboundBlocked()) {
+        recordMockFallback(order.id, 'fulfillment_outbound_disabled');
+        return fulfillMockAirtime(order, {
+          ...fulfillmentCtx,
+          fallbackFrom: 'reloadly',
+          fallbackReason: 'fulfillment_outbound_disabled',
+        });
+      }
       return {
         outcome: AIRTIME_OUTCOME.UNAVAILABLE,
         providerKey: 'reloadly',
@@ -49,8 +81,9 @@ export async function runDeliveryAdapter(order, fulfillmentCtx = {}) {
     if (r.outcome === AIRTIME_OUTCOME.SUCCESS) {
       return r;
     }
-    if (r.outcome === AIRTIME_OUTCOME.UNAVAILABLE) {
+    if (reloadlyOutcomeEligibleForUnavailableMockFallback(r.outcome)) {
       if (allowReloadlyUnavailableMockFallback()) {
+        recordMockFallback(order.id, r.failureCode ?? 'reloadly_unavailable');
         return fulfillMockAirtime(order, {
           ...fulfillmentCtx,
           fallbackFrom: 'reloadly',

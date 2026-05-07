@@ -142,6 +142,23 @@ export function applyIntegrationTestDatabaseEnv() {
   }
 
   /**
+   * Hosted checkout (`isStripeKeyAllowedForHostedCheckout`) refuses `sk_live_*` / `rk_live_*` unless
+   * `NODE_ENV=production`. Integration forces `NODE_ENV=test`, so a live key in `.env.local` yields
+   * false 403 `stripe_key_mode_forbidden` in `verifiedMoneyPath`. Optional `STRIPE_SECRET_KEY_INTEGRATION`
+   * (typically `sk_test_*`) replaces `STRIPE_SECRET_KEY` for this process only when the primary key is live.
+   */
+  const stripePrimary = String(process.env.STRIPE_SECRET_KEY ?? '').trim();
+  const stripeIntegration = String(
+    process.env.STRIPE_SECRET_KEY_INTEGRATION ?? '',
+  ).trim();
+  if (
+    stripeIntegration &&
+    (stripePrimary.startsWith('sk_live_') || stripePrimary.startsWith('rk_live_'))
+  ) {
+    process.env.STRIPE_SECRET_KEY = stripeIntegration;
+  }
+
+  /**
    * Match `test/setupTestEnv.mjs`: after dotenv, `server/.env` may set `NODE_ENV=development`.
    * `env.allowUnverifiedCheckoutInDev` would then skip `requireEmailVerified` on hosted checkout,
    * causing false negatives in `verifiedMoneyPath` (200 vs expected 403). Integration preload runs

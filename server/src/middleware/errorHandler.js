@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
 import { HttpError } from '../lib/httpError.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
+import { emitL7MoneyPathSpan } from '../infrastructure/logging/l7MoneyPathObservability.js';
 
 /** express-rate-limit throws this name when validations fail (e.g. undefined req.ip). */
 function isRateLimitValidationError(err) {
@@ -37,6 +38,17 @@ export function errorHandler(err, req, res, _next) {
         },
         'http_error',
       );
+      emitL7MoneyPathSpan({
+        surface: 'api',
+        stage: 'http_error',
+        outcome: 'error',
+        traceId: req.traceId ?? null,
+        refs: {
+          status: err.status,
+          code: err.code != null ? String(err.code) : null,
+          operationalClass: err.operationalClass,
+        },
+      });
     }
     const body = clientErrorBody(
       err.message,
@@ -99,9 +111,20 @@ export function errorHandler(err, req, res, _next) {
         code: err.code,
         message: err.message,
         contractCode: API_CONTRACT_CODE.PAYMENT_PROVIDER_ERROR,
+        traceId: req.traceId ?? null,
       },
       'stripe error',
     );
+    emitL7MoneyPathSpan({
+      surface: 'api',
+      stage: 'stripe_provider_error',
+      outcome: 'error',
+      traceId: req.traceId ?? null,
+      refs: {
+        stripeType: typeof err.type === 'string' ? err.type : null,
+        stripeCode: err.code != null ? String(err.code) : null,
+      },
+    });
     if (env.nodeEnv === 'production') {
       return res
         .status(status)
@@ -122,10 +145,25 @@ export function errorHandler(err, req, res, _next) {
   }
 
   const msg = err?.message || String(err);
+  emitL7MoneyPathSpan({
+    surface: 'api',
+    stage: 'unhandled_error',
+    outcome: 'error',
+    traceId: req.traceId ?? null,
+    refs: {
+      errorName: err?.name != null ? String(err.name) : 'Error',
+    },
+  });
   if (env.prelaunchLockdown) {
-    req.log?.error?.({ securityEvent: 'unhandled_error' }, 'unhandled error');
+    req.log?.error?.(
+      { securityEvent: 'unhandled_error', traceId: req.traceId ?? null },
+      'unhandled error',
+    );
   } else {
-    req.log?.error?.({ err: { message: msg } }, 'unhandled error');
+    req.log?.error?.(
+      { err: { message: msg }, traceId: req.traceId ?? null },
+      'unhandled error',
+    );
   }
   /** Local debugging: log safe summary (no stack by default — avoids noisy dumps). */
   if (env.nodeEnv !== 'production') {

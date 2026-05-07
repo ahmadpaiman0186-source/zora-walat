@@ -5,11 +5,13 @@ import pino from 'pino';
 import pinoHttp from 'pino-http';
 
 import { env } from './config/env.js';
+import { mountBullBoardIfConfigured } from './config/bullBoardMount.js';
 import { PINO_HTTP_REDACT_PATHS } from './config/loggingRedact.js';
 import { getCorsAllowDecision } from './lib/corsPolicy.js';
 import { logCorsRejected } from './middleware/securityObservability.js';
 import { corsRequestDebugLog } from './middleware/corsRequestDebugLog.js';
 import { blockRestrictedCountries } from './middleware/blockRestrictedCountries.js';
+import { apiEdgeLimiter } from './middleware/apiLimiter.js';
 import { attachMinimalRequestLogger } from './middleware/minimalRequestLogger.js';
 import { requestContextMiddleware } from './middleware/requestContextMiddleware.js';
 import healthRoutes from './routes/health.routes.js';
@@ -23,6 +25,7 @@ import reconciliationRoutes from './routes/reconciliation.routes.js';
 import webTopupFulfillmentAdminRoutes from './routes/webTopupFulfillmentAdmin.routes.js';
 import webtopupAdminControlRoutes from './routes/webtopupAdminControl.routes.js';
 import adminOrdersRoutes from './routes/adminOrders.routes.js';
+import softLaunchAdminRoutes from './routes/softLaunchAdmin.routes.js';
 import processingManualRoutes from './routes/processingManual.routes.js';
 import transactionsRoutes from './routes/transactions.routes.js';
 import loyaltyRoutes from './routes/loyalty.routes.js';
@@ -33,7 +36,9 @@ import opsRoutes from './routes/ops.routes.js';
 import marginRoutes from './routes/margin.routes.js';
 import referralRoutes from './routes/referral.routes.js';
 import supportRoutes from './routes/support.routes.js';
+import reliabilityAdminRoutes from './routes/reliabilityAdmin.routes.js';
 import internalWebtopupLogsRoutes from './routes/internalWebtopupLogs.routes.js';
+import internalPhase1MissionMetricsRoutes from './routes/internalPhase1MissionMetrics.routes.js';
 import fulfillmentDlqRoutes from './routes/fulfillmentDlq.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -129,6 +134,11 @@ export function createApp() {
         'X-Admin-Secret',
         // TEMP TEST MODE (dev checkout bypass) — remove before production if unused
         'X-ZW-Dev-Checkout',
+        /** Client integrity / anti-bot (optional production gate). */
+        'X-ZW-Client',
+        'Sec-Fetch-Site',
+        'Sec-Fetch-Mode',
+        'Sec-Fetch-Dest',
       ],
       exposedHeaders: ['X-Trace-Id', 'X-Request-Id'],
     }),
@@ -144,6 +154,10 @@ export function createApp() {
       pinoHttp({
         logger,
         redact: PINO_HTTP_REDACT_PATHS,
+        customProps: (req) => ({
+          traceId: req.traceId ?? null,
+          requestId: req.requestId ?? null,
+        }),
       }),
     );
   }
@@ -167,6 +181,9 @@ export function createApp() {
 
   /** Sanctioned / restricted region guard (runs after JSON parse; skips webhooks + health). */
   app.use(blockRestrictedCountries);
+
+  /** Layer 1: coarse /api rate limit (webhooks mount outside `/api`). */
+  app.use('/api', apiEdgeLimiter);
 
   /** Prefix-only liveness (`GET /api/health`); `POST /api/checkout-pricing-quote` comes from `paymentRoutes` below. */
   app.use('/api', apiRoutes);
@@ -198,12 +215,16 @@ export function createApp() {
   app.use('/api/admin/ops', apiIpLimiter, opsRoutes);
   app.use('/api/admin', apiIpLimiter, marginRoutes);
   app.use('/api/admin', apiIpLimiter, supportRoutes);
+  app.use('/api/admin', apiIpLimiter, reliabilityAdminRoutes);
 
   /** Internal structured webtop observation buffer (token-gated; not for public clients). */
   app.use('/internal', apiIpLimiter, internalWebtopupLogsRoutes);
+  app.use('/internal', apiIpLimiter, internalPhase1MissionMetricsRoutes);
 
   /** Dev/local: Stripe success/cancel when client base is this API (see CLIENT_URL / Origin). */
   mountCheckoutReturnRoutesIfNonProduction(app);
+
+  mountBullBoardIfConfigured(app);
 
   app.use(notFound);
   app.use(errorHandler);

@@ -22,7 +22,7 @@ if (!String(process.env.STRIPE_WEBHOOK_SECRET ?? '').trim()) {
   process.env.STRIPE_WEBHOOK_SECRET = `whsec_${'c'.repeat(32)}`;
 }
 if (!String(process.env.STRIPE_SECRET_KEY ?? '').trim()) {
-  process.env.STRIPE_SECRET_KEY = `sk_test_${'d'.repeat(100)}`;
+  process.env.STRIPE_SECRET_KEY = `rk_test_${'d'.repeat(100)}`;
 }
 if (!String(process.env.AIRTIME_PROVIDER ?? '').trim()) {
   process.env.AIRTIME_PROVIDER = 'mock';

@@ -1,5 +1,5 @@
 /**
- * HTTP-level Stripe webhook chaos: signed payloads through real Express `/webhooks/stripe`
+ * HTTP-level Stripe webhook chaos (incl. L11 reliability scenarios): signed payloads through real Express `/webhooks/stripe`
  * (signature verification, Prisma transaction, idempotency, async fee + fulfillment scheduling).
  *
  * Run via `npm run test:integration` (uses registerChaosWebhookEnv preload) or:
@@ -21,6 +21,7 @@ import { POST_PAYMENT_INCIDENT_MAP_SOURCE } from '../../src/constants/postPaymen
 import { FINANCIAL_ANOMALY } from '../../src/constants/financialAnomaly.js';
 import { createApp } from '../../src/app.js';
 import { getCanonicalPhase1OrderForUser } from '../../src/services/canonicalPhase1OrderService.js';
+import { LEDGER_EVENT_TYPE } from '../../src/ledger/ledgerService.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for webhook chaos integration tests');
@@ -47,30 +48,8 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    if (orderIds.length > 0) {
-      await prisma.loyaltyPointsGrant.deleteMany({
-        where: { paymentCheckoutId: { in: orderIds } },
-      });
-    }
-    if (userIds.length > 0) {
-      await prisma.loyaltyLedger.deleteMany({ where: { userId: { in: userIds } } });
-    }
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    await prisma.stripeWebhookEvent.deleteMany({
-      where: {
-        id: {
-          startsWith: 'evt_http_chaos_',
-        },
-      },
-    });
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    // Ledger journal entries are immutable and reference PaymentCheckout/FulfillmentAttempt with RESTRICT.
+    // Do not attempt DB row deletion in teardown; rely on unique IDs + isolated integration DB.
     userIds.length = 0;
     orderIds.length = 0;
   });
@@ -120,11 +99,15 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
    */
   function signAndPost(type, obj, eventId) {
     const id = eventId ?? `evt_http_chaos_${randomUUID()}`;
+    const sessionObj =
+      type === 'checkout.session.completed' && obj && typeof obj === 'object'
+        ? { mode: 'payment', payment_status: 'paid', ...obj }
+        : obj;
     const payload = JSON.stringify({
       id,
       object: 'event',
       type,
-      data: { object: obj },
+      data: { object: sessionObj },
     });
     const header = Stripe.webhooks.generateTestHeaderString({
       payload,
@@ -234,6 +217,156 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
     assert.equal(row?.stripeFeeActualUsdCents, 59);
     const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
     assert.equal(nAtt, 1);
+  });
+
+  it('invalid webhook signature returns 400; payment stays PENDING; no StripeWebhookEvent row', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+    const piId = `pi_http_bad_sig_${randomUUID().slice(0, 8)}`;
+    const eventId = `evt_http_chaos_bad_${randomUUID().slice(0, 8)}`;
+    const payload = JSON.stringify({
+      id: eventId,
+      object: 'event',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: `cs_http_bad_${randomUUID().slice(0, 8)}`,
+          object: 'checkout.session',
+          amount_total: 1000,
+          currency: 'usd',
+          payment_intent: piId,
+          customer: 'cus_http_test',
+          metadata: { internalCheckoutId: order.id },
+        },
+      },
+    });
+    const badHeader = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret: `whsec_${'z'.repeat(32)}`,
+    });
+    const res = await request(app)
+      .post('/webhooks/stripe')
+      .set('Content-Type', 'application/json')
+      .set('Stripe-Signature', badHeader)
+      .send(payload);
+    assert.equal(res.status, 400);
+
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assert.equal(row?.orderStatus, ORDER_STATUS.PENDING);
+    const nEv = await prisma.stripeWebhookEvent.count({ where: { id: eventId } });
+    assert.equal(nEv, 0);
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAtt, 0);
+  });
+
+  it('checkout.session.completed for unknown internalCheckoutId: 200, no PAID, no fulfillment', async () => {
+    const fakeOrderId = `${'a'.repeat(25)}`;
+    const eventId = `evt_http_chaos_unk_${randomUUID().slice(0, 8)}`;
+    const payload = JSON.stringify({
+      id: eventId,
+      object: 'event',
+      type: 'checkout.session.completed',
+      data: {
+        object: {
+          id: `cs_http_unk_${randomUUID().slice(0, 8)}`,
+          object: 'checkout.session',
+          amount_total: 1000,
+          currency: 'usd',
+          payment_intent: `pi_http_unk_${randomUUID().slice(0, 8)}`,
+          customer: 'cus_http_test',
+          metadata: { internalCheckoutId: fakeOrderId },
+        },
+      },
+    });
+    const header = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret: webhookSecret,
+    });
+    await request(app)
+      .post('/webhooks/stripe')
+      .set('Content-Type', 'application/json')
+      .set('Stripe-Signature', header)
+      .send(payload)
+      .expect(200);
+
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: fakeOrderId } });
+    assert.equal(nAtt, 0);
+  });
+
+  it('duplicate checkout.session.completed (same Stripe event id) is idempotent; fulfillment count 1', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+    const piId = `pi_http_same_evt_${randomUUID().slice(0, 8)}`;
+    const sessionPayload = {
+      id: `cs_http_same_evt_${randomUUID().slice(0, 8)}`,
+      object: 'checkout.session',
+      mode: 'payment',
+      payment_status: 'paid',
+      amount_total: 1000,
+      currency: 'usd',
+      payment_intent: piId,
+      customer: 'cus_http_test',
+      metadata: { internalCheckoutId: order.id },
+    };
+    const eventId = `evt_http_chaos_same_${randomUUID().slice(0, 8)}`;
+    const signOnce = () => {
+      const payload = JSON.stringify({
+        id: eventId,
+        object: 'event',
+        type: 'checkout.session.completed',
+        data: { object: sessionPayload },
+      });
+      const header = Stripe.webhooks.generateTestHeaderString({
+        payload,
+        secret: webhookSecret,
+      });
+      return request(app)
+        .post('/webhooks/stripe')
+        .set('Content-Type', 'application/json')
+        .set('Stripe-Signature', header)
+        .send(payload);
+    };
+    await signOnce().expect(200);
+    await signOnce().expect(200);
+    await settle();
+
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAtt, 1);
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assertOrderPaidOrFulfilled(row?.orderStatus);
+
+    const nLedgerDup = await prisma.ledgerJournalEntry.count({
+      where: {
+        paymentCheckoutId: order.id,
+        eventType: LEDGER_EVENT_TYPE.PAYMENT_CAPTURED,
+      },
+    });
+    assert.equal(nLedgerDup, 1);
+
+    const evtSuffix = eventId.slice(-8);
+    const whAudits = await prisma.auditLog.findMany({
+      where: { event: 'stripe_webhook_received' },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+    const whForEvt = whAudits.filter((r) => r.payload.includes(evtSuffix));
+    assert.equal(
+      whForEvt.length,
+      1,
+      'duplicate same Stripe event id must not append a second stripe_webhook_received audit',
+    );
+
+    const payAudits = await prisma.auditLog.findMany({
+      where: { event: 'payment_completed' },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+    const payForOrder = payAudits.filter((r) => r.payload.includes(order.id));
+    assert.equal(
+      payForOrder.length,
+      1,
+      'duplicate same Stripe event id must not append a second payment_completed audit',
+    );
   });
 
   it('duplicate checkout.session.completed (different evt ids) does not duplicate fulfillment', async () => {

@@ -1,6 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
 
+import { getCorrelation } from './correlationContext.js';
+
 /** @typedef {{ traceId: string }} TraceStore */
 
 const storage = new AsyncLocalStorage();
@@ -20,9 +22,16 @@ export function runWithTrace(traceId, fn) {
   );
 }
 
-/** @returns {string | undefined} */
+/**
+ * Worker/async paths use `runWithTrace`. HTTP uses `correlationStorage` only (`requestContextMiddleware`).
+ * Bridge so ledger + money-path logs resolve the same trace id without duplicating ALS writes.
+ * @returns {string | undefined}
+ */
 export function getTraceId() {
-  return storage.getStore()?.traceId;
+  const fromWorker = storage.getStore()?.traceId;
+  if (fromWorker) return fromWorker;
+  const c = getCorrelation()?.traceId;
+  return typeof c === 'string' && c.trim() ? c.trim() : undefined;
 }
 
 export { storage as traceStorage };

@@ -3,7 +3,7 @@
  * Real Stripe **test-mode** API round-trip (read-only: balance). Proves `STRIPE_SECRET_KEY`
  * authenticates to Stripe. Does not create charges or PaymentIntents.
  *
- * Rejects the sprint4 integration placeholder key (`sk_test_` + repeated `b`).
+ * Rejects the sprint4 integration placeholder key (`sk_test_` or `rk_test_` + repeated `b`).
  *
  * Run: node scripts/stripe-test-mode-api-proof.mjs
  *   or: npm run proof:sprint5:stripe-api
@@ -21,8 +21,14 @@ import { getValidatedStripeSecretKey } from '../src/config/stripeEnv.js';
  */
 export function looksLikeSprint4CiPlaceholderStripeKey(k) {
   const s = String(k ?? '');
-  if (!s.startsWith('sk_test_')) return false;
-  const rest = s.slice('sk_test_'.length);
+  let rest;
+  if (s.startsWith('sk_test_')) {
+    rest = s.slice('sk_test_'.length);
+  } else if (s.startsWith('rk_test_')) {
+    rest = s.slice('rk_test_'.length);
+  } else {
+    return false;
+  }
   if (rest.length < 50) return false;
   return /^b+$/.test(rest);
 }
@@ -40,7 +46,7 @@ export async function runStripeTestModeApiProof() {
   }
   if (looksLikeSprint4CiPlaceholderStripeKey(key)) {
     console.error(
-      '[BLOCKER] Key matches CI integration placeholder (sk_test_ + repeated b). Use a real Dashboard test secret.',
+      '[BLOCKER] Key matches CI integration placeholder (sk_test_/rk_test_ + repeated b). Use a real Dashboard test secret.',
     );
     return { exitCode: 1, evidence: null };
   }

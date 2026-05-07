@@ -17,6 +17,7 @@ import { POST_PAYMENT_INCIDENT_STATUS } from '../../src/constants/postPaymentInc
 import { applyPhase1CheckoutSessionCompleted } from '../../src/services/phase1StripeCheckoutSessionCompleted.js';
 import { recomputeFinancialTruthForPaymentCheckout } from '../../src/services/financialTruthService.js';
 import { getCanonicalPhase1OrderForUser } from '../../src/services/canonicalPhase1OrderService.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for Phase 1 money-path integration tests');
@@ -29,9 +30,12 @@ const runIntegration = Boolean(dbUrl);
 function checkoutSessionFixture(checkoutId, overrides = {}) {
   return {
     id: `cs_int_${randomUUID().slice(0, 8)}`,
+    object: 'checkout.session',
+    mode: 'payment',
+    payment_status: 'paid',
     amount_total: 1000,
     currency: 'usd',
-    payment_intent: 'pi_int_test',
+    payment_intent: `pi_int_${randomUUID()}`,
     customer: 'cus_int_test',
     metadata: { internalCheckoutId: checkoutId },
     ...overrides,
@@ -62,18 +66,9 @@ describe('Phase 1 money path (integration)', { skip: !runIntegration }, () => {
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    for (const eid of eventIds) {
-      await prisma.stripeWebhookEvent.deleteMany({ where: { id: eid } });
-    }
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    // Ledger is immutable and `LedgerJournalEntry` FKs are RESTRICT toward PaymentCheckout.
+    // Do not attempt to delete checkouts/attempts in teardown.
+    // Also avoid deleting users/webhook rows, which may be RESTRICTed via PaymentCheckout rows.
     userIds.length = 0;
     orderIds.length = 0;
     eventIds.length = 0;
@@ -134,13 +129,14 @@ describe('Phase 1 money path (integration)', { skip: !runIntegration }, () => {
     const order = await makePendingCheckout(user.id);
     const eventId = `evt_int_${randomUUID()}`;
     const session = checkoutSessionFixture(order.id);
+    const expectedPi = String(session.payment_intent);
     const r = await runWebhookCheckoutSessionCompleted(eventId, session);
     assert.equal(r.orderIdToScheduleFulfillment, order.id);
-    assert.ok(r.paymentIntentIdsForFeeCapture.includes('pi_int_test'));
+    assert.ok(r.paymentIntentIdsForFeeCapture.includes(expectedPi));
 
     const paid = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
     assert.equal(paid?.orderStatus, ORDER_STATUS.PAID);
-    assert.equal(paid?.stripePaymentIntentId, 'pi_int_test');
+    assert.equal(paid?.stripePaymentIntentId, expectedPi);
 
     const att = await prisma.fulfillmentAttempt.findFirst({
       where: { orderId: order.id, attemptNumber: 1 },

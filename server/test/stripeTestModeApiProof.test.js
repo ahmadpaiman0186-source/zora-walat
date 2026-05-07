@@ -9,6 +9,7 @@ import { looksLikeSprint4CiPlaceholderStripeKey } from '../scripts/stripe-test-m
 describe('stripe-test-mode-api-proof placeholder guard', () => {
   it('detects sprint4PaymentLoopEnv synthetic key pattern', () => {
     assert.equal(looksLikeSprint4CiPlaceholderStripeKey(`sk_test_${'b'.repeat(100)}`), true);
+    assert.equal(looksLikeSprint4CiPlaceholderStripeKey(`rk_test_${'b'.repeat(100)}`), true);
   });
 
   it('does not reject short or mixed suffix keys', () => {

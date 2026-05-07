@@ -9,7 +9,7 @@ From **`server/`**, with PostgreSQL available for integration:
 | Unit tests | `npm run test` | No DB required for default unit suite. |
 | Integration preflight | `npm run test:integration:preflight` | Env summary only; uses `.env` like preload. |
 | Migrate integration URL | `npm run db:migrate:integration` | Same URL rule as `TEST_DATABASE_URL` / `DATABASE_URL`. |
-| Full local CI mimic | `npm run verify:ci-local` | Runs preflight + migrate + `test:ci`; needs **`TEST_DATABASE_URL`** + DB up. |
+| Full local CI mimic | `npm run verify:ci-local` | Runs preflight + migrate + `test:ci`; needs **`TEST_DATABASE_URL`** + DB up. Optional: `npm run ci:release-checks` with the same synthetic env as GitHub (see **Release checks** below). |
 | Strict integration runner | `npm run ci:integration-verify` | Same as above; exits **2** if `TEST_DATABASE_URL` unset. |
 
 These prove **application + test** behavior on your machine; they do **not** prove the **Ubuntu + service health** matrix GitHub uses.
@@ -50,3 +50,19 @@ Forks that **override** or **clear** Stripe env for webhook tests may need to al
 ## Workflow file sanity
 
 The workflow is plain YAML committed at **`.github/workflows/ci.yml`**. Review on branch before merge; there is **no** embedded secret in the default job env.
+
+## Required before release (merge to `main` / production promote)
+
+The GitHub Actions **CI** workflow (`.github/workflows/ci.yml`) is the authoritative gate. A green run must include:
+
+| Stage | Command / step | Purpose |
+|--------|----------------|--------|
+| Integration DB | `npm run test:integration:preflight` → `npm run db:migrate:integration` | Postgres URL + migrate |
+| Unit + integration | `npm run test:ci` | `npm test` + integration suite (single concurrency) |
+| Launch readiness | `npm run phase1:launch-readiness -- --strict --require-ci-money-path-certified` | Post-certification strict gate |
+| **Release checks** | `npm run ci:release-checks` | In order: `verify:local-pricing`, `proof:stripe-webhook-local`, `proof:reloadly-dry-run`, `proof:reconciliation-local`, `proof:audit-trail-local`, `proof:fraud-controls-local`, `preflight:production` |
+| Flutter | `flutter analyze` + `flutter test` | Client static analysis + tests |
+
+**CI env (synthetic only):** the workflow sets `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` / JWT secrets to **non-production placeholder strings** (Stripe-shaped `sk_test_…` / `whsec_…`), `PRELAUNCH_LOCKDOWN=true`, and mock airtime/webtopup allowlists so proofs and `preflight:production` **do not** require real Stripe, Reloadly, or operator secrets. Forks must not replace these with live keys in YAML.
+
+**Local parity:** run the same server commands from `server/` with `TEST_DATABASE_URL` + Postgres (see table at top). `preflight:production` evaluates a **production profile** against your current `process.env` after `bootstrap` loads `.env` — it may fail on a dev laptop until lockdown / owner / CORS gates match your intent; in CI it is pinned to pass with the synthetic job env above.

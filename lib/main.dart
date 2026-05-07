@@ -56,16 +56,22 @@ Future<void> main() async {
   final orderHistory = LocalOrderHistoryStore(prefs);
 
   final httpClient = http.Client();
-  final apiBase = AppConfig.apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+  final apiBase = AppConfig.apiBaseUrl;
   if (kDebugMode) {
     if (apiBase.isEmpty) {
       debugPrint(
-        'MISSING: API_BASE_URL — set --dart-define=API_BASE_URL=http://127.0.0.1:8787',
+        'MISSING: API_BASE_URL — pass --dart-define=API_BASE_URL=… (release/profile), '
+        'or run a debug build to default to http://127.0.0.1:8787.',
       );
     }
-    if (StripeKeys.publishableKey.trim().isEmpty) {
+    if (!StripeKeys.isPublishableKeyConfigured) {
       debugPrint(
-        'MISSING: STRIPE_PUBLISHABLE_KEY — set --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_…',
+        'MISSING: STRIPE_PUBLISHABLE_KEY — set --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_… '
+        '(hosted Checkout redirect still works from the server without this key).',
+      );
+    } else if (!StripeKeys.publishableKeyLooksLikeStripePublishableKey) {
+      debugPrint(
+        'STRIPE_PUBLISHABLE_KEY should start with pk_test_ or pk_live_ (check your --dart-define).',
       );
     }
   }
@@ -83,16 +89,12 @@ Future<void> main() async {
   final notificationStore = InAppNotificationStore(prefs);
   final notificationHub = AppNotificationHub(store: notificationStore);
 
-  final TelecomService telecomService =
-      AppConfig.apiBaseUrl.trim().isEmpty
-          ? const PlaceholderTelecomService()
-          : RemoteTelecomService(
-              client: httpClient,
-              baseUrl: AppConfig.apiBaseUrl.trim().replaceAll(
-                RegExp(r'/+$'),
-                '',
-              ),
-            );
+  final TelecomService telecomService = AppConfig.apiBaseUrl.isEmpty
+      ? const PlaceholderTelecomService()
+      : RemoteTelecomService(
+          client: httpClient,
+          baseUrl: AppConfig.apiBaseUrl,
+        );
 
   runApp(
     ZoraWalatApp(

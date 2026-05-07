@@ -16,7 +16,13 @@ export function isStrictLoopbackHttpOrigin(origin) {
   try {
     const u = new URL(origin);
     if (u.protocol !== 'http:') return false;
-    if (u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') return false;
+    if (
+      u.hostname !== 'localhost' &&
+      u.hostname !== '127.0.0.1' &&
+      u.hostname !== '[::1]'
+    ) {
+      return false;
+    }
     if (u.username || u.password) return false;
     return true;
   } catch {
@@ -27,7 +33,13 @@ export function isStrictLoopbackHttpOrigin(origin) {
 function isNonProductionLoopbackOrigin(origin) {
   try {
     const u = new URL(origin);
-    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') return true;
+    if (
+      u.hostname === 'localhost' ||
+      u.hostname === '127.0.0.1' ||
+      u.hostname === '[::1]'
+    ) {
+      return true;
+    }
     return false;
   } catch {
     return false;

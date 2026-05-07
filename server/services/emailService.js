@@ -6,7 +6,6 @@ import { env } from '../src/config/env.js';
 const DEFAULT_EMAIL_HOST = 'mail.privateemail.com';
 const DEFAULT_EMAIL_PORT = 587;
 const DEFAULT_EMAIL_SENDER = 'noreply@zorawalat.com';
-const EMAIL_FROM = `Zora-Walat <${DEFAULT_EMAIL_SENDER}>`;
 
 let transporterPromise = null;
 let transporterCacheKey = null;
@@ -164,6 +163,57 @@ function requireEnv(name, fallback = '') {
   return value;
 }
 
+/** Prefer `primary` env key, then `fallback` (for SMTP_* vs EMAIL_* migration). */
+function firstEnvTrim(primary, fallback) {
+  const a = String(process.env[primary] ?? '').trim();
+  if (a) return a;
+  return String(process.env[fallback] ?? '').trim();
+}
+
+/**
+ * Google SMTP requires a 16‑character App Password (spaces ignored), not the account password.
+ * @param {string} host
+ * @param {string} passNoSpaces
+ */
+function assertGmailAppPasswordPolicy(host, passNoSpaces) {
+  const h = String(host ?? '').trim().toLowerCase();
+  const isGoogleSmtp =
+    h === 'smtp.gmail.com' ||
+    h === 'smtp.googlemail.com' ||
+    h.endsWith('.gmail.com');
+  if (!isGoogleSmtp) return;
+  if (!passNoSpaces || passNoSpaces.length !== 16) {
+    throw new EmailServiceError(
+      'Gmail App Password required: Google SMTP expects a 16-character App Password (Google Account → Security → 2-Step Verification → App passwords). Remove spaces in .env. A normal Gmail account password will not work.',
+      { code: 'gmail_app_password_required' },
+    );
+  }
+  if (!/^[A-Za-z0-9]{16}$/.test(passNoSpaces)) {
+    throw new EmailServiceError(
+      'Gmail App Password required: value must be 16 letters/digits after removing spaces (generate a new App Password if needed).',
+      { code: 'gmail_app_password_required' },
+    );
+  }
+}
+
+function buildFromHeader(smtpUser) {
+  const explicit = firstEnvTrim('SMTP_FROM', 'EMAIL_FROM');
+  if (explicit) {
+    if (explicit.includes('<') && explicit.includes('>')) return explicit;
+    if (explicit.includes('@')) return `Zora-Walat <${explicit}>`;
+  }
+  const u = String(smtpUser ?? '').trim();
+  if (u.includes('@')) return `Zora-Walat <${u}>`;
+  return `Zora-Walat <${DEFAULT_EMAIL_SENDER}>`;
+}
+
+function extractSenderAddress(fromHeader) {
+  const m = String(fromHeader).match(/<([^>]+)>/);
+  if (m) return m[1].trim();
+  const s = String(fromHeader).trim();
+  return s.includes('@') ? s : DEFAULT_EMAIL_SENDER;
+}
+
 function normalizeRecipient(email) {
   const normalized = String(email ?? '').trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
@@ -185,10 +235,25 @@ function normalizeNonEmpty(value, fieldName) {
 }
 
 export function getEmailConfig() {
-  const host = requireEnv('EMAIL_HOST', DEFAULT_EMAIL_HOST);
-  const port = parseEmailPort(process.env.EMAIL_PORT);
-  const user = requireEnv('EMAIL_USER', DEFAULT_EMAIL_SENDER);
-  const pass = requireEnv('EMAIL_PASS');
+  const host = firstEnvTrim('SMTP_HOST', 'EMAIL_HOST') || DEFAULT_EMAIL_HOST;
+  const portRaw = firstEnvTrim('SMTP_PORT', 'EMAIL_PORT');
+  const port = parseEmailPort(portRaw || String(DEFAULT_EMAIL_PORT));
+  const user = firstEnvTrim('SMTP_USER', 'EMAIL_USER');
+  if (!user) {
+    throw new EmailServiceError(
+      'SMTP_USER or EMAIL_USER is required for SMTP email delivery.',
+      { code: 'email_missing_env' },
+    );
+  }
+  let pass = firstEnvTrim('SMTP_PASS', 'EMAIL_PASS');
+  if (!pass) {
+    throw new EmailServiceError(
+      'SMTP_PASS or EMAIL_PASS is required for SMTP email delivery.',
+      { code: 'email_missing_env' },
+    );
+  }
+  pass = pass.replace(/\s+/g, '');
+  assertGmailAppPasswordPolicy(host, pass);
   return {
     host,
     port,
@@ -206,11 +271,16 @@ async function getTransporter() {
 
   transporterCacheKey = cacheKey;
   transporterPromise = (async () => {
+    const secureRaw = firstEnvTrim('SMTP_SECURE', 'EMAIL_SECURE');
+    const secure =
+      secureRaw.toLowerCase() === 'true' ||
+      secureRaw === '1' ||
+      Number(config.port) === 465;
     const transporter = nodemailer.createTransport({
       host: config.host,
       port: config.port,
-      secure: false,
-      requireTLS: true,
+      secure,
+      requireTLS: !secure,
       auth: {
         user: config.user,
         pass: config.pass,
@@ -234,18 +304,33 @@ async function getTransporter() {
       logEmailEvent('info', 'smtp_verify_ok', {
         smtpHost: config.host,
         smtpPort: config.port,
-        smtpSecure: false,
+        smtpSecure: secure,
       });
       return transporter;
     } catch (error) {
       transporterPromise = null;
       transporterCacheKey = null;
       const classified = classifyEmailError(error);
+      const responseCode = Number(error?.responseCode ?? 0);
+      const responseSnippet = String(error?.response ?? '')
+        .trim()
+        .replace(/\r?\n/g, ' ')
+        .slice(0, 160);
       logEmailEvent('error', 'smtp_verify_failed', {
         smtpHost: config.host,
         smtpPort: config.port,
         errorCode: classified.code,
+        smtpCauseCode: String(error?.code ?? '').trim() || null,
+        smtpResponseCode: responseCode || null,
+        smtpResponseSnippet: responseSnippet || null,
       });
+      const isGmailHost = String(config.host).toLowerCase().includes('gmail.com');
+      if (isGmailHost && (responseCode === 535 || String(error?.code ?? '') === 'EAUTH')) {
+        throw new EmailServiceError(
+          'Gmail rejected SMTP credentials (often 535). Use a 16-character App Password for this Google account (not the normal login password), and ensure 2-Step Verification is on.',
+          { code: 'gmail_app_password_required', cause: classified },
+        );
+      }
       throw classified.code === 'email_invalid_recipient'
         ? new EmailServiceError('SMTP transporter verification failed.', {
             code: 'email_transport_unavailable',
@@ -264,6 +349,9 @@ async function sendEmail({ to, subject, text, html, template }) {
   const normalizedText = normalizeNonEmpty(text, 'Email text body');
   const normalizedHtml = normalizeNonEmpty(html, 'Email HTML body');
   const transporter = await getTransporter();
+  const cfg = getEmailConfig();
+  const fromHeader = buildFromHeader(cfg.user);
+  const senderAddr = extractSenderAddress(fromHeader);
   const recipientFields = redactRecipient(recipient);
   let lastError = null;
 
@@ -271,8 +359,8 @@ async function sendEmail({ to, subject, text, html, template }) {
     try {
       const info = await withTimeout(
         transporter.sendMail({
-          from: EMAIL_FROM,
-          sender: DEFAULT_EMAIL_SENDER,
+          from: fromHeader,
+          sender: senderAddr,
           to: recipient,
           subject: normalizedSubject,
           text: normalizedText,
@@ -288,6 +376,9 @@ async function sendEmail({ to, subject, text, html, template }) {
         messageId: info.messageId ?? null,
         acceptedCount: Array.isArray(info.accepted) ? info.accepted.length : 0,
         rejectedCount: Array.isArray(info.rejected) ? info.rejected.length : 0,
+        smtpResponsePreview: String(info.response ?? '')
+          .trim()
+          .slice(0, 160),
         ...recipientFields,
       });
 
@@ -343,26 +434,37 @@ async function sendEmail({ to, subject, text, html, template }) {
 export function getOtpEmailReadinessSnapshot() {
   const raw = String(process.env.OTP_TRANSPORT ?? '').trim().toLowerCase();
   const consoleMode = raw === 'console';
+  const transportLabel = consoleMode ? 'console' : raw || 'email';
   /** @type {string[]} */
   const missing = [];
   let portParseOk = true;
   if (!consoleMode) {
-    for (const k of ['EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASS']) {
-      if (!String(process.env[k] ?? '').trim()) missing.push(k);
+    if (!firstEnvTrim('SMTP_HOST', 'EMAIL_HOST')) {
+      missing.push('SMTP_HOST or EMAIL_HOST');
+    }
+    if (!firstEnvTrim('SMTP_USER', 'EMAIL_USER')) {
+      missing.push('SMTP_USER or EMAIL_USER');
+    }
+    if (!firstEnvTrim('SMTP_PASS', 'EMAIL_PASS')) {
+      missing.push('SMTP_PASS or EMAIL_PASS');
     }
     try {
-      parseEmailPort(process.env.EMAIL_PORT);
+      parseEmailPort(
+        firstEnvTrim('SMTP_PORT', 'EMAIL_PORT') || String(DEFAULT_EMAIL_PORT),
+      );
     } catch {
-      missing.push('EMAIL_PORT');
+      missing.push('SMTP_PORT or EMAIL_PORT');
       portParseOk = false;
     }
   }
   const smtpConfigPresent =
     consoleMode ||
-    (missing.length === 0 && String(process.env.EMAIL_PASS ?? '').trim() !== '');
-  const smtpPortValid = consoleMode ? true : portParseOk && !missing.includes('EMAIL_PORT');
+    (missing.length === 0 &&
+      firstEnvTrim('SMTP_PASS', 'EMAIL_PASS').length > 0);
+  const smtpPortValid =
+    consoleMode ? true : portParseOk && !missing.includes('SMTP_PORT or EMAIL_PORT');
   return {
-    otpTransport: consoleMode ? 'console' : 'email',
+    otpTransport: transportLabel,
     smtpConfigPresent,
     smtpMissingKeys: [...new Set(missing)],
     smtpPortValid,
@@ -395,11 +497,16 @@ export function probeNodemailerTransportConstructs() {
   }
   try {
     const cfg = getEmailConfig();
+    const secureRaw = firstEnvTrim('SMTP_SECURE', 'EMAIL_SECURE');
+    const secure =
+      secureRaw.toLowerCase() === 'true' ||
+      secureRaw === '1' ||
+      Number(cfg.port) === 465;
     nodemailer.createTransport({
       host: cfg.host,
       port: cfg.port,
-      secure: false,
-      requireTLS: true,
+      secure,
+      requireTLS: !secure,
       auth: { user: cfg.user, pass: cfg.pass },
       connectionTimeout: 10_000,
       greetingTimeout: 10_000,
@@ -427,6 +534,10 @@ export async function sendOTP(email, code) {
     console.log(
       `[email] OTP_TRANSPORT=console — code for ${r.recipientLocalHash ? '…' : '?'}@${r.recipientDomain}: ${normalizedCode}`,
     );
+    /** Grep-friendly line when NODE_ENV=development — OTP only ever printed for console transport. */
+    if (String(process.env.NODE_ENV ?? '').trim() === 'development') {
+      console.log(`OTP CODE: ${normalizedCode}`);
+    }
     return { messageId: null, accepted: [], rejected: [], response: 'console' };
   }
 

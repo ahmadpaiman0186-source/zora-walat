@@ -1,8 +1,13 @@
 import { prisma } from '../db.js';
+import { env } from '../config/env.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
+import { PAYMENT_FULFILLMENT_RECON_STATUS } from '../constants/paymentFulfillmentReconciliationStatus.js';
+import { RECOVERY_STATUS } from '../constants/recoveryStatus.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
+import { scheduleFulfillmentProcessing } from './fulfillmentProcessingService.js';
+import { writeOrderAudit } from './orderAuditService.js';
 
 function asQueryString(value) {
   if (value == null) return null;
@@ -35,6 +40,19 @@ const ORDER_STATUS_VALUES = new Set(Object.values(ORDER_STATUS));
 const PAYMENT_STATUS_VALUES = new Set(Object.values(PAYMENT_CHECKOUT_STATUS));
 const FULFILLMENT_STATUS_VALUES = new Set(Object.values(FULFILLMENT_ATTEMPT_STATUS));
 
+function riskAndRecoveryFields(row) {
+  return {
+    trustScore: row.trustScore ?? null,
+    fraudRiskScore: row.fraudRiskScore ?? null,
+    fraudSignals: row.fraudSignals ?? null,
+    reconciliationStatus: row.reconciliationStatus ?? null,
+    providerTruthStatus: row.providerTruthStatus ?? null,
+    providerTruthCheckedAt: row.providerTruthCheckedAt ?? null,
+    slaBreachedAt: row.slaBreachedAt ?? null,
+    recoveryStatus: row.recoveryStatus ?? null,
+  };
+}
+
 function mapOrderRow(row) {
   return {
     id: row.id,
@@ -55,6 +73,7 @@ function mapOrderRow(row) {
     failureReason: row.failureReason,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    ...riskAndRecoveryFields(row),
   };
 }
 
@@ -132,6 +151,14 @@ export async function listAdminOrders({
       failureReason: true,
       createdAt: true,
       updatedAt: true,
+      trustScore: true,
+      fraudRiskScore: true,
+      fraudSignals: true,
+      reconciliationStatus: true,
+      providerTruthStatus: true,
+      providerTruthCheckedAt: true,
+      slaBreachedAt: true,
+      recoveryStatus: true,
       fulfillmentAttempts: {
         where: { attemptNumber: displayAttemptNumber },
         orderBy: { createdAt: 'desc' },
@@ -194,6 +221,14 @@ export async function inspectAdminOrder({ id, includeAuditLogs = false }) {
       completedByWebhookEventId: true,
       createdAt: true,
       updatedAt: true,
+      trustScore: true,
+      fraudRiskScore: true,
+      fraudSignals: true,
+      reconciliationStatus: true,
+      providerTruthStatus: true,
+      providerTruthCheckedAt: true,
+      slaBreachedAt: true,
+      recoveryStatus: true,
       fulfillmentAttempts: {
         orderBy: { attemptNumber: 'asc' },
         select: {
@@ -235,6 +270,101 @@ export async function inspectAdminOrder({ id, includeAuditLogs = false }) {
     fulfillmentAttempts: order.fulfillmentAttempts.map(mapAttemptRow),
     auditLogs,
   };
+}
+
+/**
+ * Admin “kick” — re-enqueue fulfillment dispatch (idempotent schedule). PAID / PROCESSING only.
+ *
+ * @param {{ id: string, actorUserId: string, reason: string, ip: string | null }} p
+ */
+export async function kickAdminOrderFulfillment(p) {
+  const id = String(p.id ?? '').trim();
+  if (!isLikelyPaymentCheckoutId(id)) {
+    return { ok: false, status: 400, error: 'Invalid order id' };
+  }
+  const reason = String(p.reason ?? '').trim();
+  if (reason.length < env.manualRequiredActionReasonMinLen) {
+    return {
+      ok: false,
+      status: 400,
+      error: `reason must be at least ${env.manualRequiredActionReasonMinLen} characters`,
+    };
+  }
+
+  const row = await prisma.paymentCheckout.findUnique({
+    where: { id },
+    select: { orderStatus: true },
+  });
+  if (!row) return { ok: false, status: 404, error: 'Not found' };
+  if (
+    row.orderStatus !== ORDER_STATUS.PAID &&
+    row.orderStatus !== ORDER_STATUS.PROCESSING
+  ) {
+    return {
+      ok: false,
+      status: 400,
+      error: 'Kick allowed only for PAID or PROCESSING orders',
+    };
+  }
+
+  scheduleFulfillmentProcessing(id, null);
+  await writeOrderAudit(prisma, {
+    event: 'admin_kick_fulfillment',
+    payload: {
+      orderId: id,
+      actorUserId: p.actorUserId,
+      reason: reason.slice(0, 500),
+    },
+    ip: p.ip,
+  });
+
+  return { ok: true, orderId: id };
+}
+
+/**
+ * Mark recovery loop cleared by operators (does not call Stripe or providers).
+ *
+ * @param {{ id: string, actorUserId: string, reason: string, ip: string | null }} p
+ */
+export async function markAdminOrderRecoveryResolved(p) {
+  const id = String(p.id ?? '').trim();
+  if (!isLikelyPaymentCheckoutId(id)) {
+    return { ok: false, status: 400, error: 'Invalid order id' };
+  }
+  const reason = String(p.reason ?? '').trim();
+  if (reason.length < env.manualRequiredActionReasonMinLen) {
+    return {
+      ok: false,
+      status: 400,
+      error: `reason must be at least ${env.manualRequiredActionReasonMinLen} characters`,
+    };
+  }
+
+  const exists = await prisma.paymentCheckout.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  if (!exists) return { ok: false, status: 404, error: 'Not found' };
+
+  await prisma.paymentCheckout.update({
+    where: { id },
+    data: {
+      recoveryStatus: RECOVERY_STATUS.VERIFIED,
+      reconciliationStatus: PAYMENT_FULFILLMENT_RECON_STATUS.OK,
+    },
+  });
+
+  await writeOrderAudit(prisma, {
+    event: 'admin_recovery_mark_resolved',
+    payload: {
+      orderId: id,
+      actorUserId: p.actorUserId,
+      reason: reason.slice(0, 500),
+    },
+    ip: p.ip,
+  });
+
+  return { ok: true, orderId: id };
 }
 
 function classifyRetryEligibility(failureReason) {

@@ -15,6 +15,7 @@ import bcrypt from 'bcrypt';
 import { computeMainBalanceUsdCentsFromLedger } from '../../src/lib/walletLedgerBalance.js';
 import { USER_WALLET_LEDGER_REASON_REFERRAL_INVITER_PROMOTIONAL } from '../../src/constants/walletLedgerReasons.js';
 import * as userWalletService from '../../src/services/wallet/userWalletService.js';
+import { deleteWalletIntegrationTestUsers } from './helpers/walletIntegrationUserCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for wallet idempotency integration tests');
@@ -52,10 +53,9 @@ describe('Wallet top-up idempotency (integration)', { skip: !runIntegration }, (
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    const toRemove = [...userIds];
     userIds.length = 0;
+    await deleteWalletIntegrationTestUsers(prisma, toRemove);
   });
 
   async function makeUser() {

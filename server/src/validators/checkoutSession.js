@@ -1,13 +1,13 @@
 import { z } from 'zod';
 
-const operatorKeyEnum = z.enum([
+export const operatorKeyEnum = z.enum([
   'roshan',
   'mtn',
   'etisalat',
   'afghanWireless',
 ]);
 
-const senderCountryEnum = z.enum(['US', 'CA', 'EU', 'AE', 'TR']);
+export const senderCountryEnum = z.enum(['US', 'CA', 'EU', 'AE', 'TR']);
 
 /**
  * Strict body: unknown fields rejected. Legacy `amount` (cents) accepted as alias for amountUsdCents.

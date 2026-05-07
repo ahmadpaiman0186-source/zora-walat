@@ -280,14 +280,83 @@ model PaymentCheckout {
   postPaymentIncidentUpdatedAt DateTime?
   /// How incident was tied to checkout (`REFUND_*`, `DISPUTE_*` constants). See `postPaymentIncidentMapSource.js`.
   postPaymentIncidentMapSource String?
+  /// Payment ↔ ledger ↔ fulfillment alignment (`paymentFulfillmentReconciliationStatus.js`). Default ok.
+  reconciliationStatus    String    @default("ok")
+  /// Last external Reloadly (or future provider) truth probe time.
+  providerTruthCheckedAt  DateTime?
+  /// ok | mismatch | unknown — see `providerTruthStatus.js`.
+  providerTruthStatus     String    @default("unknown")
+  /// 0–100 composite trust (`paymentCheckoutTrust.js`).
+  trustScore                Int       @default(0)
+  /// First time PAID/PROCESSING exceeded fulfillment SLA (`slaGuardService.js`).
+  slaBreachedAt             DateTime?
+  /// Recovery closed-loop: pending | repairing | verified | failed (`recoveryStatus.js`).
+  recoveryStatus            String    @default("pending")
+  /// 0–100 fraud risk from `fraudDetectionService.js` (velocity, repeats, amounts, failures).
+  fraudRiskScore              Int       @default(0)
+  /// JSON array of signal codes (e.g. `velocity_user`, `repeat_customer_24h`).
+  fraudSignals                Json?
+
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
   @@index([status, createdAt])
   @@index([userId])
   @@index([userId, orderStatus, createdAt])
+  @@index([reconciliationStatus, orderStatus])
+  @@index([providerTruthStatus])
+  @@index([trustScore])
+  @@index([recoveryStatus, orderStatus])
+  @@index([slaBreachedAt])
 
   fulfillmentAttempts FulfillmentAttempt[]
+  ledgerJournalEntries LedgerJournalEntry[]
+}
+
+/// L4 chart of accounts (double-entry). Codes are stable strings; rows are seeded by migration.
+model LedgerAccount {
+  id        String   @id
+  code      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  lines LedgerJournalLine[]
+}
+
+/// L4 journal header: one business posting per `idempotencyKey` (append-only lines).
+/// Distinct from legacy `LedgerEntry` (wallet commission table).
+model LedgerJournalEntry {
+  id                   String   @id @default(cuid())
+  idempotencyKey       String   @unique
+  paymentCheckoutId    String?
+  fulfillmentAttemptId String?
+  eventType            String
+  metadataJson         Json?
+  createdAt            DateTime @default(now())
+
+  paymentCheckout    PaymentCheckout?    @relation(fields: [paymentCheckoutId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  fulfillmentAttempt FulfillmentAttempt? @relation(fields: [fulfillmentAttemptId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  lines              LedgerJournalLine[]
+
+  @@index([paymentCheckoutId])
+  @@index([fulfillmentAttemptId])
+}
+
+/// L4 journal lines (debit/credit in USD cents; sum(debit) must equal sum(credit) per entry).
+model LedgerJournalLine {
+  id          String   @id @default(cuid())
+  entryId     String
+  accountId   String
+  debitCents  Int      @default(0)
+  creditCents Int      @default(0)
+  memo        String?
+  createdAt   DateTime @default(now())
+
+  entry   LedgerJournalEntry @relation(fields: [entryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  account LedgerAccount      @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([entryId])
+  @@index([accountId])
 }
 
 /// One row per fulfillment try for a payment order; supports retries via `attemptNumber`.
@@ -314,6 +383,8 @@ model FulfillmentAttempt {
   @@unique([orderId, attemptNumber])
   @@index([orderId, status])
   @@index([status, createdAt])
+
+  ledgerJournalEntries LedgerJournalEntry[]
 }
 
 /// Processed Stripe webhook event ids (evt_…) — idempotent handling across retries and multiple app instances.
@@ -436,7 +507,7 @@ model User {
 }
 
 /// Append-only movements for `UserWallet` (audit + future reconciliation). Balance reads stay on `UserWallet` in this phase.
-/// DB trigger blocks UPDATE/DELETE; use `referenceId` for external/operator correlation.
+/// DB trigger blocks UPDATE only; FK `ON DELETE CASCADE` from `User` may delete rows (see migration `20260415123000_wallet_ledger_trigger_update_only`). Use `referenceId` for external/operator correlation.
 model UserWalletLedgerEntry {
   id                   String   @id @default(cuid())
   /// Stable business id (UUID); immutable after insert.

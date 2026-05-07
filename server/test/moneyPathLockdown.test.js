@@ -80,6 +80,15 @@ describe('evaluateProductionMoneyPathSafety', () => {
     assert.equal(r.code, 'dev_checkout_bypass_in_production');
   });
 
+  it('rejects DEV_CHECKOUT_AUTH_BYPASS in production when normalized True', () => {
+    const r = evaluateProductionMoneyPathSafety({
+      NODE_ENV: 'production',
+      DEV_CHECKOUT_AUTH_BYPASS: 'True',
+    });
+    assert.equal(r.ok, false);
+    assert.equal(r.code, 'dev_checkout_bypass_in_production');
+  });
+
   it('rejects mock airtime in production without explicit allow', () => {
     const r = evaluateProductionMoneyPathSafety({
       NODE_ENV: 'production',

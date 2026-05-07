@@ -11,6 +11,12 @@ describe('getOtpEmailReadinessSnapshot', () => {
     'EMAIL_PORT',
     'EMAIL_USER',
     'EMAIL_PASS',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USER',
+    'SMTP_PASS',
+    'SMTP_SECURE',
+    'SMTP_FROM',
   ];
   /** @type {Record<string, string | undefined>} */
   let saved = {};
@@ -48,15 +54,19 @@ describe('getOtpEmailReadinessSnapshot', () => {
     delete process.env.EMAIL_USER;
     delete process.env.EMAIL_PASS;
     delete process.env.EMAIL_PORT;
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
+    delete process.env.SMTP_PORT;
     const { getOtpEmailReadinessSnapshot } = await import(
       '../services/emailService.js'
     );
     const s = getOtpEmailReadinessSnapshot();
     assert.equal(s.otpTransport, 'email');
     assert.equal(s.smtpConfigPresent, false);
-    assert.ok(s.smtpMissingKeys.includes('EMAIL_HOST'));
-    assert.ok(s.smtpMissingKeys.includes('EMAIL_USER'));
-    assert.ok(s.smtpMissingKeys.includes('EMAIL_PASS'));
+    assert.ok(s.smtpMissingKeys.includes('SMTP_HOST or EMAIL_HOST'));
+    assert.ok(s.smtpMissingKeys.includes('SMTP_USER or EMAIL_USER'));
+    assert.ok(s.smtpMissingKeys.includes('SMTP_PASS or EMAIL_PASS'));
   });
 
   it('rejects invalid EMAIL_PORT for smtp_port_valid', async () => {
@@ -65,12 +75,16 @@ describe('getOtpEmailReadinessSnapshot', () => {
     process.env.EMAIL_USER = 'u@example.com';
     process.env.EMAIL_PASS = 'x';
     process.env.EMAIL_PORT = 'not-a-port';
+    delete process.env.SMTP_PORT;
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
     const { getOtpEmailReadinessSnapshot } = await import(
       '../services/emailService.js'
     );
     const s = getOtpEmailReadinessSnapshot();
     assert.equal(s.smtpPortValid, false);
-    assert.ok(s.smtpMissingKeys.includes('EMAIL_PORT'));
+    assert.ok(s.smtpMissingKeys.includes('SMTP_PORT or EMAIL_PORT'));
   });
 });
 
@@ -81,6 +95,12 @@ describe('sendOTP transport paths', () => {
     'EMAIL_PORT',
     'EMAIL_USER',
     'EMAIL_PASS',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USER',
+    'SMTP_PASS',
+    'SMTP_SECURE',
+    'SMTP_FROM',
   ];
   /** @type {Record<string, string | undefined>} */
   let saved = {};
@@ -104,6 +124,9 @@ describe('sendOTP transport paths', () => {
     delete process.env.EMAIL_HOST;
     delete process.env.EMAIL_USER;
     delete process.env.EMAIL_PASS;
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
     const { sendOTP, EmailServiceError, resetEmailTransportForTests } =
       await import('../services/emailService.js');
     resetEmailTransportForTests();
@@ -137,8 +160,29 @@ describe('sendOTP transport paths', () => {
     }
   });
 
+  it('rejects Gmail SMTP when App Password is not 16 chars (after removing spaces)', async () => {
+    process.env.OTP_TRANSPORT = 'smtp';
+    process.env.SMTP_HOST = 'smtp.gmail.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_USER = 'u@gmail.com';
+    process.env.SMTP_PASS = 'short-not-app-pw';
+    const { sendOTP, EmailServiceError, resetEmailTransportForTests } =
+      await import('../services/emailService.js');
+    resetEmailTransportForTests();
+    await assert.rejects(
+      () => sendOTP('dest@gmail.com', '123456'),
+      (err) =>
+        err instanceof EmailServiceError &&
+        err.code === 'gmail_app_password_required',
+    );
+  });
+
   it('email mode with full env enters SMTP path (verify may fail; not misconfigured)', async () => {
     process.env.OTP_TRANSPORT = 'email';
+    delete process.env.SMTP_HOST;
+    delete process.env.SMTP_PORT;
+    delete process.env.SMTP_USER;
+    delete process.env.SMTP_PASS;
     process.env.EMAIL_HOST = 'smtp.invalid.localtest';
     process.env.EMAIL_PORT = '587';
     process.env.EMAIL_USER = 'u@test.invalid';

@@ -156,6 +156,46 @@ export const checkoutAuthenticatedLimiter = rateLimitWithOptionalRedis(
   },
 );
 
+/** Hosted checkout — per signed-in user only (stack under IP+user composite limiter). */
+export const checkoutPerUserLimiter = rateLimitWithOptionalRedis(
+  'checkout_user_15m',
+  {
+    windowMs: 15 * 60 * 1000,
+    max: prod ? 15 : 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      const uid = req.user?.id;
+      return uid ? `checkout_uid:${uid}` : `checkout_uid:anon`;
+    },
+    message: { error: 'Too many checkout sessions for this account; try again later.' },
+    handler: rateLimitHandler,
+  },
+);
+
+/**
+ * Per payment attempt: user + Idempotency-Key header (velocity on rapid retries with same key).
+ * Mount after `requireAuth` so `req.user` is present.
+ */
+export const checkoutPaymentAttemptLimiter = rateLimitWithOptionalRedis(
+  'checkout_idem_1m',
+  {
+    windowMs: 60 * 1000,
+    max: prod ? 12 : 80,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      const uid = req.user?.id ?? 'anon';
+      const ik = String(req.get('idempotency-key') ?? '')
+        .trim()
+        .slice(0, 128);
+      return `checkout_idem:${uid}:${ik || 'missing'}`;
+    },
+    message: { error: 'Too many checkout attempts for this idempotency key; slow down.' },
+    handler: rateLimitHandler,
+  },
+);
+
 /** Authenticated order reads — list / get by id / Stripe session lookup. */
 export const ordersReadLimiter = rateLimitWithOptionalRedis('orders_read_15m', {
   windowMs: 15 * 60 * 1000,

@@ -93,11 +93,7 @@ class AuthApiService {
   final http.Client client;
   final String baseUrl;
 
-  static String _normalizeBase(String raw) {
-    final t = raw.trim();
-    if (t.isEmpty) return '';
-    return t.replaceAll(RegExp(r'/+$'), '');
-  }
+  static String _normalizeBase(String raw) => AppConfig.normalizeApiBase(raw);
 
   void _requireConfiguredBaseUrl() {
     if (baseUrl.isEmpty) {

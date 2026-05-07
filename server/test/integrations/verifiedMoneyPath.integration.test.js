@@ -9,8 +9,10 @@ import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
 
 import { AUTH_ERROR_CODE } from '../../src/constants/authErrors.js';
+import { isStripeKeyAllowedForHostedCheckout } from '../../src/config/stripeEnv.js';
 import { createApp } from '../../src/app.js';
 import { signAccessToken } from '../../src/services/authTokenService.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for verified money path tests');
@@ -44,6 +46,14 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     });
     const userIds = users.map((u) => u.id);
     if (userIds.length > 0) {
+      const rows = await prisma.paymentCheckout.findMany({
+        where: { userId: { in: userIds } },
+        select: { id: true },
+      });
+      await deleteLedgerJournalForPaymentCheckouts(
+        prisma,
+        rows.map((r) => r.id),
+      );
       await prisma.fulfillmentAttempt.deleteMany({
         where: { order: { userId: { in: userIds } } },
       });
@@ -59,9 +69,6 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
       await prisma.referralLoyaltyBonus.deleteMany({
         where: { userId: { in: userIds } },
       });
-      await prisma.paymentCheckout.deleteMany({
-        where: { userId: { in: userIds } },
-      });
     }
     await prisma.refreshToken.deleteMany({
       where: { user: { email: { in: emails } } },
@@ -69,7 +76,8 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     await prisma.recipient.deleteMany({
       where: { user: { email: { in: emails } } },
     });
-    await prisma.user.deleteMany({ where: { email: { in: emails } } });
+    // PaymentCheckout rows may be referenced by immutable ledger entries (RESTRICT).
+    // Do not attempt to delete users in teardown.
     await prisma.$disconnect();
   });
 
@@ -121,7 +129,13 @@ describe('verified money path (integration)', { skip: !runIntegration }, () => {
     assert.equal(res.body?.code, AUTH_ERROR_CODE.AUTH_REQUIRED);
   });
 
-  it('verified user passes verification middleware on checkout (not 403)', async () => {
+  it('verified user passes verification middleware on checkout (not 403)', async (t) => {
+    if (!isStripeKeyAllowedForHostedCheckout()) {
+      t.skip(
+        'Hosted checkout disabled: live Stripe key with NODE_ENV=test, or missing key. Use sk_test_* as STRIPE_SECRET_KEY or set STRIPE_SECRET_KEY_INTEGRATION.',
+      );
+      return;
+    }
     const { token } = await makeUser({ verified: true });
     const res = await request(app)
       .post('/create-checkout-session')

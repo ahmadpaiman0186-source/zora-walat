@@ -1,3 +1,5 @@
+import { envStrictTrue } from '../lib/localCheckoutProofRuntime.js';
+
 /**
  * Evaluates production money-path safety without side effects (for tests).
  * @param {NodeJS.ProcessEnv} processEnv
@@ -9,7 +11,7 @@ export function evaluateProductionMoneyPathSafety(processEnv) {
     return { ok: true };
   }
 
-  if (processEnv.DEV_CHECKOUT_AUTH_BYPASS === 'true') {
+  if (envStrictTrue(processEnv.DEV_CHECKOUT_AUTH_BYPASS)) {
     return {
       ok: false,
       code: 'dev_checkout_bypass_in_production',

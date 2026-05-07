@@ -33,6 +33,7 @@ router.get(
     const report = await runPhase1MoneyFulfillmentReconciliationScan({
       limit,
       paidIdleMs,
+      traceId: req.traceId ?? null,
     });
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json(report);

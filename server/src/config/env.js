@@ -12,6 +12,7 @@ import {
 } from './reloadlyOperatorIdDefaults.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
 import { parseFulfillmentJobRetryDelaysMsFromEnv } from './fulfillmentJobRetryConfig.js';
+import { envStrictTrue } from '../lib/localCheckoutProofRuntime.js';
 
 function parseList(raw, fallback) {
   const s = String(raw ?? '').trim();
@@ -293,6 +294,13 @@ export const env = {
   })(),
 
   /**
+   * Local-only live-proof bypass is **not** snapshotted on this object — it is evaluated per checkout
+   * in {@link validateControlledStripeLiveProofCheckout} via `localCheckoutProofRuntime.js` so
+   * `server/bootstrap.js` dotenv (including `.env.local`) always wins over any stale process.env
+   * timing. See startup logs in `serverLifecycle.js`.
+   */
+
+  /**
    * When true: `POST /api/wallet/topup` rejects requests without `Idempotency-Key` (UUID).
    * Recommended for scale / production; off by default for older clients.
    */
@@ -561,6 +569,68 @@ export const env = {
    * Default 10 minutes.
    */
   processingTimeoutMs: parsePositiveInt(process.env.PROCESSING_TIMEOUT_MS, 600_000),
+  /**
+   * When `processFulfillmentForOrder` is re-invoked while the row is already `PROCESSING` (e.g. worker
+   * redelivery after crash), allow reclaiming in-flight work only after this idle age on the attempt
+   * and only when `providerReference` is still empty (no evidence provider accepted work).
+   * Default 2 minutes — independent of `processingTimeoutMs` (background recovery stays conservative).
+   */
+  fulfillmentInlineStuckResumeMs: parsePositiveInt(
+    process.env.FULFILLMENT_INLINE_STUCK_RESUME_MS,
+    120_000,
+  ),
+  /**
+   * When true with `AIRTIME_PROVIDER=reloadly`, FULFILLED rows may call Reloadly reports GET (read-only)
+   * during `runProviderTruthVerificationTick` / targeted verification.
+   */
+  providerTruthLiveVerify: process.env.PROVIDER_TRUTH_LIVE_VERIFY === 'true',
+  /**
+   * When true, refuse `runFulfillmentDispatchForOrder` when `PaymentCheckout.trustScore` < 50.
+   * Default false (backward-safe).
+   */
+  trustScoreFulfillmentBlock: process.env.TRUST_SCORE_FULFILLMENT_BLOCK === 'true',
+
+  /** PAID/PROCESSING → SLA breach if still not FULFILLED after this (ms). Default 30m. */
+  paidFulfillmentSlaMs: parsePositiveInt(
+    process.env.PAID_FULFILLMENT_SLA_MS,
+    30 * 60 * 1000,
+  ),
+  /** USD cents: live provider verification priority over this order size. Default $50. */
+  providerTruthHighValueUsdCents: parsePositiveInt(
+    process.env.PROVIDER_TRUTH_HIGH_VALUE_USD_CENTS,
+    5000,
+  ),
+
+  /**
+   * When true, `evaluateFinancialSafetyLock` blocks fulfillment dispatch + claim when
+   * trust/fraud/provider signals fail the gate (`financialSafetyGate.js`).
+   */
+  financialSafetyLockEnabled: process.env.FINANCIAL_SAFETY_LOCK_ENABLED === 'true',
+  /**
+   * When true, money-adjacent POST routes using `requireBasicClientIntegrity` require
+   * `Sec-Fetch-*` (browser) or `X-ZW-Client: zw-*` (apps).
+   */
+  antiBotStrictHeaders: process.env.ANTI_BOT_STRICT_HEADERS === 'true',
+  financialSafetyMinTrustScore: parsePositiveInt(
+    process.env.FINANCIAL_SAFETY_MIN_TRUST_SCORE,
+    50,
+  ),
+  fraudRiskFulfillmentBlockThreshold: parsePositiveInt(
+    process.env.FRAUD_RISK_FULFILLMENT_BLOCK_THRESHOLD,
+    70,
+  ),
+  fraudRiskAlertThreshold: parsePositiveInt(process.env.FRAUD_RISK_ALERT_THRESHOLD, 50),
+  /** Absolute abnormal top-up size (USD cents). Default $500. */
+  fraudAbnormalAmountUsdCents: parsePositiveInt(
+    process.env.FRAUD_ABNORMAL_AMOUNT_USD_CENTS,
+    50_000,
+  ),
+  /** Multiplier vs user's recent median top-up size. */
+  fraudAbnormalAmountMultiplier: parsePositiveInt(
+    process.env.FRAUD_ABNORMAL_AMOUNT_MULTIPLIER,
+    3,
+  ),
+
   /** In-process poll for stuck-processing detection + recovery (`0` disables). Default 60s. */
   processingRecoveryPollMs: parseNonNegativeInt(
     process.env.PROCESSING_RECOVERY_POLL_MS,
@@ -598,11 +668,13 @@ export const env = {
 
   /**
    * TEMP TEST MODE — development only. `index.js` exits if DEV_CHECKOUT_AUTH_BYPASS is set when NODE_ENV=production.
-   * When true: `POST /create-checkout-session` may accept `X-ZW-Dev-Checkout` + secret (see authMiddleware).
+   * Snapshot for diagnostics; **runtime** gating uses `isDevCheckoutAuthBypassRuntimeConfigured()` in authMiddleware.
+   * When true: routes using `requireAuth` may accept header `X-ZW-Dev-Checkout` equal to `DEV_CHECKOUT_BYPASS_SECRET`.
    */
   devCheckoutAuthBypass:
     nodeEnv !== 'production' &&
-    process.env.DEV_CHECKOUT_AUTH_BYPASS === 'true',
+    nodeEnv !== 'test' &&
+    envStrictTrue(process.env.DEV_CHECKOUT_AUTH_BYPASS),
   devCheckoutBypassSecret: String(
     process.env.DEV_CHECKOUT_BYPASS_SECRET ?? '',
   ).trim(),
@@ -661,7 +733,17 @@ export const env = {
     process.env.FULFILLMENT_JOB_MAX_ATTEMPTS,
     4,
   ),
-  /** Legacy exponential backoff base (ms) — unused when custom backoff is active; kept for compatibility. */
+  /**
+   * `exponential` — BullMQ exponential backoff using `fulfillmentJobBackoffMs` as base delay.
+   * `custom` — use `fulfillmentJobRetryDelaysMs` via worker `backoffStrategy`.
+   */
+  fulfillmentJobBackoffStrategy: (() => {
+    const s = String(process.env.FULFILLMENT_JOB_BACKOFF_STRATEGY ?? '')
+      .trim()
+      .toLowerCase();
+    return s === 'custom' ? 'custom' : 'exponential';
+  })(),
+  /** Exponential backoff base (ms); also used as fixed delay floor for custom tail. */
   fulfillmentJobBackoffMs: parsePositiveInt(
     process.env.FULFILLMENT_JOB_BACKOFF_MS,
     2000,
@@ -694,6 +776,24 @@ export const env = {
   instanceId: String(
     process.env.INSTANCE_ID || process.env.HOSTNAME || 'single',
   ).slice(0, 128),
+
+  /**
+   * Soft launch: structured logging hooks + `GET /api/admin/soft-launch/summary`.
+   * Limit **who** can sign up/checkout via `OWNER_ALLOWED_EMAIL` / `ZW_REQUIRE_OWNER_ALLOWED_EMAIL`.
+   */
+  softLaunchMode: process.env.SOFT_LAUNCH_MODE === 'true',
+
+  /** L8 worker scan batch cap per drift category (clamped in scanners). */
+  selfHealingScanLimit: parsePositiveInt(process.env.ZW_SELF_HEALING_SCAN_LIMIT, 40),
+
+  /**
+   * When true, worker tick applies bounded repairs after detection (queue-only fulfillment).
+   * Default false — enable only with ops awareness.
+   */
+  selfHealingApplyRepairs: process.env.ZW_SELF_HEALING_APPLY === 'true',
+
+  /** Background worker interval for L8 runner (ms). 0 = disabled. */
+  selfHealingTickMs: parseNonNegativeInt(process.env.ZW_SELF_HEALING_TICK_MS, 0),
 };
 
 /**

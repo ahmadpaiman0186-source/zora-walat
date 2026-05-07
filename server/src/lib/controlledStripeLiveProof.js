@@ -1,4 +1,5 @@
 import { env } from '../config/env.js';
+import { isLocalControlledStripeLiveProofBypassActive } from './localCheckoutProofRuntime.js';
 
 function digitsOnly(s) {
   return String(s ?? '').replace(/\D/g, '');
@@ -10,6 +11,9 @@ function digitsOnly(s) {
 function proofEnvSlice(e) {
   return {
     controlledStripeLiveProof: Boolean(e.controlledStripeLiveProof),
+    localControlledStripeLiveProofBypass: Boolean(
+      e.localControlledStripeLiveProofBypass,
+    ),
     phase1FulfillmentOutboundEnabled: Boolean(e.phase1FulfillmentOutboundEnabled),
     stripeLiveProofMaxFinalUsdCents:
       e.stripeLiveProofMaxFinalUsdCents != null
@@ -25,6 +29,10 @@ function proofEnvSlice(e) {
  * Opt-in guardrails for a controlled local Stripe **live** checkout proof session.
  * Inactive unless `ZW_CONTROLLED_STRIPE_LIVE_PROOF=true`.
  *
+ * Local bypass ({@link isLocalControlledStripeLiveProofBypassActive} or explicit
+ * `localControlledStripeLiveProofBypass` on `envOverride`) skips **only** the amount-cap and
+ * recipient-allow-list checks. Outbound, config, and `recipient_required` still apply.
+ *
  * @param {object} p
  * @param {number} p.finalPriceCents server-priced total (USD cents) charged via Stripe
  * @param {string | null} p.recipientNational normalized national digits when present
@@ -35,7 +43,17 @@ export function validateControlledStripeLiveProofCheckout(
   { finalPriceCents, recipientNational, hasOperatorAndRecipient },
   envOverride = env,
 ) {
+  const hadExplicitLocalBypass =
+    typeof envOverride === 'object' &&
+    envOverride !== null &&
+    Object.prototype.hasOwnProperty.call(
+      envOverride,
+      'localControlledStripeLiveProofBypass',
+    );
   const ev = proofEnvSlice(envOverride);
+  const localBypass = hadExplicitLocalBypass
+    ? Boolean(ev.localControlledStripeLiveProofBypass)
+    : isLocalControlledStripeLiveProofBypassActive();
 
   if (!ev.controlledStripeLiveProof) {
     return { ok: true };
@@ -65,16 +83,6 @@ export function validateControlledStripeLiveProofCheckout(
     };
   }
 
-  const n = Number(finalPriceCents);
-  if (!Number.isInteger(n) || n > max) {
-    return {
-      ok: false,
-      code: 'stripe_live_proof_amount_cap',
-      message:
-        'Checkout total exceeds controlled live proof maximum (ZW_STRIPE_LIVE_PROOF_MAX_FINAL_USD_CENTS)',
-    };
-  }
-
   const allow = ev.stripeLiveProofAllowedRecipients;
   if (allow.length === 0) {
     return {
@@ -94,14 +102,26 @@ export function validateControlledStripeLiveProofCheckout(
     };
   }
 
-  const d = digitsOnly(recipientNational);
-  const allowed = allow.some((x) => digitsOnly(x) === d);
-  if (!allowed) {
-    return {
-      ok: false,
-      code: 'stripe_live_proof_recipient_denied',
-      message: 'Recipient is not on the controlled live proof allow-list',
-    };
+  if (!localBypass) {
+    const n = Number(finalPriceCents);
+    if (!Number.isInteger(n) || n > max) {
+      return {
+        ok: false,
+        code: 'stripe_live_proof_amount_cap',
+        message:
+          'Checkout total exceeds controlled live proof maximum (ZW_STRIPE_LIVE_PROOF_MAX_FINAL_USD_CENTS)',
+      };
+    }
+
+    const d = digitsOnly(recipientNational);
+    const allowed = allow.some((x) => digitsOnly(x) === d);
+    if (!allowed) {
+      return {
+        ok: false,
+        code: 'stripe_live_proof_recipient_denied',
+        message: 'Recipient is not on the controlled live proof allow-list',
+      };
+    }
   }
 
   return { ok: true };

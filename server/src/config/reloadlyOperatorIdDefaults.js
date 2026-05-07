@@ -1,18 +1,23 @@
 /**
  * Reloadly operator id mapping — server-only (never exposed to clients).
  *
- * Internal catalog keys (e.g. roshan, mtn, etisalat, afghanWireless) must map to
- * Reloadly numeric operator ids. Add real ids from the Reloadly dashboard here,
- * or set `RELOADLY_OPERATOR_MAP_JSON` in the environment (env overrides a key when non-empty).
+ * **Sandbox / dry-run placeholders (911001–911005):** numeric strings for local
+ * `npm run proof:reloadly-dry-run` and staging config validation only. They are **not**
+ * verified against Reloadly’s live catalog — override each key in `RELOADLY_OPERATOR_MAP_JSON`
+ * with the numeric **sandbox** operator id from your Reloadly dashboard (Topups → Afghanistan)
+ * before expecting a successful sandbox `POST /topups`.
+ *
+ * Internal keys are lowercase (matches `resolveReloadlyOperatorId` and JSON parse normalization).
+ * Catalog uses `afghanwireless` (not camelCase) for Afghan Wireless.
  *
  * @type {Readonly<Record<string, string>>}
  */
 export const RELOADLY_OPERATOR_ID_DEFAULTS = Object.freeze({
-  // Populate with sandbox/production ids from Reloadly as needed, e.g.:
-  // roshan: '12345',
-  // mtn: '67890',
-  // etisalat: '11111',
-  // afghanwireless: '22222',
+  mtn: '911001',
+  roshan: '911002',
+  afghanwireless: '911003',
+  etisalat: '911004',
+  salaam: '911005',
 });
 
 /**

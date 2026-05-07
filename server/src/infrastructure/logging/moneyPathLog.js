@@ -1,4 +1,5 @@
 import { getTraceId } from '../../lib/requestContext.js';
+import { sanitizePhase1ObservabilityFields } from './phase1ObservabilitySanitize.js';
 
 /**
  * One-line JSON for payment / webhook / fulfillment operations.
@@ -11,12 +12,15 @@ import { getTraceId } from '../../lib/requestContext.js';
 export function emitMoneyPathLog(event, fields = {}) {
   const traceId = fields.traceId ?? getTraceId() ?? undefined;
   const { traceId: _omit, ...rest } = fields;
-  const line = {
+  const safeRest = sanitizePhase1ObservabilityFields(rest);
+  const line = sanitizePhase1ObservabilityFields({
     moneyPath: true,
     event,
     t: new Date().toISOString(),
-    ...rest,
-  };
-  if (traceId) line.traceId = traceId;
+    ...safeRest,
+  });
+  if (typeof traceId === 'string' && traceId.trim()) {
+    line.traceId = traceId.trim().slice(0, 128);
+  }
   console.log(JSON.stringify(line));
 }

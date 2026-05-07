@@ -4,6 +4,20 @@
 **SKU (example):** Catalog **Roshan** airtime face **$10 USD** — internal product id suffix **`air_25m`** (see `src/lib/pricing.js` / app catalog); **`operatorKey`** = `roshan`.  
 **Assumption:** `RELOADLY_OPERATOR_MAP_JSON` contains a numeric Reloadly operator id for **`roshan`** valid in **your** sandbox account.
 
+### Afghanistan operator keys (Phase 1 mobile top-up)
+
+Checkout uses lowercase internal `operatorKey` values. The merged map (`reloadlyOperatorIdDefaults.js` + `RELOADLY_OPERATOR_MAP_JSON`) must resolve these keys to **numeric** Reloadly operator ids:
+
+| Key | Notes |
+|-----|--------|
+| `mtn` | |
+| `roshan` | Golden-path example SKU |
+| `afghanwireless` | Afghan Wireless (lowercase key, not camelCase) |
+| `etisalat` | |
+| `salaam` | |
+
+The repo ships **sandbox placeholder** defaults (`911001`–`911005`) so `npm run proof:reloadly-dry-run` can validate shape and coverage without secrets. **Replace** each value in `RELOADLY_OPERATOR_MAP_JSON` with the operator id from your Reloadly **sandbox** dashboard before relying on successful sandbox `POST /topups`. Malformed `RELOADLY_OPERATOR_MAP_JSON` fails the dry-run proof when the variable is non-empty.
+
 ## Preconditions (fail = stop)
 
 Run **`npm run reloadly:golden-path-preflight`** first — exits **1** if sandbox / airtime / credentials / **`roshan`** operator mapping are not aligned (no provider HTTP).

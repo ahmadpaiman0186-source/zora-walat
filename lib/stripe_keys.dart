@@ -9,6 +9,17 @@ abstract final class StripeKeys {
     defaultValue: '',
   );
 
+  /// True when a non-empty compile-time `STRIPE_PUBLISHABLE_KEY` was provided.
+  static bool get isPublishableKeyConfigured =>
+      publishableKey.trim().isNotEmpty;
+
+  /// `pk_test_…` / `pk_live_…` only (empty key → false).
+  static bool get publishableKeyLooksLikeStripePublishableKey {
+    final k = publishableKey.trim();
+    if (k.isEmpty) return false;
+    return k.startsWith('pk_test_') || k.startsWith('pk_live_');
+  }
+
   /// Lowercase ISO 4217 code sent to Stripe Checkout (`currency` field).
   static const String stripeCheckoutCurrencyCode = 'usd';
 }

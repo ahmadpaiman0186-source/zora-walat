@@ -33,6 +33,7 @@ export async function optionalAuth(req, res, next) {
           id: user.id,
           emailVerified: Boolean(user.emailVerifiedAt),
         };
+        req.identityAuthSource = 'jwt_optional';
       }
     }
   } catch {

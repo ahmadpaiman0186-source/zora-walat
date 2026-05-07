@@ -21,7 +21,10 @@ import {
 import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
 import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { safeSuffix, webTopupLog } from '../lib/webTopupObservability.js';
-import { validatePackageOperatorPair } from '../lib/allowedCheckout.js';
+import {
+  validatePackageOperatorPair,
+  resolveTrustedAmountUsdCents,
+} from '../lib/allowedCheckout.js';
 import { resolveCheckoutPricing } from '../domain/pricing/resolveCheckoutPricing.js';
 import {
   normalizeAfghanNational,
@@ -35,7 +38,10 @@ import {
 } from '../lib/checkoutRedirectUrls.js';
 import { checkoutRequestFingerprint } from '../lib/checkoutFingerprint.js';
 import {
-  findReusableCheckout,
+  logIdempotencyReplayHit,
+  tryReuseHostedCheckoutSession,
+} from '../payment/idempotencyService.js';
+import {
   createInitiatedRow,
   markCheckoutCreated,
   markCheckoutFailed,
@@ -45,9 +51,11 @@ import { writeOrderAudit } from '../services/orderAuditService.js';
 import { prisma } from '../db.js';
 import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { classifyCheckoutAbuseDistributed } from '../services/checkoutAbuseDetectorDistributed.js';
+import { checkoutAbuseBlockHighSeverityImmediately } from '../lib/fraudControlsPolicy.js';
 import { deviceFingerprintHash } from '../lib/deviceFingerprint.js';
 import { logOpsEvent } from '../lib/opsLog.js';
 import { recordCheckoutSessionCreated } from '../lib/opsMetrics.js';
+import { recordMissionPaymentCreated } from '../infrastructure/observability/phase1MissionObservability.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
 import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
 import { MONEY_PATH_OUTCOME } from '../constants/moneyPathOutcome.js';
@@ -64,15 +72,32 @@ import {
   pricingBreakdownResponseBody,
 } from '../lib/checkoutPricingBreakdown.js';
 import { buildPricingMeta } from '../domain/pricing/pricingSnapshotPolicy.js';
+import { hashRecipientNationalForFraud } from '../fraud/fraudHashes.js';
+import { incrementCheckoutVelocitySnapshot } from '../fraud/velocityStore.js';
+import { buildRiskDecisionPayload } from '../fraud/riskScoreEngine.js';
+import {
+  hostedCheckoutFraudHttpDecision,
+  logFraudRiskDecision,
+} from '../fraud/fraudMoneyPathGuard.js';
 
 export async function createCheckoutSession(req, res) {
-  const authUserId = req.user?.id;
+  const authUserId = req.identityTrust?.userId ?? req.user?.id;
   if (!authUserId) {
     return res
       .status(401)
       .json(
         clientErrorBody('Authentication required', AUTH_ERROR_CODE.AUTH_REQUIRED),
       );
+  }
+
+  if (env.softLaunchMode) {
+    console.log(
+      JSON.stringify({
+        softLaunchCheckoutAttempt: true,
+        userIdSuffix: String(authUserId).slice(-8),
+        t: new Date().toISOString(),
+      }),
+    );
   }
 
   if (!getValidatedStripeSecretKey()) {
@@ -247,6 +272,17 @@ export async function createCheckoutSession(req, res) {
     );
   }
 
+  let amountPackageMismatch = false;
+  if (parsed.packageId?.trim() && parsed.amountUsdCents != null) {
+    const face = resolveTrustedAmountUsdCents({
+      packageId: parsed.packageId.trim(),
+      amountUsdCents: null,
+    });
+    if (face.ok && face.cents !== parsed.amountUsdCents) {
+      amountPackageMismatch = true;
+    }
+  }
+
   let recipientNational = null;
   if (parsed.recipientPhone) {
     recipientNational = normalizeAfghanNational(parsed.recipientPhone);
@@ -309,11 +345,13 @@ export async function createCheckoutSession(req, res) {
     fingerprint,
     idempotencyKey,
     deviceFingerprintHash: deviceHash,
+    recipientNational,
     now: new Date(),
   });
 
-  if (abuse.severity === 'high') {
-    // Confirm there is an existing non-terminal checkout for this fingerprint.
+  const strictHighBlock = checkoutAbuseBlockHighSeverityImmediately();
+  let rapidInFlightFingerprint = false;
+  if (!strictHighBlock && abuse.severity === 'high') {
     const latestPending = await prisma.paymentCheckout.findFirst({
       where: {
         userId: authUserId,
@@ -325,41 +363,86 @@ export async function createCheckoutSession(req, res) {
       select: { createdAt: true },
       orderBy: { createdAt: 'desc' },
     });
-
     const ageMs = latestPending?.createdAt
       ? Date.now() - new Date(latestPending.createdAt).getTime()
       : null;
+    rapidInFlightFingerprint =
+      Boolean(latestPending) && ageMs != null && ageMs < 30_000;
+  }
 
-    // Block only if a pending checkout exists and the new attempt is rapid.
-    if (latestPending && ageMs != null && ageMs < 30_000) {
-      req.log?.warn(
-        {
-          securityEvent: 'checkout_abuse_blocked',
-          abuseSeverity: abuse.severity,
-          abuseReasonCode: abuse.reasonCode,
-          reasonCodes: abuse.reasonCodes,
-          abuseDetail: abuse.detail,
-          userId: authUserId,
-          ip: req.ip,
-          fingerprintPrefix: fingerprint.slice(0, 12),
-          pendingAgeMs: ageMs,
-        },
-        'security',
-      );
-      return res.status(429).json({
-        error: 'Too many checkout attempts; please wait.',
-        moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
-        abuse: {
-          severity: abuse.severity,
-          reasonCode: abuse.reasonCode,
-          reasonCodes: abuse.reasonCodes,
-          detail: abuse.detail,
-          recommendedAction: abuse.recommendedAction,
-        },
-      });
-    }
+  const recipientPhoneHash = hashRecipientNationalForFraud(recipientNational);
+  const velocity = await incrementCheckoutVelocitySnapshot({
+    userId: authUserId,
+    ip: req.ip,
+    recipientPhoneHash,
+    operatorKey: parsed.operatorKey ?? null,
+    amountCents: trustedCents,
+    idempotencyKey,
+  });
 
-    // High severity without pending-in-flight is only flagged, never blocked.
+  const risk = buildRiskDecisionPayload({
+    traceId: req.traceId ?? null,
+    abuseSeverity: abuse.severity,
+    abuseReasonCodes: abuse.reasonCodes ?? [],
+    velocity,
+    amountPackageMismatch,
+    policyRequiresVerifiedEmail: !env.allowUnverifiedCheckoutInDev,
+    emailVerified: Boolean(req.user?.emailVerified),
+    isLocalProofIdentity: Boolean(req.identityTrust?.isLocalProof),
+  });
+
+  logFraudRiskDecision(req.log, {
+    decision: risk.decision,
+    severity: risk.severity,
+    reasonCodes: risk.reasonCodes,
+    score: risk.score,
+    traceId: risk.traceId,
+    userId: authUserId,
+    recipientPhoneHash,
+    clientIp: req.ip,
+  });
+
+  const { httpBlock, status } = hostedCheckoutFraudHttpDecision({
+    risk,
+    abuse,
+    rapidInFlightFingerprint,
+  });
+
+  if (httpBlock) {
+    req.log?.warn(
+      {
+        securityEvent: 'checkout_fraud_shield_blocked',
+        fraudDecision: risk.decision,
+        fraudSeverity: risk.severity,
+        fraudScore: risk.score,
+        abuseSeverity: abuse.severity,
+        abuseReasonCode: abuse.reasonCode,
+        reasonCodes: abuse.reasonCodes,
+        traceId: req.traceId ?? null,
+        fingerprintPrefix: fingerprint.slice(0, 12),
+      },
+      'security',
+    );
+    return res.status(status || 429).json({
+      error: 'Too many checkout attempts; please wait.',
+      moneyPathOutcome: MONEY_PATH_OUTCOME.REJECTED,
+      fraud: {
+        severity: risk.severity,
+        decision: risk.decision,
+        score: risk.score,
+        reasonCodes: risk.reasonCodes,
+      },
+      abuse: {
+        severity: abuse.severity,
+        reasonCode: abuse.reasonCode,
+        reasonCodes: abuse.reasonCodes,
+        detail: abuse.detail,
+        recommendedAction: abuse.recommendedAction,
+      },
+    });
+  }
+
+  if (abuse.severity === 'high') {
     req.log?.warn(
       {
         securityEvent: 'checkout_abuse_flagged',
@@ -390,12 +473,17 @@ export async function createCheckoutSession(req, res) {
   }
 
   try {
-    const reused = await findReusableCheckout({
+    const reused = await tryReuseHostedCheckoutSession({
       idempotencyKey,
       fingerprint,
       userId: authUserId,
     });
     if (reused) {
+      logIdempotencyReplayHit(req.log, {
+        idempotencyKey,
+        orderId: reused.id,
+        traceId: req.traceId ?? null,
+      });
       req.log?.info(
         { checkoutId: reused.id, reused: true },
         'checkout idempotent replay',
@@ -509,6 +597,10 @@ export async function createCheckoutSession(req, res) {
               internalCheckoutId: row.id,
               idempotencyKey,
               appUserId: authUserId,
+              zwTraceId:
+                typeof req.traceId === 'string' && req.traceId.trim()
+                  ? req.traceId.trim().slice(0, 128)
+                  : '',
             },
           },
           { idempotencyKey },
@@ -520,11 +612,17 @@ export async function createCheckoutSession(req, res) {
       stripeCheckoutUrl: session.url,
     });
 
+    recordMissionPaymentCreated(row.id, req.traceId ?? null);
+
     console.log('STRIPE_SESSION_CREATED', session.id);
 
     await writeOrderAudit(prisma, {
       event: 'checkout_session_created',
-      payload: { orderId: row.id, stripeCheckoutSessionId: session.id },
+      payload: {
+        orderId: row.id,
+        stripeCheckoutSessionId: session.id,
+        traceId: req.traceId ?? null,
+      },
       ip: req.ip,
     });
 
@@ -584,9 +682,17 @@ export async function createCheckoutSession(req, res) {
  * without creating a Stripe session (for review UI before pay).
  */
 export async function createCheckoutPricingQuote(req, res) {
+  const validated = req.validated;
+  if (validated == null || typeof validated !== 'object' || Array.isArray(validated)) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      code: 'EDGE_VALIDATION_FAILED',
+      details: [{ path: [], message: 'Validated checkout payload required' }],
+    });
+  }
   let parsed;
   try {
-    parsed = checkoutSessionBodySchema.parse(req.body ?? {});
+    parsed = checkoutSessionBodySchema.parse(validated);
   } catch (err) {
     if (err instanceof ZodError) {
       req.log?.warn(

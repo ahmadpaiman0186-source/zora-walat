@@ -9,12 +9,14 @@ import {
   walletTopupPerMinuteLimiter,
 } from '../middleware/rateLimits.js';
 import { blockMoneyRoutesIfPrelaunch } from '../middleware/prelaunchMoneyBlock.js';
+import { requireMoneyPathIdentity } from '../middleware/requireMoneyPathIdentity.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
 
 router.use(requireAuth);
 router.use(authenticatedApiLimiter);
+router.use(requireMoneyPathIdentity({ mode: 'strict_authenticated' }));
 
 router.get('/balance', asyncHandler(wallet.getBalance));
 router.post(

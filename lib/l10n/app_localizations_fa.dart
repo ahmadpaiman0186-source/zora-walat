@@ -421,6 +421,18 @@ class AppLocalizationsFa extends AppLocalizations {
       'کلید publishable Stripe برای این build تنظیم نشده.';
 
   @override
+  String get stripePublishableKeyDevBannerTitle =>
+      'Local dev: Stripe publishable key not passed to this build';
+
+  @override
+  String get stripePublishableKeyDevBannerBody =>
+      'Hosted Checkout still opens from our server. Add --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_… to silence this banner and enable client-side Stripe helpers.';
+
+  @override
+  String get stripePublishableKeyDevStripeSectionNote =>
+      'Hosted Checkout uses the server; a publishable key is optional here but recommended for local parity.';
+
+  @override
   String get stripeKeyLoaded =>
       'پرداخت کارت آماده است. سرور شما PaymentIntent می‌سازد و client secret برمی‌گرداند.';
 

@@ -44,6 +44,28 @@ if (envLocalLoaded) {
   });
 }
 
+/**
+ * After `.env` + `.env.local`, pin a supervised production-like profile for
+ * `npm run proof:live-simulation-local` (test Stripe + no outbound) without editing local files.
+ */
+if (String(process.env.ZW_LIVE_SIMULATION_PROOF ?? '').trim().toLowerCase() === 'true') {
+  process.env.NODE_ENV = 'production';
+  process.env.ALLOW_STRIPE_TEST_KEYS_IN_PRODUCTION = 'true';
+  process.env.PRELAUNCH_LOCKDOWN = 'false';
+  process.env.PAYMENTS_LOCKDOWN_MODE = 'false';
+  process.env.DEV_CHECKOUT_AUTH_BYPASS = 'false';
+  process.env.ZW_ALLOW_LOCAL_FLUTTER_WEB_CORS = 'false';
+  process.env.PHASE1_FULFILLMENT_OUTBOUND_ENABLED = 'false';
+}
+
+/** Paths only (no secrets) — for startup diagnostics. */
+export const zwDotenvBootstrapReport = Object.freeze({
+  serverRoot,
+  dotEnvPath: join(serverRoot, '.env'),
+  dotEnvLocalPath: join(serverRoot, '.env.local'),
+  dotEnvLocalFileExistedAtBoot: envLocalLoaded,
+});
+
 /** True when `STRIPE_WEBHOOK_SECRET` was set before bootstrap and restored after dotenv (local/CI listen alignment). */
 let stripeWebhookSecretEffectiveSource = 'dotenv_or_platform';
 if (
@@ -52,6 +74,26 @@ if (
 ) {
   process.env.STRIPE_WEBHOOK_SECRET = inheritedStripeWebhookSecret;
   stripeWebhookSecretEffectiveSource = 'process_inheritance';
+}
+
+/**
+ * Live simulation proof (`ZW_LIVE_SIMULATION_PROOF=true`): test Stripe keys only, no Reloadly outbound.
+ * When dotenv leaves a non-whsec or too-short placeholder in STRIPE_WEBHOOK_SECRET, pin a well-formed
+ * synthetic signing secret so in-process webhook verification exercises real crypto (still test-mode keys).
+ */
+if (String(process.env.ZW_LIVE_SIMULATION_PROOF ?? '').trim().toLowerCase() === 'true') {
+  const whAfter = String(process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
+  const skSim = String(process.env.STRIPE_SECRET_KEY ?? '').trim();
+  const testStripeSecret =
+    (skSim.startsWith('sk_test_') || skSim.startsWith('rk_test_')) &&
+    skSim.length >= 60;
+  if (
+    testStripeSecret &&
+    (!whAfter.startsWith('whsec_') || whAfter.length < 20)
+  ) {
+    process.env.STRIPE_WEBHOOK_SECRET =
+      'whsec_test_synthetic_live_simulation_proof_webhook_01';
+  }
 }
 
 if (inheritedPort) {

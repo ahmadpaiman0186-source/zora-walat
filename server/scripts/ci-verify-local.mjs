@@ -27,4 +27,7 @@ run('test:ci', 'npm', ['run', 'test:ci']);
 console.error(
   '\n[verify:ci-local] OK — this is local proof only; still confirm GitHub Actions on push.\n',
 );
+console.error(
+  '[verify:ci-local] Optional: run `npm run ci:release-checks` with CI-like env (see server/docs/CI_VERIFICATION.md).\n',
+);
 process.exit(0);

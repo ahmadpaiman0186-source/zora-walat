@@ -48,6 +48,7 @@ node_modules/
 # Named env variants (e.g. .env.staging); keep templates tracked
 **/.env.*
 !**/.env.local.example
+!**/.env.production.example
 **/stripe_secret.key
 
 # Symbolication related

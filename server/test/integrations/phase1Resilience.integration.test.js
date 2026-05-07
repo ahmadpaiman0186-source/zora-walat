@@ -21,6 +21,7 @@ import {
 } from '../../src/services/phase1StripeChargeIncidents.js';
 import { ensureQueuedFulfillmentAttempt } from '../../src/services/fulfillmentProcessingService.js';
 import { getCanonicalPhase1OrderForUser } from '../../src/services/canonicalPhase1OrderService.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
@@ -32,9 +33,12 @@ const runIntegration = Boolean(dbUrl);
 function checkoutSessionFixture(checkoutId, overrides = {}) {
   return {
     id: `cs_chaos_${randomUUID().slice(0, 8)}`,
+    object: 'checkout.session',
+    mode: 'payment',
+    payment_status: 'paid',
     amount_total: 1000,
     currency: 'usd',
-    payment_intent: 'pi_chaos',
+    payment_intent: `pi_chaos_${randomUUID()}`,
     customer: 'cus_chaos',
     metadata: { internalCheckoutId: checkoutId },
     ...overrides,
@@ -59,18 +63,8 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    for (const eid of eventIds) {
-      await prisma.stripeWebhookEvent.deleteMany({ where: { id: eid } });
-    }
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    // Ledger journal entries are immutable and reference PaymentCheckout/FulfillmentAttempt with RESTRICT.
+    // Do not attempt DB row deletion in teardown; rely on unique IDs + isolated integration DB.
     userIds.length = 0;
     orderIds.length = 0;
     eventIds.length = 0;
@@ -128,7 +122,8 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
   it('chaos: replay checkout.session.completed with new event id does not duplicate fulfillment attempts', async () => {
     const user = await makeUser();
     const order = await makePendingCheckout(user.id);
-    const session = checkoutSessionFixture(order.id, { payment_intent: 'pi_replay' });
+    const piReplay = `pi_replay_${randomUUID()}`;
+    const session = checkoutSessionFixture(order.id, { payment_intent: piReplay });
     const evt1 = `evt_chaos_a_${randomUUID()}`;
     await runPaidWebhook(evt1, session);
     const evt2 = `evt_chaos_b_${randomUUID()}`;
@@ -165,12 +160,13 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
   it('stripe charge.refunded updates postPaymentIncident on canonical read', async () => {
     const user = await makeUser();
     const order = await makePendingCheckout(user.id);
+    const piRefund = `pi_refund_${randomUUID()}`;
     await prisma.paymentCheckout.update({
       where: { id: order.id },
       data: {
         orderStatus: ORDER_STATUS.FULFILLED,
         status: PAYMENT_CHECKOUT_STATUS.RECHARGE_COMPLETED,
-        stripePaymentIntentId: 'pi_refund_chaos',
+        stripePaymentIntentId: piRefund,
       },
     });
     const evt = `evt_rf_${randomUUID()}`;
@@ -179,7 +175,7 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
       eventIds.push(evt);
       await applyPhase1ChargeRefunded(
         tx,
-        { id: 'ch_test', payment_intent: 'pi_refund_chaos' },
+        { id: 'ch_test', payment_intent: piRefund },
         evt,
       );
     });
@@ -191,12 +187,13 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
   it('stripe charge.dispute.created updates postPaymentIncident', async () => {
     const user = await makeUser();
     const order = await makePendingCheckout(user.id);
+    const piDsp = `pi_dsp_${randomUUID()}`;
     await prisma.paymentCheckout.update({
       where: { id: order.id },
       data: {
         orderStatus: ORDER_STATUS.PAID,
         status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
-        stripePaymentIntentId: 'pi_dsp_chaos',
+        stripePaymentIntentId: piDsp,
       },
     });
     const evt = `evt_dsp_${randomUUID()}`;
@@ -205,7 +202,7 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
       eventIds.push(evt);
       await applyPhase1DisputeCreated(
         tx,
-        { id: 'dp_test', payment_intent: 'pi_dsp_chaos' },
+        { id: 'dp_test', payment_intent: piDsp },
         evt,
       );
     });
@@ -218,12 +215,13 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
   it('stripe charge.dispute.created maps payment_intent via charges.retrieve when omitted on dispute', async () => {
     const user = await makeUser();
     const order = await makePendingCheckout(user.id);
+    const piLookup = `pi_lookup_${randomUUID()}`;
     await prisma.paymentCheckout.update({
       where: { id: order.id },
       data: {
         orderStatus: ORDER_STATUS.PAID,
         status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
-        stripePaymentIntentId: 'pi_from_charge_lookup',
+        stripePaymentIntentId: piLookup,
       },
     });
     const evt = `evt_dsp_lookup_${randomUUID()}`;
@@ -232,7 +230,7 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
         retrieve: async () => ({
           id: 'ch_lookup_sim',
           object: 'charge',
-          payment_intent: 'pi_from_charge_lookup',
+          payment_intent: piLookup,
         }),
       },
     };

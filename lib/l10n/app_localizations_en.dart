@@ -425,6 +425,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Stripe publishable key not configured for this build.';
 
   @override
+  String get stripePublishableKeyDevBannerTitle =>
+      'Local dev: Stripe publishable key not passed to this build';
+
+  @override
+  String get stripePublishableKeyDevBannerBody =>
+      'Hosted Checkout still opens from our server. Add --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_… to silence this banner and enable client-side Stripe helpers.';
+
+  @override
+  String get stripePublishableKeyDevStripeSectionNote =>
+      'Hosted Checkout uses the server; a publishable key is optional here but recommended for local parity.';
+
+  @override
   String get stripeKeyLoaded =>
       'Card payments ready. Your server creates the PaymentIntent and returns the client secret.';
 

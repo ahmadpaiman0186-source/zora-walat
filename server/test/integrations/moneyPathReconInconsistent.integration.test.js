@@ -16,6 +16,7 @@ import {
   RECON_DIVERGENCE_CODE,
   RECON_V2_ACTION,
 } from '../../src/services/phase1MoneyFulfillmentReconciliationEngine.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
@@ -36,15 +37,9 @@ describe('money path recon inconsistent (integration)', { skip: !runIntegration 
   });
 
   afterEach(async () => {
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    await deleteLedgerJournalForPaymentCheckouts(prisma, orderIds);
+    // Ledger journal entries are immutable and reference PaymentCheckout/FulfillmentAttempt with RESTRICT.
+    // Do not attempt DB row deletion in teardown; rely on unique IDs + isolated integration DB.
     userIds.length = 0;
     orderIds.length = 0;
   });
@@ -77,7 +72,7 @@ describe('money path recon inconsistent (integration)', { skip: !runIntegration 
         riskBufferUsdCents: 0,
         projectedNetMarginBp: 400,
         paidAt: new Date(),
-        stripePaymentIntentId: 'pi_recon_inc',
+        stripePaymentIntentId: `pi_recon_${randomUUID()}`,
       },
     });
     orderIds.push(row.id);

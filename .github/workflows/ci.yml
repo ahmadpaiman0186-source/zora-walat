@@ -45,8 +45,23 @@ jobs:
       REDIS_URL: redis://localhost:6379/0
       # Supertest has no browser Origin; checkout + Stripe return URLs need a stable client base.
       CLIENT_URL: http://127.0.0.1:3000
+      CORS_ORIGINS: http://127.0.0.1:3000,http://localhost:3000
       # Default dev NODE_ENV would otherwise allow unverified checkout (see env.allowUnverifiedCheckoutInDev).
       ALLOW_UNVERIFIED_CHECKOUT: "false"
+      # Synthetic Stripe + JWT for bootstrap/proofs/preflight — not real secrets (see docs/CI_VERIFICATION.md).
+      STRIPE_WEBHOOK_SECRET: whsec_ciAAAAAAAAAAAAAAAAAAAAAAAA
+      # Synthetic restricted test key (rk_test_ + 52 chars, length 60) — not a Dashboard secret.
+      STRIPE_SECRET_KEY: rk_test_0000000000000000000000000000000000000000000000000000000000
+      JWT_ACCESS_SECRET: ci_jwt_access_only_integration_test_process_zzzzzzzzzz
+      JWT_REFRESH_SECRET: ci_jwt_refresh_only_integration_test_process_zzzzzzzzz
+      ACCESS_TOKEN_TTL: "900"
+      REFRESH_TOKEN_TTL: "604800"
+      # Production-profile preflight must pass without live payments (lockdown + mock providers).
+      PRELAUNCH_LOCKDOWN: "true"
+      AIRTIME_PROVIDER: mock
+      ALLOW_MOCK_AIRTIME_IN_PRODUCTION: "true"
+      WEBTOPUP_FULFILLMENT_PROVIDER: mock
+      ALLOW_MOCK_WEBTOPUP_FULFILLMENT_IN_PRODUCTION: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -69,12 +84,15 @@ jobs:
       - name: Launch readiness (post-certification)
         timeout-minutes: 5
         run: npm run phase1:launch-readiness -- --strict --require-ci-money-path-certified
+      - name: Release checks (pricing, local proofs, production preflight)
+        timeout-minutes: 25
+        run: npm run ci:release-checks
       - name: Phase 1 money-path integrity summary
         if: always()
         run: |
           if [ "${{ steps.money_path.outcome }}" = "success" ]; then
             echo "## Phase 1 money-path integrity: PASS" >> "$GITHUB_STEP_SUMMARY"
-            echo "Preflight: \`npm run test:integration:preflight\` | Migrate: \`npm run db:migrate:integration\` | Tests: \`npm run test:ci\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "Preflight: \`npm run test:integration:preflight\` | Migrate: \`npm run db:migrate:integration\` | Tests: \`npm run test:ci\` | Release: \`npm run ci:release-checks\`" >> "$GITHUB_STEP_SUMMARY"
             echo "Nightly mock fortress also runs via workflow \`nightly-fortress.yml\` (schedule + manual)." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "## Phase 1 money-path integrity: FAIL" >> "$GITHUB_STEP_SUMMARY"
@@ -90,4 +108,5 @@ jobs:
           channel: stable
       - run: flutter pub get
       - run: flutter gen-l10n
+      - run: flutter analyze
       - run: flutter test

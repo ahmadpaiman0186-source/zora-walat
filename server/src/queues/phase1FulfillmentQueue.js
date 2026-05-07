@@ -23,13 +23,18 @@ export function getPhase1FulfillmentQueue() {
   if (queueSingleton) return queueSingleton;
   try {
     connectionSingleton = createBullmqConnection();
+    const backoff =
+      env.fulfillmentJobBackoffStrategy === 'custom'
+        ? { type: 'custom' }
+        : {
+            type: 'exponential',
+            delay: Math.max(500, env.fulfillmentJobBackoffMs),
+          };
     queueSingleton = new Queue(PHASE1_FULFILLMENT_QUEUE_NAME, {
       connection: connectionSingleton,
       defaultJobOptions: {
         attempts: Math.max(1, env.fulfillmentJobMaxAttempts),
-        backoff: {
-          type: 'custom',
-        },
+        backoff,
         removeOnComplete: { count: 25_000 },
         removeOnFail: false,
       },

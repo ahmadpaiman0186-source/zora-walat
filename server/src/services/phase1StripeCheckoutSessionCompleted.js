@@ -9,16 +9,61 @@ import {
   emitPhase1FulfillmentQueued,
   emitPhase1PaymentSucceeded,
 } from '../infrastructure/logging/phase1Observability.js';
+import { recordMissionPaymentPaid } from '../infrastructure/observability/phase1MissionObservability.js';
 import { emitFortressIdempotencyNoop } from '../lib/transactionFortressIdempotency.js';
 import { validatePaymentCheckoutStatusTransition } from '../domain/orders/phase1LifecyclePolicy.js';
-import { evaluateStripeCheckoutSessionRowIntegrity } from '../lib/paymentCompletionLinkage.js';
 import { mirrorCanonicalPaymentCheckoutById } from './canonicalTransactionSync.js';
+import {
+  PAYMENT_CORE_STATE,
+  validateLayer3WebPaidTransition,
+} from '../payment/paymentStateMachine.js';
+import {
+  WEBHOOK_PAYMENT_TRUTH_FAILURE,
+  classifyWebhookPaymentTruthFailure,
+  validateStripeCheckoutSessionTruth,
+} from '../payment/webhookTruthContract.js';
+import { postPaymentCapturedLedger } from '../ledger/ledgerService.js';
+import { appendPaymentTraceChainHop } from '../lib/paymentTraceChain.js';
+import { computePaymentCheckoutTrustScore } from '../lib/paymentCheckoutTrust.js';
+import { persistFraudAssessmentInTx } from './fraudDetectionService.js';
 
-const PAYMENT_PRE_SUCCESS = [
+/** Rows eligible for `checkout.session.completed` → PAID (matches `updateMany` `status` guard). */
+export const PHASE1_CHECKOUT_SESSION_PAID_PRE_STATUSES = [
   PAYMENT_CHECKOUT_STATUS.INITIATED,
   PAYMENT_CHECKOUT_STATUS.PAYMENT_PENDING,
   PAYMENT_CHECKOUT_STATUS.CHECKOUT_CREATED,
 ];
+
+/**
+ * True when a replay may still need `applyPhase1CheckoutSessionCompleted` after the
+ * `StripeWebhookEvent` row already exists (first txn committed without PAID).
+ *
+ * @param {import('@prisma/client').PaymentCheckout | Record<string, unknown> | null | undefined} row
+ */
+export function paymentCheckoutPendingForPhase1CheckoutSessionPaidReplay(row) {
+  if (!row || typeof row !== 'object') return false;
+  if (row.userId == null) return false;
+  if (String(row.orderStatus ?? '') !== ORDER_STATUS.PENDING) return false;
+  const ps = String(row.status ?? '');
+  return PHASE1_CHECKOUT_SESSION_PAID_PRE_STATUSES.includes(ps);
+}
+
+/**
+ * Prefer checkout-time trace carried in Stripe session metadata (`zwTraceId`) so webhook
+ * fulfillment correlates with the API request that created the session.
+ *
+ * @param {object} session
+ * @param {string | null | undefined} optsTraceId
+ */
+export function resolvePhase1CheckoutCorrelationTraceId(session, optsTraceId) {
+  const m = session?.metadata;
+  const z = m && typeof m.zwTraceId === 'string' ? m.zwTraceId.trim() : '';
+  if (z) return z.slice(0, 128);
+  if (optsTraceId != null && String(optsTraceId).trim()) {
+    return String(optsTraceId).trim().slice(0, 128);
+  }
+  return null;
+}
 
 export function stripeSessionPaymentIntentId(session) {
   const pi = session.payment_intent;
@@ -50,7 +95,7 @@ export function stripeSessionCustomerId(session) {
  */
 export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
   const { eventId, session, log } = opts;
-  const traceId = opts.traceId ?? null;
+  const traceId = resolvePhase1CheckoutCorrelationTraceId(session, opts.traceId);
   const requestId = opts.requestId ?? traceId;
   const stripeEventType = opts.stripeEventType ?? 'checkout.session.completed';
   let orderIdToScheduleFulfillment = null;
@@ -108,31 +153,137 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
     };
   }
 
-  const integrity = evaluateStripeCheckoutSessionRowIntegrity(row, session);
-  if (!integrity.ok) {
-    if (integrity.securityEvent) {
-      log?.warn?.(
-        {
-          securityEvent: integrity.securityEvent,
-          reason: integrity.reason,
-          orderIdSuffix: String(raw).slice(-12),
-          stripeSessionIdSuffix:
-            typeof session?.id === 'string' ? session.id.slice(-12) : null,
-        },
-        'security',
-      );
-    } else {
-      log?.warn?.(
-        { reason: integrity.reason, orderIdSuffix: String(raw).slice(-12) },
-        'stripe webhook: checkout session integrity',
-      );
+  const truth = validateStripeCheckoutSessionTruth({
+    session,
+    order: row,
+    stripeEventType,
+    traceId,
+  });
+
+  if (!truth.ok) {
+    const cls = classifyWebhookPaymentTruthFailure(truth.failureClass);
+    log?.warn?.(
+      {
+        event: 'webhook_truth_rejected',
+        orderId: raw,
+        traceId: traceId ?? null,
+        ...truth.audit,
+        failureClass: truth.failureClass,
+        manualReview: truth.manualReview ?? cls.manualReview,
+      },
+      'payment_core',
+    );
+
+    if (truth.failureClass === WEBHOOK_PAYMENT_TRUTH_FAILURE.DUPLICATE_EVENT) {
+      emitFortressIdempotencyNoop('CHECKOUT_SESSION_REPLAY_AFTER_PAID', {
+        orderIdSuffix: String(raw).slice(-12),
+        orderStatus: row.orderStatus,
+      });
+      await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
+      return {
+        orderIdToScheduleFulfillment,
+        checkoutAmountMismatchOrderId,
+        paymentIntentIdsForFeeCapture,
+      };
     }
-    if (integrity.reason === 'stripe_checkout_session_id_mismatch' && row.orderStatus === ORDER_STATUS.PENDING) {
-      const payTrans = validatePaymentCheckoutStatusTransition(
-        row.status,
-        PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+
+    if (truth.failureClass === WEBHOOK_PAYMENT_TRUTH_FAILURE.UNPAID_SESSION) {
+      await writeOrderAudit(tx, {
+        event: 'webhook_truth_manual_review',
+        payload: {
+          orderId: raw,
+          reason: truth.failureClass,
+          traceId: traceId ?? null,
+        },
+        ip: null,
+      });
+      await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
+      return {
+        orderIdToScheduleFulfillment,
+        checkoutAmountMismatchOrderId,
+        paymentIntentIdsForFeeCapture,
+      };
+    }
+
+    if (truth.failureClass === WEBHOOK_PAYMENT_TRUTH_FAILURE.STRIPE_SESSION_MISMATCH) {
+      const ir = truth.audit?.integrityReason;
+      if (ir === 'stripe_checkout_session_id_mismatch' && row.orderStatus === ORDER_STATUS.PENDING) {
+        const payTrans = validatePaymentCheckoutStatusTransition(
+          row.status,
+          PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+        );
+        if (payTrans.ok) {
+          assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
+          await tx.paymentCheckout.updateMany({
+            where: {
+              id: raw,
+              orderStatus: ORDER_STATUS.PENDING,
+            },
+            data: {
+              orderStatus: ORDER_STATUS.FAILED,
+              status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+              failedAt: new Date(),
+              failureReason: 'stripe_checkout_session_mismatch',
+            },
+          });
+          await writeOrderAudit(tx, {
+            event: 'order_status_changed',
+            payload: {
+              orderId: raw,
+              to: ORDER_STATUS.FAILED,
+              reason: 'stripe_checkout_session_mismatch',
+              traceId: traceId ?? null,
+            },
+            ip: null,
+          });
+        }
+      }
+      await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
+      return {
+        orderIdToScheduleFulfillment,
+        checkoutAmountMismatchOrderId,
+        paymentIntentIdsForFeeCapture,
+      };
+    }
+
+    if (
+      truth.failureClass === WEBHOOK_PAYMENT_TRUTH_FAILURE.AMOUNT_MISMATCH ||
+      truth.failureClass === WEBHOOK_PAYMENT_TRUTH_FAILURE.CURRENCY_MISMATCH
+    ) {
+      checkoutAmountMismatchOrderId = raw;
+      const total = session.amount_total;
+      const sessionCurrency = String(session.currency ?? 'usd').toLowerCase();
+      const rowCurrency = String(row.currency ?? 'usd').toLowerCase();
+      log?.error?.(
+        {
+          expectedCents: row.amountUsdCents,
+          stripeTotal: total,
+          expectedCurrency: rowCurrency,
+          stripeCurrency: sessionCurrency,
+        },
+        'stripe webhook: amount or currency mismatch (webhook truth)',
       );
-      if (payTrans.ok) {
+      if (row.orderStatus === ORDER_STATUS.PENDING) {
+        const payTrans = validatePaymentCheckoutStatusTransition(
+          row.status,
+          PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
+        );
+        if (!payTrans.ok) {
+          log?.error?.(
+            {
+              fortressDenial: payTrans.denial,
+              detail: payTrans.detail,
+              orderIdSuffix: String(raw).slice(-12),
+            },
+            'phase1 webhook: payment row transition denied (mismatch fail path)',
+          );
+          await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
+          return {
+            orderIdToScheduleFulfillment,
+            checkoutAmountMismatchOrderId,
+            paymentIntentIdsForFeeCapture,
+          };
+        }
         assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
         await tx.paymentCheckout.updateMany({
           where: {
@@ -143,7 +294,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
             orderStatus: ORDER_STATUS.FAILED,
             status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
             failedAt: new Date(),
-            failureReason: 'stripe_checkout_session_mismatch',
+            failureReason: 'stripe_amount_currency_mismatch',
           },
         });
         await writeOrderAudit(tx, {
@@ -151,12 +302,20 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
           payload: {
             orderId: raw,
             to: ORDER_STATUS.FAILED,
-            reason: 'stripe_checkout_session_mismatch',
+            reason: 'amount_currency_mismatch',
+            traceId: traceId ?? null,
           },
           ip: null,
         });
       }
+      await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
+      return {
+        orderIdToScheduleFulfillment,
+        checkoutAmountMismatchOrderId,
+        paymentIntentIdsForFeeCapture,
+      };
     }
+
     await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
@@ -164,92 +323,49 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
       paymentIntentIdsForFeeCapture,
     };
   }
-  const stripeSessionId = integrity.stripeSessionId;
 
-  const total = session.amount_total;
-  const sessionCurrency = String(session.currency ?? 'usd').toLowerCase();
-  const rowCurrency = String(row.currency ?? 'usd').toLowerCase();
-  if (total == null) {
-    log?.warn?.('stripe webhook: missing amount_total');
-    return {
-      orderIdToScheduleFulfillment,
-      checkoutAmountMismatchOrderId,
-      paymentIntentIdsForFeeCapture,
-    };
-  }
+  log?.info?.(
+    {
+      event: 'webhook_truth_validated',
+      orderId: raw,
+      traceId: traceId ?? null,
+      ...truth.audit,
+    },
+    'payment_core',
+  );
 
-  if (total !== row.amountUsdCents || sessionCurrency !== rowCurrency) {
-    checkoutAmountMismatchOrderId = raw;
-    log?.error?.(
+  const stripeSessionId = truth.stripeSessionId;
+
+  log?.info?.(
+    {
+      event: 'checkout_webhook_phase1_preflight',
+      checkoutId: raw,
+      dbOrderStatus: row.orderStatus,
+      dbPaymentCheckoutStatus: row.status,
+      sessionMode: String(session.mode ?? ''),
+      sessionPaymentStatus: String(session.payment_status ?? ''),
+      stripeEventId: eventId,
+      traceId: traceId ?? null,
+    },
+    'payment_core',
+  );
+
+  const l3PaidGate = validateLayer3WebPaidTransition(row);
+  if (!l3PaidGate.ok) {
+    log?.warn?.(
       {
-        expectedCents: row.amountUsdCents,
-        stripeTotal: total,
-        expectedCurrency: rowCurrency,
-        stripeCurrency: sessionCurrency,
-      },
-      'stripe webhook: amount or currency mismatch',
-    );
-    if (row.orderStatus === ORDER_STATUS.PENDING) {
-      const payTrans = validatePaymentCheckoutStatusTransition(
-        row.status,
-        PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
-      );
-      if (!payTrans.ok) {
-        log?.error?.(
-          {
-            fortressDenial: payTrans.denial,
-            detail: payTrans.detail,
-            orderIdSuffix: String(raw).slice(-12),
-          },
-          'phase1 webhook: payment row transition denied (mismatch fail path)',
-        );
-        return {
-          orderIdToScheduleFulfillment,
-          checkoutAmountMismatchOrderId,
-          paymentIntentIdsForFeeCapture,
-        };
-      }
-      assertTransition(row.orderStatus, ORDER_STATUS.FAILED);
-      await tx.paymentCheckout.updateMany({
-        where: {
-          id: raw,
-          orderStatus: ORDER_STATUS.PENDING,
-        },
-        data: {
-          orderStatus: ORDER_STATUS.FAILED,
-          status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
-          failedAt: new Date(),
-          failureReason: 'stripe_amount_currency_mismatch',
-        },
-      });
-      await writeOrderAudit(tx, {
-        event: 'order_status_changed',
-        payload: {
-          orderId: raw,
-          to: ORDER_STATUS.FAILED,
-          reason: 'amount_currency_mismatch',
-        },
-        ip: null,
-      });
-    }
-    await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
-    return {
-      orderIdToScheduleFulfillment,
-      checkoutAmountMismatchOrderId,
-      paymentIntentIdsForFeeCapture,
-    };
-  }
-
-  if (row.orderStatus !== ORDER_STATUS.PENDING) {
-    if (
-      row.orderStatus === ORDER_STATUS.PAID ||
-      row.orderStatus === ORDER_STATUS.PROCESSING
-    ) {
-      emitFortressIdempotencyNoop('CHECKOUT_SESSION_REPLAY_AFTER_PAID', {
+        event: 'payment_transition',
+        result: 'denied',
+        reason: l3PaidGate.reason,
+        from: l3PaidGate.from,
+        to: PAYMENT_CORE_STATE.PAID,
+        eventId,
+        checkoutId: raw,
+        securityEvent: 'payment_l3_webhook_paid_denied',
         orderIdSuffix: String(raw).slice(-12),
-        orderStatus: row.orderStatus,
-      });
-    }
+      },
+      'security',
+    );
     await mirrorCanonicalPaymentCheckoutById(tx, raw, log);
     return {
       orderIdToScheduleFulfillment,
@@ -268,8 +384,15 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
   if (!payToSucceeded.ok) {
     log?.error?.(
       {
-        fortressDenial: payToSucceeded.denial,
+        event: 'payment_transition',
+        result: 'denied',
+        reason: payToSucceeded.denial,
         detail: payToSucceeded.detail,
+        from: paymentStatusBeforePaid,
+        to: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+        eventId,
+        checkoutId: raw,
+        fortressDenial: payToSucceeded.denial,
         orderIdSuffix: String(raw).slice(-12),
       },
       'phase1 webhook: payment row transition denied (paid path)',
@@ -289,7 +412,7 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
     where: {
       id: raw,
       orderStatus: ORDER_STATUS.PENDING,
-      status: { in: PAYMENT_PRE_SUCCESS },
+      status: { in: PHASE1_CHECKOUT_SESSION_PAID_PRE_STATUSES },
     },
     data: {
       orderStatus: ORDER_STATUS.PAID,
@@ -303,6 +426,21 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
   });
 
   if (updated.count === 0) {
+    log?.warn?.(
+      {
+        event: 'payment_transition',
+        result: 'denied',
+        reason: 'update_many_noop',
+        from: l3PaidGate.from,
+        to: PAYMENT_CORE_STATE.PAID,
+        eventId,
+        checkoutId: raw,
+        dbOrderStatus: row.orderStatus,
+        dbPaymentCheckoutStatus: row.status,
+        traceId: traceId ?? null,
+      },
+      'payment_core',
+    );
     emitFortressIdempotencyNoop('CHECKOUT_SESSION_PAID_TRANSITION_RACE', {
       orderIdSuffix: String(raw).slice(-12),
     });
@@ -312,6 +450,43 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
       checkoutAmountMismatchOrderId,
       paymentIntentIdsForFeeCapture,
     };
+  }
+
+  log?.info?.(
+    {
+      event: 'payment_transition',
+      result: 'success',
+      from: l3PaidGate.from,
+      to: PAYMENT_CORE_STATE.PAID,
+      eventId,
+      checkoutId: raw,
+      orderId: raw,
+      traceId: traceId ?? null,
+    },
+    'payment_core',
+  );
+
+  try {
+    await postPaymentCapturedLedger(tx, {
+      checkoutId: raw,
+      stripeEventId: eventId,
+      amountUsdCents: row.amountUsdCents,
+    });
+  } catch (ledgerErr) {
+    log?.error?.(
+      {
+        event: 'ledger_payment_post_failed',
+        checkoutId: raw,
+        stripeEventId: eventId,
+        errName: ledgerErr?.name,
+        message:
+          typeof ledgerErr?.message === 'string'
+            ? ledgerErr.message.slice(0, 200)
+            : undefined,
+      },
+      'payment_core',
+    );
+    throw ledgerErr;
   }
 
   if (piId) {
@@ -331,11 +506,58 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
 
   await writeOrderAudit(tx, {
     event: 'order_status_changed',
-    payload: { orderId: raw, to: ORDER_STATUS.PAID },
+    payload: {
+      orderId: raw,
+      to: ORDER_STATUS.PAID,
+      traceId: traceId ?? null,
+    },
     ip: null,
   });
 
   const queuedAttempt = await ensureQueuedFulfillmentAttempt(tx, raw, log);
+
+  const snap = await tx.paymentCheckout.findUnique({
+    where: { id: raw },
+    select: {
+      metadata: true,
+      status: true,
+      orderStatus: true,
+      completedByWebhookEventId: true,
+      reconciliationStatus: true,
+      providerTruthStatus: true,
+    },
+  });
+  if (snap) {
+    const meta = appendPaymentTraceChainHop(snap.metadata, {
+      stage: 'webhook.checkout_session_completed',
+      traceId,
+      requestId,
+    });
+    const trustScore = computePaymentCheckoutTrustScore({
+      status: snap.status,
+      orderStatus: snap.orderStatus,
+      completedByWebhookEventId: snap.completedByWebhookEventId,
+      providerTruthStatus: snap.providerTruthStatus,
+      reconciliationStatus: snap.reconciliationStatus,
+    });
+    await tx.paymentCheckout.update({
+      where: { id: raw },
+      data: { metadata: meta, trustScore },
+    });
+    try {
+      await persistFraudAssessmentInTx(tx, raw, { traceId });
+    } catch (fErr) {
+      log?.warn?.(
+        {
+          fraudAssessmentPersistFailed: true,
+          checkoutId: raw,
+          message: String(fErr?.message ?? fErr).slice(0, 200),
+        },
+        'fraud_detection',
+      );
+    }
+  }
+
   log?.info?.(
     {
       requestId,
@@ -352,12 +574,16 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
     },
     'phase1 checkout.session.completed: PAID + fulfillment attempt QUEUED (webhook txn; provider I/O not here)',
   );
-  emitPhase1PaymentSucceeded({
-    id: raw,
-    stripePaymentIntentId: piId,
-    orderStatus: ORDER_STATUS.PAID,
-    status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
-  });
+  recordMissionPaymentPaid(raw, traceId, String(eventId).slice(-8));
+  emitPhase1PaymentSucceeded(
+    {
+      id: raw,
+      stripePaymentIntentId: piId,
+      orderStatus: ORDER_STATUS.PAID,
+      status: PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED,
+    },
+    { traceId: traceId ?? null },
+  );
   emitPhase1FulfillmentQueued(
     {
       id: raw,
@@ -365,11 +591,11 @@ export async function applyPhase1CheckoutSessionCompleted(tx, opts) {
       orderStatus: ORDER_STATUS.PAID,
     },
     queuedAttempt,
-    { provider: queuedAttempt?.provider ?? null },
+    { provider: queuedAttempt?.provider ?? null, traceId: traceId ?? null },
   );
   await writeOrderAudit(tx, {
     event: 'payment_completed',
-    payload: { orderId: raw },
+    payload: { orderId: raw, traceId: traceId ?? null },
     ip: null,
   });
   orderIdToScheduleFulfillment = raw;

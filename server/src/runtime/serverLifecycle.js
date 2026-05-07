@@ -26,12 +26,13 @@ import {
 import { getValidatedStripeSecretKey } from '../config/stripeEnv.js';
 import { stripeKeyStatusLog } from '../services/stripe.js';
 import { processPendingPaidOrders } from '../services/fulfillmentProcessingService.js';
-import { runProcessingRecoveryTick } from '../services/processingRecoveryService.js';
+import { runRecoveryOrchestratorTick } from '../services/recoveryOrchestrator.js';
 import { processWebTopupFulfillmentJobs } from '../services/topupFulfillment/webtopFulfillmentJob.js';
 import {
   startPhase1FulfillmentWorker,
   stopPhase1FulfillmentWorker,
 } from '../queues/phase1FulfillmentWorker.js';
+import { runSelfHealingMoneyPathTick } from '../selfHealing/selfHealingRunner.js';
 import { logReloadlyEnvQualityWarningsIfDev } from '../lib/reloadlyEnvQuality.js';
 import {
   assertHttpAppConstructionAllowedOrThrow,
@@ -42,6 +43,12 @@ import {
 import { jwtSecretLooksTrivial } from '../lib/jwtSecretQuality.js';
 import { logCheckoutPricingQuoteRouteProof } from '../lib/expressRouteInventory.js';
 import { logOtpEmailTransportStartup } from '../../services/emailService.js';
+import { zwDotenvBootstrapReport } from '../../bootstrap.js';
+import {
+  currentNodeEnvLabel,
+  envStrictTrue,
+  isLocalControlledStripeLiveProofBypassActive,
+} from '../lib/localCheckoutProofRuntime.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -402,6 +409,18 @@ async function logApiStartupBody(app) {
       '[startup] ALLOW_UNVERIFIED_CHECKOUT=true is ignored while NODE_ENV=production — use NODE_ENV=development for local API, or verify the account email.',
     );
   }
+  if (env.nodeEnv !== 'production') {
+    const zbr = zwDotenvBootstrapReport;
+    const zwcRaw = String(
+      process.env.ZW_CONTROLLED_STRIPE_LIVE_PROOF ?? '',
+    ).trim();
+    console.log(
+      `[startup] dotenv serverRoot=${zbr.serverRoot} primaryEnvFile=${zbr.dotEnvPath} localEnvFile=${zbr.dotEnvLocalPath} localEnvFileExisted=${zbr.dotEnvLocalFileExistedAtBoot}`,
+    );
+    console.log(
+      `[startup] controlled_live_proof NODE_ENV=${currentNodeEnvLabel()} ZW_CONTROLLED_STRIPE_LIVE_PROOF=${zwcRaw || 'unset'} enabled=${env.controlledStripeLiveProof} liveProofMaxFinalUsdCents=${env.stripeLiveProofMaxFinalUsdCents ?? 'unset'} liveProofRecipientAllowCount=${env.stripeLiveProofAllowedRecipients.length} allowUnverifiedCheckoutInDev=${env.allowUnverifiedCheckoutInDev} ALLOW_UNVERIFIED_CHECKOUT_strictTrue=${envStrictTrue(process.env.ALLOW_UNVERIFIED_CHECKOUT)} ZW_LOCAL_CHECKOUT_PROOF_MODE_strictTrue=${envStrictTrue(process.env.ZW_LOCAL_CHECKOUT_PROOF_MODE)} localLiveProofBypassRuntime=${isLocalControlledStripeLiveProofBypassActive()}`,
+    );
+  }
   const taxBpsKeys = Object.keys(env.phase1GovernmentSalesTaxBpsBySender ?? {});
   if (taxBpsKeys.length === 0) {
     console.log(
@@ -603,9 +622,9 @@ export function startBackgroundWorkerRuntime() {
   if (drainLoop) cleanup.push(drainLoop);
 
   const recoveryLoop = startIntervalLoop(
-    'processingRecoveryTick',
+    'recoveryOrchestratorTick',
     env.processingRecoveryEnabled ? env.processingRecoveryPollMs : 0,
-    () => runProcessingRecoveryTick(),
+    () => runRecoveryOrchestratorTick(),
   );
   if (recoveryLoop) cleanup.push(recoveryLoop);
 
@@ -615,6 +634,13 @@ export function startBackgroundWorkerRuntime() {
     () => processWebTopupFulfillmentJobs({ limit: env.webtopupFulfillmentJobBatchSize }),
   );
   if (webTopupLoop) cleanup.push(webTopupLoop);
+
+  const selfHealLoop = startIntervalLoop(
+    'selfHealingMoneyPathTick',
+    env.selfHealingTickMs,
+    () => runSelfHealingMoneyPathTick(),
+  );
+  if (selfHealLoop) cleanup.push(selfHealLoop);
 
   console.log(
     JSON.stringify({
@@ -628,6 +654,8 @@ export function startBackgroundWorkerRuntime() {
         ? env.processingRecoveryPollMs
         : 0,
       webTopupFulfillmentJobPollMs: env.webtopupFulfillmentJobPollMs,
+      selfHealingTickMs: env.selfHealingTickMs,
+      selfHealingApplyRepairs: env.selfHealingApplyRepairs,
       t: new Date().toISOString(),
     }),
   );

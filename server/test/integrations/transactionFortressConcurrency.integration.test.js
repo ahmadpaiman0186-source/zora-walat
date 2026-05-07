@@ -9,12 +9,14 @@ import { describe, it, afterEach } from 'node:test';
 import bcrypt from 'bcrypt';
 
 import { prisma } from '../../src/db.js';
+import { env } from '../../src/config/env.js';
 import { ORDER_STATUS } from '../../src/constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../../src/constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../../src/constants/fulfillmentAttemptStatus.js';
 import { POST_PAYMENT_INCIDENT_STATUS } from '../../src/constants/postPaymentIncidentStatus.js';
 import { processFulfillmentForOrder } from '../../src/services/fulfillmentProcessingService.js';
 import { applyPhase1CheckoutSessionCompleted } from '../../src/services/phase1StripeCheckoutSessionCompleted.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL');
@@ -22,6 +24,9 @@ if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
 
 const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
 const runIntegration = Boolean(dbUrl);
+/** Matches CI (`AIRTIME_PROVIDER=mock`); local `.env.local` may skip these cases. */
+const mockAirtimeProvider =
+  String(env.airtimeProvider ?? '').trim().toLowerCase() === 'mock';
 
 describe('Transaction fortress concurrency (integration)', { skip: !runIntegration }, () => {
   /** @type {string[]} */
@@ -33,25 +38,8 @@ describe('Transaction fortress concurrency (integration)', { skip: !runIntegrati
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const uid of userIds) {
-      await prisma.loyaltyLedger.deleteMany({ where: { userId: uid } });
-    }
-    /** `User` delete is RESTRICT-ed by `LoyaltyPointsGrant`; delivered tests create grants. */
-    if (userIds.length) {
-      await prisma.loyaltyPointsGrant.deleteMany({ where: { userId: { in: userIds } } });
-    }
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    for (const eid of eventIds) {
-      await prisma.stripeWebhookEvent.deleteMany({ where: { id: eid } });
-    }
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    // Ledger journal entries are immutable and reference PaymentCheckout/FulfillmentAttempt with RESTRICT.
+    // Do not attempt DB row deletion in teardown; rely on unique IDs + isolated integration DB.
     userIds.length = 0;
     orderIds.length = 0;
     eventIds.length = 0;
@@ -147,6 +135,9 @@ describe('Transaction fortress concurrency (integration)', { skip: !runIntegrati
 
     const session = {
       id: `cs_${randomUUID().slice(0, 8)}`,
+      object: 'checkout.session',
+      mode: 'payment',
+      payment_status: 'paid',
       amount_total: 1000,
       currency: 'usd',
       payment_intent: `pi_${randomUUID().slice(0, 8)}`,
@@ -218,6 +209,115 @@ describe('Transaction fortress concurrency (integration)', { skip: !runIntegrati
     });
     assert.ok(attempts.every((a) => a.status === FULFILLMENT_ATTEMPT_STATUS.QUEUED));
   });
+
+  it(
+    'stale PROCESSING + empty providerReference: resume then second dispatch is idempotent',
+    { skip: !mockAirtimeProvider },
+    async () => {
+      const u = await makeUser();
+      const oid = await paidCheckoutWithQueuedAttempt(u.id);
+      const att = await prisma.fulfillmentAttempt.findFirst({
+        where: { orderId: oid },
+      });
+      assert.ok(att);
+      const staleStarted = new Date(Date.now() - 200_000);
+      await prisma.paymentCheckout.update({
+        where: { id: oid },
+        data: {
+          orderStatus: ORDER_STATUS.PROCESSING,
+          status: PAYMENT_CHECKOUT_STATUS.RECHARGE_PENDING,
+        },
+      });
+      await prisma.fulfillmentAttempt.update({
+        where: { id: att.id },
+        data: {
+          status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+          startedAt: staleStarted,
+          providerReference: null,
+        },
+      });
+
+      await processFulfillmentForOrder(oid, {});
+
+      const deadline = Date.now() + 12_000;
+      let lastStatus = '';
+      while (Date.now() < deadline) {
+        const row = await prisma.paymentCheckout.findUnique({
+          where: { id: oid },
+          select: { orderStatus: true },
+        });
+        lastStatus = String(row?.orderStatus ?? '');
+        if (row?.orderStatus === ORDER_STATUS.FULFILLED) break;
+        await new Promise((r) => setTimeout(r, 40));
+      }
+      assert.equal(
+        lastStatus,
+        ORDER_STATUS.FULFILLED,
+        `expected FULFILLED after stale resume+mock delivery, got ${lastStatus}`,
+      );
+
+      await processFulfillmentForOrder(oid, {});
+      const afterSecond = await prisma.paymentCheckout.findUnique({
+        where: { id: oid },
+        select: { orderStatus: true },
+      });
+      assert.equal(afterSecond?.orderStatus, ORDER_STATUS.FULFILLED);
+    },
+  );
+
+  it(
+    'two concurrent stale PROCESSING resumes: single terminal attempt shape',
+    { skip: !mockAirtimeProvider },
+    async () => {
+      const u = await makeUser();
+      const oid = await paidCheckoutWithQueuedAttempt(u.id);
+      const att = await prisma.fulfillmentAttempt.findFirst({
+        where: { orderId: oid },
+      });
+      assert.ok(att);
+      const staleStarted = new Date(Date.now() - 200_000);
+      await prisma.paymentCheckout.update({
+        where: { id: oid },
+        data: {
+          orderStatus: ORDER_STATUS.PROCESSING,
+          status: PAYMENT_CHECKOUT_STATUS.RECHARGE_PENDING,
+        },
+      });
+      await prisma.fulfillmentAttempt.update({
+        where: { id: att.id },
+        data: {
+          status: FULFILLMENT_ATTEMPT_STATUS.PROCESSING,
+          startedAt: staleStarted,
+          providerReference: null,
+        },
+      });
+
+      await Promise.all([processFulfillmentForOrder(oid, {}), processFulfillmentForOrder(oid, {})]);
+
+      const deadline = Date.now() + 12_000;
+      let lastStatus = '';
+      while (Date.now() < deadline) {
+        const row = await prisma.paymentCheckout.findUnique({
+          where: { id: oid },
+          select: { orderStatus: true },
+        });
+        lastStatus = String(row?.orderStatus ?? '');
+        if (row?.orderStatus === ORDER_STATUS.FULFILLED) break;
+        await new Promise((r) => setTimeout(r, 40));
+      }
+      assert.equal(lastStatus, ORDER_STATUS.FULFILLED, `expected FULFILLED, got ${lastStatus}`);
+
+      const attempts = await prisma.fulfillmentAttempt.findMany({
+        where: { orderId: oid },
+      });
+      const succeeded = attempts.filter((a) => a.status === FULFILLMENT_ATTEMPT_STATUS.SUCCEEDED);
+      assert.equal(
+        succeeded.length,
+        1,
+        attempts.map((a) => `${a.attemptNumber}:${a.status}`).join(','),
+      );
+    },
+  );
 
   it('parallel distinct orders all advance without deadlocking', async () => {
     const u = await makeUser();

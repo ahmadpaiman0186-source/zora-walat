@@ -86,6 +86,30 @@ export const prisma = prismaBase.$extends({
         throw e;
       },
     },
+    ledgerJournalEntry: {
+      update() {
+        const e = new Error('immutable_ledger_journal');
+        e.code = 'immutable_ledger_journal';
+        throw e;
+      },
+      updateMany() {
+        const e = new Error('immutable_ledger_journal');
+        e.code = 'immutable_ledger_journal';
+        throw e;
+      },
+    },
+    ledgerJournalLine: {
+      update() {
+        const e = new Error('immutable_ledger_journal');
+        e.code = 'immutable_ledger_journal';
+        throw e;
+      },
+      updateMany() {
+        const e = new Error('immutable_ledger_journal');
+        e.code = 'immutable_ledger_journal';
+        throw e;
+      },
+    },
   },
 });
 

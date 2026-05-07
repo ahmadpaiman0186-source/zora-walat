@@ -826,6 +826,24 @@ abstract class AppLocalizations {
   /// **'Stripe publishable key not configured for this build.'**
   String get stripeKeyMissing;
 
+  /// No description provided for @stripePublishableKeyDevBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local dev: Stripe publishable key not passed to this build'**
+  String get stripePublishableKeyDevBannerTitle;
+
+  /// No description provided for @stripePublishableKeyDevBannerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted Checkout still opens from our server. Add --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_… to silence this banner and enable client-side Stripe helpers.'**
+  String get stripePublishableKeyDevBannerBody;
+
+  /// No description provided for @stripePublishableKeyDevStripeSectionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted Checkout uses the server; a publishable key is optional here but recommended for local parity.'**
+  String get stripePublishableKeyDevStripeSectionNote;
+
   /// No description provided for @stripeKeyLoaded.
   ///
   /// In en, this message translates to:

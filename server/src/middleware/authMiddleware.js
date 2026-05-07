@@ -2,6 +2,11 @@ import { env } from '../config/env.js';
 import { API_CONTRACT_CODE } from '../constants/apiContractCodes.js';
 import { AUTH_ERROR_CODE } from '../constants/authErrors.js';
 import { prisma } from '../db.js';
+import {
+  devCheckoutBypassExpectedUserId,
+  devCheckoutBypassSecretForCompare,
+  isDevCheckoutAuthBypassRuntimeConfigured,
+} from '../lib/devCheckoutAuthBypassRuntime.js';
 import { clientErrorBody } from '../lib/clientErrorJson.js';
 import { verifyAccessToken } from '../services/authTokenService.js';
 import { loadUserForRequest } from '../services/authService.js';
@@ -18,17 +23,16 @@ async function requireAuthAsync(req, res, next) {
      * See `docs/WALLET_TOPUP_LOCAL_VERIFY.md`.
      */
     if (
-      env.nodeEnv !== 'production' &&
+      isDevCheckoutAuthBypassRuntimeConfigured() &&
       !env.prelaunchLockdown &&
-      !isOwnerOnlyEnforced() &&
-      env.devCheckoutAuthBypass &&
-      env.devCheckoutBypassSecret.length >= 16 &&
-      env.devCheckoutBypassUserId
+      !isOwnerOnlyEnforced()
     ) {
+      const secret = devCheckoutBypassSecretForCompare();
+      const bypassUserId = devCheckoutBypassExpectedUserId();
       const bypass = req.headers['x-zw-dev-checkout'];
-      if (typeof bypass === 'string' && bypass === env.devCheckoutBypassSecret) {
+      if (typeof bypass === 'string' && bypass === secret) {
         const user = await prisma.user.findUnique({
-          where: { id: env.devCheckoutBypassUserId },
+          where: { id: bypassUserId },
           select: { id: true, email: true, role: true, emailVerifiedAt: true },
         });
         if (user) {
@@ -38,6 +42,7 @@ async function requireAuthAsync(req, res, next) {
             role: user.role,
             emailVerified: Boolean(user.emailVerifiedAt),
           };
+          req.identityAuthSource = 'dev_bypass';
           if (denyIfOwnerOnlyMismatchAuthenticated(req, res)) {
             return;
           }
@@ -98,6 +103,7 @@ async function requireAuthAsync(req, res, next) {
       role: user.role,
       emailVerified: Boolean(user.emailVerifiedAt),
     };
+    req.identityAuthSource = 'jwt';
     if (denyIfOwnerOnlyMismatchAuthenticated(req, res)) {
       return;
     }

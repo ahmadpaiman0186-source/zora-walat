@@ -31,6 +31,7 @@ import { FULFILLMENT_ATTEMPT_STATUS } from '../../src/constants/fulfillmentAttem
 import { CUSTOMER_FULFILLMENT_VIEW } from '../../src/lib/customerVisibleOrderStatus.js';
 import { createApp } from '../../src/app.js';
 import { getCanonicalPhase1OrderForUser } from '../../src/services/canonicalPhase1OrderService.js';
+import { deleteLedgerJournalForPaymentCheckouts } from './integrationLedgerTestCleanup.js';
 
 if (process.env.CI === 'true' && !process.env.TEST_DATABASE_URL) {
   throw new Error('CI requires TEST_DATABASE_URL for Sprint 4 payment-loop proof tests');
@@ -60,26 +61,8 @@ describe('Sprint 4 — payment loop proof (integration)', { skip: !runIntegratio
 
   afterEach(async () => {
     if (!prisma) return;
-    for (const oid of orderIds) {
-      await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: oid } });
-    }
-    if (orderIds.length > 0) {
-      await prisma.loyaltyPointsGrant.deleteMany({
-        where: { paymentCheckoutId: { in: orderIds } },
-      });
-    }
-    await prisma.stripeWebhookEvent.deleteMany({
-      where: { id: { startsWith: 'evt_s4_' } },
-    });
-    for (const oid of orderIds) {
-      await prisma.paymentCheckout.deleteMany({ where: { id: oid } });
-    }
-    if (userIds.length > 0) {
-      await prisma.loyaltyLedger.deleteMany({ where: { userId: { in: userIds } } });
-    }
-    for (const uid of userIds) {
-      await prisma.user.deleteMany({ where: { id: uid } });
-    }
+    // Ledger journal entries are immutable and reference PaymentCheckout/FulfillmentAttempt with RESTRICT.
+    // Do not attempt DB row deletion in teardown; rely on unique IDs + isolated integration DB.
     userIds.length = 0;
     orderIds.length = 0;
   });
@@ -128,11 +111,15 @@ describe('Sprint 4 — payment loop proof (integration)', { skip: !runIntegratio
    */
   function signAndPost(type, obj, eventId) {
     const id = eventId ?? `evt_s4_${randomUUID()}`;
+    const sessionObj =
+      type === 'checkout.session.completed' && obj && typeof obj === 'object'
+        ? { mode: 'payment', payment_status: 'paid', ...obj }
+        : obj;
     const payload = JSON.stringify({
       id,
       object: 'event',
       type,
-      data: { object: obj },
+      data: { object: sessionObj },
     });
     const header = Stripe.webhooks.generateTestHeaderString({
       payload,

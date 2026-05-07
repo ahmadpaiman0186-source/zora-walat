@@ -8,6 +8,8 @@ import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
 import { FULFILLMENT_ATTEMPT_STATUS } from '../constants/fulfillmentAttemptStatus.js';
 import { recordPhase1ReconciliationFinding } from '../lib/opsMetrics.js';
+import { recordMissionReconciliationScan } from '../infrastructure/observability/phase1MissionObservability.js';
+import { writeOrderAudit } from './orderAuditService.js';
 
 export const RECON_RECOMMENDATION = {
   NONE: 'NONE',
@@ -43,7 +45,7 @@ export const RECON_V2_ACTION = Object.freeze({
 });
 
 /**
- * @param {{ limit?: number, paidIdleMs?: number, now?: Date }} [opts]
+ * @param {{ limit?: number, paidIdleMs?: number, now?: Date, traceId?: string | null }} [opts]
  */
 export async function runPhase1MoneyFulfillmentReconciliationScan(opts = {}) {
   const limit = Math.min(500, Math.max(1, opts.limit ?? 50));
@@ -278,7 +280,8 @@ export async function runPhase1MoneyFulfillmentReconciliationScan(opts = {}) {
 
   const fulfilledRows = await prisma.paymentCheckout.findMany({
     where: { orderStatus: ORDER_STATUS.FULFILLED },
-    take: Math.min(80, limit),
+    orderBy: { createdAt: 'desc' },
+    take: limit,
     select: { id: true, orderStatus: true, status: true },
   });
   for (const row of fulfilledRows) {
@@ -352,6 +355,35 @@ export async function runPhase1MoneyFulfillmentReconciliationScan(opts = {}) {
     recordPhase1ReconciliationFinding(f.divergenceCode);
   }
 
+  const summary = {
+    count: withV2.length,
+    byRecommendation: tally(withV2, (f) => f.recommendation),
+    byCode: tally(withV2, (f) => f.divergenceCode),
+    byActionV2: tally(withV2, (f) => f.actionV2 ?? 'UNKNOWN'),
+  };
+
+  recordMissionReconciliationScan(summary, opts.traceId ?? null);
+
+  try {
+    await writeOrderAudit(prisma, {
+      event: 'phase1_reconciliation_scan',
+      payload: {
+        schema: 'zora.phase1_money_fulfillment_recon.v2',
+        scannedAt: now.toISOString(),
+        findingCount: summary.count,
+        byCode: summary.byCode,
+        byRecommendation: summary.byRecommendation,
+        traceId: opts.traceId ?? null,
+        checkoutIdSuffixSample: withV2.slice(0, 12).map((f) =>
+          String(f.checkoutId).slice(-12),
+        ),
+      },
+      ip: null,
+    });
+  } catch {
+    // Read-only scan must not fail on audit persistence.
+  }
+
   return {
     schema: 'zora.phase1_money_fulfillment_recon.v2',
     scannedAt: now.toISOString(),
@@ -362,12 +394,7 @@ export async function runPhase1MoneyFulfillmentReconciliationScan(opts = {}) {
       preHttpArmedStaleMs: armedStaleMs,
     },
     findings: withV2,
-    summary: {
-      count: withV2.length,
-      byRecommendation: tally(withV2, (f) => f.recommendation),
-      byCode: tally(withV2, (f) => f.divergenceCode),
-      byActionV2: tally(withV2, (f) => f.actionV2 ?? 'UNKNOWN'),
-    },
+    summary,
   };
 }
 
@@ -519,7 +546,7 @@ export function evaluateCheckoutAttemptInconsistency(
  * @param {import('@prisma/client').PaymentCheckout & { fulfillmentAttempts: import('@prisma/client').FulfillmentAttempt[] }} row
  * @param {import('@prisma/client').FulfillmentAttempt[]} attempts
  */
-function classifyPaidIdle(row, attempts) {
+export function classifyPaidIdle(row, attempts) {
   if (!attempts.length) {
     return {
       code: RECON_DIVERGENCE_CODE.PAID_NO_ATTEMPT,

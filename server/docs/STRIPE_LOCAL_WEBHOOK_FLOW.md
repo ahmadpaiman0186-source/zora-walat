@@ -51,7 +51,7 @@ If `.env` has an old `whsec_` from a previous listen (or a placeholder), verific
 3. **Edit `server/.env`**:
 
    ```env
-   STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   STRIPE_WEBHOOK_SECRET=whsec_<paste_exact_value_from_stripe_listen_or_dashboard>
    ```
 
    Save the file.

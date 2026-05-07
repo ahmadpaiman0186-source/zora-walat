@@ -365,13 +365,19 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
       error instanceof EmailServiceError &&
       (error.code === 'email_missing_env' ||
         error.code === 'email_invalid_port' ||
-        error.code === 'otp_delivery_misconfigured')
+        error.code === 'otp_delivery_misconfigured' ||
+        error.code === 'gmail_app_password_required')
     ) {
-      throw new HttpError(
-        503,
-        'OTP email is not configured. Set EMAIL_HOST, EMAIL_USER, EMAIL_PASS (and valid EMAIL_PORT). Use OTP_TRANSPORT=console only when you want codes in this server log.',
-        { code: 'otp_delivery_misconfigured' },
-      );
+      const msg =
+        error.code === 'gmail_app_password_required'
+          ? error.message
+          : 'OTP email is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS (or legacy EMAIL_*), and SMTP_PORT. Use OTP_TRANSPORT=console only when you want codes in this server log.';
+      throw new HttpError(503, msg, {
+        code:
+          error.code === 'gmail_app_password_required'
+            ? 'gmail_app_password_required'
+            : 'otp_delivery_misconfigured',
+      });
     }
     return publicOtpResponse();
   }
