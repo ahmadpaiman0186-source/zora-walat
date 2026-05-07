@@ -30,6 +30,20 @@ if (!String(process.env.PRISMA_CONNECTION_LIMIT ?? '').trim()) {
 }
 
 /**
+ * `ci.yml` sets `PRELAUNCH_LOCKDOWN=true` so post-test release gates (`preflight:production`, etc.) see
+ * a lockdown production profile. The **unit** suite mounts `createApp()` and expects money-path routes
+ * (e.g. `POST /api/checkout-pricing-quote`) to return contract HTTP statuses — not **503** from
+ * `prelaunchMoneyBlock`. Integration preload already clears lockdown unless opted in; match that here.
+ * Subprocess/isolated tests that require lockdown set env before importing app or spawn children with it.
+ */
+if (process.env.ZW_UNIT_TEST_RESPECT_PRELAUNCH !== 'true') {
+  process.env.PRELAUNCH_LOCKDOWN = 'false';
+}
+if (process.env.ZW_UNIT_TEST_RESPECT_PAYMENTS_LOCKDOWN !== 'true') {
+  process.env.PAYMENTS_LOCKDOWN_MODE = 'false';
+}
+
+/**
  * Unit tests hit `/webhooks/stripe` with signed payloads. CI may omit keys; local `.env.local`
  * may override with an empty token, a non-whsec placeholder, or a too-short `whsec_` string.
  * In `NODE_ENV=test` only, normalize to a fixed synthetic signing secret when the effective value
