@@ -284,22 +284,19 @@ async function main() {
         : null,
   });
 
+  /**
+   * Teardown: same posture as `proof-stripe-webhook-local.mjs` — L4 journal is immutable with FK RESTRICT
+   * toward `FulfillmentAttempt` / `PaymentCheckout`. Only delete rows outside that immutable subgraph.
+   */
   await deleteLedgerJournalForPaymentCheckouts(prisma, [
     paid.id,
     paidRetry.id,
     pending.id,
   ]);
-  await prisma.fulfillmentAttempt.deleteMany({
-    where: { orderId: { in: [paid.id, paidRetry.id, pending.id] } },
-  });
   await prisma.loyaltyPointsGrant.deleteMany({
     where: { paymentCheckoutId: { in: [paid.id, paidRetry.id, pending.id] } },
   });
   await prisma.loyaltyLedger.deleteMany({ where: { userId: user.id } });
-  await prisma.paymentCheckout.deleteMany({
-    where: { id: { in: [paid.id, paidRetry.id, pending.id] } },
-  });
-  await prisma.user.deleteMany({ where: { id: user.id } });
 }
 
 (async () => {

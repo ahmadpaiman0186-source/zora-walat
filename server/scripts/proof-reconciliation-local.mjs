@@ -3,7 +3,7 @@
  *
  * - No Stripe refund API calls.
  * - No Reloadly outbound.
- * - Creates and deletes isolated DB fixtures when DATABASE_URL is set.
+ * - Creates isolated DB fixtures when DATABASE_URL is set (immutable ledger subgraph may remain — CI disposable DB).
  *
  * Run: npm --prefix server run proof:reconciliation-local
  */
@@ -166,12 +166,11 @@ async function main() {
       'Engine emits recommendations only; Phase 1 does not call Stripe refunds from recon or fulfillment failure.',
   });
 
+  /**
+   * Teardown: L4 journal is immutable with FK RESTRICT; fixtures may gain ledger rows as Phase 1 evolves.
+   * Do not delete FulfillmentAttempt / PaymentCheckout / User here — mirrors Sprint 4 integration posture.
+   */
   await deleteLedgerJournalForPaymentCheckouts(prisma, [orphan.id, dupOrder.id]);
-  await prisma.fulfillmentAttempt.deleteMany({
-    where: { orderId: { in: [orphan.id, dupOrder.id] } },
-  });
-  await prisma.paymentCheckout.deleteMany({ where: { id: { in: [orphan.id, dupOrder.id] } } });
-  await prisma.user.deleteMany({ where: { id: user.id } });
 }
 
 (async () => {

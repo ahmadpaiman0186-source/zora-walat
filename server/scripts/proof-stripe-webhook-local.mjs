@@ -156,15 +156,18 @@ async function main() {
     orderIdSuffix: String(order.id).slice(-12),
   });
 
+  /**
+   * Teardown: `LedgerJournalEntry` is append-only (DB triggers; FK RESTRICT to PaymentCheckout +
+   * FulfillmentAttempt). {@link deleteLedgerJournalForPaymentCheckouts} is intentionally a no-op.
+   * Do **not** delete FulfillmentAttempt / PaymentCheckout / User — mirror Sprint 4 integration teardown.
+   * Safe cleanup only (CI disposable Postgres job DB + unique proof IDs).
+   */
   await deleteLedgerJournalForPaymentCheckouts(prisma, [order.id]);
-  await prisma.fulfillmentAttempt.deleteMany({ where: { orderId: order.id } });
   await prisma.loyaltyPointsGrant.deleteMany({ where: { paymentCheckoutId: order.id } });
   await prisma.loyaltyLedger.deleteMany({ where: { userId: user.id } });
-  await prisma.paymentCheckout.deleteMany({ where: { id: order.id } });
   await prisma.stripeWebhookEvent.deleteMany({
     where: { id: { startsWith: 'evt_proof_local_' } },
   });
-  await prisma.user.deleteMany({ where: { id: user.id } });
 }
 
 (async () => {
