@@ -29,3 +29,4 @@ soft-launch-gate-report.json
 /_req-*.json
 
 .vercel
+.env*.local
