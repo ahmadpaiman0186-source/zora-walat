@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L38_SECURITY_FINDING_TRIAGE_AND_REMEDIATION_RUNBOOK.md](./L38_SECURITY_FINDING_TRIAGE_AND_REMEDIATION_RUNBOOK.md) — L38 security finding triage, remediation, retest, closure
+- [../security/L38_SECURITY_REVIEW_PENTEST_COMPLIANCE_AUDIT_PLAN.md](../security/L38_SECURITY_REVIEW_PENTEST_COMPLIANCE_AUDIT_PLAN.md) — L38 audit / pentest plan (docs only)
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
