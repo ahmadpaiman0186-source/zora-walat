@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L34_FAILOVER_OPERATIONAL_DRILL_RUNBOOK.md](./L34_FAILOVER_OPERATIONAL_DRILL_RUNBOOK.md) — L34 failover drills (plan-only; no live prod cutover from doc alone)
+- [../operations/L34_MULTI_REGION_FAILOVER_STRATEGY.md](../operations/L34_MULTI_REGION_FAILOVER_STRATEGY.md) — L34 strategy and dependencies
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
