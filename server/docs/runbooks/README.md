@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L36_ERROR_BUDGET_BURN_RATE_RESPONSE_RUNBOOK.md](./L36_ERROR_BUDGET_BURN_RATE_RESPONSE_RUNBOOK.md) — L36 burn-rate / error budget incident response
+- [../operations/L36_SLO_ERROR_BUDGET_ONCALL_MODEL.md](../operations/L36_SLO_ERROR_BUDGET_ONCALL_MODEL.md) — L36 formal SLO, budget, on-call model
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
