@@ -11,6 +11,7 @@ Operational entry points:
 
 See also:
 
+- [../security/L31_FRAUD_ABUSE_RESPONSE_RUNBOOK.md](../security/L31_FRAUD_ABUSE_RESPONSE_RUNBOOK.md) — L31 fraud/abuse security response (escalation; customer comms via L30 templates when that package is present)
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
