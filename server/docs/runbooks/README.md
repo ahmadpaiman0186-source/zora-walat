@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L39_PRODUCTION_CHANGE_APPROVAL_RUNBOOK.md](./L39_PRODUCTION_CHANGE_APPROVAL_RUNBOOK.md) — L39 production change approval, rollback, emergency path
+- [../governance/L39_RELEASE_GOVERNANCE_AND_CHANGE_APPROVAL_PLAN.md](../governance/L39_RELEASE_GOVERNANCE_AND_CHANGE_APPROVAL_PLAN.md) — L39 governance and approval plan
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
