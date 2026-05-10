@@ -11,6 +11,7 @@ Operational entry points:
 
 See also:
 
+- [L29_OBSERVABILITY_INCIDENT_RESPONSE.md](./L29_OBSERVABILITY_INCIDENT_RESPONSE.md) — L29 observability incident playbooks (API, `/ready`, webhooks, fulfillment, ledger, DB, Redis, security)
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
