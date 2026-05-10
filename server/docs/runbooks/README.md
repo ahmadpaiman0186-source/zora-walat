@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L32_SOFT_LAUNCH_COMMAND_CENTER.md](./L32_SOFT_LAUNCH_COMMAND_CENTER.md) — L32 controlled soft launch timing, stop/rollback triggers, evidence
+- [../launch/L32_CONTROLLED_SOFT_LAUNCH_PLAN.md](../launch/L32_CONTROLLED_SOFT_LAUNCH_PLAN.md) — L32 cohort and dependency context
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
