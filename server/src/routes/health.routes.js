@@ -1,5 +1,11 @@
 import { Router } from 'express';
 
+import {
+  raceReadinessOperation,
+  runReadinessDatabaseCore,
+  READINESS_DB_EXTENDED_MS,
+  READINESS_QUEUE_PROBE_MS,
+} from '../lib/readinessBoundedChecks.js';
 import { sendLivenessJsonOk } from '../lib/sendLivenessJsonOk.js';
 import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
 
@@ -143,49 +149,63 @@ router.get('/ready', async (req, res) => {
     getAirtimeReloadlyDiagnosticsSnapshot,
     getLaunchSubsystemSnapshot,
   } = await getHealthDeps();
+
+  const core = await runReadinessDatabaseCore(prisma);
+  if (!core.ok) {
+    return res.status(503).json({
+      status: 'unavailable',
+      readinessReason: core.readinessReason,
+      checks: core.checks,
+      walletTopupContract: walletTopupContractSnapshot(env),
+      webTopupMetrics: getWebTopupMetricsSnapshot(),
+      opsMetrics: getOpsMetricsSnapshot(),
+    });
+  }
   /** @type {{ database?: string, webTopupPersistence?: string }} */
-  const checks = {};
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    checks.database = 'ok';
-  } catch {
-    checks.database = 'failed';
-    checks.webTopupPersistence = 'skipped';
-    return res.status(503).json({
-      status: 'unavailable',
-      checks,
-      walletTopupContract: walletTopupContractSnapshot(env),
-      webTopupMetrics: getWebTopupMetricsSnapshot(),
-      opsMetrics: getOpsMetricsSnapshot(),
-    });
-  }
-  try {
-    await prisma.webTopupOrder.findFirst({ select: { id: true } });
-    checks.webTopupPersistence = 'ok';
-  } catch {
-    checks.webTopupPersistence = 'failed';
-    return res.status(503).json({
-      status: 'unavailable',
-      checks,
-      walletTopupContract: walletTopupContractSnapshot(env),
-      webTopupMetrics: getWebTopupMetricsSnapshot(),
-      opsMetrics: getOpsMetricsSnapshot(),
-    });
-  }
+  const checks = { ...core.checks };
+
   let webTopupStuck = null;
   try {
-    webTopupStuck = await getWebTopupFulfillmentStuckSummary();
-  } catch {
+    webTopupStuck = await raceReadinessOperation(
+      getWebTopupFulfillmentStuckSummary(),
+      READINESS_DB_EXTENDED_MS,
+      'db_probe_timeout',
+    );
+  } catch (e) {
+    if (e?.code === 'db_probe_timeout') {
+      return res.status(503).json({
+        status: 'unavailable',
+        readinessReason: 'db_probe_timeout',
+        checks: { ...checks, webTopupStuckProbe: 'timeout' },
+        walletTopupContract: walletTopupContractSnapshot(env),
+        webTopupMetrics: getWebTopupMetricsSnapshot(),
+        opsMetrics: getOpsMetricsSnapshot(),
+      });
+    }
     webTopupStuck = { error: 'stuck_summary_unavailable' };
   }
 
   /** @type {number | null} */
   let webTopupFulfillmentJobsQueued = null;
   try {
-    webTopupFulfillmentJobsQueued = await prisma.webTopupFulfillmentJob.count({
-      where: { status: 'queued' },
-    });
-  } catch {
+    webTopupFulfillmentJobsQueued = await raceReadinessOperation(
+      prisma.webTopupFulfillmentJob.count({
+        where: { status: 'queued' },
+      }),
+      READINESS_DB_EXTENDED_MS,
+      'db_probe_timeout',
+    );
+  } catch (e) {
+    if (e?.code === 'db_probe_timeout') {
+      return res.status(503).json({
+        status: 'unavailable',
+        readinessReason: 'db_probe_timeout',
+        checks: { ...checks, webTopupFulfillmentJobCount: 'timeout' },
+        walletTopupContract: walletTopupContractSnapshot(env),
+        webTopupMetrics: getWebTopupMetricsSnapshot(),
+        opsMetrics: getOpsMetricsSnapshot(),
+      });
+    }
     webTopupFulfillmentJobsQueued = null;
   }
 
@@ -193,15 +213,29 @@ router.get('/ready', async (req, res) => {
   let paymentCheckoutByOrderStatus24h = {};
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const rows = await prisma.paymentCheckout.groupBy({
-      by: ['orderStatus'],
-      where: { updatedAt: { gte: since } },
-      _count: { _all: true },
-    });
+    const rows = await raceReadinessOperation(
+      prisma.paymentCheckout.groupBy({
+        by: ['orderStatus'],
+        where: { updatedAt: { gte: since } },
+        _count: { _all: true },
+      }),
+      READINESS_DB_EXTENDED_MS,
+      'db_probe_timeout',
+    );
     paymentCheckoutByOrderStatus24h = Object.fromEntries(
       rows.map((r) => [r.orderStatus, r._count._all]),
     );
-  } catch {
+  } catch (e) {
+    if (e?.code === 'db_probe_timeout') {
+      return res.status(503).json({
+        status: 'unavailable',
+        readinessReason: 'db_probe_timeout',
+        checks: { ...checks, paymentCheckoutGroupBy24h: 'timeout' },
+        walletTopupContract: walletTopupContractSnapshot(env),
+        webTopupMetrics: getWebTopupMetricsSnapshot(),
+        opsMetrics: getOpsMetricsSnapshot(),
+      });
+    }
     paymentCheckoutByOrderStatus24h = { error: 'payment_checkout_health_unavailable' };
   }
 
@@ -211,8 +245,22 @@ router.get('/ready', async (req, res) => {
     const { getPhase1FulfillmentQueueObservation } = await import(
       '../lib/phase1FulfillmentQueueObservation.js'
     );
-    phase1FulfillmentQueue = await getPhase1FulfillmentQueueObservation();
+    phase1FulfillmentQueue = await raceReadinessOperation(
+      getPhase1FulfillmentQueueObservation(),
+      READINESS_QUEUE_PROBE_MS,
+      'queue_timeout',
+    );
   } catch (e) {
+    if (e?.code === 'queue_timeout') {
+      return res.status(503).json({
+        status: 'unavailable',
+        readinessReason: 'queue_timeout',
+        checks: { ...checks, phase1FulfillmentQueue: 'timeout' },
+        walletTopupContract: walletTopupContractSnapshot(env),
+        webTopupMetrics: getWebTopupMetricsSnapshot(),
+        opsMetrics: getOpsMetricsSnapshot(),
+      });
+    }
     phase1FulfillmentQueue = {
       available: false,
       reason: 'queue_observation_import_failed',
