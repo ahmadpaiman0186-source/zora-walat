@@ -45,6 +45,8 @@ import {
 import {
   applyPhase1ChargeRefunded,
   applyPhase1DisputeCreated,
+  DisputeChargeLookupError,
+  resolvePhase1DisputePaymentIntentForWebhook,
 } from '../services/phase1StripeChargeIncidents.js';
 import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
 import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
@@ -280,6 +282,9 @@ router.post('/', async (req, res) => {
   /** PaymentIntent ids for async actual-fee reconciliation (non-blocking). */
   const paymentIntentIdsForFeeCapture = [];
 
+  /** Pre-transaction Stripe HTTP for dispute→PI mapping only (`resolvePhase1DisputePaymentIntentForWebhook`). */
+  let disputePaymentIntentResolution = null;
+
   try {
     let l7WebhookTraceId = req.traceId ?? null;
     if (event.type === 'checkout.session.completed') {
@@ -307,6 +312,33 @@ router.post('/', async (req, res) => {
       stripeEventIdSuffix,
       traceId: req.traceId ?? null,
     });
+
+    if (event.type === 'charge.dispute.created') {
+      const disputeObj = event.data?.object;
+      try {
+        disputePaymentIntentResolution = await resolvePhase1DisputePaymentIntentForWebhook(
+          stripe,
+          disputeObj,
+          req.log,
+        );
+      } catch (e) {
+        if (e instanceof DisputeChargeLookupError) {
+          webTopupLog(req.log, 'warn', 'dispute_charge_lookup_failed_pre_tx', {
+            stripeEventType: event.type,
+            stripeEventIdSuffix,
+            traceId: req.traceId ?? null,
+          });
+          return res.status(503).json(
+            clientErrorBody(
+              'Service unavailable',
+              API_CONTRACT_CODE.INTERNAL_ERROR,
+            ),
+          );
+        }
+        throw e;
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
       await tx.stripeWebhookEvent.create({ data: { id: event.id } });
 
@@ -434,8 +466,8 @@ router.post('/', async (req, res) => {
       if (event.type === 'charge.dispute.created') {
         const dispute = event.data.object;
         await applyPhase1DisputeCreated(tx, dispute, event.id, {
-          stripe,
           log: req.log,
+          disputePaymentIntentResolution,
         });
         return;
       }

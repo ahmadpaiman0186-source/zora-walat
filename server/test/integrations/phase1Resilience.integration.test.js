@@ -18,6 +18,8 @@ import { applyPhase1CheckoutSessionCompleted } from '../../src/services/phase1St
 import {
   applyPhase1ChargeRefunded,
   applyPhase1DisputeCreated,
+  DisputeChargeLookupError,
+  resolvePhase1DisputePaymentIntentForWebhook,
 } from '../../src/services/phase1StripeChargeIncidents.js';
 import { ensureQueuedFulfillmentAttempt } from '../../src/services/fulfillmentProcessingService.js';
 import { getCanonicalPhase1OrderForUser } from '../../src/services/canonicalPhase1OrderService.js';
@@ -197,14 +199,18 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
       },
     });
     const evt = `evt_dsp_${randomUUID()}`;
+    const disputePayload = { id: 'dp_test', payment_intent: piDsp };
+    const resolution = await resolvePhase1DisputePaymentIntentForWebhook(
+      null,
+      disputePayload,
+      null,
+    );
     await prisma.$transaction(async (tx) => {
       await tx.stripeWebhookEvent.create({ data: { id: evt } });
       eventIds.push(evt);
-      await applyPhase1DisputeCreated(
-        tx,
-        { id: 'dp_test', payment_intent: piDsp },
-        evt,
-      );
+      await applyPhase1DisputeCreated(tx, disputePayload, evt, {
+        disputePaymentIntentResolution: resolution,
+      });
     });
     const dto = await getCanonicalPhase1OrderForUser(order.id, user.id, { prisma });
     assert.equal(dto.postPaymentIncident.status, POST_PAYMENT_INCIDENT_STATUS.DISPUTED);
@@ -225,29 +231,61 @@ describe('Phase 1 resilience (integration)', { skip: !runIntegration }, () => {
       },
     });
     const evt = `evt_dsp_lookup_${randomUUID()}`;
+    let retrieveCalls = 0;
     const mockStripe = {
       charges: {
-        retrieve: async () => ({
-          id: 'ch_lookup_sim',
-          object: 'charge',
-          payment_intent: piLookup,
-        }),
+        retrieve: async () => {
+          retrieveCalls += 1;
+          return {
+            id: 'ch_lookup_sim',
+            object: 'charge',
+            payment_intent: piLookup,
+          };
+        },
       },
     };
+    const disputeLookup = {
+      id: 'dp_lookup',
+      object: 'dispute',
+      charge: 'ch_lookup_sim',
+    };
+    const resolution = await resolvePhase1DisputePaymentIntentForWebhook(
+      /** @type {import('stripe').Stripe} */ (/** @type {unknown} */ (mockStripe)),
+      disputeLookup,
+      null,
+    );
+    assert.equal(retrieveCalls, 1);
     await prisma.$transaction(async (tx) => {
       await tx.stripeWebhookEvent.create({ data: { id: evt } });
       eventIds.push(evt);
-      await applyPhase1DisputeCreated(
-        tx,
-        { id: 'dp_lookup', object: 'dispute', charge: 'ch_lookup_sim' },
-        evt,
-        { stripe: /** @type {import('stripe').Stripe} */ (/** @type {unknown} */ (mockStripe)) },
-      );
+      await applyPhase1DisputeCreated(tx, disputeLookup, evt, {
+        disputePaymentIntentResolution: resolution,
+      });
     });
+    assert.equal(retrieveCalls, 1);
     const dto = await getCanonicalPhase1OrderForUser(order.id, user.id, { prisma });
     assert.equal(dto.postPaymentIncident.status, POST_PAYMENT_INCIDENT_STATUS.DISPUTED);
     assert.equal(dto.postPaymentIncident.mapSource, POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_CHARGE_LOOKUP);
     assert.equal(dto.postPaymentIncident.disputeSupportMapping, 'recovered_via_stripe_charge_api');
+  });
+
+  it('stripe charge.dispute.created: charges.retrieve failure throws before DB (retryable path)', async () => {
+    const mockStripe = {
+      charges: {
+        retrieve: async () => {
+          throw new Error('simulated_stripe_network_failure');
+        },
+      },
+    };
+    await assert.rejects(
+      () =>
+        resolvePhase1DisputePaymentIntentForWebhook(
+          /** @type {import('stripe').Stripe} */ (/** @type {unknown} */ (mockStripe)),
+          { id: 'dp_fail', object: 'dispute', charge: 'ch_fail_sim' },
+          null,
+        ),
+      DisputeChargeLookupError,
+    );
   });
 
   it('incident: terminal failure is reflected in canonical phase', async () => {
