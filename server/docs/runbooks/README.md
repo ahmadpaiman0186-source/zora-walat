@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L30_SUPPORT_INCIDENT_RECOVERY.md](./L30_SUPPORT_INCIDENT_RECOVERY.md) — L30 support/recovery scenarios (outage, fulfillment, refunds, access, ledger, DB restore, fraud escalation)
+- [../support/L30_SUPPORT_RECOVERY_OVERVIEW.md](../support/L30_SUPPORT_RECOVERY_OVERVIEW.md) — L30 scope, escalation, NO-GO
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
