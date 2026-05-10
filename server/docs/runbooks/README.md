@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L37_PROVIDER_OUTAGE_AND_FALLBACK_RUNBOOK.md](./L37_PROVIDER_OUTAGE_AND_FALLBACK_RUNBOOK.md) — L37 vendor outage, latency, auth, quota, stuck fulfillment, duplicate-risk
+- [../vendor/L37_VENDOR_SLA_PROVIDER_FALLBACK_STRATEGY.md](../vendor/L37_VENDOR_SLA_PROVIDER_FALLBACK_STRATEGY.md) — L37 strategy and dependency map
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
