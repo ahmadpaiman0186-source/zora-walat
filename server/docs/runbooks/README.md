@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L35_RECREATE_ENVIRONMENT_FROM_SCRATCH_RUNBOOK.md](./L35_RECREATE_ENVIRONMENT_FROM_SCRATCH_RUNBOOK.md) — L35 recreate env tabletop (no prod without approval)
+- [../infrastructure/L35_IAC_REPRODUCIBLE_INFRASTRUCTURE_STRATEGY.md](../infrastructure/L35_IAC_REPRODUCIBLE_INFRASTRUCTURE_STRATEGY.md) — L35 IaC posture and dependency map
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
