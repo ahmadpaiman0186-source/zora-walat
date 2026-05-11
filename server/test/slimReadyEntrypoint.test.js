@@ -105,6 +105,37 @@ describe('slim serverless /ready entrypoint', () => {
     assertPayloadHasNoSecretLikeStrings(res.body);
   });
 
+  it('handleSlimReady db_error keeps four public keys when runProbe uses core diagnostics', async () => {
+    const { runReadinessDatabaseCore } = await import(
+      '../src/lib/readinessBoundedChecks.js'
+    );
+    const res = createMockRes();
+    const err = new Error('');
+    err.name = 'PrismaClientKnownRequestError';
+    err.code = 'P2021';
+    await handleSlimReady(res, {
+      runProbe: () =>
+        runReadinessDatabaseCore(
+          {
+            $queryRaw: function () {
+              return Promise.resolve([]);
+            },
+            webTopupOrder: { findFirst: () => Promise.reject(err) },
+          },
+          { dbProbeMs: 50, logSlimReadyDbError: true },
+        ),
+    });
+    assert.equal(res.statusCode, 503);
+    assert.equal(res.body.readinessReason, 'db_error');
+    assert.deepEqual(Object.keys(res.body).sort(), [
+      'checkedAt',
+      'readinessReason',
+      'status',
+      'timeoutMs',
+    ]);
+    assertPayloadHasNoSecretLikeStrings(res.body);
+  });
+
   it('GET /ready via api/index.mjs does not import bootstrap (no hook events)', async () => {
     const loaded = [];
     const original = globalThis.__zwServerlessHealthTestHook;

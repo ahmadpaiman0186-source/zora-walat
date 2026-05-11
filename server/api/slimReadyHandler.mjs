@@ -55,7 +55,7 @@ export async function handleSlimReady(res, options = {}) {
       const { runReadinessDatabaseCore } = await import(
         '../src/lib/readinessBoundedChecks.js'
       );
-      return runReadinessDatabaseCore(prisma);
+      return runReadinessDatabaseCore(prisma, { logSlimReadyDbError: true });
     });
 
   try {
