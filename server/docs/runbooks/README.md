@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L40_POST_LAUNCH_REVIEW_RUNBOOK.md](./L40_POST_LAUNCH_REVIEW_RUNBOOK.md) — L40 first 24h/7d review, reconciliation, go/no-go, closure
+- [../operations/L40_POST_SOFT_LAUNCH_LEARNING_LOOP.md](../operations/L40_POST_SOFT_LAUNCH_LEARNING_LOOP.md) — L40 learning cadence and handoffs
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
