@@ -5,8 +5,15 @@
  */
 import '../src/runtime/registerServerlessRuntime.js';
 import { sendLivenessJsonOk } from '../src/lib/sendLivenessJsonOk.js';
+import { handleSlimReady } from './slimReadyHandler.mjs';
 
 let cachedHandler = null;
+
+function requestPathname(url) {
+  if (typeof url !== 'string') return '';
+  const q = url.indexOf('?');
+  return q === -1 ? url : url.slice(0, q);
+}
 
 function notifyServerlessHealthTest(event) {
   globalThis.__zwServerlessHealthTestHook?.(event);
@@ -41,6 +48,13 @@ export default function handler(req, res) {
   if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
     sendLivenessJsonOk(res);
     return;
+  }
+  /**
+   * Slim readiness: DB core probe only with a hard outer deadline — avoids `bootstrap.js`
+   * (Redis init) and full Express graph + `getHealthDeps()` stalls on Vercel.
+   */
+  if (req.method === 'GET' && requestPathname(req.url) === '/ready') {
+    return handleSlimReady(res);
   }
   return getHandler().then((nextHandler) => nextHandler(req, res));
 }
