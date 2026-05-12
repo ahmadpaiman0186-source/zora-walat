@@ -56,5 +56,15 @@ export default function handler(req, res) {
   if (req.method === 'GET' && requestPathname(req.url) === '/ready') {
     return handleSlimReady(res);
   }
+  /**
+   * Stripe webhooks: verify signature before bootstrap (Redis + full Express import graph).
+   * Invalid/missing signatures return 400 here; verified payloads replay into the existing
+   * Express `/webhooks/stripe` route (see slimStripeWebhookHandler.mjs).
+   */
+  if (req.method === 'POST' && requestPathname(req.url) === '/webhooks/stripe') {
+    return import('./slimStripeWebhookHandler.mjs').then((m) =>
+      m.handleSlimStripeWebhookPost(req, res, getHandler),
+    );
+  }
   return getHandler().then((nextHandler) => nextHandler(req, res));
 }
