@@ -73,3 +73,6 @@ server/debug/
 # Any `debug/` directory in the repo (broader than server/debug/)
 debug/
 _backup/
+
+.vercel
+.env*.local

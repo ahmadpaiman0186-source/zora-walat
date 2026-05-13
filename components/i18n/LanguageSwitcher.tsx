@@ -2,7 +2,7 @@
 
 import type { UiLocale } from '@/messages';
 
-import { useLocale } from './localeContext';
+import { useLocale } from './LocaleContext';
 import styles from './LanguageSwitcher.module.css';
 
 const ORDER: UiLocale[] = ['en', 'fa', 'ar', 'tr'];

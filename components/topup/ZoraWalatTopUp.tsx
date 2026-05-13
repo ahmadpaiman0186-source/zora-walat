@@ -13,7 +13,7 @@ import {
 } from 'react';
 
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
-import { useLocale } from '@/components/i18n/localeContext';
+import { useLocale } from '@/components/i18n/LocaleContext';
 import type { UiLocale, UiMessages } from '@/messages';
 import {
   clearTopupUpdateToken,
