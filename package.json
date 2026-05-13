@@ -6,6 +6,7 @@
     "api:dev": "npm --prefix server run dev",
     "dev": "node scripts/next-env-banner.mjs && next dev -p 3000",
     "start:local": "pwsh -ExecutionPolicy Bypass -File ./scripts/start-local.ps1",
+    "prebuild": "node scripts/assert-next-topup-present.mjs",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "next lint",
