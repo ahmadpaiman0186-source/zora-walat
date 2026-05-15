@@ -5,8 +5,8 @@
 - **Current state:** Staging API project **`zora-walat-api-staging`** deploys from **`server/`** with **`server/vercel.json`** routing all traffic to **`api/index.mjs`**. Prior incidents (wrong-root Next deploy, bundled **`.env`**, invalid **`DATABASE_URL`** scheme, checkout quote before validation) were addressed in git through mid-May 2026. A follow-on symptom was **`curl --max-time 20`** to **`https://zora-walat-api-staging.vercel.app/api/index`** returning **no bytes** within 20s — consistent with **cold-start blocking** on **`bootstrap.js`** (optional Redis) and/or **full Express import** before any response.
 - **What works:** Slim paths for **`GET /health`**, **`GET /ready`** (bounded DB probe), and **Stripe webhook** signature gate before full bootstrap; **`.vercelignore`** excluding env files; **Prisma** lazy client (no **`$connect`** at import); **fatal_startup_gate** JSON for production **`DATABASE_URL`** shape.
 - **What was broken:** **`GET /api/index`** had **no fast path** and always waited for **`getHandler()`** → **`bootstrap`** (top-level **`await`** on rate-limit Redis) → **dynamic import** of the full app graph — vulnerable to **long or stuck TCP** to Redis and/or **large cold-start** cost, surfacing as **client-side timeouts**.
-- **What was fixed today (code):** (1) **Slim `GET`/`HEAD` `/api/index`** (and **`/index`**) returning **`200`** JSON without bootstrap/Express. (2) **Hard wall (3–5s)** around **`redis`** **`connect()`** in **`rateLimitRedisInit.js`**. (3) **Sanitized `[startup] phase=...`** logs in **`bootstrap.js`** and **`api/index.mjs`** **`getHandler()`** cold path.
-- **Current blocker (live verification):** **Operator must deploy** from **`C:\Users\ahmad\zora_walat\server`** and re-run **`curl --max-time 20 -i https://zora-walat-api-staging.vercel.app/api/index`**. This document does **not** claim production success until that curl shows **200**, **204**, or **405** within the deadline.
+- **What was fixed today (code):** (1) **Slim `GET`/`HEAD` `/api/index`** (and **`/index`**) returning **`200`** JSON without bootstrap/Express. (2) **Slim `GET /api/health`** and **`GET /api/ready`** at the serverless entry (same as root **`/health`** / **`/ready`**), because **`vercel.json`** routes **`/api/*`** into **`api/index.mjs`** and **`req.url`** carries the **`/api/...`** prefix. (3) **Hard wall (3–5s)** around **`redis`** **`connect()`** in **`rateLimitRedisInit.js`**. (4) **Sanitized `[startup] phase=...`** logs in **`bootstrap.js`** and **`api/index.mjs`** **`getHandler()`** cold path.
+- **Current blocker (live verification):** None for **`/api/index`**, **`/api/health`**, and **`/api/ready`** on **`https://zora-walat-api-staging.vercel.app`** as of deployment **`dpl_64QfLaCRTmnZbkXETeVt8ZA2AXaE`** (**`curl --max-time 20`** verified). Re-check after any env or routing change.
 - **CTO recommendation:** **Freeze feature work** until staging **`/api/index`**, **`/ready`**, and webhook smoke are green. **Deploy only from `server/`**. **Keep Stripe test mode** on staging. **Rotate** any secret class that may have been bundled in historical **`.env`** artifacts. Use **`/ready`** for bounded DB truth; use **`/api/index`** only as a **liveness** probe (now deterministic). **Mock providers** only with explicit **`ALLOW_MOCK_*_IN_PRODUCTION`** flags.
 
 ---
@@ -112,7 +112,8 @@
 
 | Area | Status | Severity | Required action | Owner | Verification |
 |------|--------|----------|-----------------|-------|----------------|
-| **`/api/index` liveness** | Green after deploy | High | Deploy + **`curl --max-time 20`** | Ops | 200 < 20s |
+| **`/api/index` liveness** | Fixed | High | Slim **`GET/HEAD`** in **`api/index.mjs`** | Eng | **`curl`** 200 < 20s |
+| **`/api/health` / `/api/ready`** | Fixed | High | Match **`/api/...`** prefix at serverless entry (Vercel passes full path) | Eng | **`curl`** 200 < 20s |
 | Full API cold start | Partial | Medium | Watch logs for **`phase=`** stalls | Eng | Spot-check heavy routes |
 | DB connectivity | Env-dependent | High | **`/ready`** on staging | Ops | 200 or explicit 503 |
 | Unit tests on dev laptop | Red without valid DB | Medium | CI or local test **`DATABASE_URL`** | Eng | **`npm run test`** green |
@@ -142,8 +143,8 @@
 
 ## 14. Definition of Done
 
-- [ ] **`curl --max-time 20 -i https://zora-walat-api-staging.vercel.app/api/index`** → **200**, **204**, or **405** with bytes received.
-- [ ] No silent **20s** hang on **`/api/index`** probe.
+- [x] **`curl --max-time 20 -i https://zora-walat-api-staging.vercel.app/api/index`** → **200**, **204**, or **405** with bytes received (verified **200** + **`{"status":"ok"}`** after deploy **`dpl_64QfLaCRTmnZbkXETeVt8ZA2AXaE`**).
+- [x] No silent **20s** hang on **`/api/index`** probe (same deployment as above).
 - [ ] Bounded diagnostics present in logs (**`[startup] phase=`**).
 - [ ] DB path stable (**`/ready`**).
 - [ ] Stripe **test** mode on staging.
