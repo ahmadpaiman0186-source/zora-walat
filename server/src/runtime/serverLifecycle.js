@@ -156,7 +156,7 @@ function validateDatabaseConfigOrExit() {
         }),
       );
       console.error(
-        '[fatal] DATABASE_URL must be set to a PostgreSQL connection string in production',
+        '[fatal] DATABASE_URL must be set to a PostgreSQL connection string in production (scheme postgres:// or postgresql://; check for pasted host-only values or wrong secret type)',
       );
       process.exit(1);
     }
