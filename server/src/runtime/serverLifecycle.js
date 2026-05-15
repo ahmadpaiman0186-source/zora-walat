@@ -110,7 +110,8 @@ function validateJwtSecretsOrExit() {
 }
 
 function validateDatabaseConfigOrExit() {
-  const dbUrl = String(env.databaseUrl ?? '').trim();
+  /** Read at check time — `env.databaseUrl` is fixed when `env.js` first loads; serverless must match `process.env`. */
+  const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
   if (env.prelaunchLockdown) {
     if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
       console.error(
@@ -144,6 +145,15 @@ function validateDatabaseConfigOrExit() {
 
   if (env.nodeEnv === 'production') {
     if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
+      console.error(
+        JSON.stringify({
+          event: 'fatal_startup_gate',
+          schemaVersion: 1,
+          gate: 'database_url_production',
+          hasNonWhitespaceDatabaseUrl: Boolean(dbUrl),
+          passesPostgresSchemeCheck: Boolean(dbUrl && isPostgresDatabaseUrl(dbUrl)),
+        }),
+      );
       console.error(
         '[fatal] DATABASE_URL must be set to a PostgreSQL connection string in production',
       );
