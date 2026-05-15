@@ -17,6 +17,16 @@ if (files.length === 0) {
   console.error('[run-unit-tests] No test/*.test.js files in test/');
   process.exit(1);
 }
+
+const pre = spawnSync(
+  process.execPath,
+  [join(serverRoot, 'scripts', 'unit-test-db-precheck.mjs')],
+  { cwd: serverRoot, stdio: 'inherit', shell: false },
+);
+if (pre.status !== 0) {
+  process.exit(pre.status === null ? 1 : pre.status);
+}
+
 const r = spawnSync(
   process.execPath,
   [
