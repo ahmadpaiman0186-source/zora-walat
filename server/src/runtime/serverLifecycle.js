@@ -49,6 +49,7 @@ import {
   envStrictTrue,
   isLocalControlledStripeLiveProofBypassActive,
 } from '../lib/localCheckoutProofRuntime.js';
+import { normalizeDatabaseUrlEnv } from '../lib/normalizeDatabaseUrlEnv.js';
 
 function isPostgresDatabaseUrl(url) {
   return /^postgres(ql)?:\/\//i.test(String(url ?? '').trim());
@@ -111,7 +112,7 @@ function validateJwtSecretsOrExit() {
 
 function validateDatabaseConfigOrExit() {
   /** Read at check time — `env.databaseUrl` is fixed when `env.js` first loads; serverless must match `process.env`. */
-  const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
+  const dbUrl = normalizeDatabaseUrlEnv(process.env.DATABASE_URL);
   if (env.prelaunchLockdown) {
     if (!dbUrl || !isPostgresDatabaseUrl(dbUrl)) {
       console.error(

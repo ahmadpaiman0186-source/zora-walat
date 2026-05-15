@@ -1,5 +1,6 @@
 import './config/env.js';
 import { PrismaClient, Prisma } from '@prisma/client';
+import { normalizeDatabaseUrlEnv } from './lib/normalizeDatabaseUrlEnv.js';
 
 /**
  * Replace or append `connection_limit` using only query-string parsing (host/path may contain
@@ -35,10 +36,10 @@ function buildDatabaseUrlWithPoolCap() {
   let limit = process.env.PRISMA_CONNECTION_LIMIT?.trim();
   if (isTest) {
     if (!limit) limit = '3';
-    return applyConnectionLimitQueryParam(String(raw).trim(), limit);
+    return applyConnectionLimitQueryParam(normalizeDatabaseUrlEnv(raw), limit);
   }
 
-  let url = String(raw).trim();
+  let url = normalizeDatabaseUrlEnv(raw);
   if (url.includes('connection_limit=')) return url;
   if (!limit) return url;
   const sep = url.includes('?') ? '&' : '?';
