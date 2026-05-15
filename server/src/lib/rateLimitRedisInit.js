@@ -72,6 +72,12 @@ export function initRateLimitRedisOptional() {
   return initOnce;
 }
 
+/** Hard wall so serverless cold start never blocks on Redis longer than a few seconds. */
+const RATE_LIMIT_REDIS_CONNECT_WALL_MS = Math.min(
+  5000,
+  Math.max(3000, env.redisConnectTimeoutMs + 1500),
+);
+
 async function runInitRateLimitRedis() {
   if (process.env.NODE_ENV === 'test') {
     recordHttpRateLimitSnapshot('skipped_test_env', 'memory');
@@ -82,8 +88,10 @@ async function runInitRateLimitRedis() {
     return { ok: true, mode: 'memory_default' };
   }
 
+  /** @type {import('redis').RedisClientType | undefined} */
+  let c;
   try {
-    const c = createClient({
+    c = createClient({
       url: env.redisUrl,
       socket: {
         connectTimeout: env.redisConnectTimeoutMs,
@@ -91,7 +99,16 @@ async function runInitRateLimitRedis() {
       },
     });
     c.on('error', () => {});
-    await c.connect();
+    await Promise.race([
+      c.connect(),
+      new Promise((_, rej) => {
+        setTimeout(() => {
+          const err = new Error('redis_connect_wall');
+          err.code = 'redis_connect_wall';
+          rej(err);
+        }, RATE_LIMIT_REDIS_CONNECT_WALL_MS);
+      }),
+    ]);
     dedicatedClient = c;
     sendCommandFn = (args) => c.sendCommand(args);
     recordHttpRateLimitSnapshot('redis', 'redis');
@@ -100,6 +117,17 @@ async function runInitRateLimitRedis() {
     );
     return { ok: true, mode: 'redis' };
   } catch (e) {
+    if (c) {
+      try {
+        await c.quit();
+      } catch {
+        try {
+          c.disconnect();
+        } catch {
+          /* ignore */
+        }
+      }
+    }
     dedicatedClient = null;
     sendCommandFn = null;
     const msg = String(e?.message ?? e);

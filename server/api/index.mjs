@@ -15,6 +15,24 @@ function requestPathname(url) {
   return q === -1 ? url : url.slice(0, q);
 }
 
+/** Strip trailing slash (except `/`) for stable routing on probes. */
+function normalizedPathname(url) {
+  let p = requestPathname(url);
+  if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+  return p;
+}
+
+/**
+ * Fast staging/LB probe: never loads bootstrap, Redis, or Express (avoids cold-start hangs).
+ * Real API traffic still uses `getHandler()`.
+ */
+function sendApiIndexProbeOk(res) {
+  console.log('[startup] phase=request_start route=/api/index');
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(200).json({ status: 'ok' });
+  console.log('[startup] phase=request_done route=/api/index status=200');
+}
+
 function notifyServerlessHealthTest(event) {
   globalThis.__zwServerlessHealthTestHook?.(event);
 }
@@ -23,12 +41,16 @@ async function getHandler() {
   if (!cachedHandler) {
     notifyServerlessHealthTest('bootstrap_import');
     await import('../bootstrap.js');
+    console.log('[startup] phase=prisma_init_start');
     notifyServerlessHealthTest('app_graph_import');
     const [{ createValidatedApp }, { default: serverless }] = await Promise.all([
       import('../src/index.js'),
       import('serverless-http'),
     ]);
+    console.log('[startup] phase=prisma_init_done');
+    console.log('[startup] phase=route_register_start');
     const app = createValidatedApp();
+    console.log('[startup] phase=route_register_done');
     cachedHandler = serverless(app, {
       /**
        * Prisma / Redis clients keep sockets open. In serverless we want the response to flush
@@ -36,6 +58,7 @@ async function getHandler() {
        */
       callbackWaitsForEmptyEventLoop: false,
     });
+    console.log('[startup] phase=handler_ready');
   }
   return cachedHandler;
 }
@@ -56,6 +79,23 @@ export default function handler(req, res) {
   if (req.method === 'GET' && requestPathname(req.url) === '/ready') {
     return handleSlimReady(res);
   }
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      (req.method === 'GET' || req.method === 'HEAD') &&
+      (p === '/api/index' || p === '/index')
+    ) {
+      if (req.method === 'HEAD') {
+        console.log('[startup] phase=request_start route=/api/index');
+        res.setHeader('Cache-Control', 'no-store');
+        res.status(200).end();
+        console.log('[startup] phase=request_done route=/api/index status=200');
+        return;
+      }
+      sendApiIndexProbeOk(res);
+      return;
+    }
+  }
   /**
    * Stripe webhooks: verify signature before bootstrap (Redis + full Express import graph).
    * Invalid/missing signatures return 400 here; verified payloads replay into the existing
@@ -66,5 +106,16 @@ export default function handler(req, res) {
       m.handleSlimStripeWebhookPost(req, res, getHandler),
     );
   }
-  return getHandler().then((nextHandler) => nextHandler(req, res));
+  return getHandler().then((nextHandler) => {
+    const route = normalizedPathname(req.url);
+    if (route === '/api/index') {
+      console.log('[startup] phase=request_start route=/api/index');
+      res.once('finish', () => {
+        console.log(
+          `[startup] phase=request_done route=/api/index status=${res.statusCode}`,
+        );
+      });
+    }
+    return nextHandler(req, res);
+  });
 }

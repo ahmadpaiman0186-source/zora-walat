@@ -7,6 +7,8 @@ import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+console.log('[startup] phase=entry_start');
+
 const serverRoot = dirname(fileURLToPath(import.meta.url));
 /**
  * Development uses `override: true` so `server/.env` wins over stale shell vars (e.g. DATABASE_URL).
@@ -26,6 +28,7 @@ const dotenvQuiet =
     .toLowerCase() === 'true';
 /** In development, suppress dotenv marketing/tips on stdout; errors still surface via `loaded.error`. */
 const dotenvQuietDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+console.log('[startup] phase=env_validate_start');
 const loaded = dotenv.config({
   path: join(serverRoot, '.env'),
   /** In development, prefer `server/.env` over inherited shell (stale DATABASE_URL). Production keeps platform env. */
@@ -43,6 +46,7 @@ if (envLocalLoaded) {
     quiet: dotenvQuiet || dotenvQuietDev,
   });
 }
+console.log('[startup] phase=env_validate_done');
 
 /**
  * After `.env` + `.env.local`, pin a supervised production-like profile for
@@ -164,7 +168,15 @@ if (process.env.NODE_ENV !== 'test' && !isPrismaCliTooling) {
   }
 }
 
+/**
+ * DB is validated in `createValidatedApp` / slim `/ready` — bootstrap stays non-blocking for Prisma.
+ */
+console.log('[startup] phase=db_validate_skipped note=runtime_gates');
+console.log('[startup] phase=prisma_init_skipped note=lazy_factory');
+
 /** Share Redis rate-limit connection across any entry that imports bootstrap before `app.js` (API, smoke scripts, prisma-cli). */
+console.log('[startup] phase=redis_rate_limit_start');
 await import('./src/lib/rateLimitRedisInit.js').then((m) =>
   m.initRateLimitRedisOptional(),
 );
+console.log('[startup] phase=redis_rate_limit_done');
