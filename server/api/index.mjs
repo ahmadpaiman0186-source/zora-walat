@@ -68,15 +68,22 @@ export default function handler(req, res) {
    * Keep liveness probes independent from the wider app import graph so `/health`
    * stays cheap and deterministic even when optional integrations are slow.
    */
-  if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
-    sendLivenessJsonOk(res);
-    return;
+  if (req.method === 'GET') {
+    const hp = normalizedPathname(req.url);
+    if (hp === '/' || hp === '/health' || hp === '/api/health') {
+      sendLivenessJsonOk(res);
+      return;
+    }
   }
   /**
    * Slim readiness: DB core probe only with a hard outer deadline — avoids `bootstrap.js`
    * (Redis init) and full Express graph + `getHealthDeps()` stalls on Vercel.
    */
-  if (req.method === 'GET' && requestPathname(req.url) === '/ready') {
+  if (
+    req.method === 'GET' &&
+    (normalizedPathname(req.url) === '/ready' ||
+      normalizedPathname(req.url) === '/api/ready')
+  ) {
     return handleSlimReady(res);
   }
   {
