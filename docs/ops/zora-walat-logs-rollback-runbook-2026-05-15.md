@@ -231,4 +231,26 @@ vercel deploy --prod --yes
 2. **Central redaction middleware** for all `console.log` — not present; rely on discipline + code review.
 3. **Automated alerts** — runbook assumes humans read Vercel/Stripe; wire PagerDuty/Slack separately.
 4. **Rollback audit log** — no application-level `rollback_completed`; use Vercel deployment history + change ticket.
-5. **Full `npm test` locally** — blocked without valid `DATABASE_URL`; CI should remain source of truth for green builds.
+5. **Full `npm test` locally** — `scripts/unit-test-db-precheck.mjs` may pass while **individual tests still fail** (e.g. HTTP/admin suites needing fixtures). Treat **CI** as the merge gate; do not claim green from probes alone.
+
+---
+
+## 13. Safe local test commands (Windows / PowerShell)
+
+**Do not** pipe `npm test` into `Select-Object -First N` (or similar): closing the pipe early can **terminate** the Node test runner with a **non-actionable exit code** on Windows.
+
+From `server/`:
+
+| Command | Notes |
+|---------|--------|
+| `npm run lint` | **Not defined** in `package.json` |
+| `npm run typecheck` | **Not defined** |
+| `npm run build` | **Not defined** |
+| `npm test` | Full `test/*.test.js` list via `scripts/run-unit-tests.mjs` — allow **several minutes**; exit **0** only when all pass |
+
+**Targeted audits (no DB fixtures; fast):**
+
+```bash
+cd C:\Users\ahmad\zora_walat\server
+node --import ./test/setupTestEnv.mjs --test test/orderStateSafetyAudit.test.js test/fulfillmentFailureSafetyAudit.test.js test/slimStripeWebhookEntrypoint.test.js test/checkoutRedirectUrls.test.js
+```
