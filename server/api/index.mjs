@@ -175,9 +175,8 @@ export default function handler(req, res) {
     }
   }
   /**
-   * Hosted checkout requires auth before any bootstrap. Without this gate, cold POSTs
-   * block on full `getHandler()` for tens of seconds with zero bytes (LB/client timeouts).
-   * Dev header bypass still defers to Express (secret + user lookup).
+   * Hosted checkout (Bearer JWT): slim path — full `getHandler()` cold start caused client timeouts.
+   * Dev `X-ZW-Dev-Checkout` bypass still uses Express via `getHandler()`.
    */
   {
     const p = normalizedPathname(req.url);
@@ -190,10 +189,15 @@ export default function handler(req, res) {
         typeof authz === 'string' &&
         authz.startsWith('Bearer ') &&
         authz.slice(7).trim().length > 0;
+      if (hasBearer) {
+        return import('./slimCreateCheckoutHandler.mjs').then((m) =>
+          m.handleSlimCreateCheckoutPost(req, res),
+        );
+      }
       const devHdr = req.headers?.['x-zw-dev-checkout'];
       const devProbe =
         typeof devHdr === 'string' && String(devHdr).trim().length >= 16;
-      if (!hasBearer && !devProbe) {
+      if (!devProbe) {
         res.setHeader('Cache-Control', 'no-store');
         res.status(401).json(
           clientErrorBody('Authentication required', 'auth_required'),
