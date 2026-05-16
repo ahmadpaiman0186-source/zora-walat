@@ -160,6 +160,21 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Staging operator email verify (Path B): runs on Vercel DB — local `vercel env run`
+   * does not inject decryptable production DATABASE_URL for Prisma from operator machines.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'POST' &&
+      p === '/api/ops/staging-verify-operator-email'
+    ) {
+      return import('./slimStagingOperatorVerifyEmailHandler.mjs').then((m) =>
+        m.handleSlimStagingOperatorVerifyEmailPost(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout requires auth before any bootstrap. Without this gate, cold POSTs
    * block on full `getHandler()` for tens of seconds with zero bytes (LB/client timeouts).
    * Dev header bypass still defers to Express (secret + user lookup).
