@@ -30,3 +30,7 @@ soft-launch-gate-report.json
 
 .vercel
 .env*.local
+
+# Staging operator harness (local tokens / email — never commit)
+.staging-token.local
+.staging-operator-email.local
