@@ -34,3 +34,4 @@ soft-launch-gate-report.json
 # Staging operator harness (local tokens / email — never commit)
 .staging-token.local
 .staging-operator-email.local
+.staging-operator-verify-token.local
