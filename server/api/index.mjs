@@ -142,6 +142,24 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Auth request-otp / resend-otp: avoid cold `getHandler()` so OTP issue returns before
+   * Vercel FUNCTION_INVOCATION_TIMEOUT (SMTP + Prisma only, no Redis bootstrap).
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'POST' &&
+      (p === '/api/auth/request-otp' ||
+        p === '/auth/request-otp' ||
+        p === '/api/auth/resend-otp' ||
+        p === '/auth/resend-otp')
+    ) {
+      return import('./slimAuthRequestOtpHandler.mjs').then((m) =>
+        m.handleSlimAuthRequestOtpPost(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout requires auth before any bootstrap. Without this gate, cold POSTs
    * block on full `getHandler()` for tens of seconds with zero bytes (LB/client timeouts).
    * Dev header bypass still defers to Express (secret + user lookup).
