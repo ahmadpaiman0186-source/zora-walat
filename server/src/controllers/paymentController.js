@@ -41,6 +41,7 @@ import {
   logIdempotencyReplayHit,
   tryReuseHostedCheckoutSession,
 } from '../payment/idempotencyService.js';
+import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../constants/webTopupStripePiMetadata.js';
 import {
   createInitiatedRow,
   markCheckoutCreated,
@@ -818,7 +819,9 @@ export async function createTestPaymentIntent(req, res) {
    * integration / CI without STRIPE_SECRET_KEY still receives **403** for invalid session (contract),
    * not **503** stripe_not_configured.
    */
-  let metadata = { source: 'zora_walat_next_test' };
+  let metadata = {
+    source: WEBTOPUP_STRIPE_PI_METADATA_SOURCE,
+  };
   if (parsed.orderId != null && parsed.orderId !== '') {
     let orderRow;
     try {

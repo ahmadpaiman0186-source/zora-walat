@@ -11,8 +11,10 @@ import Stripe from 'stripe';
 import {
   createStripeWebhookReplayStream,
   handleSlimStripeWebhookPost,
+  stripeEventSlimUnmatchedFastAck,
   WEBHOOK_RAW_BODY_LIMIT_BYTES,
 } from '../api/slimStripeWebhookHandler.mjs';
+import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../src/constants/webTopupStripePiMetadata.js';
 
 /**
  * @param {Buffer | string} body
@@ -147,6 +149,8 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
       typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
       'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
     );
+    /** Shape like Prisma cuid so slim path does not fast-ack checkout before Express replay. */
+    const internalCheckoutId = `c${'0123456789abcdefghijk'.slice(0, 23)}`;
     const payload = JSON.stringify({
       id: `evt_slim_ok_${randomUUID().slice(0, 8)}`,
       object: 'event',
@@ -155,7 +159,7 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
         object: {
           id: `cs_slim_ok_${randomUUID().slice(0, 8)}`,
           object: 'checkout.session',
-          metadata: {},
+          metadata: { internalCheckoutId },
         },
       },
     });
@@ -193,6 +197,109 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
     assert.equal(replayBytes, payload);
     assert.equal(res.statusCode, 200);
     assert.equal(res.body, '{"ok":true}');
+  });
+
+  it('fast-acks payment_intent.succeeded when topup_order_id looks valid but metadata.source is not Zora (Stripe CLI fixtures)', async () => {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    assert.ok(
+      typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
+      'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
+    );
+    const orderLike = `tw_ord_${randomUUID()}`;
+    const payload = JSON.stringify({
+      id: `evt_slim_pi_${randomUUID().slice(0, 8)}`,
+      object: 'event',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: `pi_slim_${randomUUID().slice(0, 8)}`,
+          object: 'payment_intent',
+          status: 'succeeded',
+          metadata: { topup_order_id: orderLike },
+        },
+      },
+    });
+    const header = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret,
+    });
+    let handlerCalls = 0;
+    const getHandler = async () => {
+      handlerCalls += 1;
+      return () => {};
+    };
+    const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
+    const res = makeMockRes();
+    await handleSlimStripeWebhookPost(req, res, getHandler);
+    assert.equal(handlerCalls, 0, 'getHandler must not run for fixture-shaped PI');
+    assert.equal(res.statusCode, 200);
+    const j = JSON.parse(res.body);
+    assert.equal(j.ok, true);
+    assert.equal(j.status, 'ignored');
+    assert.equal(j.reason, 'unmatched_event');
+    assert.equal(j.stripeEventType, 'payment_intent.succeeded');
+  });
+
+  it('hands off payment_intent.succeeded when Zora metadata.source and topup_order_id are present', async () => {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    assert.ok(
+      typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
+      'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
+    );
+    const orderLike = `tw_ord_${randomUUID()}`;
+    const payload = JSON.stringify({
+      id: `evt_slim_pi_ok_${randomUUID().slice(0, 8)}`,
+      object: 'event',
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          id: `pi_slim_ok_${randomUUID().slice(0, 8)}`,
+          object: 'payment_intent',
+          status: 'succeeded',
+          metadata: {
+            topup_order_id: orderLike,
+            source: WEBTOPUP_STRIPE_PI_METADATA_SOURCE,
+          },
+        },
+      },
+    });
+    const header = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret,
+    });
+    let handlerCalls = 0;
+    const getHandler = async () => {
+      handlerCalls += 1;
+      return (rq, rs) => {
+        rs.statusCode = 200;
+        rs.setHeader('Content-Type', 'application/json; charset=utf-8');
+        rs.end('{"ok":true,"status":"replay"}');
+        return undefined;
+      };
+    };
+    const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
+    const res = makeMockRes();
+    await handleSlimStripeWebhookPost(req, res, getHandler);
+    assert.equal(handlerCalls, 1);
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body, '{"ok":true,"status":"replay"}');
+  });
+
+  it('stripeEventSlimUnmatchedFastAck: PI with Zora source + valid tw_ord is not unmatched', () => {
+    const orderLike = `tw_ord_${randomUUID()}`;
+    const ev = {
+      type: 'payment_intent.succeeded',
+      data: {
+        object: {
+          object: 'payment_intent',
+          metadata: {
+            topup_order_id: orderLike,
+            source: WEBTOPUP_STRIPE_PI_METADATA_SOURCE,
+          },
+        },
+      },
+    };
+    assert.equal(stripeEventSlimUnmatchedFastAck(ev), false);
   });
 
   it('createStripeWebhookReplayStream preserves headers for downstream', () => {

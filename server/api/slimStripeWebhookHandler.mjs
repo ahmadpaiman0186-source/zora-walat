@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 
 import { clientErrorBody } from '../src/lib/clientErrorJson.js';
 import { API_CONTRACT_CODE } from '../src/constants/apiContractCodes.js';
+import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../src/constants/webTopupStripePiMetadata.js';
 import { isLikelyPaymentCheckoutId } from '../src/lib/paymentCheckoutId.js';
 import { primeSlimServerlessEnv } from './slimReadyEnv.mjs';
 
@@ -51,7 +52,15 @@ export function stripeEventSlimUnmatchedFastAck(event) {
     if (!pi || typeof pi !== 'object') return true;
     const tid = pi.metadata?.topup_order_id;
     if (tid == null || String(tid).trim() === '') return true;
-    return typeof tid !== 'string' || !TW_ORD_META.test(tid);
+    if (typeof tid !== 'string' || !TW_ORD_META.test(tid)) return true;
+    /**
+     * Stripe CLI / dashboard resends often synthesize a `tw_ord_<uuid>`-shaped id without
+     * our app marker; those must fast-ack 200 before cold `getHandler()`. Real embedded
+     * PIs always set `metadata.source` in paymentController.
+     */
+    const src = String(pi.metadata?.source ?? '').trim();
+    if (src !== WEBTOPUP_STRIPE_PI_METADATA_SOURCE) return true;
+    return false;
   }
   return false;
 }
