@@ -2,7 +2,10 @@ import { createHash, randomInt } from 'node:crypto';
 
 import { prisma } from '../../db.js';
 import { HttpError } from '../../lib/httpError.js';
-import { EmailServiceError } from '../../../services/emailService.js';
+import {
+  EmailServiceError,
+  getOtpEmailReadinessSnapshot,
+} from '../../../services/emailService.js';
 import {
   bumpCounter,
   recordOtpIssueOutcome,
@@ -65,6 +68,24 @@ function logOtpEvent(level, event, fields = {}) {
     return;
   }
   console.log(line);
+}
+
+/** Sanitized OTP delivery breadcrumbs for Vercel/serverless (never includes OTP plaintext). */
+function logOtpDeliveryBreadcrumb(event, fields = {}) {
+  logOtpEvent('info', event, {
+    schema: 'zora.otp_delivery.v1',
+    ...fields,
+  });
+}
+
+function otpEmailTransportSnapshotForLogs() {
+  const s = getOtpEmailReadinessSnapshot();
+  return {
+    otpTransport: s.otpTransport,
+    smtpConfigPresent: s.smtpConfigPresent,
+    smtpPortValid: s.smtpPortValid,
+    smtpMissingKeyCount: s.smtpMissingKeys.length,
+  };
 }
 
 let cleanupInFlight = null;
@@ -224,6 +245,11 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
   const now = new Date();
   void scheduleOtpCleanup(now);
 
+  logOtpDeliveryBreadcrumb('otp_request_received', {
+    emailHash,
+    ...otpEmailTransportSnapshotForLogs(),
+  });
+
   const emailSw = incrementSlidingWindow(`otp_req_sw_email:${emailHash}`, OTP_EMAIL_WINDOW_MS);
   const ipSw = incrementSlidingWindow(`otp_req_sw_ip:${ipKey}`, OTP_EMAIL_WINDOW_MS);
   const reqEv = evaluateRisk({
@@ -297,6 +323,7 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
   }
 
   const otp = generateOtpCode();
+  logOtpDeliveryBreadcrumb('otp_generated', { emailHash });
   const otpHash = otpHashFor(normalizedEmail, otp);
   const expiresAt = new Date(now.getTime() + otpTtlMs());
   const resendAfter = new Date(now.getTime() + otpResendCooldownMs());
@@ -332,11 +359,21 @@ export async function requestEmailOtp({ email }, { sendOtp, clientIpKey }) {
   });
 
   try {
+    logOtpDeliveryBreadcrumb('otp_email_send_start', {
+      emailHash,
+      ...otpEmailTransportSnapshotForLogs(),
+    });
     await sendOtp(normalizedEmail, otp);
+    logOtpDeliveryBreadcrumb('otp_email_send_success', { emailHash });
     logOtpRequestObserved(OTP_REQUEST_OUTCOME.ISSUED, emailHash);
     recordOtpIssueOutcome(true);
     maybeEmitOtpDeliverySuccessWarn();
   } catch (error) {
+    logOtpDeliveryBreadcrumb('otp_email_send_failed', {
+      emailHash,
+      errorCode: error?.code ?? 'unknown',
+      ...otpEmailTransportSnapshotForLogs(),
+    });
     logOtpRequestObserved(OTP_REQUEST_OUTCOME.DELIVERY_FAILED, emailHash);
     recordOtpIssueOutcome(false);
     maybeEmitOtpDeliverySuccessWarn();
