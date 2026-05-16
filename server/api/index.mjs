@@ -115,6 +115,18 @@ export default function handler(req, res) {
     );
   }
   /**
+   * Auth login: avoid cold `getHandler()` (bootstrap Redis + full Express) so staging login
+   * returns before Vercel FUNCTION_INVOCATION_TIMEOUT.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (req.method === 'POST' && (p === '/api/auth/login' || p === '/auth/login')) {
+      return import('./slimAuthLoginHandler.mjs').then((m) =>
+        m.handleSlimAuthLoginPost(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout requires auth before any bootstrap. Without this gate, cold POSTs
    * block on full `getHandler()` for tens of seconds with zero bytes (LB/client timeouts).
    * Dev header bypass still defers to Express (secret + user lookup).
