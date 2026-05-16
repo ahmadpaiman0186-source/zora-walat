@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 
 import { clientErrorBody } from '../src/lib/clientErrorJson.js';
 import { API_CONTRACT_CODE } from '../src/constants/apiContractCodes.js';
+import { isLikelyPaymentCheckoutId } from '../src/lib/paymentCheckoutId.js';
 import { primeSlimServerlessEnv } from './slimReadyEnv.mjs';
 
 /** Match `express.raw({ limit: '256kb' })` on `/webhooks/stripe` in app.js */
@@ -25,6 +26,34 @@ function logWebhookSlimBreadcrumb(event) {
       t: new Date().toISOString(),
     }),
   );
+}
+
+const TW_ORD_META = /^tw_ord_[0-9a-f-]{36}$/i;
+
+/**
+ * True when a verified Stripe event cannot correlate to Zora-Walat money-path rows based
+ * only on Stripe payload shape (no DB). Used to return 2xx before cold `getHandler()`.
+ *
+ * @param {import('stripe').Stripe.Event} event
+ * @returns {boolean}
+ */
+export function stripeEventSlimUnmatchedFastAck(event) {
+  const t = event?.type;
+  if (t === 'checkout.session.completed' || t === 'checkout.session.expired') {
+    const session = event.data?.object;
+    if (!session || typeof session !== 'object') return true;
+    const raw = session.metadata?.internalCheckoutId;
+    if (raw == null || String(raw).trim() === '') return true;
+    return !isLikelyPaymentCheckoutId(String(raw));
+  }
+  if (t === 'payment_intent.succeeded' || t === 'payment_intent.payment_failed') {
+    const pi = event.data?.object;
+    if (!pi || typeof pi !== 'object') return true;
+    const tid = pi.metadata?.topup_order_id;
+    if (tid == null || String(tid).trim() === '') return true;
+    return typeof tid !== 'string' || !TW_ORD_META.test(tid);
+  }
+  return false;
 }
 
 /**
@@ -177,8 +206,9 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     throw e;
   }
 
+  let event;
   try {
-    Stripe.webhooks.constructEvent(rawBody, sig, secret);
+    event = Stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch {
     logWebhookSlimBreadcrumb('webhook_signature_invalid');
     res.statusCode = 400;
@@ -193,6 +223,35 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
   }
 
   logWebhookSlimBreadcrumb('webhook_signature_verified_handoff');
+
+  if (stripeEventSlimUnmatchedFastAck(event)) {
+    const idSuffix =
+      typeof event.id === 'string' && event.id.length >= 8
+        ? event.id.slice(-8)
+        : 'unknown';
+    console.log(
+      JSON.stringify({
+        event: 'webhook_slim_unmatched_fast_ack',
+        schema: 'zora.webhook_slim.v1',
+        stripeEventType: event.type,
+        stripeEventIdSuffix: idSuffix,
+        t: new Date().toISOString(),
+      }),
+    );
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.end(
+      JSON.stringify({
+        ok: true,
+        status: 'ignored',
+        reason: 'unmatched_event',
+        stripeEventType: event.type,
+      }),
+    );
+    return;
+  }
+
   const replayReq = createStripeWebhookReplayStream(req, rawBody);
   const next = await getHandler();
   const out = next(replayReq, res);

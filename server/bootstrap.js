@@ -36,7 +36,14 @@ const loaded = dotenv.config({
   quiet: dotenvQuiet || dotenvQuietDev,
 });
 if (loaded.error) {
-  console.warn('[dotenv]', loaded.error.message);
+  const msg = String(loaded.error.message ?? '');
+  const missingEnvFileInProd =
+    process.env.NODE_ENV === 'production' &&
+    /enoent/i.test(msg) &&
+    /\.env\b/i.test(msg);
+  if (!missingEnvFileInProd) {
+    console.warn('[dotenv]', msg);
+  }
 }
 const envLocalLoaded = existsSync(join(serverRoot, '.env.local'));
 if (envLocalLoaded) {
