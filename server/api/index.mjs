@@ -4,6 +4,7 @@
  * to the dedicated worker lifecycle, not the HTTP process.
  */
 import '../src/runtime/registerServerlessRuntime.js';
+import { clientErrorBody } from '../src/lib/clientErrorJson.js';
 import { sendLivenessJsonOk } from '../src/lib/sendLivenessJsonOk.js';
 import { handleSlimReady } from './slimReadyHandler.mjs';
 
@@ -112,6 +113,34 @@ export default function handler(req, res) {
     return import('./slimStripeWebhookHandler.mjs').then((m) =>
       m.handleSlimStripeWebhookPost(req, res, getHandler),
     );
+  }
+  /**
+   * Hosted checkout requires auth before any bootstrap. Without this gate, cold POSTs
+   * block on full `getHandler()` for tens of seconds with zero bytes (LB/client timeouts).
+   * Dev header bypass still defers to Express (secret + user lookup).
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'POST' &&
+      (p === '/api/create-checkout-session' || p === '/create-checkout-session')
+    ) {
+      const authz = req.headers?.authorization;
+      const hasBearer =
+        typeof authz === 'string' &&
+        authz.startsWith('Bearer ') &&
+        authz.slice(7).trim().length > 0;
+      const devHdr = req.headers?.['x-zw-dev-checkout'];
+      const devProbe =
+        typeof devHdr === 'string' && String(devHdr).trim().length >= 16;
+      if (!hasBearer && !devProbe) {
+        res.setHeader('Cache-Control', 'no-store');
+        res.status(401).json(
+          clientErrorBody('Authentication required', 'auth_required'),
+        );
+        return;
+      }
+    }
   }
   return getHandler().then((nextHandler) => {
     const route = normalizedPathname(req.url);
