@@ -10,7 +10,10 @@
  *   node tools/staging-auth-checkout-operator.mjs verify-otp
  *   node tools/staging-auth-checkout-operator.mjs checkout
  *
- * Optional: STAGING_OPERATOR_PASSWORD for non-interactive password (not printed).
+ * Non-interactive (Windows-safe): set env vars — values are never printed.
+ *   STAGING_OPERATOR_EMAIL
+ *   STAGING_OPERATOR_PASSWORD
+ *   STAGING_OPERATOR_OTP (verify-otp only)
  */
 import crypto from 'node:crypto';
 import { chmod, readFile, writeFile } from 'node:fs/promises';
@@ -33,6 +36,20 @@ const MODES = new Set([
 ]);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const FETCH_TIMEOUT_MS = 30_000;
+
+function usingEnvEmail() {
+  return Boolean(envEmail());
+}
+
+function usingEnvPassword() {
+  return Boolean(envPassword());
+}
+
+/** Immediate stdout line (avoids silent hang before buffered flush). */
+function safeLine(line) {
+  output.write(`${line}\n`);
+}
 
 function usage() {
   output.write(
@@ -50,6 +67,18 @@ function isValidPassword(password) {
   return s.length >= 10 && s.length <= 128;
 }
 
+function envEmail() {
+  return String(process.env.STAGING_OPERATOR_EMAIL ?? '').trim();
+}
+
+function envPassword() {
+  return String(process.env.STAGING_OPERATOR_PASSWORD ?? '').trim();
+}
+
+function envOtp() {
+  return String(process.env.STAGING_OPERATOR_OTP ?? '').trim();
+}
+
 async function promptLine(label, { defaultValue = '' } = {}) {
   const rl = createInterface({ input, output });
   try {
@@ -63,7 +92,7 @@ async function promptLine(label, { defaultValue = '' } = {}) {
 }
 
 async function promptPassword(label) {
-  const fromEnv = String(process.env.STAGING_OPERATOR_PASSWORD ?? '').trim();
+  const fromEnv = envPassword();
   if (fromEnv) return fromEnv;
 
   if (!input.isTTY) {
@@ -131,16 +160,27 @@ async function loadEmail() {
   }
 }
 
-async function resolveEmail({ required = true } = {}) {
-  const saved = await loadEmail();
-  const email = await promptLine('Email', { defaultValue: saved });
+async function resolveEmail() {
+  const fromEnv = envEmail();
+  let email = fromEnv;
+  if (!email) {
+    const saved = await loadEmail();
+    email = await promptLine('Email', { defaultValue: saved });
+  }
   if (!isValidEmail(email)) {
     output.write('LOCAL_VALIDATION_ERROR invalid_email\n');
     process.exitCode = 2;
     return null;
   }
-  await saveEmail(email);
-  return email.toLowerCase();
+  const normalized = email.toLowerCase();
+  await saveEmail(normalized);
+  return normalized;
+}
+
+async function resolveOtp() {
+  const fromEnv = envOtp();
+  if (fromEnv) return fromEnv;
+  return promptLine('OTP (6 digits)');
 }
 
 async function saveToken(token) {
@@ -163,25 +203,37 @@ async function loadToken() {
 
 async function apiPost(path, body, headers = {}) {
   const url = `${STAGING_API_BASE}${path}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...headers,
-    },
-    body: JSON.stringify(body),
-  });
-  let json = null;
-  const text = await res.text();
-  if (text) {
-    try {
-      json = JSON.parse(text);
-    } catch {
-      json = null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...headers,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    let json = null;
+    const text = await res.text();
+    if (text) {
+      try {
+        json = JSON.parse(text);
+      } catch {
+        json = null;
+      }
     }
+    return { status: res.status, json, text, timedOut: false };
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      return { status: null, json: null, text: '', timedOut: true };
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  return { status: res.status, json, text };
 }
 
 function printCodeMessage(json) {
@@ -201,33 +253,92 @@ function extractAccessToken(json) {
   return typeof t === 'string' && t.length > 20 ? t : '';
 }
 
-async function modeRegister() {
+/**
+ * Register credentials: env-only when both STAGING_OPERATOR_* are set;
+ * otherwise interactive fallback (TTY required).
+ */
+async function resolveRegisterCredentials() {
+  const hasEmailEnv = usingEnvEmail();
+  const hasPasswordEnv = usingEnvPassword();
+
+  if (hasEmailEnv && hasPasswordEnv) {
+    const email = envEmail().toLowerCase();
+    const password = envPassword();
+    if (!isValidEmail(email)) {
+      safeLine('LOCAL_VALIDATION_ERROR invalid_email');
+      process.exitCode = 2;
+      return null;
+    }
+    if (!isValidPassword(password)) {
+      safeLine('LOCAL_VALIDATION_ERROR invalid_password_length');
+      process.exitCode = 2;
+      return null;
+    }
+    await saveEmail(email);
+    return { email, password };
+  }
+
+  if (!input.isTTY) {
+    safeLine(
+      'LOCAL_VALIDATION_ERROR set STAGING_OPERATOR_EMAIL and STAGING_OPERATOR_PASSWORD',
+    );
+    process.exitCode = 2;
+    return null;
+  }
+
   const email = await resolveEmail();
-  if (!email) return;
+  if (!email) return null;
   const password = await promptPassword('Password');
   if (!isValidPassword(password)) {
-    output.write('LOCAL_VALIDATION_ERROR invalid_password_length\n');
+    safeLine('LOCAL_VALIDATION_ERROR invalid_password_length');
     process.exitCode = 2;
+    return null;
+  }
+  return { email, password };
+}
+
+async function modeRegister() {
+  safeLine('MODE register');
+  safeLine(`USING_ENV_EMAIL ${usingEnvEmail() ? 'true' : 'false'}`);
+  safeLine(`USING_ENV_PASSWORD ${usingEnvPassword() ? 'true' : 'false'}`);
+
+  const creds = await resolveRegisterCredentials();
+  if (!creds) {
+    safeLine('REQUEST_DONE register');
     return;
   }
 
-  const body = { email, password };
-  const { status, json } = await apiPost('/api/auth/register', body);
-  output.write(`REGISTER_HTTP ${status}\n`);
+  safeLine('REQUEST_START register');
+  const result = await apiPost('/api/auth/register', {
+    email: creds.email,
+    password: creds.password,
+  });
+  safeLine('REQUEST_DONE register');
 
-  if (status === 201) {
-    output.write('REGISTER_OK\n');
+  if (result.timedOut) {
+    safeLine('REGISTER_HTTP timeout');
+    safeLine('REGISTER_OK false');
+    safeLine('USER_ALREADY_EXISTS_USE_LOGIN false');
+    process.exitCode = 1;
     return;
   }
-  if (status === 409 && json?.code === 'auth_email_exists') {
-    output.write('USER_ALREADY_EXISTS_USE_LOGIN\n');
-    return;
-  }
+
+  const { status, json } = result;
+  const registerOk = status === 201;
+  const userExists =
+    status === 409 && json?.code === 'auth_email_exists';
+
+  safeLine(`REGISTER_HTTP ${status}`);
+  safeLine(`REGISTER_OK ${registerOk ? 'true' : 'false'}`);
+  safeLine(
+    `USER_ALREADY_EXISTS_USE_LOGIN ${userExists ? 'true' : 'false'}`,
+  );
+
   if (status === 400 || status === 403 || status === 503) {
     printCodeMessage(json);
-    return;
+  } else if (!registerOk && !userExists) {
+    printCodeMessage(json);
   }
-  printCodeMessage(json);
 }
 
 async function modeLogin() {
@@ -240,38 +351,61 @@ async function modeLogin() {
     return;
   }
 
-  const { status, json } = await apiPost('/api/auth/login', { email, password });
-  output.write(`LOGIN_HTTP ${status}\n`);
+  const { status, json, timedOut } = await apiPost('/api/auth/login', {
+    email,
+    password,
+  });
+  if (timedOut) {
+    safeLine('LOGIN_HTTP timeout');
+    safeLine('TOKEN_OK false');
+    process.exitCode = 1;
+    return;
+  }
+  safeLine(`LOGIN_HTTP ${status}`);
 
   const token = extractAccessToken(json);
   const saved = status === 200 && (await saveToken(token));
-  output.write(`TOKEN_OK ${saved ? 'true' : 'false'}\n`);
+  safeLine(`TOKEN_OK ${saved ? 'true' : 'false'}`);
 }
 
 async function modeRequestOtp() {
   const email = await resolveEmail();
   if (!email) return;
 
-  const { status } = await apiPost('/api/auth/request-otp', { email });
-  output.write(`OTP_REQUEST_HTTP ${status}\n`);
+  const { status, timedOut } = await apiPost('/api/auth/request-otp', { email });
+  if (timedOut) {
+    safeLine('OTP_REQUEST_HTTP timeout');
+    process.exitCode = 1;
+    return;
+  }
+  safeLine(`OTP_REQUEST_HTTP ${status}`);
 }
 
 async function modeVerifyOtp() {
   const email = await resolveEmail();
   if (!email) return;
-  const otp = await promptLine('OTP (6 digits)');
+  const otp = await resolveOtp();
   if (!/^\d{6}$/.test(otp)) {
     output.write('LOCAL_VALIDATION_ERROR invalid_otp\n');
     process.exitCode = 2;
     return;
   }
 
-  const { status, json } = await apiPost('/api/auth/verify-otp', { email, otp });
-  output.write(`OTP_VERIFY_HTTP ${status}\n`);
+  const { status, json, timedOut } = await apiPost('/api/auth/verify-otp', {
+    email,
+    otp,
+  });
+  if (timedOut) {
+    safeLine('OTP_VERIFY_HTTP timeout');
+    safeLine('TOKEN_OK false');
+    process.exitCode = 1;
+    return;
+  }
+  safeLine(`OTP_VERIFY_HTTP ${status}`);
 
   const token = extractAccessToken(json);
   const saved = status === 200 && (await saveToken(token));
-  output.write(`TOKEN_OK ${saved ? 'true' : 'false'}\n`);
+  safeLine(`TOKEN_OK ${saved ? 'true' : 'false'}`);
 }
 
 async function modeCheckout() {
@@ -294,7 +428,7 @@ async function modeCheckout() {
     recipientPhone: '0701234567',
   };
 
-  const { status, json } = await apiPost(
+  const { status, json, timedOut } = await apiPost(
     '/api/create-checkout-session',
     checkoutBody,
     {
@@ -305,7 +439,16 @@ async function modeCheckout() {
     },
   );
 
-  output.write(`CHECKOUT_HTTP ${status}\n`);
+  if (timedOut) {
+    safeLine('CHECKOUT_HTTP timeout');
+    safeLine('CHECKOUT_URL_OK false');
+    safeLine('ORDER_ID_OK false');
+    safeLine('ORDER_REFERENCE_OK false');
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine(`CHECKOUT_HTTP ${status}`);
 
   const urlOk =
     typeof json?.url === 'string' && json.url.startsWith('https://');
@@ -314,9 +457,9 @@ async function modeCheckout() {
   const orderRefOk =
     typeof json?.orderReference === 'string' && json.orderReference.length > 0;
 
-  output.write(`CHECKOUT_URL_OK ${urlOk ? 'true' : 'false'}\n`);
-  output.write(`ORDER_ID_OK ${orderIdOk ? 'true' : 'false'}\n`);
-  output.write(`ORDER_REFERENCE_OK ${orderRefOk ? 'true' : 'false'}\n`);
+  safeLine(`CHECKOUT_URL_OK ${urlOk ? 'true' : 'false'}`);
+  safeLine(`ORDER_ID_OK ${orderIdOk ? 'true' : 'false'}`);
+  safeLine(`ORDER_REFERENCE_OK ${orderRefOk ? 'true' : 'false'}`);
 
   if (status !== 200) {
     printCodeMessage(json);
