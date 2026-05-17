@@ -75,6 +75,11 @@ export default function handler(req, res) {
       sendLivenessJsonOk(res);
       return;
     }
+    if (hp === '/success' || hp === '/cancel') {
+      return import('./slimCheckoutReturnHandler.mjs').then((m) =>
+        m.handleSlimCheckoutReturnGet(req, res),
+      );
+    }
   }
   /**
    * Slim readiness: DB core probe only with a hard outer deadline — avoids `bootstrap.js`

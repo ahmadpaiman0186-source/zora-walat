@@ -143,13 +143,12 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
     }
   });
 
-  it('hands off to getHandler after valid signature with replayable body stream', async () => {
+  it('processes checkout.session.completed on slim path without calling getHandler', async () => {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
     assert.ok(
       typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
       'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
     );
-    /** Shape like Prisma cuid so slim path does not fast-ack checkout before Express replay. */
     const internalCheckoutId = `c${'0123456789abcdefghijk'.slice(0, 23)}`;
     const payload = JSON.stringify({
       id: `evt_slim_ok_${randomUUID().slice(0, 8)}`,
@@ -167,36 +166,38 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
       payload,
       secret,
     });
-    let replayBytes = '';
     let handlerCalls = 0;
     const getHandler = async () => {
       handlerCalls += 1;
-      return (rq, rs) =>
-        new Promise((resolve, reject) => {
-          void (async () => {
-            try {
-              const chunks = [];
-              for await (const c of rq) {
-                chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c));
-              }
-              replayBytes = Buffer.concat(chunks).toString('utf8');
-              rs.statusCode = 200;
-              rs.setHeader('Content-Type', 'application/json; charset=utf-8');
-              rs.end('{"ok":true}');
-              resolve(undefined);
-            } catch (e) {
-              reject(e);
-            }
-          })();
-        });
+      return () => {};
     };
-    const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
-    const res = makeMockRes();
-    await handleSlimStripeWebhookPost(req, res, getHandler);
-    assert.equal(handlerCalls, 1);
-    assert.equal(replayBytes, payload);
-    assert.equal(res.statusCode, 200);
-    assert.equal(res.body, '{"ok":true}');
+    globalThis.__zwSlimWebhookCheckoutSessionCompletedImpl = async () => ({
+      status: 'paid',
+      stateTransition: 'pending_to_paid',
+      stripeEventType: 'checkout.session.completed',
+      stripeEventIdSuffix: '12345678',
+      orderIdSuffix: internalCheckoutId.slice(-10),
+      checkoutSessionIdSuffix: '123456789abc',
+      paymentIntentIdSuffix: 'pi_suffix12',
+      orderIdToScheduleFulfillment: internalCheckoutId,
+      latencyMs: 12,
+    });
+    try {
+      const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
+      const res = makeMockRes();
+      const t0 = Date.now();
+      await handleSlimStripeWebhookPost(req, res, getHandler);
+      assert.ok(Date.now() - t0 < 2000);
+      assert.equal(handlerCalls, 0);
+      assert.equal(res.statusCode, 200);
+      const j = JSON.parse(res.body);
+      assert.equal(j.received, true);
+      assert.equal(j.path, 'slim_checkout_session_completed');
+      assert.equal(j.status, 'paid');
+      assertNoSecretLeak(res.body);
+    } finally {
+      delete globalThis.__zwSlimWebhookCheckoutSessionCompletedImpl;
+    }
   });
 
   it('fast-acks payment_intent.succeeded when topup_order_id looks valid but metadata.source is not Zora (Stripe CLI fixtures)', async () => {

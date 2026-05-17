@@ -12,6 +12,10 @@ import { API_CONTRACT_CODE } from '../src/constants/apiContractCodes.js';
 import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../src/constants/webTopupStripePiMetadata.js';
 import { isLikelyPaymentCheckoutId } from '../src/lib/paymentCheckoutId.js';
 import { primeSlimServerlessEnv } from './slimReadyEnv.mjs';
+import {
+  isHostedCheckoutSessionCompletedEvent,
+  slimProcessCheckoutSessionCompletedWebhook,
+} from './slimStripeWebhookCheckoutCompleted.mjs';
 
 /** Match `express.raw({ limit: '256kb' })` on `/webhooks/stripe` in app.js */
 export const WEBHOOK_RAW_BODY_LIMIT_BYTES = 256 * 1024;
@@ -232,6 +236,46 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
   }
 
   logWebhookSlimBreadcrumb('webhook_signature_verified_handoff');
+
+  if (isHostedCheckoutSessionCompletedEvent(event)) {
+    const t0 = Date.now();
+    try {
+      const processor =
+        typeof globalThis.__zwSlimWebhookCheckoutSessionCompletedImpl ===
+        'function'
+          ? globalThis.__zwSlimWebhookCheckoutSessionCompletedImpl
+          : slimProcessCheckoutSessionCompletedWebhook;
+      const result = await processor(event);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(
+        JSON.stringify({
+          received: true,
+          path: 'slim_checkout_session_completed',
+          status: result.status,
+          stateTransition: result.stateTransition,
+          latencyMs: result.latencyMs ?? Date.now() - t0,
+        }),
+      );
+    } catch (err) {
+      console.log(
+        JSON.stringify({
+          event: 'webhook_slim_checkout_unhandled_error',
+          schema: 'zora.webhook_slim.v1',
+          stripeEventType: event.type,
+          latencyMs: Date.now() - t0,
+          errName: err?.name,
+          t: new Date().toISOString(),
+        }),
+      );
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(JSON.stringify({ received: true, path: 'slim_checkout_session_completed_error_ack' }));
+    }
+    return;
+  }
 
   if (stripeEventSlimUnmatchedFastAck(event)) {
     const idSuffix =
