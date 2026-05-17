@@ -35,3 +35,6 @@ soft-launch-gate-report.json
 .staging-token.local
 .staging-operator-email.local
 .staging-operator-verify-token.local
+.staging-checkout-url.local
+.staging-order-id.local
+.env.staging-preflight.tmp

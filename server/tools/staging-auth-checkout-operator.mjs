@@ -9,6 +9,11 @@
  *   node tools/staging-auth-checkout-operator.mjs request-otp
  *   node tools/staging-auth-checkout-operator.mjs verify-otp
  *   node tools/staging-auth-checkout-operator.mjs checkout
+ *   node tools/staging-auth-checkout-operator.mjs checkout-open-test
+ *   node tools/staging-auth-checkout-operator.mjs status-check
+ *
+ * Phase 2 (test payment): requires STAGING_ALLOW_STRIPE_TEST_PAYMENT=true.
+ * checkout-open-test saves URL to .staging-checkout-url.local (gitignored); never printed.
  *
  * Non-interactive (Windows-safe): set env vars — values are never printed.
  *   STAGING_OPERATOR_EMAIL
@@ -17,6 +22,7 @@
  */
 import crypto from 'node:crypto';
 import { chmod, readFile, writeFile } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
@@ -26,6 +32,8 @@ const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TOKEN_PATH = join(SERVER_ROOT, '.staging-token.local');
 const EMAIL_PATH = join(SERVER_ROOT, '.staging-operator-email.local');
+const CHECKOUT_URL_PATH = join(SERVER_ROOT, '.staging-checkout-url.local');
+const ORDER_ID_PATH = join(SERVER_ROOT, '.staging-order-id.local');
 
 const MODES = new Set([
   'register',
@@ -33,6 +41,8 @@ const MODES = new Set([
   'request-otp',
   'verify-otp',
   'checkout',
+  'checkout-open-test',
+  'status-check',
 ]);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,8 +63,78 @@ function safeLine(line) {
 
 function usage() {
   output.write(
-    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout>\n',
+    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check>\n',
   );
+}
+
+function envTruthy(name) {
+  const v = String(process.env[name] ?? '')
+    .trim()
+    .toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes';
+}
+
+/**
+ * Stripe test Checkout sessions use cs_test_ in the path; never log the full URL.
+ * @param {string | undefined} url
+ */
+export function isStripeTestCheckoutSessionUrl(url) {
+  const s = String(url ?? '');
+  if (!s.startsWith('https://')) return false;
+  return /\/cs_test_[a-zA-Z0-9]+/.test(s) || s.includes('cs_test_');
+}
+
+/**
+ * @param {string | undefined} url
+ */
+export function isStripeLiveCheckoutSessionUrl(url) {
+  const s = String(url ?? '');
+  if (!s.startsWith('https://')) return false;
+  return /\/cs_live_[a-zA-Z0-9]+/.test(s) || s.includes('cs_live_');
+}
+
+async function saveCheckoutUrl(url) {
+  const u = String(url ?? '').trim();
+  if (!u.startsWith('https://')) return false;
+  await writeFile(CHECKOUT_URL_PATH, `${u}\n`, { encoding: 'utf8', mode: 0o600 });
+  if (process.platform !== 'win32') {
+    await chmod(CHECKOUT_URL_PATH, 0o600).catch(() => {});
+  }
+  return true;
+}
+
+async function saveOrderId(orderId) {
+  const id = String(orderId ?? '').trim();
+  if (id.length < 8) return false;
+  await writeFile(ORDER_ID_PATH, `${id}\n`, { encoding: 'utf8', mode: 0o600 });
+  if (process.platform !== 'win32') {
+    await chmod(ORDER_ID_PATH, 0o600).catch(() => {});
+  }
+  return true;
+}
+
+async function loadOrderId() {
+  try {
+    return String(await readFile(ORDER_ID_PATH, 'utf8')).trim();
+  } catch {
+    return '';
+  }
+}
+
+function openCheckoutUrlInBrowser(url) {
+  if (process.platform === 'win32') {
+    spawn('cmd', ['/c', 'start', '', url], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true,
+    }).unref();
+    return;
+  }
+  if (process.platform === 'darwin') {
+    spawn('open', [url], { detached: true, stdio: 'ignore' }).unref();
+    return;
+  }
+  spawn('xdg-open', [url], { detached: true, stdio: 'ignore' }).unref();
 }
 
 function isValidEmail(email) {
@@ -201,21 +281,24 @@ async function loadToken() {
   }
 }
 
-async function apiPost(path, body, headers = {}) {
+async function apiFetch(method, path, { body, headers = {} } = {}) {
   const url = `${STAGING_API_BASE}${path}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, {
-      method: 'POST',
+    const init = {
+      method,
       headers: {
-        'Content-Type': 'application/json',
         Accept: 'application/json',
         ...headers,
       },
-      body: JSON.stringify(body),
       signal: controller.signal,
-    });
+    };
+    if (body !== undefined) {
+      init.headers['Content-Type'] = 'application/json';
+      init.body = JSON.stringify(body);
+    }
+    const res = await fetch(url, init);
     let json = null;
     const text = await res.text();
     if (text) {
@@ -234,6 +317,14 @@ async function apiPost(path, body, headers = {}) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function apiPost(path, body, headers = {}) {
+  return apiFetch('POST', path, { body, headers });
+}
+
+async function apiGet(path, headers = {}) {
+  return apiFetch('GET', path, { headers });
 }
 
 function printCodeMessage(json) {
@@ -408,16 +499,20 @@ async function modeVerifyOtp() {
   safeLine(`TOKEN_OK ${saved ? 'true' : 'false'}`);
 }
 
-async function modeCheckout() {
+async function runHostedCheckoutProbe({ persistForPhase2 = false } = {}) {
   const token = await loadToken();
   if (!token) {
-    output.write('CHECKOUT_HTTP 0\n');
-    output.write('CHECKOUT_URL_OK false\n');
-    output.write('ORDER_ID_OK false\n');
-    output.write('ORDER_REFERENCE_OK false\n');
-    output.write('LOCAL_ERROR missing_token_run_login_or_verify_otp\n');
+    safeLine('CHECKOUT_HTTP 0');
+    safeLine('CHECKOUT_URL_OK false');
+    safeLine('ORDER_ID_OK false');
+    safeLine('ORDER_REFERENCE_OK false');
+    if (persistForPhase2) {
+      safeLine('LOCAL_CHECKOUT_URL_SAVED false');
+      safeLine('STRIPE_TEST_MODE_CONFIRMED false');
+    }
+    safeLine('LOCAL_ERROR missing_token_run_login_or_verify_otp');
     process.exitCode = 2;
-    return;
+    return null;
   }
 
   const checkoutBody = {
@@ -444,26 +539,133 @@ async function modeCheckout() {
     safeLine('CHECKOUT_URL_OK false');
     safeLine('ORDER_ID_OK false');
     safeLine('ORDER_REFERENCE_OK false');
+    if (persistForPhase2) {
+      safeLine('LOCAL_CHECKOUT_URL_SAVED false');
+      safeLine('STRIPE_TEST_MODE_CONFIRMED false');
+    }
     process.exitCode = 1;
-    return;
+    return null;
   }
 
   safeLine(`CHECKOUT_HTTP ${status}`);
 
-  const urlOk =
-    typeof json?.url === 'string' && json.url.startsWith('https://');
+  const checkoutUrl = typeof json?.url === 'string' ? json.url : '';
+  const urlOk = checkoutUrl.startsWith('https://');
   const orderIdOk =
     typeof json?.orderId === 'string' && json.orderId.length > 0;
   const orderRefOk =
     typeof json?.orderReference === 'string' && json.orderReference.length > 0;
+  const testSession = isStripeTestCheckoutSessionUrl(checkoutUrl);
+  const liveSession = isStripeLiveCheckoutSessionUrl(checkoutUrl);
 
   safeLine(`CHECKOUT_URL_OK ${urlOk ? 'true' : 'false'}`);
   safeLine(`ORDER_ID_OK ${orderIdOk ? 'true' : 'false'}`);
   safeLine(`ORDER_REFERENCE_OK ${orderRefOk ? 'true' : 'false'}`);
 
+  if (persistForPhase2) {
+    if (liveSession) {
+      safeLine('STRIPE_TEST_MODE_CONFIRMED false');
+      safeLine('STRIPE_LIVE_SESSION_DETECTED true');
+      safeLine('LOCAL_CHECKOUT_URL_SAVED false');
+      process.exitCode = 2;
+      return null;
+    }
+    safeLine(`STRIPE_TEST_MODE_CONFIRMED ${testSession ? 'true' : 'false'}`);
+    if (!testSession && urlOk) {
+      process.exitCode = 2;
+      return null;
+    }
+    const urlSaved = urlOk && testSession && (await saveCheckoutUrl(checkoutUrl));
+    const orderSaved =
+      orderIdOk && (await saveOrderId(json.orderId));
+    safeLine(`LOCAL_CHECKOUT_URL_SAVED ${urlSaved ? 'true' : 'false'}`);
+    safeLine(`LOCAL_ORDER_ID_SAVED ${orderSaved ? 'true' : 'false'}`);
+    if (urlSaved && envTruthy('STAGING_OPEN_CHECKOUT_BROWSER')) {
+      openCheckoutUrlInBrowser(checkoutUrl);
+      safeLine('LOCAL_BROWSER_OPEN_REQUESTED true');
+    }
+  }
+
   if (status !== 200) {
     printCodeMessage(json);
   }
+
+  return { status, json, testSession, orderIdOk };
+}
+
+async function modeCheckout() {
+  await runHostedCheckoutProbe({ persistForPhase2: false });
+}
+
+async function modeCheckoutOpenTest() {
+  if (!envTruthy('STAGING_ALLOW_STRIPE_TEST_PAYMENT')) {
+    safeLine('LOCAL_VALIDATION_ERROR staging_allow_stripe_test_payment_required');
+    process.exitCode = 2;
+    return;
+  }
+  safeLine('MODE checkout-open-test');
+  const result = await runHostedCheckoutProbe({ persistForPhase2: true });
+  if (result?.testSession === false && result?.status === 200) {
+    safeLine('PHASE2_ABORT live_or_unknown_stripe_session');
+  }
+}
+
+async function modeStatusCheck() {
+  const token = await loadToken();
+  if (!token) {
+    safeLine('ORDER_FOUND false');
+    safeLine('LOCAL_ERROR missing_token_run_login');
+    process.exitCode = 2;
+    return;
+  }
+
+  const orderId = await loadOrderId();
+  if (!orderId) {
+    safeLine('ORDER_FOUND false');
+    safeLine('LOCAL_ERROR missing_order_id_run_checkout_open_test');
+    process.exitCode = 2;
+    return;
+  }
+
+  const { status, json, timedOut } = await apiGet(
+    `/api/orders/${encodeURIComponent(orderId)}/phase1-truth`,
+    { Authorization: `Bearer ${token}` },
+  );
+
+  if (timedOut) {
+    safeLine('ORDER_FOUND false');
+    safeLine('STATUS_CHECK_HTTP timeout');
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine(`STATUS_CHECK_HTTP ${status}`);
+
+  if (status !== 200 || !json?.phase1Order) {
+    safeLine('ORDER_FOUND false');
+    if (status === 404) {
+      safeLine('ORDER_STATUS unknown');
+      safeLine('PAYMENT_STATUS unknown');
+    }
+    printCodeMessage(json);
+    process.exitCode = status === 200 ? 1 : 1;
+    return;
+  }
+
+  const p = json.phase1Order;
+  const lifecycle = String(p.lifecycleStatus ?? 'unknown');
+  const payment = String(p.paymentStatus ?? 'unknown');
+  const attemptCount = Number(p.fulfillmentAttemptCount ?? 0);
+  const paidConfirmed = lifecycle === 'PAID' || lifecycle === 'PROCESSING' || lifecycle === 'FULFILLED';
+  const duplicateSafe =
+    paidConfirmed && attemptCount <= 1;
+
+  safeLine('ORDER_FOUND true');
+  safeLine(`ORDER_STATUS ${lifecycle}`);
+  safeLine(`PAYMENT_STATUS ${payment}`);
+  safeLine(`PAID_CONFIRMED ${paidConfirmed ? 'true' : 'false'}`);
+  safeLine(`FULFILLMENT_ATTEMPT_COUNT ${Number.isFinite(attemptCount) ? attemptCount : 0}`);
+  safeLine(`FULFILLMENT_DUPLICATE_SAFE ${duplicateSafe ? 'true' : 'false'}`);
 }
 
 async function main() {
@@ -490,13 +692,25 @@ async function main() {
     case 'checkout':
       await modeCheckout();
       break;
+    case 'checkout-open-test':
+      await modeCheckoutOpenTest();
+      break;
+    case 'status-check':
+      await modeStatusCheck();
+      break;
     default:
       usage();
       process.exitCode = 1;
   }
 }
 
-main().catch((err) => {
-  output.write(`FATAL ${err?.message ?? 'unknown'}\n`);
-  process.exitCode = 1;
-});
+const isCliEntry = Boolean(
+  process.argv[1]?.includes('staging-auth-checkout-operator.mjs'),
+);
+
+if (isCliEntry) {
+  main().catch((err) => {
+    output.write(`FATAL ${err?.message ?? 'unknown'}\n`);
+    process.exitCode = 1;
+  });
+}
