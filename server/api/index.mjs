@@ -175,6 +175,20 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Staging operator order status (Bearer JWT): read-only PaymentCheckout row without full Express.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'GET' &&
+      p.startsWith('/api/ops/staging-operator-order-status/')
+    ) {
+      return import('./slimStagingOperatorOrderStatusHandler.mjs').then((m) =>
+        m.handleSlimStagingOperatorOrderStatusGet(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout (Bearer JWT): slim path — full `getHandler()` cold start caused client timeouts.
    * Dev `X-ZW-Dev-Checkout` bypass still uses Express via `getHandler()`.
    */

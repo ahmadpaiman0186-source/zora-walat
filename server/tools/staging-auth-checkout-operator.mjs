@@ -21,6 +21,7 @@
  *   STAGING_OPERATOR_OTP (verify-otp only)
  */
 import crypto from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { chmod, readFile, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -34,6 +35,12 @@ const TOKEN_PATH = join(SERVER_ROOT, '.staging-token.local');
 const EMAIL_PATH = join(SERVER_ROOT, '.staging-operator-email.local');
 const CHECKOUT_URL_PATH = join(SERVER_ROOT, '.staging-checkout-url.local');
 const ORDER_ID_PATH = join(SERVER_ROOT, '.staging-order-id.local');
+const ORDER_REFERENCE_PATH = join(SERVER_ROOT, '.staging-order-reference.local');
+
+const STATUS_CHECK_SLIM_TIMEOUT_MS = 45_000;
+const STATUS_CHECK_LEGACY_TIMEOUT_MS = 120_000;
+const STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX =
+  '/api/ops/staging-operator-order-status/';
 
 const MODES = new Set([
   'register',
@@ -113,12 +120,71 @@ async function saveOrderId(orderId) {
   return true;
 }
 
+async function saveOrderReference(orderReference) {
+  const ref = String(orderReference ?? '').trim();
+  if (ref.length < 8) return false;
+  await writeFile(ORDER_REFERENCE_PATH, `${ref}\n`, {
+    encoding: 'utf8',
+    mode: 0o600,
+  });
+  if (process.platform !== 'win32') {
+    await chmod(ORDER_REFERENCE_PATH, 0o600).catch(() => {});
+  }
+  return true;
+}
+
 async function loadOrderId() {
   try {
     return String(await readFile(ORDER_ID_PATH, 'utf8')).trim();
   } catch {
     return '';
   }
+}
+
+function redactIdPreview(id) {
+  const s = String(id ?? '').trim();
+  if (s.length < 10) return '(empty-or-short)';
+  return `…${s.slice(-10)}`;
+}
+
+function apiOriginOnly() {
+  try {
+    return new URL(STAGING_API_BASE).origin;
+  } catch {
+    return STAGING_API_BASE;
+  }
+}
+
+/**
+ * Safe response preview: status code + JSON keys or short error code only.
+ * @param {{ status: number | null, json: unknown, text: string, timedOut: boolean }} result
+ */
+function safeResponsePreview(result) {
+  if (result.timedOut) return 'timeout_no_body';
+  if (result.status == null) return 'no_http_status';
+  if (result.json && typeof result.json === 'object') {
+    const keys = Object.keys(result.json).slice(0, 12).join(',');
+    return `http_${result.status}_keys_${keys || 'empty_object'}`;
+  }
+  const t = String(result.text ?? '').slice(0, 80);
+  if (!t) return `http_${result.status}_empty_body`;
+  if (/^[\x20-\x7e]+$/.test(t)) return `http_${result.status}_text_len_${t.length}`;
+  return `http_${result.status}_non_json_body`;
+}
+
+function logSavedStateDebug() {
+  safeLine(`STATUS_CHECK_CWD ${process.cwd()}`);
+  safeLine(`STATUS_CHECK_SERVER_ROOT ${SERVER_ROOT}`);
+  safeLine(`STATUS_CHECK_ORDER_ID_FILE ${ORDER_ID_PATH}`);
+  safeLine(`STATUS_CHECK_ORDER_ID_FILE_EXISTS ${existsSync(ORDER_ID_PATH)}`);
+  safeLine(`STATUS_CHECK_ORDER_REF_FILE ${ORDER_REFERENCE_PATH}`);
+  safeLine(
+    `STATUS_CHECK_ORDER_REF_FILE_EXISTS ${existsSync(ORDER_REFERENCE_PATH)}`,
+  );
+  safeLine(`STATUS_CHECK_CHECKOUT_URL_FILE ${CHECKOUT_URL_PATH}`);
+  safeLine(
+    `STATUS_CHECK_CHECKOUT_URL_FILE_EXISTS ${existsSync(CHECKOUT_URL_PATH)}`,
+  );
 }
 
 function openCheckoutUrlInBrowser(url) {
@@ -281,10 +347,10 @@ async function loadToken() {
   }
 }
 
-async function apiFetch(method, path, { body, headers = {} } = {}) {
+async function apiFetch(method, path, { body, headers = {}, timeoutMs = FETCH_TIMEOUT_MS } = {}) {
   const url = `${STAGING_API_BASE}${path}`;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const init = {
       method,
@@ -323,8 +389,8 @@ async function apiPost(path, body, headers = {}) {
   return apiFetch('POST', path, { body, headers });
 }
 
-async function apiGet(path, headers = {}) {
-  return apiFetch('GET', path, { headers });
+async function apiGet(path, headers = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+  return apiFetch('GET', path, { headers, timeoutMs });
 }
 
 function printCodeMessage(json) {
@@ -578,8 +644,14 @@ async function runHostedCheckoutProbe({ persistForPhase2 = false } = {}) {
     const urlSaved = urlOk && testSession && (await saveCheckoutUrl(checkoutUrl));
     const orderSaved =
       orderIdOk && (await saveOrderId(json.orderId));
+    const refSaved =
+      orderRefOk && (await saveOrderReference(json.orderReference));
     safeLine(`LOCAL_CHECKOUT_URL_SAVED ${urlSaved ? 'true' : 'false'}`);
     safeLine(`LOCAL_ORDER_ID_SAVED ${orderSaved ? 'true' : 'false'}`);
+    safeLine(`LOCAL_ORDER_REFERENCE_SAVED ${refSaved ? 'true' : 'false'}`);
+    if (orderSaved) {
+      safeLine(`LOCAL_ORDER_ID_FILE ${ORDER_ID_PATH}`);
+    }
     if (urlSaved && envTruthy('STAGING_OPEN_CHECKOUT_BROWSER')) {
       openCheckoutUrlInBrowser(checkoutUrl);
       safeLine('LOCAL_BROWSER_OPEN_REQUESTED true');
@@ -611,8 +683,12 @@ async function modeCheckoutOpenTest() {
 }
 
 async function modeStatusCheck() {
+  safeLine('MODE status-check');
+  logSavedStateDebug();
+
   const token = await loadToken();
   if (!token) {
+    safeLine('LOCAL_ORDER_ID_PRESENT false');
     safeLine('ORDER_FOUND false');
     safeLine('LOCAL_ERROR missing_token_run_login');
     process.exitCode = 2;
@@ -620,6 +696,11 @@ async function modeStatusCheck() {
   }
 
   const orderId = await loadOrderId();
+  safeLine(`LOCAL_ORDER_ID_PRESENT ${orderId ? 'true' : 'false'}`);
+  if (orderId) {
+    safeLine(`LOCAL_ORDER_ID_PREVIEW ${redactIdPreview(orderId)}`);
+  }
+
   if (!orderId) {
     safeLine('ORDER_FOUND false');
     safeLine('LOCAL_ERROR missing_order_id_run_checkout_open_test');
@@ -627,44 +708,118 @@ async function modeStatusCheck() {
     return;
   }
 
-  const { status, json, timedOut } = await apiGet(
-    `/api/orders/${encodeURIComponent(orderId)}/phase1-truth`,
+  const slimPath = `${STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX}${encodeURIComponent(orderId)}`;
+  safeLine(`STATUS_CHECK_API_ORIGIN ${apiOriginOnly()}`);
+  safeLine('STATUS_CHECK_HTTP_METHOD GET');
+  safeLine(`STATUS_CHECK_ENDPOINT_PRIMARY ${slimPath}`);
+  safeLine(`STATUS_CHECK_TIMEOUT_MS ${STATUS_CHECK_SLIM_TIMEOUT_MS}`);
+
+  const slimResult = await apiGet(
+    slimPath,
     { Authorization: `Bearer ${token}` },
+    STATUS_CHECK_SLIM_TIMEOUT_MS,
   );
 
-  if (timedOut) {
-    safeLine('ORDER_FOUND false');
+  safeLine(`STATUS_CHECK_RESPONSE_PREVIEW ${safeResponsePreview(slimResult)}`);
+
+  if (slimResult.timedOut) {
     safeLine('STATUS_CHECK_HTTP timeout');
+    safeLine(`STATUS_CHECK_TIMED_OUT_ENDPOINT ${slimPath}`);
+    safeLine(
+      `STATUS_CHECK_TIMEOUT_REASON slim_operator_status_exceeded_${STATUS_CHECK_SLIM_TIMEOUT_MS}ms`,
+    );
+    safeLine('ORDER_API_REACHED false');
+    safeLine('ORDER_FOUND unknown');
     process.exitCode = 1;
     return;
   }
 
-  safeLine(`STATUS_CHECK_HTTP ${status}`);
+  safeLine(`STATUS_CHECK_HTTP ${slimResult.status}`);
 
-  if (status !== 200 || !json?.phase1Order) {
-    safeLine('ORDER_FOUND false');
-    if (status === 404) {
-      safeLine('ORDER_STATUS unknown');
-      safeLine('PAYMENT_STATUS unknown');
+  if (slimResult.status === 503 && slimResult.json?.reason === 'staging_operator_order_status_disabled') {
+    safeLine('STATUS_CHECK_FALLBACK legacy_express_order_route');
+    const legacyPath = `/api/orders/${encodeURIComponent(orderId)}`;
+    safeLine(`STATUS_CHECK_ENDPOINT_FALLBACK ${legacyPath}`);
+    safeLine(`STATUS_CHECK_TIMEOUT_MS ${STATUS_CHECK_LEGACY_TIMEOUT_MS}`);
+    const legacy = await apiGet(
+      legacyPath,
+      { Authorization: `Bearer ${token}` },
+      STATUS_CHECK_LEGACY_TIMEOUT_MS,
+    );
+    safeLine(`STATUS_CHECK_FALLBACK_RESPONSE_PREVIEW ${safeResponsePreview(legacy)}`);
+    if (legacy.timedOut) {
+      safeLine('STATUS_CHECK_HTTP timeout');
+      safeLine(`STATUS_CHECK_TIMED_OUT_ENDPOINT ${legacyPath}`);
+      safeLine(
+        `STATUS_CHECK_TIMEOUT_REASON legacy_express_cold_start_exceeded_${STATUS_CHECK_LEGACY_TIMEOUT_MS}ms`,
+      );
+      safeLine('ORDER_API_REACHED false');
+      safeLine('ORDER_FOUND unknown');
+      safeLine('STATUS_CHECK_HINT deploy_slim_operator_order_status_and_set_STAGING_ALLOW_OPERATOR_ORDER_STATUS');
+      process.exitCode = 1;
+      return;
     }
-    printCodeMessage(json);
-    process.exitCode = status === 200 ? 1 : 1;
+    safeLine(`STATUS_CHECK_HTTP ${legacy.status}`);
+    if (legacy.status !== 200 || !legacy.json?.order) {
+      safeLine(`ORDER_FOUND ${legacy.status === 404 ? 'false' : 'unknown'}`);
+      printCodeMessage(legacy.json);
+      process.exitCode = 1;
+      return;
+    }
+    const o = legacy.json.order;
+    const lifecycle = String(o.orderStatus ?? 'unknown');
+    const payment = String(o.status ?? 'unknown');
+    const paidConfirmed =
+      lifecycle === 'PAID' || lifecycle === 'PROCESSING' || lifecycle === 'FULFILLED';
+    safeLine('ORDER_FOUND true');
+    safeLine(`ORDER_STATUS ${lifecycle}`);
+    safeLine(`PAYMENT_STATUS ${payment}`);
+    safeLine(`PAID_CONFIRMED ${paidConfirmed ? 'true' : 'false'}`);
+    safeLine('FULFILLMENT_ATTEMPT_COUNT unknown');
+    safeLine('FULFILLMENT_DUPLICATE_SAFE unknown');
     return;
   }
 
-  const p = json.phase1Order;
-  const lifecycle = String(p.lifecycleStatus ?? 'unknown');
-  const payment = String(p.paymentStatus ?? 'unknown');
-  const attemptCount = Number(p.fulfillmentAttemptCount ?? 0);
-  const paidConfirmed = lifecycle === 'PAID' || lifecycle === 'PROCESSING' || lifecycle === 'FULFILLED';
-  const duplicateSafe =
-    paidConfirmed && attemptCount <= 1;
+  if (slimResult.status === 401 || slimResult.status === 403) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('ORDER_FOUND unknown');
+    safeLine('LOCAL_ERROR auth_token_invalid_or_denied');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 2;
+    return;
+  }
+
+  if (slimResult.status === 404 || slimResult.json?.orderFound === false) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('ORDER_FOUND false');
+    safeLine('ORDER_STATUS unknown');
+    safeLine('PAYMENT_STATUS unknown');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (slimResult.status !== 200 || slimResult.json?.orderFound !== true) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('ORDER_FOUND unknown');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 1;
+    return;
+  }
+
+  const lifecycle = String(slimResult.json.orderStatus ?? 'unknown');
+  const payment = String(slimResult.json.paymentStatus ?? 'unknown');
+  const attemptCount = Number(slimResult.json.fulfillmentAttemptCount ?? 0);
+  const paidConfirmed = slimResult.json.paidConfirmed === true;
+  const duplicateSafe = slimResult.json.fulfillmentDuplicateSafe === true;
 
   safeLine('ORDER_FOUND true');
   safeLine(`ORDER_STATUS ${lifecycle}`);
   safeLine(`PAYMENT_STATUS ${payment}`);
   safeLine(`PAID_CONFIRMED ${paidConfirmed ? 'true' : 'false'}`);
-  safeLine(`FULFILLMENT_ATTEMPT_COUNT ${Number.isFinite(attemptCount) ? attemptCount : 0}`);
+  safeLine(
+    `FULFILLMENT_ATTEMPT_COUNT ${Number.isFinite(attemptCount) ? attemptCount : 0}`,
+  );
   safeLine(`FULFILLMENT_DUPLICATE_SAFE ${duplicateSafe ? 'true' : 'false'}`);
 }
 
