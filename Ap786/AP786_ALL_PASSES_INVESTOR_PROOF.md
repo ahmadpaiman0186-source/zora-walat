@@ -2,7 +2,7 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** P-2 operator auth pass + L-6 / L-7 desk evidence (2026-05-18)  
+**Last updated:** L-9 checkout cancel safety + P-2 operator auth (2026-05-18)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
 
 ---
@@ -18,6 +18,8 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 **L-6 / L-7 (2026-05-18):** Event-ordering and unmatched-event safety have **PASS (automated)** coverage via new/extended repository tests (classifier, slim HTTP, Express chaos integration). **Live** staging webhook fixture traffic was **not** run (approval gate).
 
 **P-2 (2026-05-18):** Staging operator **login succeeded**; **`status-check` HTTP 200** with terminal fulfillment enums (`FULFILLED`, `RECHARGE_COMPLETED`, one fulfillment attempt, duplicate-safe). Harness reliability fixes are in commit `5d6fa2f`.
+
+**L-9 (2026-05-18):** Disposable **test-mode** checkout opened and **not paid**; **`GET /cancel`** on staging returned **200** without gateway timeout; operator readout shows **PENDING**, **`PAID_CONFIRMED` false**, **zero** fulfillment attempts, payment status **not** recharge-complete.
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
@@ -235,6 +237,32 @@ Details: `Ap786/P2_OPERATOR_AUTH_RELIABILITY.md`
 
 ---
 
+## 14b. L-9 — Checkout cancel / abandon safety
+
+**Verdict:** **PASS** (staging operator run, 2026-05-18)
+
+| Item | Status |
+|------|--------|
+| Slim `GET /cancel` (no full Express cold start) | **PASS** — HTTP **200**, ~1.2s, no **504** |
+| Checkout created (test mode), payment **not** completed | **PASS** |
+| Operator `status-check` after abandon | **PASS** — HTTP **200** |
+
+**Verified operator readout (enums only):**
+
+| Field | Value |
+|-------|--------|
+| `STATUS_CHECK_HTTP` | **200** |
+| `ORDER_FOUND` | **true** |
+| `ORDER_STATUS` | `PENDING` |
+| `PAYMENT_STATUS` | `CHECKOUT_CREATED` |
+| `PAID_CONFIRMED` | **false** |
+| `FULFILLMENT_ATTEMPT_COUNT` | **0** |
+| `FULFILLMENT_DUPLICATE_SAFE` | **false** (unpaid pending) |
+
+Details: `Ap786/L9_CHECKOUT_CANCEL_SAFETY.md`
+
+---
+
 ## 15. Remaining manual proof needed
 
 **L-4 / L-5 (Dashboard resend):** **Complete** — before/after enums recorded in L-4 and L-5 evidence files.
@@ -313,6 +341,7 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Event ordering safety (L-6) | **4** | Automated interleave + late-PI tests pass in repo |
 | Unmatched event safety (L-7) | **4** | Classifier + slim + chaos HTTP tests; staging fixtures pending |
 | Operator auth session (P-2) | **4** | Login + status-check **200**; token not expired at read time |
+| Checkout cancel safety (L-9) | **4** | Unpaid abandon: not PAID, zero fulfillment; `/cancel` **200** |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 
@@ -331,4 +360,5 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Success page | `DAY1_SUCCESS_ROUTE_FIX.md` |
 | Release control | `L1_RELEASE_CONTROL_REPORT.md` |
 | Operator auth (P-2) | `P2_OPERATOR_AUTH_RELIABILITY.md` |
+| Checkout cancel (L-9) | `L9_CHECKOUT_CANCEL_SAFETY.md` |
 | Day 2 plan | `DAY2_L8_L13_EXECUTION_PLAN.md` |

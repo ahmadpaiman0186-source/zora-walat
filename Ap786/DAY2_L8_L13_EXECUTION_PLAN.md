@@ -40,6 +40,7 @@
 | Field | Content |
 |-------|---------|
 | **Goal** | Prove payer hitting **cancel** / abandoning checkout does not PAID or fulfill. |
+| **Status** | **PASS (2026-05-18)** — staging `/cancel` **200** (~1.2s); disposable test checkout; no payment; `status-check` enums in `L9_CHECKOUT_CANCEL_SAFETY.md` §5. |
 | **Safe test method** | Create checkout; open Stripe hosted page; click **Back/Cancel** or navigate to app `/cancel` slim return URL; **do not** complete payment. Optional: `checkout.session.expired` webhook for same session after timeout (Dashboard or clock). |
 | **Expected DB / order state** | Row stays **PENDING** or becomes **CANCELLED** with `PAYMENT_FAILED` / `failureReason` consistent with abandon or expiry; **no** fulfillment attempts. |
 | **Pass criteria** | `PAID_CONFIRMED` **false**; fulfillment count **0**; cancel return page **200** (no 504). |

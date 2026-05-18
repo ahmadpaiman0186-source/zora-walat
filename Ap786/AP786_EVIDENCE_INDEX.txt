@@ -23,6 +23,7 @@ Files:
   DAY1_CLOSEOUT_REPORT.md
   DAY2_L8_L13_EXECUTION_PLAN.md
   P2_OPERATOR_AUTH_RELIABILITY.md
+  L9_CHECKOUT_CANCEL_SAFETY.md
 
 L-3: PASS — desk re-verification (L3_PAYMENT_CORE_REVERIFICATION.md).
 L-4/L-5: PASS 2026-05-18 — Dashboard checkout.session.completed resend; operator before/after enums unchanged (see L4/L5 files).
@@ -30,6 +31,7 @@ L-6: PASS (automated) 2026-05-18 — ordering tests in stripeWebhookHttpChaos; s
 L-7: PASS (automated) 2026-05-18 — slimStripeWebhookUnmatchedFastAck + chaos HTTP tests; staging fixtures PENDING (L7 file).
 
 P-2: PASS 2026-05-18 — operator login + status-check HTTP 200; TOKEN_EXPIRED false; terminal enums (P2_OPERATOR_AUTH_RELIABILITY.md). Harness commit 5d6fa2f.
+L-9: PASS 2026-05-18 — /cancel HTTP 200 no 504; unpaid checkout PENDING, PAID_CONFIRMED false, fulfillment count 0 (L9_CHECKOUT_CANCEL_SAFETY.md).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
