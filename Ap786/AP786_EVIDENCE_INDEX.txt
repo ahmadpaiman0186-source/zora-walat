@@ -14,8 +14,13 @@ Files:
   DAY1_COMMIT_AND_DEPLOY_SUMMARY.md
   DAY1_REMAINING_RISKS.md
   DAY1_ROADMAP_L3_L7.md
+  L3_PAYMENT_CORE_REVERIFICATION.md
+  L4_STRIPE_WEBHOOK_RESEND_PLAN.md
+  L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md
+  L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md
+  L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md
 
-Verified milestone (staging, operator harness):
+L-3 to L-7: plans and re-verification (no raw webhooks; no Stripe execution in repo).
   Stripe Checkout opened (test mode)
   GET /success — no 504
   checkout.session.completed — slim webhook path deployed

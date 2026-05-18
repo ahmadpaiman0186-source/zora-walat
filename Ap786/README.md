@@ -14,7 +14,12 @@
 | [DAY1_COMMIT_AND_DEPLOY_SUMMARY.md](./DAY1_COMMIT_AND_DEPLOY_SUMMARY.md) | Commit hashes and staging URL |
 | [DAY1_REMAINING_RISKS.md](./DAY1_REMAINING_RISKS.md) | Honest gaps before production |
 | [DAY1_ROADMAP_L3_L7.md](./DAY1_ROADMAP_L3_L7.md) | Next checklist items (L-3 … L-7) |
+| [L3_PAYMENT_CORE_REVERIFICATION.md](./L3_PAYMENT_CORE_REVERIFICATION.md) | L-3: payment core re-verification from existing evidence |
+| [L4_STRIPE_WEBHOOK_RESEND_PLAN.md](./L4_STRIPE_WEBHOOK_RESEND_PLAN.md) | L-4: `checkout.session.completed` resend proof plan (confirmation gate) |
+| [L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md](./L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md) | L-5: duplicate webhook safety proof plan |
+| [L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md](./L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md) | L-6: PI vs checkout ordering safety plan |
+| [L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md](./L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md) | L-7: unmatched Stripe event safety plan |
 
-**Staging API (public):** https://zora-walat-api-staging.vercel.app  
+**Ap786 evidence commit (Day 1 pack):** `5f926295fb0792f563d2c0c7752da0d793d6777e`  
 
 **External evidence (optional):** Prior packs may exist under `C:\Users\ahmad\zora_walat_evidence\` — this folder is the **repo-canonical** Ap786 pack for Day 1.

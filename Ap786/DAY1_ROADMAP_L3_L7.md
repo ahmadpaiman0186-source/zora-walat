@@ -1,5 +1,15 @@
 # Day 1 → L-3 … L-7 — Suggested checklist (not executed)
 
+**Update:** Executable plans and L-3 desk summary now live as dedicated files:
+
+- [L3_PAYMENT_CORE_REVERIFICATION.md](./L3_PAYMENT_CORE_REVERIFICATION.md)
+- [L4_STRIPE_WEBHOOK_RESEND_PLAN.md](./L4_STRIPE_WEBHOOK_RESEND_PLAN.md)
+- [L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md](./L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md)
+- [L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md](./L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md)
+- [L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md](./L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md)
+
+---
+
 High-level themes to schedule after L-1/L-2 closure. Titles are **suggested**; align with your internal L taxonomy.
 
 ## L-3 — CI / quality gates
