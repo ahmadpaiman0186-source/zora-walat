@@ -15,7 +15,7 @@
 | Step | Goal | Method | Pass |
 |------|------|--------|------|
 | **P-1** | Integration DB proof | **PASS (local 2026-05-18)** — `TEST_DATABASE_URL` on **127.0.0.1:5432** / `zora_walat_test`; migrate; focused chaos pattern **6/6** green. See `DAY1_CLOSEOUT_REPORT.md` §8. | Focused L-6/L-7 suite green |
-| **P-2** | Operator session | `staging-auth-checkout-operator.mjs login` on operator machine | `status-check` returns **200** |
+| **P-2** | Operator session | **PASS (2026-05-18)** — operator login + `status-check` **200** on staging; terminal enums per `P2_OPERATOR_AUTH_RELIABILITY.md` §8. Harness: `5d6fa2f`. | `status-check` returns **200** |
 
 ---
 

@@ -1,7 +1,7 @@
 # P-2 — Operator auth reliability (staging harness)
 
-**Status:** **Harness PASS** — **full P-2 PARTIAL** (pending valid staging credentials for live login + status-check)  
-**Date:** 2026-05-18  
+**Status:** **Harness PASS** — **full P-2 PASS** (operator login + status-check **200** on staging)  
+**Date:** 2026-05-18 (full pass verified same day)  
 **Rules:** No secrets, JWTs, passwords, raw env values, or API keys in this file.
 
 ---
@@ -99,12 +99,33 @@ Optional: put `STAGING_OPERATOR_*` in gitignored `server/.env.local` (loaded aut
 | Layer | Verdict |
 |-------|---------|
 | Harness reliability (no hang, diagnostics) | **PASS** |
-| Staging login with operator creds | **PENDING** — requires valid `STAGING_OPERATOR_*` on operator machine |
-| Full P-2 (login + status-check **200**) | **PARTIAL** until operator runs `auth-check` successfully |
+| Staging operator login (`LOGIN_HTTP` **200**, token saved) | **PASS** |
+| Full P-2 (`status-check` **200**, terminal order enums) | **PASS** |
+
+Harness commit: `5d6fa2f` (`test(auth): harden staging operator login diagnostics`).
 
 ---
 
-## 8. If LOGIN_HTTP stays 401
+## 8. Verified full P-2 run (sanitized enums only)
+
+Operator machine run against `https://zora-walat-api-staging.vercel.app` after valid `STAGING_OPERATOR_*` were set in-process (no secrets recorded here).
+
+| Field | Value |
+|-------|--------|
+| Operator login | **Succeeded** (`LOGIN_HTTP` **200**, `TOKEN_OK` **true**) |
+| `TOKEN_STATE` | present |
+| `TOKEN_EXPIRED` | **false** |
+| `STATUS_CHECK_HTTP` | **200** |
+| `ORDER_FOUND` | **true** |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | **true** |
+| `FULFILLMENT_ATTEMPT_COUNT` | **1** |
+| `FULFILLMENT_DUPLICATE_SAFE` | **true** |
+
+---
+
+## 9. If LOGIN_HTTP stays 401 (historical / recovery)
 
 1. Confirm `auth-env-check` shows `PASSWORD_LENGTH` ≥ 1 (password actually in process).  
 2. Register or reset password on staging (`register` or Dashboard DB).  

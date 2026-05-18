@@ -2,7 +2,7 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** L-6 / L-7 desk + test evidence recorded (2026-05-18)  
+**Last updated:** P-2 operator auth pass + L-6 / L-7 desk evidence (2026-05-18)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
 
 ---
@@ -16,6 +16,8 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 **What is additionally verified:** **Dashboard resend** of the same `checkout.session.completed` event (test mode) — before and after operator readouts **unchanged** (L-4 / L-5).
 
 **L-6 / L-7 (2026-05-18):** Event-ordering and unmatched-event safety have **PASS (automated)** coverage via new/extended repository tests (classifier, slim HTTP, Express chaos integration). **Live** staging webhook fixture traffic was **not** run (approval gate).
+
+**P-2 (2026-05-18):** Staging operator **login succeeded**; **`status-check` HTTP 200** with terminal fulfillment enums (`FULFILLED`, `RECHARGE_COMPLETED`, one fulfillment attempt, duplicate-safe). Harness reliability fixes are in commit `5d6fa2f`.
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
@@ -41,6 +43,7 @@ No deployment secrets or preview hostnames are listed in this document.
 | Ap786 L3–L7 plans | `3e76ce0a3fe5dc042f7c69f916e0749d434a8e40` | `3e76ce0` |
 | L4/L5 resend proof record | `866a26ed5dd18f20e13d11c1413533b46f158bfa` | `866a26e` |
 | L4/L5 index note | `1c03477aaf4b10498a590023187b465f232b2500` | `1c03477` |
+| P-2 operator auth harness | `5d6fa2f4d6a5d52caeb67aae07c744ca9d068ad4` | `5d6fa2f` |
 
 Evidence is **version-controlled** on branch `fix/post-l40-slim-stripe-webhook-invalid-signature` and **pushed** to the remote repository.
 
@@ -204,6 +207,34 @@ Details: `Ap786/L4_STRIPE_WEBHOOK_RESEND_PLAN.md`, `Ap786/L5_DUPLICATE_WEBHOOK_S
 
 ---
 
+## 14a. P-2 — Operator auth reliability (staging)
+
+**Verdict:** **PASS** (operator run, 2026-05-18)
+
+| Item | Status |
+|------|--------|
+| Harness (env-first login, diagnostics, tests) | **PASS** — commit `5d6fa2f` |
+| Staging operator login | **PASS** |
+| `status-check` after login | **HTTP 200** |
+
+**Verified operator readout (enums only — no tokens or credentials):**
+
+| Field | Value |
+|-------|--------|
+| `TOKEN_STATE` | present |
+| `TOKEN_EXPIRED` | **false** |
+| `STATUS_CHECK_HTTP` | **200** |
+| `ORDER_FOUND` | **true** |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | **true** |
+| `FULFILLMENT_ATTEMPT_COUNT` | **1** |
+| `FULFILLMENT_DUPLICATE_SAFE` | **true** |
+
+Details: `Ap786/P2_OPERATOR_AUTH_RELIABILITY.md`
+
+---
+
 ## 15. Remaining manual proof needed
 
 **L-4 / L-5 (Dashboard resend):** **Complete** — before/after enums recorded in L-4 and L-5 evidence files.
@@ -281,6 +312,7 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Duplicate / retry safety | **4** | Resend proof: count **1**, duplicate-safe **true** before and after |
 | Event ordering safety (L-6) | **4** | Automated interleave + late-PI tests pass in repo |
 | Unmatched event safety (L-7) | **4** | Classifier + slim + chaos HTTP tests; staging fixtures pending |
+| Operator auth session (P-2) | **4** | Login + status-check **200**; token not expired at read time |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 
@@ -298,3 +330,5 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Webhook slim path | `DAY1_WEBHOOK_SLIM_PATH.md` |
 | Success page | `DAY1_SUCCESS_ROUTE_FIX.md` |
 | Release control | `L1_RELEASE_CONTROL_REPORT.md` |
+| Operator auth (P-2) | `P2_OPERATOR_AUTH_RELIABILITY.md` |
+| Day 2 plan | `DAY2_L8_L13_EXECUTION_PLAN.md` |
