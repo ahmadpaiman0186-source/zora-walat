@@ -11,6 +11,8 @@ Operational entry points:
 
 See also:
 
+- [L33_CHAOS_FAILURE_DRILL_RUNBOOK.md](./L33_CHAOS_FAILURE_DRILL_RUNBOOK.md) — L33 chaos/failure drills (non-production only; plan-first)
+- [../performance/L33_LOAD_STRESS_CHAOS_TEST_PLAN.md](../performance/L33_LOAD_STRESS_CHAOS_TEST_PLAN.md) — L33 load/stress scope and guardrails
 - [INCIDENT_SCENARIOS.md](./INCIDENT_SCENARIOS.md)
 - [SLO.md](./SLO.md)
 - [BACKUP_RESTORE_DRILL.md](./BACKUP_RESTORE_DRILL.md) — staging backup/restore rehearsal, ledger-safe post-restore checks, RPO/RTO worksheet (no prod ledger `UPDATE`/`DELETE`)
