@@ -21,8 +21,10 @@ Files:
   L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md
   AP786_ALL_PASSES_INVESTOR_PROOF.md
 
-L-3 to L-7: plans and re-verification (no raw webhooks; no Stripe execution in repo).
+L-3: PASS — desk re-verification (L3_PAYMENT_CORE_REVERIFICATION.md).
 L-4/L-5: PASS 2026-05-18 — Dashboard checkout.session.completed resend; operator before/after enums unchanged (see L4/L5 files).
+L-6: PARTIAL 2026-05-18 — desk PASS + integration tests PASS; staging live replay PENDING (L6 file).
+L-7: PARTIAL 2026-05-18 — desk PASS + partial tests PASS; expired/unrelated HTTP gaps + staging PENDING (L7 file).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
