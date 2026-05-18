@@ -56,8 +56,19 @@ After **one** successful Stripe **test-mode** payment that reached **FULFILLED**
 | API | Refund visibility |
 |-----|-------------------|
 | `GET /api/ops/staging-operator-order-status/:id` (harness `status-check`) | **Lifecycle + fulfillment only** — does **not** expose `postPaymentIncident` |
-| `GET /api/orders/:id/phase1-truth` | **Yes** — `postPaymentIncident.status`, `mapSource` (owner JWT) |
+| `GET /api/orders/:id/phase1-truth` | **Yes** — full canonical DTO (owner JWT); **cold Vercel bootstrap may timeout** |
+| `GET /api/ops/staging-operator-phase1-truth/:id` | **Yes** — slim read-only incident enums (harness `phase1-truth-check`); same gate as status-check |
 | Stripe Dashboard | Payment / Refund objects (test mode) |
+
+### 2e. Verifier timeout (root cause + fix)
+
+| Item | Detail |
+|------|--------|
+| **Root cause** | `GET /api/orders/:id/phase1-truth` is served only via **full Express `getHandler()`** (`bootstrap.js` + Redis + route graph). On Vercel cold start this often exceeds harness/client timeouts (~45s). |
+| **Why status-check works** | `GET /api/ops/staging-operator-order-status/:id` is routed **before** bootstrap in `api/index.mjs` (slim Prisma read). |
+| **Fix (repo)** | Slim `GET /api/ops/staging-operator-phase1-truth/:id` + harness `phase1-truth-check` (read-only incident fields). Gate: `STAGING_ALLOW_OPERATOR_ORDER_STATUS=true`. |
+| **Staging** | Verifier **works after deploy** of API with slim route; until then harness may return **503** `staging_operator_phase1_truth_disabled` (not a timeout). |
+| **L-11 proof** | Still **blocked** — no refund; no PASS commit until live **REFUNDED** observed post-refund. |
 
 ### 2d. Automated proof already in repo (not executed for L-11 staging)
 
@@ -121,15 +132,14 @@ node tools/staging-auth-checkout-operator.mjs status-check
 
 Record baseline enums (expect **FULFILLED**, **RECHARGE_COMPLETED**, fulfillment **1**).
 
-**Phase-1 truth (incident baseline)** — replace `{orderId}` from gitignored order id file; use Bearer from login (never commit token):
+**Phase-1 truth (incident baseline)** — use slim harness mode (not legacy `/api/orders/.../phase1-truth` on cold staging):
 
 ```powershell
-# Example shape only — run locally after login
-# GET https://zora-walat-api-staging.vercel.app/api/orders/{orderId}/phase1-truth
-# Header: Authorization: Bearer <accessToken from login response, not stored in git>
+Set-Content .staging-order-id.local "cmp95a2kc0003jy04pvq0dr78"
+node tools/staging-auth-checkout-operator.mjs phase1-truth-check
 ```
 
-Confirm `postPaymentIncident.status` is not **REFUNDED** before proceeding.
+Expect `PHASE1_TRUTH_HTTP 200`, `POST_PAYMENT_INCIDENT_STATUS` **not** `REFUNDED`, `PREFLIGHT_REFUND_ELIGIBLE true`. If **503**, deploy API with slim phase1-truth route and `STAGING_ALLOW_OPERATOR_ORDER_STATUS=true`.
 
 ### 5b. Full refund execution (**PENDING approval**)
 
@@ -148,8 +158,10 @@ Confirm `postPaymentIncident.status` is not **REFUNDED** before proceeding.
 
 ```powershell
 node tools/staging-auth-checkout-operator.mjs status-check
-# Then phase1-truth GET again for postPaymentIncident.status REFUNDED
+node tools/staging-auth-checkout-operator.mjs phase1-truth-check
 ```
+
+Expect `POST_PAYMENT_INCIDENT_STATUS REFUNDED` after Dashboard full refund + webhook.
 
 Capture **enum-only** evidence for `Ap786/L11_FULL_REFUND_SAFETY.md` execution section (future commit after approval).
 
@@ -167,7 +179,8 @@ Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refu
 | Refund wrong PaymentIntent | Match order suffix **`…04pvq0dr78`** + gitignored order id file + Dashboard test mode |
 | Partial refund confuses L-11 | Dashboard: **full** refund only |
 | Live mode | Dashboard **test mode** toggle must be on |
-| Expecting status-check to show REFUNDED | Use **phase1-truth** for incident; status-check stays FULFILLED |
+| Expecting status-check to show REFUNDED | Use **phase1-truth-check** (slim) for incident; status-check stays FULFILLED |
+| Legacy phase1-truth timeout | Use **slim** `/api/ops/staging-operator-phase1-truth/:id` via harness |
 | Second fulfillment | Assert `FULFILLMENT_ATTEMPT_COUNT` still **1**; gate blocks new attempts |
 | Double refund (L-13) | Defer duplicate refund / resend to L-13; checklist denies `already_recorded_refunded_incident` |
 

@@ -13,6 +13,7 @@
  *   node tools/staging-auth-checkout-operator.mjs status-check
  *   node tools/staging-auth-checkout-operator.mjs auth-env-check
  *   node tools/staging-auth-checkout-operator.mjs auth-check
+ *   node tools/staging-auth-checkout-operator.mjs phase1-truth-check
  *
  * Phase 2 (test payment): requires STAGING_ALLOW_STRIPE_TEST_PAYMENT=true.
  * checkout-open-test saves URL to .staging-checkout-url.local (gitignored); never printed.
@@ -53,8 +54,11 @@ const ORDER_REFERENCE_PATH = join(SERVER_ROOT, '.staging-order-reference.local')
 
 const STATUS_CHECK_SLIM_TIMEOUT_MS = 45_000;
 const STATUS_CHECK_LEGACY_TIMEOUT_MS = 120_000;
+const PHASE1_TRUTH_SLIM_TIMEOUT_MS = 45_000;
 const STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX =
   '/api/ops/staging-operator-order-status/';
+const STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX =
+  '/api/ops/staging-operator-phase1-truth/';
 
 const MODES = new Set([
   'register',
@@ -66,6 +70,7 @@ const MODES = new Set([
   'status-check',
   'auth-env-check',
   'auth-check',
+  'phase1-truth-check',
 ]);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -86,7 +91,7 @@ function safeLine(line) {
 
 function usage() {
   output.write(
-    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check|auth-env-check|auth-check>\n',
+    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check|auth-env-check|auth-check|phase1-truth-check>\n',
   );
 }
 
@@ -1034,6 +1039,120 @@ async function modeStatusCheck() {
   safeLine(`FULFILLMENT_DUPLICATE_SAFE ${duplicateSafe ? 'true' : 'false'}`);
 }
 
+async function modePhase1TruthCheck() {
+  safeLine('MODE phase1-truth-check');
+
+  const token = await loadToken();
+  printTokenFileDiagnostics(token);
+  if (!token || isAccessTokenExpired(token) === true) {
+    safeLine('PHASE1_TRUTH_HTTP 0');
+    safeLine('LOCAL_ERROR TOKEN_MISSING_OR_EXPIRED');
+    safeLine('ORDER_AUTH_FAILURE true');
+    process.exitCode = 2;
+    return;
+  }
+
+  const orderId = await loadOrderId();
+  safeLine(`LOCAL_ORDER_ID_PRESENT ${orderId ? 'true' : 'false'}`);
+  if (orderId) {
+    safeLine(`LOCAL_ORDER_ID_PREVIEW ${redactIdPreview(orderId)}`);
+  }
+  if (!orderId) {
+    safeLine('PHASE1_TRUTH_HTTP 0');
+    safeLine('LOCAL_ERROR missing_order_id');
+    process.exitCode = 2;
+    return;
+  }
+
+  const slimPath = `${STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX}${encodeURIComponent(orderId)}`;
+  safeLine(`PHASE1_TRUTH_API_ORIGIN ${apiOriginOnly()}`);
+  safeLine('PHASE1_TRUTH_HTTP_METHOD GET');
+  safeLine(`PHASE1_TRUTH_ENDPOINT_PRIMARY ${slimPath}`);
+  safeLine(`PHASE1_TRUTH_TIMEOUT_MS ${PHASE1_TRUTH_SLIM_TIMEOUT_MS}`);
+
+  const slimResult = await apiGet(
+    slimPath,
+    { Authorization: `Bearer ${token}` },
+    PHASE1_TRUTH_SLIM_TIMEOUT_MS,
+  );
+
+  safeLine(`PHASE1_TRUTH_RESPONSE_PREVIEW ${safeResponsePreview(slimResult)}`);
+
+  if (slimResult.timedOut) {
+    safeLine('PHASE1_TRUTH_HTTP timeout');
+    safeLine(`PHASE1_TRUTH_TIMED_OUT_ENDPOINT ${slimPath}`);
+    safeLine(
+      `PHASE1_TRUTH_TIMEOUT_REASON slim_operator_phase1_truth_exceeded_${PHASE1_TRUTH_SLIM_TIMEOUT_MS}ms`,
+    );
+    safeLine('ORDER_API_REACHED false');
+    safeLine(
+      'PHASE1_TRUTH_HINT deploy_slim_operator_phase1_truth_and_set_STAGING_ALLOW_OPERATOR_ORDER_STATUS',
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine(`PHASE1_TRUTH_HTTP ${slimResult.status}`);
+
+  if (
+    slimResult.status === 503 &&
+    slimResult.json?.reason === 'staging_operator_phase1_truth_disabled'
+  ) {
+    safeLine('PHASE1_TRUTH_SLIM_DISABLED true');
+    safeLine(
+      'PHASE1_TRUTH_HINT deploy_api_with_slim_phase1_truth_and_STAGING_ALLOW_OPERATOR_ORDER_STATUS_true',
+    );
+    safeLine(
+      'PHASE1_TRUTH_NOTE legacy_GET_api_orders_phase1_truth_requires_full_express_bootstrap_and_may_timeout_on_cold_start',
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  if (slimResult.status === 401) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('LOCAL_ERROR TOKEN_REJECTED_BY_API');
+    safeLine('ORDER_AUTH_FAILURE true');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 2;
+    return;
+  }
+
+  if (slimResult.status === 404 || slimResult.json?.orderFound === false) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('ORDER_FOUND false');
+    safeLine('POST_PAYMENT_INCIDENT_STATUS unknown');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (slimResult.status !== 200 || slimResult.json?.orderFound !== true) {
+    safeLine('ORDER_API_REACHED true');
+    safeLine('ORDER_FOUND unknown');
+    printCodeMessage(slimResult.json);
+    process.exitCode = 1;
+    return;
+  }
+
+  const incident = String(slimResult.json.postPaymentIncidentStatus ?? 'unknown');
+  const mapSource =
+    slimResult.json.postPaymentIncidentMapSource != null
+      ? String(slimResult.json.postPaymentIncidentMapSource)
+      : 'null';
+  const lifecycle = String(slimResult.json.orderStatus ?? 'unknown');
+  const payment = String(slimResult.json.paymentStatus ?? 'unknown');
+
+  safeLine('ORDER_FOUND true');
+  safeLine(`ORDER_STATUS ${lifecycle}`);
+  safeLine(`PAYMENT_STATUS ${payment}`);
+  safeLine(`POST_PAYMENT_INCIDENT_STATUS ${incident}`);
+  safeLine(`POST_PAYMENT_INCIDENT_MAP_SOURCE ${mapSource}`);
+  safeLine(
+    `PREFLIGHT_REFUND_ELIGIBLE ${incident !== 'REFUNDED' ? 'true' : 'false'}`,
+  );
+}
+
 async function main() {
   loadOperatorDotenv(SERVER_ROOT);
 
@@ -1071,6 +1190,9 @@ async function main() {
       break;
     case 'auth-check':
       await modeAuthCheck();
+      break;
+    case 'phase1-truth-check':
+      await modePhase1TruthCheck();
       break;
     default:
       usage();

@@ -194,6 +194,20 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Staging operator phase1-truth incident read (Bearer JWT): slim L-11 pre/post refund verify.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'GET' &&
+      p.startsWith('/api/ops/staging-operator-phase1-truth/')
+    ) {
+      return import('./slimStagingOperatorPhase1TruthHandler.mjs').then((m) =>
+        m.handleSlimStagingOperatorPhase1TruthGet(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout (Bearer JWT): slim path — full `getHandler()` cold start caused client timeouts.
    * Dev `X-ZW-Dev-Checkout` bypass still uses Express via `getHandler()`.
    */
