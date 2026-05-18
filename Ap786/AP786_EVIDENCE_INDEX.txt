@@ -20,6 +20,8 @@ Files:
   L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md
   L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md
   AP786_ALL_PASSES_INVESTOR_PROOF.md
+  DAY1_CLOSEOUT_REPORT.md
+  DAY2_L8_L13_EXECUTION_PLAN.md
 
 L-3: PASS — desk re-verification (L3_PAYMENT_CORE_REVERIFICATION.md).
 L-4/L-5: PASS 2026-05-18 — Dashboard checkout.session.completed resend; operator before/after enums unchanged (see L4/L5 files).
