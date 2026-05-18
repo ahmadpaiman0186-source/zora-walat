@@ -57,14 +57,15 @@
 | Field | Content |
 |-------|---------|
 | **Goal** | Prove `checkout.session.expired` cancels a **pending** correlated checkout without PAID or fulfillment; unknown ids stay safe. |
+| **Status** | **PASS (automated, 2026-05-18)** — focused tests **11/11** green; see `L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md`. Staging Dashboard expire **not run**. |
 | **Safe test method** | **Automated (already in repo):** `stripeWebhookHttpChaos` — expired on pending → **CANCELLED**; unknown id → no row. **Staging:** Dashboard expire session or wait for test-mode expiry on a disposable checkout **after approval**. |
 | **Expected DB / order state** | Valid metadata + pending row → `orderStatus` **CANCELLED**, `status` **PAYMENT_FAILED**, `failureReason` includes expired semantics; **0** fulfillment. Unknown id → no new row. |
 | **Pass criteria** | Matches automated test expectations on integration DB; staging operator enums align. |
 | **Evidence to capture** | Enum-only before/after; reference test names in commit/evidence file — no session ids in git. |
 | **Risks** | Expiring already-paid session — use only **unpaid** pending checkouts. |
-| **Stripe manual action required?** | **Optional** for staging corroboration; **automated proof** already in `fcf928f` when DB available. |
+| **Stripe manual action required?** | **No** for L-10 PASS (automated). **Optional** staging corroboration only. |
 
-**Approval gate:** `Approved: L-10 expired checkout staging proof` (if beyond CI)
+**Approval gate:** `Approved: L-10 expired checkout staging proof` (optional corroboration only)
 
 ---
 
