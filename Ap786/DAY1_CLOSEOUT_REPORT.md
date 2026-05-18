@@ -86,7 +86,7 @@ Detail: `DAY1_PAYMENT_TO_FULFILLMENT_PASS.md`, `DAY1_STATUS_CHECK_FINAL.md`, `AP
 
 | Item | Status |
 |------|--------|
-| Integration DB proof (full chaos suite green on operator machine / CI) | **Pending** — local Postgres authentication failed during agent run; tests exist in repo |
+| Integration DB proof (focused L-6/L-7 chaos suite) | **PASS (local)** — see P-1 note below; `server/.env` alone still points at wrong host credentials |
 | L-6 staging multi-event replay | **Pending** — gated |
 | L-7 staging fixture webhooks (CLI/Dashboard unrelated events) | **Pending** — gated |
 | Production Stripe (live), SMTP/OTP parity, Redis/queue at scale | **Open** — see `DAY1_REMAINING_RISKS.md` |
@@ -108,15 +108,29 @@ Detail: `DAY1_PAYMENT_TO_FULFILLMENT_PASS.md`, `DAY1_STATUS_CHECK_FINAL.md`, `AP
 
 ---
 
-## 8. Day 2 scope (start)
+## 8. P-1 integration DB proof (2026-05-18)
 
-Execute **L-8 through L-13** negative and post-payment incident paths under controlled Stripe **test mode**, with explicit approval per item. Plan: `DAY2_L8_L13_EXECUTION_PLAN.md`.
+| Item | Result |
+|------|--------|
+| Root cause | `server/.env` used **localhost:5433** with a **password mismatch** for the running Postgres; integration preload used that URL instead of docker-compose defaults on **5432**. |
+| Fix (local, gitignored) | `TEST_DATABASE_URL` in `server/.env.local` → **127.0.0.1:5432** / database `zora_walat_test` (docker-compose credentials). Created DB via `node scripts/ensure-integration-test-database.mjs`; `npm run db:migrate:integration`. |
+| Focused command | `stripeWebhookHttpChaos.integration.test.js` name-pattern L-6/L-7 + PI-before-checkout |
+| Test result | **6/6 PASS** (no failures) |
+| P-1 verdict | **PASS** (local integration DB) |
 
-**Recommended first Day 2 step:** Restore **integration test database** access and run `stripeWebhookHttpChaos.integration.test.js` green locally or in CI — closes Day 1 “integration DB proof pending” before new Stripe manual actions.
+Operators without docker: start Postgres on **5432**, set `TEST_DATABASE_URL` per `server/.env.local.example`, migrate, re-run the command above.
 
 ---
 
-## 9. Investor-readable closeout statement
+## 9. Day 2 scope (start)
+
+Execute **L-8 through L-13** negative and post-payment incident paths under controlled Stripe **test mode**, with explicit approval per item. Plan: `DAY2_L8_L13_EXECUTION_PLAN.md`.
+
+**Recommended first Day 2 step:** **L-10** or **L-9** per plan (P-1 complete); obtain approval gate before Stripe manual actions.
+
+---
+
+## 10. Investor-readable closeout statement
 
 Day 1 demonstrated **technical feasibility** of the staging money path (checkout → webhook → fulfillment) and **duplicate-safe** webhook replay, plus **automated** ordering and unmatched-event tests in the repository. This is **not** a production launch approval.
 

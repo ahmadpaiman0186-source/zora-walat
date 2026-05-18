@@ -156,7 +156,7 @@ Unmatched **2xx** responses are a **deliberate** Stripe retry semantics tradeoff
 |-------|---------|
 | Desk / slim classification | **PASS** |
 | Classifier + slim HTTP tests | **PASS** |
-| Express HTTP integration tests (chaos suite) | **PASS** (when integration DB configured) |
+| Express HTTP integration tests (chaos suite) | **PASS** (local focused run **6/6**, 2026-05-18; requires `TEST_DATABASE_URL` + migrate) |
 | Staging live fixture webhook traffic | **PENDING** |
 | **Overall L-7** | **PASS (automated)** — staging fixtures still **PENDING** |
 

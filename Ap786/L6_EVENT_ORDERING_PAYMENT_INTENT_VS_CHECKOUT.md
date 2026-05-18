@@ -110,7 +110,7 @@ Allowed in future runs: event **type**, id **suffixes**, transition **result**, 
 | Layer | Verdict |
 |-------|---------|
 | Desk / code authority | **PASS** |
-| Automated tests (integration + unit anchors) | **PASS** |
+| Automated tests (integration + unit anchors) | **PASS** (integration DB proof local **6/6** on focused chaos pattern, 2026-05-18) |
 | Staging live multi-event replay | **PENDING** |
 | **Overall L-6** | **PASS (automated)** — staging replay still **PENDING** |
 
