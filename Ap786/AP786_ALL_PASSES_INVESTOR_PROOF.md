@@ -23,7 +23,7 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **L-10 (2026-05-18):** Signed-fixture integration tests prove `checkout.session.expired` returns **200**, does **not** PAID or fulfill, creates **no** row for unknown ids, and moves a **pending** checkout to **CANCELLED** / payment-failed only. Slim path fast-acks expired events without checkout metadata. **No live Stripe** used.
 
-**L-8 (2026-05-18):** Automated tests prove failed/uncorrelated payment events do **not** mark hosted checkout **PAID** or trigger fulfillment (**0** attempts). Decline at Stripe Checkout implies no `checkout.session.completed` (desk). Staging decline test card optional.
+**L-8 (2026-05-18):** Automated tests plus **staging** Stripe Checkout decline (test card ending **0002**, browser message *credit card was declined*) — order stays **PENDING**, **`PAID_CONFIRMED` false**, **zero** fulfillment; **not** recharge-complete or fulfilled.
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
@@ -292,16 +292,28 @@ Details: `Ap786/L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md`
 
 ## 14d. L-8 — Card declined / failed payment safety
 
-**Verdict:** **PASS (automated + desk)** (2026-05-18)
+**Verdict:** **PASS** (2026-05-18)
 
 | Item | Status |
 |------|--------|
 | Decline cannot drive paid webhook | **PASS** — no `checkout.session.completed` on decline |
 | `payment_intent.succeeded` without correlation | **PASS** — order stays **PENDING**, **0** fulfillment |
 | Never-paid canonical phase | **PASS** — **AWAITING_PAYMENT** |
-| Staging Checkout + decline test card | **Optional** — not run in evidence session |
+| Staging Checkout + decline test card | **PASS** — browser decline (0002); no success-card retry |
 
-**Verified test enums:**
+**Verified staging operator readout (after decline, enums only):**
+
+| Field | Value |
+|-------|--------|
+| `STATUS_CHECK_HTTP` | **200** |
+| `ORDER_FOUND` | **true** |
+| `ORDER_STATUS` | **PENDING** |
+| `PAYMENT_STATUS` | **CHECKOUT_CREATED** |
+| `PAID_CONFIRMED` | **false** |
+| `FULFILLMENT_ATTEMPT_COUNT` | **0** |
+| `FULFILLMENT_DUPLICATE_SAFE` | **false** |
+
+**Verified automated test enums:**
 
 | Scenario | `ORDER_STATUS` | Fulfillment |
 |----------|----------------|-------------|
@@ -392,7 +404,7 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Operator auth session (P-2) | **4** | Login + status-check **200**; token not expired at read time |
 | Checkout cancel safety (L-9) | **4** | Unpaid abandon: not PAID, zero fulfillment; `/cancel` **200** |
 | Expired session safety (L-10) | **4** | Automated webhook proof; staging expire optional |
-| Card decline safety (L-8) | **4** | Automated + desk; staging decline card optional |
+| Card decline safety (L-8) | **4** | Automated + staging decline UX; not PAID, zero fulfillment |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 
