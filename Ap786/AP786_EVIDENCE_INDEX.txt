@@ -21,6 +21,9 @@ Files:
   L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md
 
 L-3 to L-7: plans and re-verification (no raw webhooks; no Stripe execution in repo).
+L-4/L-5: execution record 2026-05-18 in L4/L5 files (agent baseline 401; operator-fill after login + Dashboard resend).
+
+Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
   checkout.session.completed — slim webhook path deployed
