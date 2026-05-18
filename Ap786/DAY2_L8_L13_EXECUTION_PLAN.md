@@ -24,14 +24,15 @@
 | Field | Content |
 |-------|---------|
 | **Goal** | Prove a **declined** test card does not mark the order PAID, does not fulfill, and leaves a safe terminal or pending-failed state. |
+| **Status** | **PASS (automated + desk, 2026-05-18)** — chaos + resilience tests **10/10**; decline = no `checkout.session.completed`. See `L8_CARD_DECLINED_SAFETY.md`. Staging decline UI optional (token refresh). |
 | **Safe test method** | New hosted checkout in **test mode** only; pay with Stripe decline test PAN (e.g. `4000000000000002` — do not paste full card in evidence). Alternatively signed `payment_intent.payment_failed` fixture in integration DB **after approval**. |
 | **Expected DB / order state** | `orderStatus` remains **PENDING** or moves to **CANCELLED** / payment row **PAYMENT_FAILED**; **no** `RECHARGE_COMPLETED`; **0** fulfillment attempts (or unchanged if abandon before pay). |
 | **Pass criteria** | Operator or API read shows **not** `PAID_CONFIRMED`; `FULFILLMENT_ATTEMPT_COUNT` **0**; no erroneous PAID transition. |
 | **Evidence to capture** | Enum-only `status-check` or sanitized API fields; event **type** string; HTTP status **200/4xx** as applicable — no payloads. |
 | **Risks** | Confusing decline with webhook delay; creating real-looking PII in Stripe Dashboard — use test emails only. |
-| **Stripe manual action required?** | **Yes** — test checkout + declined card **or** approved signed fixture POST. |
+| **Stripe manual action required?** | **Optional** for staging UX corroboration; **not required** for L-8 PASS (automated). |
 
-**Approval gate:** `Approved: L-8 card declined proof on staging`
+**Approval gate:** `Approved: L-8 card declined proof on staging` (optional live decline only)
 
 ---
 

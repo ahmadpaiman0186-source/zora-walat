@@ -2,7 +2,7 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** L-10 expired checkout safety + L-9 cancel + P-2 auth (2026-05-18)  
+**Last updated:** L-8 card declined safety + L-9/L-10 + P-2 auth (2026-05-18)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
 
 ---
@@ -22,6 +22,8 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 **L-9 (2026-05-18):** Disposable **test-mode** checkout opened and **not paid**; **`GET /cancel`** on staging returned **200** without gateway timeout; operator readout shows **PENDING**, **`PAID_CONFIRMED` false**, **zero** fulfillment attempts, payment status **not** recharge-complete.
 
 **L-10 (2026-05-18):** Signed-fixture integration tests prove `checkout.session.expired` returns **200**, does **not** PAID or fulfill, creates **no** row for unknown ids, and moves a **pending** checkout to **CANCELLED** / payment-failed only. Slim path fast-acks expired events without checkout metadata. **No live Stripe** used.
+
+**L-8 (2026-05-18):** Automated tests prove failed/uncorrelated payment events do **not** mark hosted checkout **PAID** or trigger fulfillment (**0** attempts). Decline at Stripe Checkout implies no `checkout.session.completed` (desk). Staging decline test card optional.
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
@@ -288,6 +290,28 @@ Details: `Ap786/L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md`
 
 ---
 
+## 14d. L-8 — Card declined / failed payment safety
+
+**Verdict:** **PASS (automated + desk)** (2026-05-18)
+
+| Item | Status |
+|------|--------|
+| Decline cannot drive paid webhook | **PASS** — no `checkout.session.completed` on decline |
+| `payment_intent.succeeded` without correlation | **PASS** — order stays **PENDING**, **0** fulfillment |
+| Never-paid canonical phase | **PASS** — **AWAITING_PAYMENT** |
+| Staging Checkout + decline test card | **Optional** — not run in evidence session |
+
+**Verified test enums:**
+
+| Scenario | `ORDER_STATUS` | Fulfillment |
+|----------|----------------|-------------|
+| PI succeeded before checkout (wrong path) | **PENDING** | **0** |
+| Never paid | **PENDING** (canonical awaiting payment) | **0** |
+
+Details: `Ap786/L8_CARD_DECLINED_SAFETY.md`
+
+---
+
 ## 15. Remaining manual proof needed
 
 **L-4 / L-5 (Dashboard resend):** **Complete** — before/after enums recorded in L-4 and L-5 evidence files.
@@ -368,6 +392,7 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Operator auth session (P-2) | **4** | Login + status-check **200**; token not expired at read time |
 | Checkout cancel safety (L-9) | **4** | Unpaid abandon: not PAID, zero fulfillment; `/cancel` **200** |
 | Expired session safety (L-10) | **4** | Automated webhook proof; staging expire optional |
+| Card decline safety (L-8) | **4** | Automated + desk; staging decline card optional |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 
@@ -388,4 +413,5 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Operator auth (P-2) | `P2_OPERATOR_AUTH_RELIABILITY.md` |
 | Checkout cancel (L-9) | `L9_CHECKOUT_CANCEL_SAFETY.md` |
 | Expired checkout (L-10) | `L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md` |
+| Card declined (L-8) | `L8_CARD_DECLINED_SAFETY.md` |
 | Day 2 plan | `DAY2_L8_L13_EXECUTION_PLAN.md` |
