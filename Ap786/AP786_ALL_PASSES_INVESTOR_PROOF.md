@@ -15,7 +15,7 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **What is additionally verified:** **Dashboard resend** of the same `checkout.session.completed` event (test mode) — before and after operator readouts **unchanged** (L-4 / L-5).
 
-**L-6 / L-7 (2026-05-18):** Event-ordering and unmatched-event safety were reviewed against the codebase and existing automated tests. **Partial** overall: repository tests **pass** for core scenarios; **live** staging webhook fixture traffic was **not** run (approval gate).
+**L-6 / L-7 (2026-05-18):** Event-ordering and unmatched-event safety have **PASS (automated)** coverage via new/extended repository tests (classifier, slim HTTP, Express chaos integration). **Live** staging webhook fixture traffic was **not** run (approval gate).
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
@@ -208,12 +208,13 @@ Details: `Ap786/L4_STRIPE_WEBHOOK_RESEND_PLAN.md`, `Ap786/L5_DUPLICATE_WEBHOOK_S
 
 **L-4 / L-5 (Dashboard resend):** **Complete** — before/after enums recorded in L-4 and L-5 evidence files.
 
-**L-6 / L-7 (staging live webhook traffic):** **Pending approval** — no Stripe CLI trigger, no extra Dashboard resends, no new checkout/payment in this pass. Repository tests cover core ordering and unmatched-id cases when integration DB is available.
+**L-6 / L-7 (staging live webhook traffic):** **Pending approval** — no Stripe CLI trigger, no Dashboard resends, no new checkout/payment.
+
+**L-6 / L-7 (automated):** **Complete** — see section 17.
 
 **Still open:**
 
-- Production Stripe, scale/SLO, compliance, and DR evidence per section 16.  
-- Optional proposed unit tests listed in L-6/L-7 evidence (expired session HTTP matrix, unrelated event types).
+- Production Stripe, scale/SLO, compliance, and DR evidence per section 16.
 
 ---
 
@@ -236,22 +237,22 @@ Details: `Ap786/DAY1_REMAINING_RISKS.md`
 
 ### L-6 — Event ordering (`payment_intent.succeeded` vs `checkout.session.completed`)
 
-**Verdict:** **PARTIAL**
+**Verdict:** **PASS (automated)** — staging replay **PENDING**
 
 | Layer | Verdict | Summary |
 |-------|---------|---------|
-| Desk / architecture | **PASS** | Hosted checkout PAID authority is `checkout.session.completed`; PI without Zora metadata does not drive Phase 1 PAID on slim path |
-| Automated tests | **PASS** | Integration interleave tests in `stripeWebhookHttpChaos.integration.test.js` (PI before/after checkout; single fulfillment) |
+| Desk / architecture | **PASS** | Hosted checkout PAID authority is `checkout.session.completed`; PI without Zora metadata does not drive Phase 1 PAID |
+| Automated tests | **PASS** | `stripeWebhookHttpChaos.integration.test.js` — PI before checkout stays PENDING; late duplicate PI does not increase fulfillment |
 | Staging live replay | **PENDING** | Requires explicit approval; not run |
 
 ### L-7 — Unmatched Stripe event safety
 
-**Verdict:** **PARTIAL**
+**Verdict:** **PASS (automated)** — staging fixtures **PENDING**
 
 | Layer | Verdict | Summary |
 |-------|---------|---------|
-| Desk / slim classification | **PASS** | Unknown checkout id, fixture PI, and signature failures handled per design |
-| Automated tests | **PARTIAL** | Missing signature, invalid signature, unknown `internalCheckoutId`, fixture PI covered; expired-session HTTP + unrelated event types — gaps documented |
+| Desk / slim classification | **PASS** | Unknown id, expired, fixture PI, unrelated types handled per design |
+| Automated tests | **PASS** | `slimStripeWebhookUnmatchedFastAck.test.js`, `slimStripeWebhookEntrypoint.test.js`, `stripeWebhookHttpChaos.integration.test.js` (expired, customer.created, invoice.created) |
 | Staging live fixtures | **PENDING** | Requires explicit approval; not run |
 
 **Key safety properties (investor language):**
@@ -278,8 +279,8 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Webhook reliability (staging) | **4** | Slim path + Dashboard resend steady state verified |
 | Fulfillment (staging smoke) | **4** | One order fulfilled; not load-tested |
 | Duplicate / retry safety | **4** | Resend proof: count **1**, duplicate-safe **true** before and after |
-| Event ordering safety (L-6) | **3** | Code + integration tests; live staging replay pending |
-| Unmatched event safety (L-7) | **3** | Core slim/unknown-id tests; broader matrix + staging pending |
+| Event ordering safety (L-6) | **4** | Automated interleave + late-PI tests pass in repo |
+| Unmatched event safety (L-7) | **4** | Classifier + slim + chaos HTTP tests; staging fixtures pending |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 

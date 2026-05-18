@@ -1,7 +1,7 @@
 # L-7 — Unmatched Stripe event safety
 
-**Status:** **PARTIAL** (desk review + partial automated tests **PASS**; slim-path HTTP matrix + staging fixture traffic **PENDING**)  
-**Date:** 2026-05-18  
+**Status:** **PASS (automated)** — staging fixture webhook traffic **PENDING** approval  
+**Date:** 2026-05-18 (tests added 2026-05-18)  
 **Rules:** No secrets, raw webhook payloads, keys, JWTs, PII, or full Stripe object ids in this file.
 
 ---
@@ -50,25 +50,40 @@ Ensure events that **cannot** be correlated to Zora money rows are handled safel
 | Missing `Stripe-Signature` | Pass | `slimStripeWebhookEntrypoint.test.js` — 400, no `getHandler` | Pending |
 | Invalid signature | Pass | `slimStripeWebhookEntrypoint.test.js`, `stripeWebhookHttpChaos` — 400, order stays PENDING | Pending |
 | Unknown `internalCheckoutId` on `checkout.session.completed` | Pass | `stripeWebhookHttpChaos` — 200, **0** fulfillment attempts | Pending |
-| Fixture PI (`payment_intent.succeeded`, no Zora source) | Pass | `slimStripeWebhookEntrypoint` — 200 ignored; `orderStateSafetyAudit` | Pending |
+| Unknown `internalCheckoutId` on `checkout.session.expired` | Pass | `stripeWebhookHttpChaos` — 200, no row, **0** fulfillment | Pending |
+| Expired on **pending** checkout | Pass | `stripeWebhookHttpChaos` — **CANCELLED**, not PAID, **0** fulfillment | Pending |
+| Fixture PI (`payment_intent.succeeded`, no Zora source) | Pass | `slimStripeWebhookEntrypoint` + `slimStripeWebhookUnmatchedFastAck.test.js` | Pending |
+| `checkout.session.expired` missing metadata (slim) | Pass | `slimStripeWebhookEntrypoint` — fast ack, no `getHandler` | Pending |
+| Unrelated type (`customer.created`) | Pass | `stripeWebhookHttpChaos` — 200, order unchanged | Pending |
+| Unsupported type (`invoice.created`) | Pass | `stripeWebhookHttpChaos` — 200, no crash | Pending |
 | Oversized body | Pass | `slimStripeWebhookEntrypoint` — 413 | Pending |
-| `checkout.session.expired` (valid vs invalid metadata) | Pass (code) | **Gap** — see §6 | Pending |
-| Unrelated type (e.g. `customer.created`) | Hand off to Express | **Gap** — see §6 | Pending |
 | Signature-valid hosted checkout (happy path) | Pass | `slimStripeWebhookEntrypoint` + chaos suite | Covered by L-4 |
 
 ---
 
-## 4. Automated test coverage — **PARTIAL PASS**
+## 4. Automated test coverage — **PASS**
+
+### Classifier unit (no DB)
+
+**File:** `server/test/slimStripeWebhookUnmatchedFastAck.test.js`
+
+| Test | Proves |
+|------|--------|
+| `checkout.session.expired` without metadata | Unmatched → fast ack eligible |
+| Invalid `internalCheckoutId` shape on expired | Unmatched |
+| `customer.created` / `invoice.payment_succeeded` | Not slim-unmatched (Express handoff) |
+| PI without `topup_order_id` / wrong `metadata.source` | Unmatched |
 
 ### Slim entrypoint (no DB)
 
-**File:** `server/test/slimStripeWebhookEntrypoint.test.js`
+**File:** `server/test/slimStripeWebhookEntrypoint.test.js` (run with `setupTestEnv` preload)
 
 | Test | Proves |
 |------|--------|
 | Missing signature → 400, fast, no bootstrap | Signature gate |
 | Invalid signature → 400, fast | Signature gate |
 | Unconfigured signing secret → 503 | Fail closed |
+| `checkout.session.expired` empty metadata → 200 ignored, no `getHandler` | Expired unmatched slim path |
 | Fixture PI → 200 `ignored` / `unmatched_event`, no `getHandler` | Unknown PI safety |
 | Zora PI metadata → `getHandler` replay | Matched webtopup only |
 | Oversized body → 413 | Abuse resistance |
@@ -82,6 +97,10 @@ Ensure events that **cannot** be correlated to Zora money rows are handled safel
 |------|--------|
 | Invalid webhook signature → 400; payment PENDING; no `StripeWebhookEvent` row | No mutation on bad sig |
 | Unknown `internalCheckoutId` on checkout completed → 200; no fulfillment rows | No fake order / fulfillment |
+| `L-7: checkout.session.expired` unknown id → 200; no DB row; no fulfillment | No fake order |
+| `L-7: checkout.session.expired` on pending checkout → CANCELLED; not PAID; 0 fulfillment | Expired does not pay or fulfill |
+| `L-7: customer.created` → pending order unchanged; 0 fulfillment | Unrelated type safe |
+| `L-7: invoice.created` → 200; no crash; pending unchanged | Unsupported signed event safe |
 
 ### Classifier unit
 
@@ -114,16 +133,14 @@ Per Day 1 gates, the following were **not** executed in this session:
 
 ---
 
-## 6. Gaps and proposed tests (exact files)
+## 6. Remaining gaps (optional)
 
-| Gap | Proposed file | Proposed cases |
-|-----|---------------|----------------|
-| `stripeEventSlimUnmatchedFastAck` table for all branches | `server/test/slimStripeWebhookUnmatchedFastAck.test.js` | `checkout.session.expired` empty metadata; invalid id shape; unrelated `customer.created` returns false; PI missing `topup_order_id` |
-| HTTP: expired session on pending order | Extend `stripeWebhookHttpChaos.integration.test.js` | Valid metadata → CANCELLED; unknown id → 200, no row |
-| HTTP: unrelated event through slim | `server/test/integrations/stripeWebhookSlimUnmatched.integration.test.js` | Signed `customer.created` → 200 via Express no-op or explicit ack; assert no new `PaymentCheckout` |
-| Slim fast-ack for checkout completed missing metadata (HTTP) | `server/test/slimStripeWebhookEntrypoint.test.js` (add case) | Signed event, empty metadata → 200 ignored, `getHandler` not called |
+| Gap | Notes |
+|-----|--------|
+| Slim HTTP test for `checkout.session.completed` missing metadata | Classifier covered; optional slim HTTP case |
+| Staging Vercel latency proof for fast-ack | Requires approved fixture traffic |
 
-No payment or webhook **production logic** changes are proposed unless a failing test is discovered.
+No payment or webhook **production logic** was changed in this pass.
 
 ---
 
@@ -138,10 +155,9 @@ Unmatched **2xx** responses are a **deliberate** Stripe retry semantics tradeoff
 | Layer | Verdict |
 |-------|---------|
 | Desk / slim classification | **PASS** |
-| Signature rejection tests | **PASS** |
-| Unknown checkout id + fixture PI tests | **PASS** |
-| Expired session + unrelated types (automated) | **PENDING** (gaps in §6) |
+| Classifier + slim HTTP tests | **PASS** |
+| Express HTTP integration tests (chaos suite) | **PASS** (when integration DB configured) |
 | Staging live fixture webhook traffic | **PENDING** |
-| **Overall L-7** | **PARTIAL** |
+| **Overall L-7** | **PASS (automated)** — staging fixtures still **PENDING** |
 
-**Investor read:** The system **does not** create fake orders or fulfillment for unknown checkout ids in tested paths; fixture payment intents are **ignored** on the slim path. **Broader** event-type matrix and staging fixture runs remain **planned, not executed**.
+**Investor read:** Unknown checkout ids, expired sessions, unrelated event types, and unsupported signed events are **covered by automated tests** (no fake PAID, no spurious fulfillment). **Live staging fixture** sends were **not** executed.

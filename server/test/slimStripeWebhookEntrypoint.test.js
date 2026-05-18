@@ -200,6 +200,45 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
     }
   });
 
+  it('fast-acks checkout.session.expired without internalCheckoutId without calling getHandler', async () => {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    assert.ok(
+      typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
+      'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
+    );
+    const payload = JSON.stringify({
+      id: `evt_slim_exp_${randomUUID().slice(0, 8)}`,
+      object: 'event',
+      type: 'checkout.session.expired',
+      data: {
+        object: {
+          id: `cs_slim_exp_${randomUUID().slice(0, 8)}`,
+          object: 'checkout.session',
+          metadata: {},
+        },
+      },
+    });
+    const header = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret,
+    });
+    let handlerCalls = 0;
+    const getHandler = async () => {
+      handlerCalls += 1;
+      return () => {};
+    };
+    const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
+    const res = makeMockRes();
+    await handleSlimStripeWebhookPost(req, res, getHandler);
+    assert.equal(handlerCalls, 0);
+    assert.equal(res.statusCode, 200);
+    const j = JSON.parse(res.body);
+    assert.equal(j.ok, true);
+    assert.equal(j.status, 'ignored');
+    assert.equal(j.reason, 'unmatched_event');
+    assert.equal(j.stripeEventType, 'checkout.session.expired');
+  });
+
   it('fast-acks payment_intent.succeeded when topup_order_id looks valid but metadata.source is not Zora (Stripe CLI fixtures)', async () => {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
     assert.ok(

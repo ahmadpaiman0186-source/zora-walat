@@ -1,7 +1,7 @@
 # L-6 — Event ordering safety (`payment_intent.succeeded` vs `checkout.session.completed`)
 
-**Status:** **PARTIAL** (desk review + automated tests **PASS**; staging multi-event replay **PENDING** approval)  
-**Date:** 2026-05-18  
+**Status:** **PASS (automated)** — staging multi-event replay **PENDING** approval  
+**Date:** 2026-05-18 (tests added 2026-05-18)  
 **Scope:** Hosted Stripe Checkout / Phase 1 mobile top-up on staging architecture  
 **Rules:** No secrets, raw webhook payloads, keys, JWTs, PII, or full Stripe object ids in this file.
 
@@ -52,12 +52,13 @@ Prove that **out-of-order** Stripe delivery does not leave money-path state inco
 ### Primary integration suite
 
 **File:** `server/test/integrations/stripeWebhookHttpChaos.integration.test.js`  
-**Requires:** `TEST_DATABASE_URL` / `DATABASE_URL` (skipped in CI without DB)
+**Requires:** `TEST_DATABASE_URL` / `DATABASE_URL` (skipped when no DB URL)
 
 | Test name | What it proves |
 |-----------|----------------|
-| `interleave: payment_intent.succeeded before checkout.session.completed (order becomes paid once)` | PI with **empty metadata** → 200; then checkout with `internalCheckoutId` → PAID/FULFILLED; **1** fulfillment attempt; PI id stored |
+| `interleave: payment_intent.succeeded before checkout.session.completed (order becomes paid once)` | PI with **empty metadata** → 200; order stays **PENDING** with **0** fulfillment attempts until checkout; then PAID/FULFILLED; **1** fulfillment attempt |
 | `interleave: checkout.session.completed before payment_intent.succeeded (single fulfillment, fee idempotent)` | Checkout first → paid; **two** duplicate PI deliveries → still **1** fulfillment; fee field unchanged |
+| `L-6: late duplicate payment_intent.succeeded after checkout completed does not increase fulfillment` | After checkout PAID, **two** late PI events → fulfillment count remains **1** |
 
 ### Supporting unit / audit tests
 
@@ -94,13 +95,13 @@ Allowed in future runs: event **type**, id **suffixes**, transition **result**, 
 
 ---
 
-## 6. Gaps and proposed tests (not added in this pass)
+## 6. Remaining gaps (optional)
 
-| Gap | Proposed file | Proposed test |
-|-----|---------------|---------------|
-| Slim path PI-before-checkout without Express bootstrap | `server/test/slimStripeWebhookOrdering.test.js` | Mock `getHandler`; assert PI unmatched → 200 ignored; then inject checkout slim processor → single schedule |
-| Late PI after terminal FULFILLED | Extend `stripeWebhookHttpChaos.integration.test.js` | Fulfill order, send PI, assert order status + attempt count unchanged |
-| Only-PI-never-checkout operational alert | Runbook / monitoring doc | N/A — not a unit test |
+| Gap | Notes |
+|-----|--------|
+| Slim-path PI-before-checkout without Express (mocked DB) | Covered indirectly: PI fast-ack on slim + Express interleave tests |
+| Only-PI-never-checkout operational alert | Runbook / monitoring — not a unit test |
+| Late PI after terminal **FULFILLED** | Optional future integration case |
 
 ---
 
@@ -109,8 +110,8 @@ Allowed in future runs: event **type**, id **suffixes**, transition **result**, 
 | Layer | Verdict |
 |-------|---------|
 | Desk / code authority | **PASS** |
-| Automated tests (integration + unit anchors) | **PASS** (when `TEST_DATABASE_URL` set) |
+| Automated tests (integration + unit anchors) | **PASS** |
 | Staging live multi-event replay | **PENDING** |
-| **Overall L-6** | **PARTIAL** |
+| **Overall L-6** | **PASS (automated)** — staging replay still **PENDING** |
 
-**Investor read:** Ordering safety for hosted checkout is **implemented and tested in the repository**; **live staging replay** of arbitrary event order is still gated and was **not** executed in this session.
+**Investor read:** Event ordering for hosted checkout is **covered by automated tests** in the repository (PI-before-checkout does not PAID; late PI does not add fulfillment). **Live staging replay** remains gated and was **not** executed.
