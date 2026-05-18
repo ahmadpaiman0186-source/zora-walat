@@ -14,6 +14,11 @@
  *   node tools/staging-auth-checkout-operator.mjs auth-env-check
  *   node tools/staging-auth-checkout-operator.mjs auth-check
  *   node tools/staging-auth-checkout-operator.mjs phase1-truth-check
+ *   node tools/staging-auth-checkout-operator.mjs l11-preflight
+ *
+ * PowerShell (one command per line — do not concatenate):
+ *   cd .\server
+ *   node tools\staging-auth-checkout-operator.mjs l11-preflight
  *
  * Phase 2 (test payment): requires STAGING_ALLOW_STRIPE_TEST_PAYMENT=true.
  * checkout-open-test saves URL to .staging-checkout-url.local (gitignored); never printed.
@@ -43,6 +48,17 @@ import {
   readOperatorPassword,
   windowsEnvSetupHintLines,
 } from './stagingOperatorAuthEnv.mjs';
+import {
+  OPERATOR_MODES_SET,
+  operatorUsageLines,
+  parseOperatorCliArgv,
+  powershellSafeOneLiners,
+  safeOperatorCommandLine,
+} from './stagingOperatorCliSafety.mjs';
+import {
+  evaluateL11Preflight,
+  L11_PREFLIGHT_SLIM_PHASE1_TRUTH_PREFIX,
+} from './stagingOperatorL11Preflight.mjs';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -60,18 +76,7 @@ const STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX =
 const STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX =
   '/api/ops/staging-operator-phase1-truth/';
 
-const MODES = new Set([
-  'register',
-  'login',
-  'request-otp',
-  'verify-otp',
-  'checkout',
-  'checkout-open-test',
-  'status-check',
-  'auth-env-check',
-  'auth-check',
-  'phase1-truth-check',
-]);
+const MODES = OPERATOR_MODES_SET;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FETCH_TIMEOUT_MS = 30_000;
@@ -90,9 +95,42 @@ function safeLine(line) {
 }
 
 function usage() {
-  output.write(
-    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check|auth-env-check|auth-check|phase1-truth-check>\n',
-  );
+  for (const line of operatorUsageLines()) {
+    output.write(`${line}\n`);
+  }
+  for (const line of powershellSafeOneLiners()) {
+    output.write(`${line}\n`);
+  }
+}
+
+/**
+ * @param {import('./stagingOperatorCliSafety.mjs').parseOperatorCliArgv extends (...args: any) => infer R ? Extract<R, { ok: false }> : never} parsed
+ */
+function failCliValidation(parsed) {
+  if (parsed.error === 'command_concatenation_detected') {
+    safeLine('LOCAL_VALIDATION_ERROR command_concatenation_detected');
+    safeLine(`CONCAT_BASE_MODE ${parsed.baseMode ?? 'unknown'}`);
+    safeLine(`CONCAT_GLUED_FRAGMENT ${parsed.glued ?? 'unknown'}`);
+    safeLine('HINT run_one_command_per_line_use_semicolon_or_newline_in_powershell');
+  } else if (parsed.error === 'missing_mode') {
+    safeLine('LOCAL_VALIDATION_ERROR missing_mode');
+  } else {
+    safeLine('LOCAL_VALIDATION_ERROR unknown_mode');
+  }
+  safeLine(`NEXT_SAFE_COMMAND ${parsed.nextSafeCommand}`);
+  for (const line of powershellSafeOneLiners()) {
+    safeLine(line);
+  }
+  usage();
+  process.exitCode = 1;
+}
+
+function printL11Blocked(reason, nextCommand) {
+  safeLine(`BLOCKED_REASON ${reason}`);
+  safeLine(`NEXT_SAFE_COMMAND ${nextCommand}`);
+  safeLine('DO_NOT_REFUND true');
+  safeLine('L11_PREFLIGHT_VERDICT BLOCKED');
+  process.exitCode = 1;
 }
 
 function printWindowsEnvHints() {
@@ -667,6 +705,244 @@ async function modeLogin() {
   }
 }
 
+/**
+ * Login without MODE banner (for l11-preflight token refresh).
+ * @returns {Promise<{ ok: boolean, loginHttp: number | string, token: string }>}
+ */
+async function executeLoginCore() {
+  const creds = await resolveLoginCredentials();
+  if (!creds) {
+    return { ok: false, loginHttp: 0, token: '' };
+  }
+
+  const { status, json, timedOut } = await apiPost(LOGIN_API_PATH, {
+    email: creds.email,
+    password: creds.password,
+  });
+  if (timedOut) {
+    return { ok: false, loginHttp: 'timeout', token: '' };
+  }
+
+  const token = extractAccessToken(json);
+  const saved = status === 200 && (await saveToken(token));
+  return {
+    ok: saved,
+    loginHttp: status,
+    token: saved ? token : '',
+  };
+}
+
+/**
+ * @returns {Promise<{ ok: boolean, token: string, loginHttp: number | string, blockedReason?: string }>}
+ */
+async function ensureOperatorToken({ verbose = false } = {}) {
+  let token = await loadToken();
+  const expired = !token || isAccessTokenExpired(token) === true;
+
+  if (!expired) {
+    if (verbose) {
+      safeLine('TOKEN_REFRESH_SKIPPED true');
+      safeLine('TOKEN_VALID true');
+    }
+    return { ok: true, token, loginHttp: 'skipped_valid_token' };
+  }
+
+  if (verbose) {
+    safeLine('TOKEN_REFRESH_REQUIRED true');
+    printTokenFileDiagnostics(token);
+  }
+
+  const d = credentialEnvDiagnostics(process.env);
+  if (!d.hasEmail || !d.hasPassword) {
+    return {
+      ok: false,
+      token: '',
+      loginHttp: 0,
+      blockedReason: 'token_expired_credentials_missing',
+    };
+  }
+
+  if (verbose) {
+    safeLine('LOGIN_ATTEMPT_FOR_TOKEN_REFRESH true');
+  }
+
+  const login = await executeLoginCore();
+  if (verbose) {
+    safeLine(`LOGIN_HTTP ${login.loginHttp}`);
+  }
+
+  if (!login.ok) {
+    return {
+      ok: false,
+      token: '',
+      loginHttp: login.loginHttp,
+      blockedReason: 'token_refresh_login_failed',
+    };
+  }
+
+  return { ok: true, token: login.token, loginHttp: login.loginHttp };
+}
+
+/**
+ * Read-only status-check (slim primary, legacy fallback).
+ * @param {string} token
+ * @param {{ verbose?: boolean }} [options]
+ */
+async function runStatusCheckCore(token, { verbose = false } = {}) {
+  const orderId = await loadOrderId();
+  const base = {
+    http: 0,
+    orderFound: false,
+    orderStatus: 'unknown',
+    paymentStatus: 'unknown',
+    paidConfirmed: false,
+    fulfillmentAttemptCount: 0,
+    endpoint: '',
+    timedOut: false,
+    orderIdPresent: Boolean(orderId),
+  };
+
+  if (!orderId) {
+    return { ...base, blockedReason: 'missing_order_id' };
+  }
+
+  const slimPath = `${STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX}${encodeURIComponent(orderId)}`;
+  base.endpoint = slimPath;
+
+  if (verbose) {
+    safeLine(`STATUS_CHECK_ENDPOINT_PRIMARY ${slimPath}`);
+    safeLine(`STATUS_CHECK_TIMEOUT_MS ${STATUS_CHECK_SLIM_TIMEOUT_MS}`);
+  }
+
+  const slimResult = await apiGet(
+    slimPath,
+    { Authorization: `Bearer ${token}` },
+    STATUS_CHECK_SLIM_TIMEOUT_MS,
+  );
+
+  if (slimResult.timedOut) {
+    return {
+      ...base,
+      http: 'timeout',
+      timedOut: true,
+      blockedReason: 'status_check_timeout',
+    };
+  }
+
+  base.http = slimResult.status;
+
+  if (
+    slimResult.status === 503 &&
+    slimResult.json?.reason === 'staging_operator_order_status_disabled'
+  ) {
+    const legacyPath = `/api/orders/${encodeURIComponent(orderId)}`;
+    base.endpoint = legacyPath;
+    if (verbose) {
+      safeLine(`STATUS_CHECK_ENDPOINT_FALLBACK ${legacyPath}`);
+    }
+    const legacy = await apiGet(
+      legacyPath,
+      { Authorization: `Bearer ${token}` },
+      STATUS_CHECK_LEGACY_TIMEOUT_MS,
+    );
+    if (legacy.timedOut) {
+      return {
+        ...base,
+        http: 'timeout',
+        timedOut: true,
+        blockedReason: 'status_check_legacy_timeout',
+      };
+    }
+    base.http = legacy.status;
+    if (legacy.status === 200 && legacy.json?.order) {
+      const o = legacy.json.order;
+      base.orderFound = true;
+      base.orderStatus = String(o.orderStatus ?? o.status ?? 'unknown');
+      base.paymentStatus = String(o.paymentStatus ?? o.status ?? 'unknown');
+      base.paidConfirmed = o.paidConfirmed === true || o.paidAt != null;
+      base.fulfillmentAttemptCount = Number(o.fulfillmentAttemptCount ?? 0);
+    }
+    return base;
+  }
+
+  if (slimResult.status === 200 && slimResult.json?.orderFound === true) {
+    base.orderFound = true;
+    base.orderStatus = String(slimResult.json.orderStatus ?? 'unknown');
+    base.paymentStatus = String(slimResult.json.paymentStatus ?? 'unknown');
+    base.paidConfirmed = slimResult.json.paidConfirmed === true;
+    base.fulfillmentAttemptCount = Number(
+      slimResult.json.fulfillmentAttemptCount ?? 0,
+    );
+  }
+
+  return base;
+}
+
+/**
+ * Read-only phase1-truth incident check (slim endpoint only).
+ * @param {string} token
+ * @param {{ verbose?: boolean }} [options]
+ */
+async function runPhase1TruthCheckCore(token, { verbose = false } = {}) {
+  const orderId = await loadOrderId();
+  const base = {
+    http: 0,
+    orderFound: false,
+    postPaymentIncidentStatus: 'unknown',
+    postPaymentIncidentMapSource: 'null',
+    orderStatus: 'unknown',
+    paymentStatus: 'unknown',
+    endpoint: '',
+    usedSlimPath: true,
+    timedOut: false,
+    orderIdPresent: Boolean(orderId),
+  };
+
+  if (!orderId) {
+    return { ...base, blockedReason: 'missing_order_id' };
+  }
+
+  const slimPath = `${STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX}${encodeURIComponent(orderId)}`;
+  base.endpoint = slimPath;
+
+  if (verbose) {
+    safeLine(`PHASE1_TRUTH_ENDPOINT_PRIMARY ${slimPath}`);
+    safeLine(`PHASE1_TRUTH_TIMEOUT_MS ${PHASE1_TRUTH_SLIM_TIMEOUT_MS}`);
+  }
+
+  const slimResult = await apiGet(
+    slimPath,
+    { Authorization: `Bearer ${token}` },
+    PHASE1_TRUTH_SLIM_TIMEOUT_MS,
+  );
+
+  if (slimResult.timedOut) {
+    return {
+      ...base,
+      http: 'timeout',
+      timedOut: true,
+      blockedReason: 'phase1_truth_timeout',
+    };
+  }
+
+  base.http = slimResult.status;
+
+  if (slimResult.status === 200 && slimResult.json?.orderFound === true) {
+    base.orderFound = true;
+    base.postPaymentIncidentStatus = String(
+      slimResult.json.postPaymentIncidentStatus ?? 'unknown',
+    );
+    base.postPaymentIncidentMapSource =
+      slimResult.json.postPaymentIncidentMapSource != null
+        ? String(slimResult.json.postPaymentIncidentMapSource)
+        : 'null';
+    base.orderStatus = String(slimResult.json.orderStatus ?? 'unknown');
+    base.paymentStatus = String(slimResult.json.paymentStatus ?? 'unknown');
+  }
+
+  return base;
+}
+
 async function modeAuthEnvCheck() {
   safeLine('MODE auth-env-check');
   safeLine(`LOGIN_API_ORIGIN ${apiOriginOnly()}`);
@@ -1153,15 +1429,126 @@ async function modePhase1TruthCheck() {
   );
 }
 
+async function modeL11Preflight() {
+  safeLine('MODE l11-preflight');
+  safeLine('DO_NOT_REFUND true');
+  safeLine('L11_SCOPE preflight_only_no_refund_no_checkout_no_payment');
+  safeLine(`L11_CANDIDATE_SUFFIX_HINT …04pvq0dr78`);
+
+  const orderId = await loadOrderId();
+  safeLine(`LOCAL_ORDER_ID_PRESENT ${orderId ? 'true' : 'false'}`);
+  if (orderId) {
+    safeLine(`LOCAL_ORDER_ID_PREVIEW ${redactIdPreview(orderId)}`);
+  }
+  if (!orderId) {
+    printL11Blocked(
+      'missing_order_id',
+      safeOperatorCommandLine('l11-preflight'),
+    );
+    safeLine(
+      'HINT set_order_id_first: cd .\\server; Set-Content .staging-order-id.local "cmp95a2kc0003jy04pvq0dr78"',
+    );
+    return;
+  }
+
+  const tokenResult = await ensureOperatorToken({ verbose: true });
+  if (!tokenResult.ok) {
+    const reason = tokenResult.blockedReason ?? 'token_unavailable';
+    const next =
+      reason === 'token_expired_credentials_missing'
+        ? safeOperatorCommandLine('login')
+        : safeOperatorCommandLine('login');
+    printL11Blocked(reason, next);
+    if (reason === 'token_expired_credentials_missing') {
+      safeLine('HINT set STAGING_OPERATOR_EMAIL and STAGING_OPERATOR_PASSWORD then re-run l11-preflight');
+      for (const line of windowsEnvSetupHintLines()) {
+        safeLine(line);
+      }
+    }
+    return;
+  }
+
+  safeLine(`LOGIN_HTTP ${tokenResult.loginHttp}`);
+
+  safeLine('L11_STEP status-check');
+  const status = await runStatusCheckCore(tokenResult.token, { verbose: true });
+  safeLine(`STATUS_CHECK_HTTP ${status.http}`);
+  if (status.orderFound) {
+    safeLine('ORDER_FOUND true');
+    safeLine(`ORDER_STATUS ${status.orderStatus}`);
+    safeLine(`PAYMENT_STATUS ${status.paymentStatus}`);
+    safeLine(`PAID_CONFIRMED ${status.paidConfirmed ? 'true' : 'false'}`);
+    safeLine(
+      `FULFILLMENT_ATTEMPT_COUNT ${status.fulfillmentAttemptCount}`,
+    );
+  } else {
+    safeLine('ORDER_FOUND false');
+  }
+
+  safeLine('L11_STEP phase1-truth-check');
+  const truth = await runPhase1TruthCheckCore(tokenResult.token, { verbose: true });
+  safeLine(`PHASE1_TRUTH_HTTP ${truth.http}`);
+  safeLine(`PHASE1_TRUTH_SLIM_PATH ${truth.usedSlimPath ? 'true' : 'false'}`);
+  if (truth.orderFound) {
+    safeLine(`POST_PAYMENT_INCIDENT_STATUS ${truth.postPaymentIncidentStatus}`);
+    safeLine(
+      `POST_PAYMENT_INCIDENT_MAP_SOURCE ${truth.postPaymentIncidentMapSource}`,
+    );
+  }
+  safeLine(
+    `PREFLIGHT_REFUND_ELIGIBLE ${truth.postPaymentIncidentStatus !== 'REFUNDED' ? 'true' : 'false'}`,
+  );
+
+  const evaluation = evaluateL11Preflight({
+    tokenOk: true,
+    loginHttp: tokenResult.loginHttp,
+    status: {
+      http: status.http,
+      orderFound: status.orderFound,
+      orderStatus: status.orderStatus,
+      paymentStatus: status.paymentStatus,
+      paidConfirmed: status.paidConfirmed,
+      fulfillmentAttemptCount: status.fulfillmentAttemptCount,
+      endpoint: status.endpoint,
+    },
+    phase1Truth: {
+      http: truth.http,
+      orderFound: truth.orderFound,
+      postPaymentIncidentStatus: truth.postPaymentIncidentStatus,
+      endpoint: truth.endpoint,
+      usedSlimPath: truth.endpoint.startsWith(L11_PREFLIGHT_SLIM_PHASE1_TRUTH_PREFIX),
+    },
+  });
+
+  for (const [key, value] of Object.entries(evaluation.checks)) {
+    safeLine(`L11_CHECK_${key.toUpperCase()} ${value ? 'true' : 'false'}`);
+  }
+
+  if (evaluation.pass) {
+    safeLine('L11_PREFLIGHT_VERDICT PASS');
+    safeLine('DO_NOT_REFUND true');
+    safeLine('L11_STATUS PLAN_READY');
+    safeLine('NEXT_STEP after_approval_only stripe_dashboard_full_refund_test_mode');
+    process.exitCode = 0;
+    return;
+  }
+
+  printL11Blocked(
+    evaluation.blockedReason ?? 'preflight_failed',
+    safeOperatorCommandLine('l11-preflight'),
+  );
+}
+
 async function main() {
   loadOperatorDotenv(SERVER_ROOT);
 
-  const mode = String(process.argv[2] ?? '').trim().toLowerCase();
-  if (!MODES.has(mode)) {
-    usage();
-    process.exitCode = 1;
+  const parsed = parseOperatorCliArgv(process.argv);
+  if (!parsed.ok) {
+    failCliValidation(parsed);
     return;
   }
+
+  const mode = parsed.mode;
 
   switch (mode) {
     case 'register':
@@ -1193,6 +1580,9 @@ async function main() {
       break;
     case 'phase1-truth-check':
       await modePhase1TruthCheck();
+      break;
+    case 'l11-preflight':
+      await modeL11Preflight();
       break;
     default:
       usage();

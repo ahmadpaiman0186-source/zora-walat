@@ -70,6 +70,17 @@ After **one** successful Stripe **test-mode** payment that reached **FULFILLED**
 | **Staging** | Verifier **works after deploy** of API with slim route; until then harness may return **503** `staging_operator_phase1_truth_disabled` (not a timeout). |
 | **L-11 proof** | Still **blocked** — no refund; no PASS commit until live **REFUNDED** observed post-refund. |
 
+### 2f. Operator CLI hardening (concatenation + one-shot preflight)
+
+| Item | Detail |
+|------|--------|
+| **Operator failure mode** | PowerShell copy/paste glued commands (`loginnode`, `phase1-truth-checkSet-Content`) → harness printed **Usage** with no recovery hint. |
+| **Fix (repo)** | `parseOperatorCliArgv` detects concatenation → `LOCAL_VALIDATION_ERROR command_concatenation_detected` + `NEXT_SAFE_COMMAND`. |
+| **One-shot mode** | `l11-preflight` — token check/refresh, `status-check`, slim `phase1-truth-check`, enum-only verdict. **No refund**, no checkout, no payment. |
+| **Pass output** | `L11_PREFLIGHT_VERDICT PASS`, `DO_NOT_REFUND true`, `L11_STATUS PLAN_READY` (not L-11 execution PASS). |
+| **Block output** | `BLOCKED_REASON`, `NEXT_SAFE_COMMAND`, `DO_NOT_REFUND true`, `L11_PREFLIGHT_VERDICT BLOCKED`. |
+| **L-11 overall** | **PLAN_READY** only until approval + Dashboard full refund + post-refund **REFUNDED** verify. |
+
 ### 2d. Automated proof already in repo (not executed for L-11 staging)
 
 | Test | File | Proves |
@@ -123,23 +134,27 @@ Use the **existing** staging success order from P-2 / L-4 / L-5 evidence (do **n
 
 ### 5a. Pre-flight (safe — no refund)
 
+**PowerShell: one command per line** (do not paste commands together).
+
 ```powershell
 cd C:\Users\ahmad\zora_walat\server
-# Same session: STAGING_OPERATOR_EMAIL / STAGING_OPERATOR_PASSWORD set
-node tools/staging-auth-checkout-operator.mjs login
-node tools/staging-auth-checkout-operator.mjs status-check
+$env:STAGING_OPERATOR_EMAIL = "you@example.com"
+$env:STAGING_OPERATOR_PASSWORD = "YourStagingPassword"
+Set-Content .staging-order-id.local "cmp95a2kc0003jy04pvq0dr78"
+node tools/staging-auth-checkout-operator.mjs l11-preflight
 ```
 
-Record baseline enums (expect **FULFILLED**, **RECHARGE_COMPLETED**, fulfillment **1**).
-
-**Phase-1 truth (incident baseline)** — use slim harness mode (not legacy `/api/orders/.../phase1-truth` on cold staging):
+**Recommended one-shot (after env + order id set):**
 
 ```powershell
-Set-Content .staging-order-id.local "cmp95a2kc0003jy04pvq0dr78"
-node tools/staging-auth-checkout-operator.mjs phase1-truth-check
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-preflight
 ```
 
-Expect `PHASE1_TRUTH_HTTP 200`, `POST_PAYMENT_INCIDENT_STATUS` **not** `REFUNDED`, `PREFLIGHT_REFUND_ELIGIBLE true`. If **503**, deploy API with slim phase1-truth route and `STAGING_ALLOW_OPERATOR_ORDER_STATUS=true`.
+Expect `L11_PREFLIGHT_VERDICT PASS`, `DO_NOT_REFUND true`, `STATUS_CHECK_HTTP 200`, `ORDER_STATUS FULFILLED`, `PAYMENT_STATUS RECHARGE_COMPLETED`, `FULFILLMENT_ATTEMPT_COUNT 1`, `PHASE1_TRUTH_HTTP 200`, `POST_PAYMENT_INCIDENT_STATUS` not `REFUNDED`, `PREFLIGHT_REFUND_ELIGIBLE true`.
+
+If `LOCAL_VALIDATION_ERROR command_concatenation_detected`, run the `NEXT_SAFE_COMMAND` line only.
+
+Individual modes (optional): `login`, `status-check`, `phase1-truth-check`, `auth-check`.
 
 ### 5b. Full refund execution (**PENDING approval**)
 
