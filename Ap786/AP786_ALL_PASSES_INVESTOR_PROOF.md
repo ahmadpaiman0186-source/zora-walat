@@ -25,6 +25,8 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **L-8 (2026-05-18):** Automated tests plus **staging** Stripe Checkout decline (test card ending **0002**, browser message *credit card was declined*) — order stays **PENDING**, **`PAID_CONFIRMED` false**, **zero** fulfillment; **not** recharge-complete or fulfilled.
 
+**L-11 (2026-05-18):** **Plan only** — refund path mapped; candidate fulfilled test order suffix **`…04pvq0dr78`**; Dashboard full-refund steps documented. **No refund executed.** Execution requires **`Approved: L-11 execute full refund`**.
+
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
 ---
@@ -426,4 +428,5 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 | Checkout cancel (L-9) | `L9_CHECKOUT_CANCEL_SAFETY.md` |
 | Expired checkout (L-10) | `L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md` |
 | Card declined (L-8) | `L8_CARD_DECLINED_SAFETY.md` |
+| Full refund plan (L-11) | `L11_FULL_REFUND_SAFETY_PLAN.md` |
 | Day 2 plan | `DAY2_L8_L13_EXECUTION_PLAN.md` |

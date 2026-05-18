@@ -75,16 +75,17 @@
 | Field | Content |
 |-------|---------|
 | **Goal** | Prove **full** `charge.refunded` after fulfillment updates **post-payment incident** to REFUNDED without corrupting ledger uniqueness or double-counting fulfillment. |
-| **Safe test method** | Complete **one** test payment → fulfill (or mock terminal); issue **full** refund in Stripe Dashboard test mode **or** signed `charge.refunded` integration fixture (pattern in `stripeWebhookHttpChaos` — `charge.refunded after delivery`). |
-| **Expected DB / order state** | `postPaymentIncidentStatus` **REFUNDED**; canonical financial anomaly codes remain unique; order lifecycle reflects refund mirror — **not** automatic app-initiated refund. |
+| **Status** | **PLAN_READY (2026-05-18)** — execution **PENDING**; **no refund executed**. See `L11_FULL_REFUND_SAFETY_PLAN.md`. |
+| **Safe test method** | Use existing fulfilled test order suffix **`…04pvq0dr78`**; **full** refund in Stripe Dashboard (**test mode**) after approval gate. |
+| **Expected DB / order state** | `postPaymentIncidentStatus` **REFUNDED** (via `phase1-truth`); `orderStatus` may stay **FULFILLED**; fulfillment count **1** unchanged. |
 | **Pass criteria** | Operator/support DTO shows REFUNDED incident; no second fulfillment attempt; no duplicate ledger capture events. |
 | **Evidence to capture** | Sanitized incident status enums; mapSource enum if exposed — no charge ids. |
 | **Risks** | Refunding wrong PI; partial vs full ambiguity — document amount bucket as full only. |
-| **Stripe manual action required?** | **Yes** — Dashboard refund **or** approved signed webhook fixture. |
+| **Stripe manual action required?** | **Yes** — Dashboard full refund — **blocked until approval** |
 
-**Approval gate:** `Approved: L-11 full refund mirror proof on staging`
+**Approval gate (execution):** `Approved: L-11 execute full refund`
 
-**Note:** Do **not** process refunds until this gate is explicit (Day 2 start instruction).
+**Note:** **No refund** until that exact approval line is given.
 
 ---
 

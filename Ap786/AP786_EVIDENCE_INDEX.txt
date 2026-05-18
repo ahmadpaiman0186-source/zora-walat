@@ -26,6 +26,7 @@ Files:
   L9_CHECKOUT_CANCEL_SAFETY.md
   L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md
   L8_CARD_DECLINED_SAFETY.md
+  L11_FULL_REFUND_SAFETY_PLAN.md
 
 L-3: PASS — desk re-verification (L3_PAYMENT_CORE_REVERIFICATION.md).
 L-4/L-5: PASS 2026-05-18 — Dashboard checkout.session.completed resend; operator before/after enums unchanged (see L4/L5 files).
@@ -36,6 +37,7 @@ P-2: PASS 2026-05-18 — operator login + status-check HTTP 200; TOKEN_EXPIRED f
 L-9: PASS 2026-05-18 — /cancel HTTP 200 no 504; unpaid checkout PENDING, PAID_CONFIRMED false, fulfillment count 0 (L9_CHECKOUT_CANCEL_SAFETY.md).
 L-10: PASS (automated) 2026-05-18 — expired webhook 200; unknown id no row; pending→CANCELLED not PAID; fulfillment 0 (L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md). Staging expire PENDING.
 L-8: PASS 2026-05-18 — automated + staging decline card (0002); post-decline PENDING, PAID_CONFIRMED false, fulfillment 0 (L8_CARD_DECLINED_SAFETY.md).
+L-11: PLAN_READY 2026-05-18 — full refund plan only; execution PENDING; no refund executed (L11_FULL_REFUND_SAFETY_PLAN.md).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
