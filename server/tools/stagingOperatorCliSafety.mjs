@@ -15,6 +15,7 @@ export const OPERATOR_MODES = Object.freeze([
   'auth-check',
   'phase1-truth-check',
   'l11-preflight',
+  'staging-api-smoke',
 ]);
 
 export const OPERATOR_MODES_SET = new Set(OPERATOR_MODES);

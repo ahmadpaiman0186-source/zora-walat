@@ -69,6 +69,8 @@
     "release:gate": "node scripts/release-gate.mjs",
     "soft-launch:gate": "node scripts/soft-launch-gate.mjs",
     "smoke:checkout-local": "node scripts/smoke-checkout-local.mjs",
+    "deploy:staging:guard": "node scripts/assert-vercel-api-deploy-root.mjs",
+    "deploy:staging": "npm run deploy:staging:guard && vercel deploy --prod --yes",
     "ensure:local-checkout-dev-user": "node scripts/ensure-local-checkout-dev-user.mjs",
     "load:sim:prod-readiness": "node scripts/load-sim-production-readiness.mjs",
     "load:wallet:replay": "node scripts/wallet-topup-load.mjs --mode=replay",

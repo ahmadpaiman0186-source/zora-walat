@@ -57,6 +57,12 @@ describe('parseOperatorCliArgv', () => {
     assert.equal(parsed.ok, true);
     if (parsed.ok) assert.equal(parsed.mode, 'l11-preflight');
   });
+
+  it('accepts staging-api-smoke', () => {
+    const parsed = parseOperatorCliArgv(['node', 'script', 'staging-api-smoke']);
+    assert.equal(parsed.ok, true);
+    if (parsed.ok) assert.equal(parsed.mode, 'staging-api-smoke');
+  });
 });
 
 describe('staging-auth-checkout-operator CLI (spawn)', () => {

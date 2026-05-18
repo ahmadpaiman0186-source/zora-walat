@@ -15,6 +15,7 @@
  *   node tools/staging-auth-checkout-operator.mjs auth-check
  *   node tools/staging-auth-checkout-operator.mjs phase1-truth-check
  *   node tools/staging-auth-checkout-operator.mjs l11-preflight
+ *   node tools/staging-auth-checkout-operator.mjs staging-api-smoke
  *
  * PowerShell (one command per line — do not concatenate):
  *   cd .\server
@@ -59,6 +60,12 @@ import {
   evaluateL11Preflight,
   L11_PREFLIGHT_SLIM_PHASE1_TRUTH_PREFIX,
 } from './stagingOperatorL11Preflight.mjs';
+import {
+  classifyStagingHttpResponse,
+  responseLooksLikeNextHtml,
+  ROUTE_DIAGNOSIS,
+  STAGING_API_DEPLOY_RECOVERY_HINT,
+} from './stagingOperatorRouteDiagnostics.mjs';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -495,7 +502,7 @@ async function apiFetch(method, path, { body, headers = {}, timeoutMs = FETCH_TI
     return { status: res.status, json, text, timedOut: false };
   } catch (err) {
     if (err?.name === 'AbortError') {
-      return { status: null, json: null, text: '', timedOut: true };
+      return { status: null, json: null, text: '', contentType: '', timedOut: true };
     }
     throw err;
   } finally {
@@ -667,19 +674,41 @@ async function modeLogin() {
 
   printLoginRequestDiagnostics(creds.email);
 
-  const { status, json, timedOut } = await apiPost(LOGIN_API_PATH, {
+  const loginResult = await apiPost(LOGIN_API_PATH, {
     email: creds.email,
     password: creds.password,
   });
+  const { status, json, timedOut, contentType, text } = loginResult;
   if (timedOut) {
     safeLine('LOGIN_HTTP timeout');
+    safeLine('ROUTE_DIAGNOSIS timeout_cold_start_or_bootstrap');
     safeLine('TOKEN_OK false');
     safeLine('TOKEN_SAVED false');
     process.exitCode = 1;
     return;
   }
   safeLine(`LOGIN_HTTP ${status}`);
-  safeLine(`LOGIN_RESPONSE_PREVIEW ${safeResponsePreview({ status, json, text: '', timedOut: false })}`);
+  safeLine(`LOGIN_RESPONSE_PREVIEW ${safeResponsePreview(loginResult)}`);
+
+  const loginDx = classifyStagingHttpResponse({
+    status,
+    timedOut: false,
+    contentType,
+    text,
+    json,
+    path: LOGIN_API_PATH,
+    method: 'POST',
+  });
+  safeLine(`ROUTE_DIAGNOSIS ${loginDx.diagnosis}`);
+  safeLine(`API_SURFACE_LIKELY ${loginDx.apiSurfaceLikely}`);
+
+  if (loginDx.diagnosis === ROUTE_DIAGNOSIS.ROUTE_MISSING_OR_WRONG_DEPLOYMENT) {
+    safeLine('LOGIN_HINT wrong_vercel_deployment_nextjs_on_api_domain_not_credentials');
+    safeLine(`NEXT_SAFE_COMMAND ${STAGING_API_DEPLOY_RECOVERY_HINT.command}`);
+    safeLine(`DEPLOY_GUARD_RUN cd server; npm run deploy:staging:guard`);
+    process.exitCode = 1;
+    return;
+  }
 
   if (status === 401) {
     safeLine('LOGIN_HINT invalid_email_or_password_or_inactive_user_on_staging');
@@ -1429,6 +1458,128 @@ async function modePhase1TruthCheck() {
   );
 }
 
+async function modeStagingApiSmoke() {
+  safeLine('MODE staging-api-smoke');
+  safeLine('DO_NOT_REFUND true');
+  safeLine(`SMOKE_API_ORIGIN ${apiOriginOnly()}`);
+
+  const probes = [
+    { name: 'health', method: 'GET', path: '/api/health' },
+    { name: 'index', method: 'GET', path: '/api/index' },
+    {
+      name: 'login_route',
+      method: 'POST',
+      path: LOGIN_API_PATH,
+      body: {},
+    },
+    {
+      name: 'operator_status_route',
+      method: 'GET',
+      path: `${STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX}cmp91xbrt0003jm04m9ub8wrw`,
+    },
+    {
+      name: 'operator_phase1_truth_route',
+      method: 'GET',
+      path: `${STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX}cmp91xbrt0003jm04m9ub8wrw`,
+    },
+  ];
+
+  let allPass = true;
+  let wrongDeployment = false;
+
+  for (const probe of probes) {
+    const result =
+      probe.method === 'POST'
+        ? await apiPost(probe.path, probe.body ?? {})
+        : await apiGet(probe.path, {}, 20_000);
+
+    safeLine(`SMOKE_PROBE ${probe.name}`);
+    safeLine(
+      `SMOKE_HTTP ${result.timedOut ? 'timeout' : result.status ?? 'unknown'}`,
+    );
+
+    const dx = classifyStagingHttpResponse({
+      status: result.status,
+      timedOut: result.timedOut,
+      contentType: result.contentType,
+      text: result.text,
+      json: result.json,
+      path: probe.path,
+      method: probe.method,
+    });
+    safeLine(`ROUTE_DIAGNOSIS ${dx.diagnosis}`);
+    safeLine(`API_SURFACE_LIKELY ${dx.apiSurfaceLikely}`);
+
+    if (dx.diagnosis === ROUTE_DIAGNOSIS.ROUTE_MISSING_OR_WRONG_DEPLOYMENT) {
+      wrongDeployment = true;
+      allPass = false;
+      continue;
+    }
+
+    if (result.timedOut) {
+      allPass = false;
+      continue;
+    }
+
+    if (probe.name === 'health' || probe.name === 'index') {
+      if (result.status !== 200) allPass = false;
+    }
+
+    if (probe.name === 'login_route') {
+      if (
+        dx.diagnosis !== ROUTE_DIAGNOSIS.VALIDATION_ERROR &&
+        dx.diagnosis !== ROUTE_DIAGNOSIS.INVALID_CREDENTIALS &&
+        dx.diagnosis !== ROUTE_DIAGNOSIS.OK &&
+        dx.diagnosis !== ROUTE_DIAGNOSIS.OWNER_ONLY_OR_FORBIDDEN
+      ) {
+        allPass = false;
+      }
+    }
+
+    if (
+      probe.name === 'operator_status_route' ||
+      probe.name === 'operator_phase1_truth_route'
+    ) {
+      if (
+        dx.diagnosis !== ROUTE_DIAGNOSIS.AUTH_REQUIRED &&
+        dx.diagnosis !== ROUTE_DIAGNOSIS.SERVICE_DISABLED &&
+        dx.diagnosis !== ROUTE_DIAGNOSIS.OK &&
+        result.status !== 404
+      ) {
+        if (result.status === 404 && !responseLooksLikeNextHtml(result.contentType, result.text)) {
+          /* API 404 invalid id is acceptable */
+        } else if (dx.diagnosis === ROUTE_DIAGNOSIS.UNKNOWN && result.status === 404) {
+          /* ok */
+        } else if (result.status !== 401 && result.status !== 503 && result.status !== 400) {
+          allPass = false;
+        }
+      }
+    }
+  }
+
+  if (wrongDeployment) {
+    safeLine('STAGING_API_SMOKE_VERDICT FAIL');
+    safeLine('BLOCKED_REASON route_missing_or_wrong_deployment');
+    safeLine(`NEXT_SAFE_COMMAND ${STAGING_API_DEPLOY_RECOVERY_HINT.command}`);
+    safeLine('DEPLOY_REQUIRED true');
+    safeLine('DO_NOT_REFUND true');
+    process.exitCode = 1;
+    return;
+  }
+
+  if (allPass) {
+    safeLine('STAGING_API_SMOKE_VERDICT PASS');
+    safeLine('API_SURFACE_LIKELY api_serverless');
+    process.exitCode = 0;
+    return;
+  }
+
+  safeLine('STAGING_API_SMOKE_VERDICT FAIL');
+  safeLine('BLOCKED_REASON staging_api_probe_failed');
+  safeLine(`NEXT_SAFE_COMMAND ${STAGING_API_DEPLOY_RECOVERY_HINT.command}`);
+  process.exitCode = 1;
+}
+
 async function modeL11Preflight() {
   safeLine('MODE l11-preflight');
   safeLine('DO_NOT_REFUND true');
@@ -1583,6 +1734,9 @@ async function main() {
       break;
     case 'l11-preflight':
       await modeL11Preflight();
+      break;
+    case 'staging-api-smoke':
+      await modeStagingApiSmoke();
       break;
     default:
       usage();

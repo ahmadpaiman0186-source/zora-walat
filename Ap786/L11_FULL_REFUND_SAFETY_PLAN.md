@@ -70,6 +70,16 @@ After **one** successful Stripe **test-mode** payment that reached **FULFILLED**
 | **Staging** | Verifier **works after deploy** of API with slim route; until then harness may return **503** `staging_operator_phase1_truth_disabled` (not a timeout). |
 | **L-11 proof** | Still **blocked** — no refund; no PASS commit until live **REFUNDED** observed post-refund. |
 
+### 2g. Staging API 404 on login (wrong Vercel deployment surface)
+
+| Item | Detail |
+|------|--------|
+| **Symptom** | `LOGIN_HTTP 404`, `http_404_empty_body` or **Next.js HTML** on `POST /api/auth/login` — **not** a password/credential issue. |
+| **Root cause (live verify 2026-05-18)** | Production alias **`zora-walat-api-staging.vercel.app`** is serving **Next.js frontend** (monorepo root deploy), not **`server/api/index.mjs`**. `/api/health`, `/api/index`, and slim operator routes all return **404 HTML**. |
+| **Fix** | Redeploy **from `server/` only**: `cd server; npm run deploy:staging` (runs deploy guard + `vercel deploy --prod --yes`). Confirm `vercel inspect` shows **`λ api/index`**, not Next lambdas. |
+| **Harness** | `staging-api-smoke` prints `ROUTE_DIAGNOSIS route_missing_or_wrong_deployment` + `NEXT_SAFE_COMMAND`. `login` on 404 HTML does **not** suggest password retry. |
+| **L-11** | **PLAN_READY** — blocked until API surface restored; then `staging-api-smoke` PASS → `l11-preflight`. |
+
 ### 2f. Operator CLI hardening (concatenation + one-shot preflight)
 
 | Item | Detail |
@@ -133,6 +143,14 @@ Use the **existing** staging success order from P-2 / L-4 / L-5 evidence (do **n
 ## 5. Execution commands (documented only — **do not run** until approved)
 
 ### 5a. Pre-flight (safe — no refund)
+
+**First — confirm API surface (no credentials):**
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs staging-api-smoke
+```
+
+Expect `STAGING_API_SMOKE_VERDICT PASS`. If `route_missing_or_wrong_deployment`, run `cd server; npm run deploy:staging` before login or L-11.
 
 **PowerShell: one command per line** (do not paste commands together).
 
