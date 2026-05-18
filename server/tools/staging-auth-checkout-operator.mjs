@@ -11,6 +11,8 @@
  *   node tools/staging-auth-checkout-operator.mjs checkout
  *   node tools/staging-auth-checkout-operator.mjs checkout-open-test
  *   node tools/staging-auth-checkout-operator.mjs status-check
+ *   node tools/staging-auth-checkout-operator.mjs auth-env-check
+ *   node tools/staging-auth-checkout-operator.mjs auth-check
  *
  * Phase 2 (test payment): requires STAGING_ALLOW_STRIPE_TEST_PAYMENT=true.
  * checkout-open-test saves URL to .staging-checkout-url.local (gitignored); never printed.
@@ -28,6 +30,18 @@ import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { fileURLToPath } from 'node:url';
+
+import {
+  LOGIN_API_PATH,
+  accessTokenExpiryIso,
+  classifyStoredToken,
+  credentialEnvDiagnostics,
+  isAccessTokenExpired,
+  loadOperatorDotenv,
+  readOperatorEmail,
+  readOperatorPassword,
+  windowsEnvSetupHintLines,
+} from './stagingOperatorAuthEnv.mjs';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -50,6 +64,8 @@ const MODES = new Set([
   'checkout',
   'checkout-open-test',
   'status-check',
+  'auth-env-check',
+  'auth-check',
 ]);
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -70,8 +86,67 @@ function safeLine(line) {
 
 function usage() {
   output.write(
-    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check>\n',
+    'Usage: node tools/staging-auth-checkout-operator.mjs <register|login|request-otp|verify-otp|checkout|checkout-open-test|status-check|auth-env-check|auth-check>\n',
   );
+}
+
+function printWindowsEnvHints() {
+  for (const line of windowsEnvSetupHintLines()) {
+    safeLine(line);
+  }
+}
+
+function printCredentialEnvDiagnostics() {
+  const d = credentialEnvDiagnostics(process.env);
+  safeLine(`HAS_EMAIL ${d.hasEmail ? 'true' : 'false'}`);
+  safeLine(`HAS_PASSWORD ${d.hasPassword ? 'true' : 'false'}`);
+  safeLine(`EMAIL_LENGTH ${d.emailLength}`);
+  safeLine(`PASSWORD_LENGTH ${d.passwordLength}`);
+}
+
+function printLoginRequestDiagnostics(email) {
+  safeLine(`LOGIN_API_ORIGIN ${apiOriginOnly()}`);
+  safeLine(`LOGIN_ENDPOINT ${LOGIN_API_PATH}`);
+  safeLine(`USING_ENV_EMAIL ${usingEnvEmail() ? 'true' : 'false'}`);
+  safeLine(`USING_ENV_PASSWORD ${usingEnvPassword() ? 'true' : 'false'}`);
+  printCredentialEnvDiagnostics();
+  safeLine(`LOGIN_EMAIL_PRESENT ${email ? 'true' : 'false'}`);
+  safeLine(`TOKEN_FILE_PATH ${TOKEN_PATH}`);
+  safeLine(`TOKEN_FILE_EXISTS ${existsSync(TOKEN_PATH) ? 'true' : 'false'}`);
+}
+
+function printTokenFileDiagnostics(token) {
+  const state = classifyStoredToken(token);
+  safeLine(`TOKEN_FILE_PATH ${TOKEN_PATH}`);
+  safeLine(`TOKEN_FILE_EXISTS ${token ? 'true' : 'false'}`);
+  safeLine(`TOKEN_STATE ${state}`);
+  const expIso = token ? accessTokenExpiryIso(token) : null;
+  if (expIso) {
+    safeLine(`TOKEN_EXPIRY_ISO ${expIso}`);
+    safeLine(
+      `TOKEN_EXPIRED ${isAccessTokenExpired(token) === true ? 'true' : 'false'}`,
+    );
+  } else if (token) {
+    safeLine('TOKEN_EXPIRY_ISO unknown');
+  }
+}
+
+function failPasswordRequiredNonInteractive() {
+  safeLine('LOCAL_VALIDATION_ERROR password_required');
+  safeLine(
+    'HINT set STAGING_OPERATOR_PASSWORD in the same PowerShell session before login',
+  );
+  printWindowsEnvHints();
+  process.exitCode = 2;
+}
+
+function failEmailRequiredNonInteractive() {
+  safeLine('LOCAL_VALIDATION_ERROR email_required');
+  safeLine(
+    'HINT set STAGING_OPERATOR_EMAIL in the same PowerShell session before login',
+  );
+  printWindowsEnvHints();
+  process.exitCode = 2;
 }
 
 function envTruthy(name) {
@@ -214,11 +289,11 @@ function isValidPassword(password) {
 }
 
 function envEmail() {
-  return String(process.env.STAGING_OPERATOR_EMAIL ?? '').trim();
+  return readOperatorEmail(process.env);
 }
 
 function envPassword() {
-  return String(process.env.STAGING_OPERATOR_PASSWORD ?? '').trim();
+  return readOperatorPassword(process.env);
 }
 
 function envOtp() {
@@ -414,6 +489,47 @@ function extractAccessToken(json) {
  * Register credentials: env-only when both STAGING_OPERATOR_* are set;
  * otherwise interactive fallback (TTY required).
  */
+/**
+ * Env-first login credentials; interactive only when TTY and env incomplete.
+ * @returns {Promise<{ email: string, password: string } | null>}
+ */
+async function resolveLoginCredentials() {
+  const hasEmailEnv = usingEnvEmail();
+  const hasPasswordEnv = usingEnvPassword();
+
+  if (hasEmailEnv && hasPasswordEnv) {
+    const email = envEmail().toLowerCase();
+    const password = envPassword();
+    if (!isValidEmail(email)) {
+      safeLine('LOCAL_VALIDATION_ERROR invalid_email');
+      process.exitCode = 2;
+      return null;
+    }
+    if (!password) {
+      failPasswordRequiredNonInteractive();
+      return null;
+    }
+    await saveEmail(email);
+    return { email, password };
+  }
+
+  if (!input.isTTY) {
+    if (!hasEmailEnv) failEmailRequiredNonInteractive();
+    else failPasswordRequiredNonInteractive();
+    return null;
+  }
+
+  const email = await resolveEmail();
+  if (!email) return null;
+  const password = await promptPassword('Password');
+  if (!password) {
+    safeLine('LOCAL_VALIDATION_ERROR password_required');
+    process.exitCode = 2;
+    return null;
+  }
+  return { email, password };
+}
+
 async function resolveRegisterCredentials() {
   const hasEmailEnv = usingEnvEmail();
   const hasPasswordEnv = usingEnvPassword();
@@ -499,30 +615,107 @@ async function modeRegister() {
 }
 
 async function modeLogin() {
-  const email = await resolveEmail();
-  if (!email) return;
-  const password = await promptPassword('Password');
-  if (!password) {
-    output.write('LOCAL_VALIDATION_ERROR password_required\n');
-    process.exitCode = 2;
+  safeLine('MODE login');
+  const creds = await resolveLoginCredentials();
+  if (!creds) {
+    safeLine('LOGIN_SKIPPED true');
     return;
   }
 
-  const { status, json, timedOut } = await apiPost('/api/auth/login', {
-    email,
-    password,
+  printLoginRequestDiagnostics(creds.email);
+
+  const { status, json, timedOut } = await apiPost(LOGIN_API_PATH, {
+    email: creds.email,
+    password: creds.password,
   });
   if (timedOut) {
     safeLine('LOGIN_HTTP timeout');
     safeLine('TOKEN_OK false');
+    safeLine('TOKEN_SAVED false');
     process.exitCode = 1;
     return;
   }
   safeLine(`LOGIN_HTTP ${status}`);
+  safeLine(`LOGIN_RESPONSE_PREVIEW ${safeResponsePreview({ status, json, text: '', timedOut: false })}`);
+
+  if (status === 401) {
+    safeLine('LOGIN_HINT invalid_email_or_password_or_inactive_user_on_staging');
+    printCodeMessage(json);
+  } else if (status === 403) {
+    safeLine(
+      'LOGIN_HINT access_denied_check_Vercel_OWNER_ALLOWED_EMAIL_matches_operator_email',
+    );
+    printCodeMessage(json);
+  } else if (status !== 200) {
+    printCodeMessage(json);
+  }
 
   const token = extractAccessToken(json);
   const saved = status === 200 && (await saveToken(token));
   safeLine(`TOKEN_OK ${saved ? 'true' : 'false'}`);
+  safeLine(`TOKEN_SAVED ${saved ? 'true' : 'false'}`);
+  if (saved) {
+    printTokenFileDiagnostics(token);
+  }
+  if (!saved) {
+    process.exitCode = status === 200 ? 2 : 1;
+  }
+}
+
+async function modeAuthEnvCheck() {
+  safeLine('MODE auth-env-check');
+  safeLine(`LOGIN_API_ORIGIN ${apiOriginOnly()}`);
+  safeLine(`LOGIN_ENDPOINT ${LOGIN_API_PATH}`);
+  printCredentialEnvDiagnostics();
+  safeLine(`INTERACTIVE_TTY ${input.isTTY ? 'true' : 'false'}`);
+  safeLine(`TOKEN_FILE_PATH ${TOKEN_PATH}`);
+  const token = await loadToken();
+  printTokenFileDiagnostics(token);
+  if (!usingEnvEmail() || !usingEnvPassword()) {
+    printWindowsEnvHints();
+    process.exitCode = 2;
+  }
+}
+
+async function modeAuthCheck() {
+  safeLine('MODE auth-check');
+  const d = credentialEnvDiagnostics(process.env);
+  if (!d.hasEmail || !d.hasPassword) {
+    safeLine('AUTH_CHECK_PASS false');
+    if (!d.hasEmail) failEmailRequiredNonInteractive();
+    else failPasswordRequiredNonInteractive();
+    return;
+  }
+
+  await modeLogin();
+  if (process.exitCode && process.exitCode !== 0) {
+    safeLine('AUTH_CHECK_PASS false');
+    safeLine('AUTH_CHECK_STAGE login_failed');
+    return;
+  }
+
+  const token = await loadToken();
+  if (!token || classifyStoredToken(token) === 'expired') {
+    safeLine('AUTH_CHECK_PASS false');
+    safeLine('AUTH_CHECK_STAGE token_missing_or_expired_after_login');
+    printTokenFileDiagnostics(token);
+    process.exitCode = 2;
+    return;
+  }
+
+  const priorExit = process.exitCode;
+  process.exitCode = 0;
+  await modeStatusCheck();
+  const statusOk = process.exitCode === 0 || process.exitCode === undefined;
+  process.exitCode = statusOk ? 0 : process.exitCode ?? 1;
+
+  if (statusOk) {
+    safeLine('AUTH_CHECK_PASS true');
+  } else {
+    safeLine('AUTH_CHECK_PASS false');
+    safeLine('AUTH_CHECK_STAGE status_check_failed');
+    if (priorExit) process.exitCode = priorExit;
+  }
 }
 
 async function modeRequestOtp() {
@@ -576,7 +769,7 @@ async function runHostedCheckoutProbe({ persistForPhase2 = false } = {}) {
       safeLine('LOCAL_CHECKOUT_URL_SAVED false');
       safeLine('STRIPE_TEST_MODE_CONFIRMED false');
     }
-    safeLine('LOCAL_ERROR missing_token_run_login_or_verify_otp');
+    safeLine('LOCAL_ERROR TOKEN_MISSING_OR_EXPIRED');
     process.exitCode = 2;
     return null;
   }
@@ -687,10 +880,23 @@ async function modeStatusCheck() {
   logSavedStateDebug();
 
   const token = await loadToken();
+  printTokenFileDiagnostics(token);
   if (!token) {
     safeLine('LOCAL_ORDER_ID_PRESENT false');
-    safeLine('ORDER_FOUND false');
-    safeLine('LOCAL_ERROR missing_token_run_login');
+    safeLine('ORDER_FOUND unknown');
+    safeLine('LOCAL_ERROR TOKEN_MISSING_OR_EXPIRED');
+    safeLine('ORDER_AUTH_FAILURE true');
+    safeLine('ORDER_STATE_UNAVAILABLE true');
+    process.exitCode = 2;
+    return;
+  }
+  if (isAccessTokenExpired(token) === true) {
+    safeLine('LOCAL_ORDER_ID_PRESENT false');
+    safeLine('ORDER_FOUND unknown');
+    safeLine('LOCAL_ERROR TOKEN_MISSING_OR_EXPIRED');
+    safeLine('TOKEN_EXPIRED true');
+    safeLine('ORDER_AUTH_FAILURE true');
+    safeLine('ORDER_STATE_UNAVAILABLE true');
     process.exitCode = 2;
     return;
   }
@@ -783,7 +989,12 @@ async function modeStatusCheck() {
   if (slimResult.status === 401 || slimResult.status === 403) {
     safeLine('ORDER_API_REACHED true');
     safeLine('ORDER_FOUND unknown');
-    safeLine('LOCAL_ERROR auth_token_invalid_or_denied');
+    safeLine('LOCAL_ERROR TOKEN_REJECTED_BY_API');
+    safeLine('ORDER_AUTH_FAILURE true');
+    safeLine('ORDER_STATE_UNAVAILABLE true');
+    safeLine(
+      `TOKEN_LOCAL_STATE ${classifyStoredToken(token)}`,
+    );
     printCodeMessage(slimResult.json);
     process.exitCode = 2;
     return;
@@ -824,6 +1035,8 @@ async function modeStatusCheck() {
 }
 
 async function main() {
+  loadOperatorDotenv(SERVER_ROOT);
+
   const mode = String(process.argv[2] ?? '').trim().toLowerCase();
   if (!MODES.has(mode)) {
     usage();
@@ -853,6 +1066,12 @@ async function main() {
     case 'status-check':
       await modeStatusCheck();
       break;
+    case 'auth-env-check':
+      await modeAuthEnvCheck();
+      break;
+    case 'auth-check':
+      await modeAuthCheck();
+      break;
     default:
       usage();
       process.exitCode = 1;
@@ -862,6 +1081,8 @@ async function main() {
 const isCliEntry = Boolean(
   process.argv[1]?.includes('staging-auth-checkout-operator.mjs'),
 );
+
+export { resolveLoginCredentials };
 
 if (isCliEntry) {
   main().catch((err) => {
