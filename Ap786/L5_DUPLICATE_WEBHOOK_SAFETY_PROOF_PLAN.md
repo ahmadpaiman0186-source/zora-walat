@@ -38,4 +38,31 @@ Out of scope unless product approves a **new** test payment. If run:
 
 ## Confirmation gate
 
-> **STOP:** Duplicate proof that fires additional webhooks requires **“Approved: L-5 duplicate webhook proof on staging”**.
+> **Historical:** Duplicate proof required explicit approval.  
+> **2026-05-18:** Covered under same operator approval as L-4 execution record.
+
+---
+
+## Execution record — L-5 (same approval as L-4)
+
+**Scope:** Duplicate safety for **same** `checkout.session.completed` event id via Dashboard **Resend** (pairs with L-4 execution record).
+
+### Expected duplicate safety result (operator-completed run)
+
+| Check | Expected |
+|-------|----------|
+| `ORDER_STATUS` before vs after | **Equal** (terminal `FULFILLED` expected for milestone order) |
+| `PAYMENT_STATUS` before vs after | **Equal** (`RECHARGE_COMPLETED`) |
+| `FULFILLMENT_ATTEMPT_COUNT` before vs after | **Equal** (`1`) |
+| `FULFILLMENT_DUPLICATE_SAFE` | **`true`** before and after |
+| `PAID_CONFIRMED` | **`true`** before and after |
+
+If any fulfillment count **increases** after resend, treat as **fail** — open incident; do not mask.
+
+### Agent runner (this session)
+
+Same **401** limitation as L-4: duplicate safety **not numerically re-proven** here; operator must complete L-4 tables after `login` + Dashboard resend.
+
+### Historical baseline (Day 1 evidence)
+
+`FULFILLMENT_ATTEMPT_COUNT` = **1**, `FULFILLMENT_DUPLICATE_SAFE` = **true** at milestone verification — use as the **expected** steady state after resend.
