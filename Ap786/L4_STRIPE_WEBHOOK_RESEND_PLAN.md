@@ -112,26 +112,34 @@ node tools/staging-auth-checkout-operator.mjs status-check
 
 ### Operator-fill — before resend (enums only; after `login`)
 
+**Recorded:** 2026-05-18 manual operator run (staging, test mode).
+
 | Field | Value |
 |-------|-------|
-| `STATUS_CHECK_HTTP` | *(operator)* |
-| `ORDER_FOUND` | *(operator)* |
-| `ORDER_STATUS` | *(operator)* |
-| `PAYMENT_STATUS` | *(operator)* |
-| `PAID_CONFIRMED` | *(operator)* |
-| `FULFILLMENT_ATTEMPT_COUNT` | *(operator)* |
-| `FULFILLMENT_DUPLICATE_SAFE` | *(operator)* |
+| `STATUS_CHECK_HTTP` | `200` |
+| `ORDER_FOUND` | `true` |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | `true` |
+| `FULFILLMENT_ATTEMPT_COUNT` | `1` |
+| `FULFILLMENT_DUPLICATE_SAFE` | `true` |
 
 ### Operator-fill — after Dashboard resend (enums only)
 
+**Recorded:** 2026-05-18 — same `checkout.session.completed` event resent via Stripe Dashboard (test mode); **no new payment**.
+
 | Field | Value |
 |-------|-------|
-| `STATUS_CHECK_HTTP` | *(operator)* |
-| `ORDER_FOUND` | *(operator)* |
-| `ORDER_STATUS` | *(operator)* |
-| `PAYMENT_STATUS` | *(operator)* |
-| `PAID_CONFIRMED` | *(operator)* |
-| `FULFILLMENT_ATTEMPT_COUNT` | *(operator)* |
-| `FULFILLMENT_DUPLICATE_SAFE` | *(operator)* |
+| `STATUS_CHECK_HTTP` | `200` |
+| `ORDER_FOUND` | `true` |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | `true` |
+| `FULFILLMENT_ATTEMPT_COUNT` | `1` |
+| `FULFILLMENT_DUPLICATE_SAFE` | `true` |
 
-**Next commit:** Paste completed operator tables into this section (or append dated row) — still **no** secrets, payloads, or full ids.
+**Before vs after:** All fields **unchanged** — resend did not alter terminal order or payment readout.
+
+## L-4 verdict
+
+**PASS** — Dashboard resend of the same `checkout.session.completed` event completed; operator `status-check` remained **200** with steady terminal enums.

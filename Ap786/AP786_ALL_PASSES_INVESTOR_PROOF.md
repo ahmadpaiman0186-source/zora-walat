@@ -2,7 +2,7 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** Day 1 production-readiness pack (evidence documents in `Ap786/`)  
+**Last updated:** L-4 / L-5 Dashboard resend proof recorded (2026-05-18)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
 
 ---
@@ -13,7 +13,9 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **What is verified:** Checkout can be created; the payer can return from Stripe without a gateway timeout; the payment webhook can mark the order paid on a fast serverless path; the operator can read back a **fulfilled** order with **one** fulfillment attempt and **duplicate-safe** flags.
 
-**What is not yet verified in this pack:** A fresh **Dashboard resend** of the same webhook event with before/after operator readouts (blocked in the latest automated attempt by **expired operator login**, not by payment failure). Broader production readiness (live Stripe, scale, compliance, disaster recovery) is **not** claimed here.
+**What is additionally verified:** **Dashboard resend** of the same `checkout.session.completed` event (test mode) — before and after operator readouts **unchanged** (L-4 / L-5).
+
+**What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 
 ---
 
@@ -125,16 +127,17 @@ This does **not** prove all markets, operators, or failure modes — only the ve
 
 ## 10. Duplicate safety pass
 
-**Verdict:** **PASS** (read-model flags at milestone verification)
+**Verdict:** **PASS** (milestone readout + L-5 resend proof)
 
-At the time of the verified milestone:
+At milestone verification and **after** Dashboard resend of the same event:
 
-- `FULFILLMENT_ATTEMPT_COUNT` = **1**  
-- `FULFILLMENT_DUPLICATE_SAFE` = **true**
+- `FULFILLMENT_ATTEMPT_COUNT` = **1** (unchanged)  
+- `FULFILLMENT_DUPLICATE_SAFE` = **true** (unchanged)  
+- Terminal `ORDER_STATUS` / `PAYMENT_STATUS` unchanged (`FULFILLED` / `RECHARGE_COMPLETED`)
 
-**Design intent:** Database idempotency on Stripe event ids, optional Redis shadow acknowledgements, and idempotent fulfillment scheduling are intended to prevent double-paid state or parallel duplicate fulfillment when Stripe retries.
+**Design intent:** Database idempotency on Stripe event ids, optional Redis shadow acknowledgements, and idempotent fulfillment scheduling prevent double-paid state or parallel duplicate fulfillment when Stripe retries.
 
-**Pending:** Explicit **Dashboard resend** of the **same** `checkout.session.completed` event with fresh before/after operator tables (see section 14).
+Details: `Ap786/L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md`
 
 ---
 
@@ -171,18 +174,29 @@ Details: `Ap786/L3_PAYMENT_CORE_REVERIFICATION.md`
 
 ---
 
-## 14. L-4 / L-5 current status and limitation
+## 14. L-4 / L-5 — Stripe resend and duplicate safety
 
-**Verdict:** **PLANNED + PARTIALLY EXECUTED** — **not** a new payment failure
+**Verdict:** **PASS** (manual operator run, 2026-05-18)
 
 | Item | Status |
 |------|--------|
-| L-4 plan (Dashboard resend of same event) | Written and approved |
-| L-5 plan (duplicate safety via resend) | Written and approved |
-| Operator `login` + before/after enum capture | **Pending** (operator machine) |
-| Latest automated `status-check` in CI/agent | **`401`** — missing or **expired operator auth token** |
+| L-4 — Dashboard resend of same `checkout.session.completed` | **Verified** |
+| L-5 — Duplicate safety (before vs after) | **Verified** |
+| Operator `status-check` after resend | **200** — enums unchanged |
 
-**Important:** The **401** means the tooling could not read order state in that environment. It does **not** mean the underlying order reverted or that payment/fulfillment failed. Historical milestone enums (section 8) remain the verified baseline.
+**After-resend operator readout (enums only):**
+
+| Field | Value |
+|-------|--------|
+| `STATUS_CHECK_HTTP` | `200` |
+| `ORDER_FOUND` | `true` |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | `true` |
+| `FULFILLMENT_ATTEMPT_COUNT` | `1` |
+| `FULFILLMENT_DUPLICATE_SAFE` | `true` |
+
+**Note:** An earlier automated agent run saw **401** (expired operator token) and could not capture enums; the manual operator run above supersedes that limitation.
 
 Details: `Ap786/L4_STRIPE_WEBHOOK_RESEND_PLAN.md`, `Ap786/L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md`
 
@@ -190,12 +204,13 @@ Details: `Ap786/L4_STRIPE_WEBHOOK_RESEND_PLAN.md`, `Ap786/L5_DUPLICATE_WEBHOOK_S
 
 ## 15. Remaining manual proof needed
 
-1. Operator runs `login`, then `status-check` **before** Stripe Dashboard **Resend** on the existing `checkout.session.completed` event (test mode).  
-2. Operator runs `status-check` **after** resend.  
-3. Paste **enum-only** before/after tables into L-4 evidence (no payloads, no secrets).  
-4. Confirm fulfillment count **unchanged** and duplicate-safe flag **still true**.
+**L-4 / L-5 (Dashboard resend):** **Complete** — before/after enums recorded in L-4 and L-5 evidence files.
 
-No new checkout and no new card payment are required for this step.
+**Still open (not in L-4/L-5 scope):**
+
+- L-6 event-ordering scenarios (`payment_intent.succeeded` vs `checkout.session.completed`) — plan only.  
+- L-7 unmatched Stripe event safety — plan only.  
+- Production Stripe, scale/SLO, compliance, and DR evidence per section 16.
 
 ---
 
@@ -233,9 +248,9 @@ Scores are **qualitative** for this staging milestone only (not a guarantee of p
 |------|-------------|--------|
 | Payment capture (staging test) | **4** | End-to-end happy path verified |
 | Payer return experience | **4** | `/success` 504 issue addressed on staging |
-| Webhook reliability (staging) | **4** | Slim path deployed; resend proof pending |
+| Webhook reliability (staging) | **4** | Slim path + Dashboard resend steady state verified |
 | Fulfillment (staging smoke) | **4** | One order fulfilled; not load-tested |
-| Duplicate / retry safety | **3** | Strong design + readout flags; Dashboard resend proof pending |
+| Duplicate / retry safety | **4** | Resend proof: count **1**, duplicate-safe **true** before and after |
 | Documentation & evidence | **5** | Ap786 pack committed and pushed |
 | Production readiness overall | **2** | Staging-only; risks in section 16 remain |
 

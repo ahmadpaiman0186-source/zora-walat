@@ -59,10 +59,26 @@ Out of scope unless product approves a **new** test payment. If run:
 
 If any fulfillment count **increases** after resend, treat as **fail** — open incident; do not mask.
 
-### Agent runner (this session)
+### Agent runner (historical — superseded)
 
-Same **401** limitation as L-4: duplicate safety **not numerically re-proven** here; operator must complete L-4 tables after `login` + Dashboard resend.
+Earlier automated run returned **401** (`auth_token_invalid_or_denied`) — could not read order state. **Not** a payment or fulfillment failure.
 
-### Historical baseline (Day 1 evidence)
+### Operator proof — after Dashboard resend (2026-05-18)
 
-`FULFILLMENT_ATTEMPT_COUNT` = **1**, `FULFILLMENT_DUPLICATE_SAFE` = **true** at milestone verification — use as the **expected** steady state after resend.
+Paired with L-4 resend; enums only:
+
+| Field | Before resend | After resend | Pass |
+|-------|---------------|--------------|------|
+| `STATUS_CHECK_HTTP` | `200` | `200` | Yes |
+| `ORDER_FOUND` | `true` | `true` | Yes |
+| `ORDER_STATUS` | `FULFILLED` | `FULFILLED` | Yes |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` | `RECHARGE_COMPLETED` | Yes |
+| `PAID_CONFIRMED` | `true` | `true` | Yes |
+| `FULFILLMENT_ATTEMPT_COUNT` | `1` | `1` | Yes |
+| `FULFILLMENT_DUPLICATE_SAFE` | `true` | `true` | Yes |
+
+## L-5 verdict
+
+**PASS** — Duplicate delivery of the same `checkout.session.completed` event did **not** increase fulfillment attempts or change terminal payment/order state. `FULFILLMENT_DUPLICATE_SAFE` remained **true**.
+
+Details: `L4_STRIPE_WEBHOOK_RESEND_PLAN.md` (operator before/after tables).
