@@ -1,0 +1,255 @@
+# Ap786 — All passes investor proof (master summary)
+
+**Audience:** Investors and non-technical reviewers  
+**Environment:** Staging only (Stripe **test mode** in operator flows)  
+**Last updated:** Day 1 production-readiness pack (evidence documents in `Ap786/`)  
+**Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
+
+---
+
+## 1. Executive summary
+
+Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Checkout through payment confirmation, webhook processing, and fulfillment to a **terminal success state**, using **test-mode** Stripe only.
+
+**What is verified:** Checkout can be created; the payer can return from Stripe without a gateway timeout; the payment webhook can mark the order paid on a fast serverless path; the operator can read back a **fulfilled** order with **one** fulfillment attempt and **duplicate-safe** flags.
+
+**What is not yet verified in this pack:** A fresh **Dashboard resend** of the same webhook event with before/after operator readouts (blocked in the latest automated attempt by **expired operator login**, not by payment failure). Broader production readiness (live Stripe, scale, compliance, disaster recovery) is **not** claimed here.
+
+---
+
+## 2. Staging URL
+
+| Role | URL |
+|------|-----|
+| Staging API (public) | https://zora-walat-api-staging.vercel.app |
+
+No deployment secrets or preview hostnames are listed in this document.
+
+---
+
+## 3. Key commits
+
+| Role | Commit (full SHA) | Short |
+|------|-------------------|-------|
+| Operator order status (fast read path) | `014f666ab324097db11a45c94e479e6aebaaf337` | `014f666` |
+| Slim webhook PAID + slim `/success` return | `57983768f6510a97a88414949ca8b585abaf268a` | `5798376` |
+| Ap786 Day 1 evidence pack | `5f926295fb0792f563d2c0c7752da0d793d6777e` | `5f92629` |
+| Ap786 L3–L7 plans | `3e76ce0a3fe5dc042f7c69f916e0749d434a8e40` | `3e76ce0` |
+| L4/L5 resend proof record | `866a26ed5dd18f20e13d11c1413533b46f158bfa` | `866a26e` |
+| L4/L5 index note | `1c03477aaf4b10498a590023187b465f232b2500` | `1c03477` |
+
+Evidence is **version-controlled** on branch `fix/post-l40-slim-stripe-webhook-invalid-signature` and **pushed** to the remote repository.
+
+---
+
+## 4. Final payment-to-fulfillment pass
+
+**Verdict:** **PASS** (staging, one verified end-to-end journey)
+
+| Stage | Result |
+|-------|--------|
+| Checkout session created | Pass |
+| Test card payment completed | Pass (Stripe test mode) |
+| Return from Stripe | Pass (no 504 on `/success`) |
+| Webhook marks order paid | Pass (slim `checkout.session.completed` path) |
+| Fulfillment completes | Pass (`ORDER_STATUS` **FULFILLED**) |
+
+This is a **single happy-path** proof, not proof at scale or in production.
+
+---
+
+## 5. Checkout creation pass
+
+**Verdict:** **PASS**
+
+Hosted checkout session creation on staging returned success in operator testing. Identifiers were stored locally for follow-up checks only (not reproduced in this investor document).
+
+---
+
+## 6. `/success` no-504 pass
+
+**Verdict:** **PASS** (after slim return-page fix)
+
+**Before fix:** Browser redirect to `/success` could hit a long cold start and return **504 FUNCTION_INVOCATION_TIMEOUT**.
+
+**After fix:** Return page is served on a **lightweight path** without loading the full application stack. Staging probes show **quick HTML responses** (sub-second to low-second), not a formal production SLA.
+
+**Commit:** `57983768f6510a97a88414949ca8b585abaf268a`
+
+---
+
+## 7. Stripe webhook slim path pass
+
+**Verdict:** **PASS** (hosted checkout `checkout.session.completed`)
+
+**Before fix:** After signature verification, webhooks could wait on a **full application cold start**, sometimes never finishing before platform time limits — orders could stay unpaid in the database even after successful payment.
+
+**After fix:** For hosted checkout completion events that correlate to an internal order id, payment state is updated on a **dedicated slim path** using the same business rules as the main application, with fulfillment work **queued after** the critical database step.
+
+**Commit:** `57983768f6510a97a88414949ca8b585abaf268a`
+
+---
+
+## 8. Operator status-check pass
+
+**Verdict:** **PASS** (authenticated read of order state)
+
+Operator tooling calls a **fast staging order-status endpoint** (order identifiers are not recorded in this document).
+
+**Final verified readout (enums only):**
+
+| Field | Value |
+|-------|--------|
+| `STATUS_CHECK_HTTP` | `200` |
+| `ORDER_FOUND` | `true` |
+| `ORDER_STATUS` | `FULFILLED` |
+| `PAYMENT_STATUS` | `RECHARGE_COMPLETED` |
+| `PAID_CONFIRMED` | `true` |
+| `FULFILLMENT_ATTEMPT_COUNT` | `1` |
+| `FULFILLMENT_DUPLICATE_SAFE` | `true` |
+
+**Commit:** `014f666ab324097db11a45c94e479e6aebaaf337`
+
+---
+
+## 9. Fulfillment pass
+
+**Verdict:** **PASS** (single attempt, terminal state)
+
+- Fulfillment reached a **completed** lifecycle state consistent with recharge delivery.  
+- **Exactly one** fulfillment attempt was reported in the operator read model for the verified order.
+
+This does **not** prove all markets, operators, or failure modes — only the verified staging scenario.
+
+---
+
+## 10. Duplicate safety pass
+
+**Verdict:** **PASS** (read-model flags at milestone verification)
+
+At the time of the verified milestone:
+
+- `FULFILLMENT_ATTEMPT_COUNT` = **1**  
+- `FULFILLMENT_DUPLICATE_SAFE` = **true**
+
+**Design intent:** Database idempotency on Stripe event ids, optional Redis shadow acknowledgements, and idempotent fulfillment scheduling are intended to prevent double-paid state or parallel duplicate fulfillment when Stripe retries.
+
+**Pending:** Explicit **Dashboard resend** of the **same** `checkout.session.completed` event with fresh before/after operator tables (see section 14).
+
+---
+
+## 11. L-1 release control pass
+
+**Verdict:** **PASS**
+
+- Working branch identified and **clean** at evidence snapshots.  
+- Payment, webhook, and return-page fixes are **committed**.  
+- Ap786 documentation is **committed and pushed**.  
+- Local branch tip matched remote at last push (`1c03477…`).
+
+Details: `Ap786/L1_RELEASE_CONTROL_REPORT.md`
+
+---
+
+## 12. L-2 Ap786 evidence pass
+
+**Verdict:** **PASS**
+
+Repo-level `Ap786/` folder contains sanitized Day 1 summaries, plans for L-3–L-7, and execution notes. No secrets or customer data in evidence files.
+
+**Commits:** `5f92629…`, `3e76ce0…`, `866a26e…`, `1c03477…`
+
+---
+
+## 13. L-3 payment core re-verification
+
+**Verdict:** **PASS** (desk re-verification from existing evidence)
+
+Payment core behavior was re-stated from prior Ap786 documents **without** running a new payment. Conclusion: hosted checkout paid state is driven by **`checkout.session.completed`**, return UX is decoupled from webhook timing, and operator read paths are available.
+
+Details: `Ap786/L3_PAYMENT_CORE_REVERIFICATION.md`
+
+---
+
+## 14. L-4 / L-5 current status and limitation
+
+**Verdict:** **PLANNED + PARTIALLY EXECUTED** — **not** a new payment failure
+
+| Item | Status |
+|------|--------|
+| L-4 plan (Dashboard resend of same event) | Written and approved |
+| L-5 plan (duplicate safety via resend) | Written and approved |
+| Operator `login` + before/after enum capture | **Pending** (operator machine) |
+| Latest automated `status-check` in CI/agent | **`401`** — missing or **expired operator auth token** |
+
+**Important:** The **401** means the tooling could not read order state in that environment. It does **not** mean the underlying order reverted or that payment/fulfillment failed. Historical milestone enums (section 8) remain the verified baseline.
+
+Details: `Ap786/L4_STRIPE_WEBHOOK_RESEND_PLAN.md`, `Ap786/L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md`
+
+---
+
+## 15. Remaining manual proof needed
+
+1. Operator runs `login`, then `status-check` **before** Stripe Dashboard **Resend** on the existing `checkout.session.completed` event (test mode).  
+2. Operator runs `status-check` **after** resend.  
+3. Paste **enum-only** before/after tables into L-4 evidence (no payloads, no secrets).  
+4. Confirm fulfillment count **unchanged** and duplicate-safe flag **still true**.
+
+No new checkout and no new card payment are required for this step.
+
+---
+
+## 16. Remaining risks
+
+Staging success does **not** equal production launch. Outstanding areas include:
+
+- Production Stripe (live) policy and key management  
+- Email/OTP delivery parity on staging vs production  
+- Redis/queue health under load  
+- Webhook and API latency SLOs at scale  
+- Fraud tuning, compliance, and formal finance/ledger sign-off  
+- Backup/restore drills  
+
+Details: `Ap786/DAY1_REMAINING_RISKS.md`
+
+---
+
+## 17. Next L-6 / L-7 steps
+
+| Track | Purpose | Status |
+|-------|---------|--------|
+| **L-6** | Event ordering: `payment_intent.succeeded` vs `checkout.session.completed` for hosted checkout | Plan only — see `Ap786/L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md` |
+| **L-7** | Unmatched Stripe events: safe ignore/ack without corrupting money state | Plan only — see `Ap786/L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md` |
+
+Both require explicit approval before scripted webhook traffic on staging.
+
+---
+
+## 18. Investor-readable readiness score
+
+Scores are **qualitative** for this staging milestone only (not a guarantee of production revenue or uptime).
+
+| Area | Score (1–5) | Notes |
+|------|-------------|--------|
+| Payment capture (staging test) | **4** | End-to-end happy path verified |
+| Payer return experience | **4** | `/success` 504 issue addressed on staging |
+| Webhook reliability (staging) | **4** | Slim path deployed; resend proof pending |
+| Fulfillment (staging smoke) | **4** | One order fulfilled; not load-tested |
+| Duplicate / retry safety | **3** | Strong design + readout flags; Dashboard resend proof pending |
+| Documentation & evidence | **5** | Ap786 pack committed and pushed |
+| Production readiness overall | **2** | Staging-only; risks in section 16 remain |
+
+**Overall staging milestone:** **Demonstrated technical feasibility** of the money path on test Stripe — **not** a claim of production launch readiness.
+
+---
+
+## Document map (deeper detail)
+
+| Topic | File |
+|-------|------|
+| Index | `AP786_EVIDENCE_INDEX.txt` |
+| Day 1 status enums | `DAY1_STATUS_CHECK_FINAL.md` |
+| Payment journey | `DAY1_PAYMENT_TO_FULFILLMENT_PASS.md` |
+| Webhook slim path | `DAY1_WEBHOOK_SLIM_PATH.md` |
+| Success page | `DAY1_SUCCESS_ROUTE_FIX.md` |
+| Release control | `L1_RELEASE_CONTROL_REPORT.md` |

@@ -19,6 +19,7 @@
 | [L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md](./L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md) | L-5: duplicate webhook safety proof plan |
 | [L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md](./L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md) | L-6: PI vs checkout ordering safety plan |
 | [L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md](./L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md) | L-7: unmatched Stripe event safety plan |
+| [AP786_ALL_PASSES_INVESTOR_PROOF.md](./AP786_ALL_PASSES_INVESTOR_PROOF.md) | **Master investor summary** — all verified passes in one place |
 
 **Ap786 evidence commit (Day 1 pack):** `5f926295fb0792f563d2c0c7752da0d793d6777e`  
 
