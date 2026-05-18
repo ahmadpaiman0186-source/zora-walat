@@ -15,6 +15,9 @@ export const OPERATOR_MODES = Object.freeze([
   'auth-check',
   'phase1-truth-check',
   'l11-preflight',
+  'l11-refund-target',
+  'l11-refund-execute',
+  'l11-post-refund-verify',
   'staging-api-smoke',
 ]);
 

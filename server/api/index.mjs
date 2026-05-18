@@ -208,6 +208,20 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Staging operator L-11 refund target mapping (Bearer JWT): read-only DB payment mapping.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'GET' &&
+      p.startsWith('/api/ops/staging-operator-refund-target/')
+    ) {
+      return import('./slimStagingOperatorRefundTargetHandler.mjs').then((m) =>
+        m.handleSlimStagingOperatorRefundTargetGet(req, res),
+      );
+    }
+  }
+  /**
    * Hosted checkout (Bearer JWT): slim path — full `getHandler()` cold start caused client timeouts.
    * Dev `X-ZW-Dev-Checkout` bypass still uses Express via `getHandler()`.
    */

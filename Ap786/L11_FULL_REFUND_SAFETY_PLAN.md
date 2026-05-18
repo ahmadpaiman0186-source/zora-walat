@@ -174,31 +174,48 @@ If `LOCAL_VALIDATION_ERROR command_concatenation_detected`, run the `NEXT_SAFE_C
 
 Individual modes (optional): `login`, `status-check`, `phase1-truth-check`, `auth-check`.
 
-### 5b. Full refund execution (**PENDING approval**)
+### 5b. Refund target discovery (read-only — **preferred over Dashboard**)
 
-**Primary path — Stripe Dashboard (test mode):**
+**Manual Stripe Dashboard navigation is deprecated** (error-prone). Use harness mapping from DB + optional local Stripe test-key verify.
 
-1. Open Stripe Dashboard → **Test mode** on.
-2. **Payments** → locate the PaymentIntent / Charge for order suffix **`…04pvq0dr78`** (use Checkout session id from gitignored `.staging-checkout-url.local` or Dashboard search — do not paste ids into Ap786).
-3. **Refund** → **Full refund** (not partial).
-4. Wait for `charge.refunded` webhook delivery to staging (typically seconds).
-5. **Do not** resend `checkout.session.completed`.
-6. **Do not** retry payment with card **4242**.
-
-**No in-repo CLI** calls Stripe Refund API for Phase 1 hosted checkout.
-
-### 5c. Post-refund verification (safe read-only)
+Requires: operator login env, `STRIPE_SECRET_KEY=sk_test_…` in gitignored `server/.env.local`, order file set to **`cmp95a2kc0003jy04pvq0dr78`**.
 
 ```powershell
-node tools/staging-auth-checkout-operator.mjs status-check
-node tools/staging-auth-checkout-operator.mjs phase1-truth-check
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-refund-target
 ```
 
-Expect `POST_PAYMENT_INCIDENT_STATUS REFUNDED` after Dashboard full refund + webhook.
+Expect: `L11_REFUND_TARGET_VERDICT PASS`, `DO_NOT_REFUND true`, `STRIPE_PAYMENT_INTENT_ID_SUFFIX`, `STRIPE_CHARGE_ID_SUFFIX`, `AMOUNT`, `CURRENCY`, `POST_PAYMENT_INCIDENT_STATUS` not `REFUNDED`, `REFUND_ALREADY_EXISTS false`.
 
-Capture **enum-only** evidence for `Ap786/L11_FULL_REFUND_SAFETY.md` execution section (future commit after approval).
+Slim API: `GET /api/ops/staging-operator-refund-target/:orderId` (suffix-only Stripe ids in response).
 
-### 5d. Integration fixture path (CI / local DB only — **not** staging L-11 default)
+### 5c. Full refund execution (**second approval gate**)
+
+**Guarded path — Stripe Refund API (test mode only, full amount):**
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server
+$env:L11_REFUND_APPROVAL = "Approved: L-11 execute full refund"
+node tools/staging-auth-checkout-operator.mjs l11-refund-execute
+```
+
+Requires: `l11-preflight` PASS, `l11-refund-target` PASS, exact order id, test key only, no prior refund.
+
+Expect before refund: `FINAL_REFUND_GUARD_PASS true`, `REFUND_MODE full`, `STRIPE_MODE test_only`.  
+After: `REFUND_CREATED true`, `REFUND_ID_SUFFIX` only (no full ids).
+
+**Dashboard manual refund:** fallback only if `l11-refund-execute` blocked — use `DASHBOARD_SEARCH_HINT` from `l11-refund-target`.
+
+### 5d. Post-refund verification
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
+```
+
+Expect: `L11_REFUND_PROOF_VERDICT PASS`, `POST_PAYMENT_INCIDENT_STATUS REFUNDED`, lifecycle still **FULFILLED** / **RECHARGE_COMPLETED** / fulfillment **1**.
+
+Do **not** commit proof until this passes. L-11 remains **PLAN_READY** until then.
+
+### 5e. Integration fixture path (CI / local DB only — **not** staging L-11 default)
 
 Pattern: `stripeWebhookHttpChaos.integration.test.js` — `charge.refunded after delivery…`  
 Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refunded` with synthetic secret. **Do not use** as substitute for staging Dashboard proof unless explicitly approved.
@@ -226,7 +243,8 @@ Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refu
 | Refund code path mapped | **Done** |
 | Candidate order identified (suffix only) | **`…04pvq0dr78`** |
 | Execution path documented | **Dashboard full refund** (pending approval) |
-| Refund executed | **No** |
-| **Overall** | **PLAN_READY** |
+| Refund executed | **No** (use §5c only with `L11_REFUND_APPROVAL` env) |
+| Guarded operator modes | **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
+| **Overall** | **PLAN_READY** — proof commit blocked until `l11-post-refund-verify` PASS |
 
-**Next:** After **`Approved: L-11 execute full refund`**, run §5b–5c, record enums, update this file with execution section, then commit L-11 **PASS** evidence.
+**Next:** `l11-refund-target` → (optional) `l11-refund-execute` with approval env → `l11-post-refund-verify` → then record enums and commit proof (separate approval).

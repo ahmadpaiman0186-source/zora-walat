@@ -91,6 +91,28 @@ describe('staging-auth-checkout-operator CLI (spawn)', () => {
     assert.match(out, /phase1-truth-check/);
   });
 
+  it('l11-refund-execute refuses without L11_REFUND_APPROVAL env', () => {
+    const r = spawnSync(
+      process.execPath,
+      ['tools/staging-auth-checkout-operator.mjs', 'l11-refund-execute'],
+      {
+        cwd: SERVER_ROOT,
+        env: {
+          ...process.env,
+          L11_REFUND_APPROVAL: '',
+          STAGING_OPERATOR_EMAIL: '',
+          STAGING_OPERATOR_PASSWORD: '',
+        },
+        encoding: 'utf8',
+        timeout: 30_000,
+      },
+    );
+    const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+    assert.match(out, /FINAL_REFUND_GUARD_PASS false/);
+    assert.match(out, /refund_approval_missing|L11_REFUND_APPROVAL_EXACT false/);
+    assert.ok(!/REFUND_CREATED true/.test(out));
+  });
+
   it('l11-preflight prints DO_NOT_REFUND without network when blocked locally', () => {
     const r = spawnSync(
       process.execPath,

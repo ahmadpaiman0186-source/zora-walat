@@ -16,6 +16,9 @@
  *   node tools/staging-auth-checkout-operator.mjs phase1-truth-check
  *   node tools/staging-auth-checkout-operator.mjs l11-preflight
  *   node tools/staging-auth-checkout-operator.mjs staging-api-smoke
+ *   node tools/staging-auth-checkout-operator.mjs l11-refund-target
+ *   node tools/staging-auth-checkout-operator.mjs l11-refund-execute
+ *   node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
  *
  * PowerShell (one command per line — do not concatenate):
  *   cd .\server
@@ -66,6 +69,27 @@ import {
   ROUTE_DIAGNOSIS,
   STAGING_API_DEPLOY_RECOVERY_HINT,
 } from './stagingOperatorRouteDiagnostics.mjs';
+import {
+  dbMappingFromRefundTargetApi,
+  runL11PreflightEvaluation,
+} from './stagingOperatorL11HarnessCore.mjs';
+import {
+  buildDashboardSearchHint,
+  createFullPaymentIntentRefund,
+  evaluateL11PostRefundVerify,
+  evaluateL11RefundExecuteGuards,
+  evaluateL11RefundTarget,
+  idSuffix,
+  isStripeTestModeSecret,
+  L11_REFUND_APPROVAL_PHRASE,
+  L11_TARGET_ORDER_ID,
+  lookupStripePaymentForOrder,
+  orderIdMatchesL11Target,
+  refundApprovalPhraseMatches,
+  stripeSecretKeyMode,
+} from './stagingOperatorL11Refund.mjs';
+import { effectiveStripeSecretKey } from '../src/config/stripeEnv.js';
+import { getStripeClient } from '../src/services/stripe.js';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -82,6 +106,8 @@ const STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX =
   '/api/ops/staging-operator-order-status/';
 const STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX =
   '/api/ops/staging-operator-phase1-truth/';
+const STAGING_OPERATOR_REFUND_TARGET_PATH_PREFIX =
+  '/api/ops/staging-operator-refund-target/';
 
 const MODES = OPERATOR_MODES_SET;
 
@@ -1580,6 +1606,297 @@ async function modeStagingApiSmoke() {
   process.exitCode = 1;
 }
 
+function readStripeSecretForL11() {
+  return effectiveStripeSecretKey(process.env.STRIPE_SECRET_KEY ?? '');
+}
+
+async function fetchRefundTargetFromApi(token, orderId) {
+  const path = `${STAGING_OPERATOR_REFUND_TARGET_PATH_PREFIX}${encodeURIComponent(orderId)}`;
+  return apiGet(path, { Authorization: `Bearer ${token}` }, PHASE1_TRUTH_SLIM_TIMEOUT_MS);
+}
+
+/**
+ * @param {{ verbose?: boolean }} [options]
+ */
+async function runL11PreflightCore(options = {}) {
+  const verbose = options.verbose === true;
+  const orderId = await loadOrderId();
+  if (!orderId) {
+    return { pass: false, blockedReason: 'missing_order_id', orderId: '' };
+  }
+  if (!orderIdMatchesL11Target(orderId)) {
+    return {
+      pass: false,
+      blockedReason: 'order_id_not_l11_target',
+      orderId,
+    };
+  }
+
+  const tokenResult = await ensureOperatorToken({ verbose });
+  if (!tokenResult.ok) {
+    return {
+      pass: false,
+      blockedReason: tokenResult.blockedReason ?? 'token_unavailable',
+      orderId,
+    };
+  }
+
+  const { evaluation } = await runL11PreflightEvaluation({
+    orderId,
+    token: tokenResult.token,
+    loginHttp: tokenResult.loginHttp,
+    runStatusCheckCore,
+    runPhase1TruthCheckCore,
+    phase1TruthPrefix: L11_PREFLIGHT_SLIM_PHASE1_TRUTH_PREFIX,
+    verbose,
+  });
+
+  return {
+    pass: evaluation.pass,
+    blockedReason: evaluation.blockedReason,
+    orderId,
+    token: tokenResult.token,
+    loginHttp: tokenResult.loginHttp,
+    evaluation,
+  };
+}
+
+async function resolveStripeMappingForOrder(orderId) {
+  const secret = readStripeSecretForL11();
+  if (!secret || !isStripeTestModeSecret(secret)) {
+    return { verified: false, reason: 'stripe_test_key_missing' };
+  }
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return { verified: false, reason: 'stripe_test_key_missing' };
+  }
+  try {
+    const mapped = await lookupStripePaymentForOrder(stripe, orderId);
+    if (!mapped.verified) return mapped;
+    if (mapped.partialRefundExists) {
+      return { verified: false, reason: 'partial_refund_exists' };
+    }
+    return mapped;
+  } catch (err) {
+    return {
+      verified: false,
+      reason: String(err?.code ?? err?.message ?? 'stripe_lookup_failed'),
+    };
+  }
+}
+
+async function modeL11RefundTarget() {
+  safeLine('MODE l11-refund-target');
+  safeLine('DO_NOT_REFUND true');
+
+  const pre = await runL11PreflightCore({ verbose: false });
+  safeLine(`L11_PREFLIGHT_VERDICT ${pre.pass ? 'PASS' : 'BLOCKED'}`);
+  if (!pre.pass) {
+    safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const targetRes = await fetchRefundTargetFromApi(pre.token, pre.orderId);
+  safeLine(`REFUND_TARGET_HTTP ${targetRes.timedOut ? 'timeout' : targetRes.status}`);
+  if (targetRes.status !== 200 || targetRes.json?.orderFound !== true) {
+    safeLine('L11_REFUND_TARGET_VERDICT BLOCKED');
+    safeLine('BLOCKED_REASON refund_target_api_failed');
+    process.exitCode = 1;
+    return;
+  }
+
+  const db = dbMappingFromRefundTargetApi(targetRes.json);
+  let stripe = null;
+  const secret = readStripeSecretForL11();
+  if (secret && isStripeTestModeSecret(secret)) {
+    stripe = await resolveStripeMappingForOrder(pre.orderId);
+    if (stripe.verified) {
+      safeLine('STRIPE_LOCAL_VERIFY true');
+      safeLine(`STRIPE_MODE ${stripe.stripeMode}`);
+    } else {
+      safeLine('STRIPE_LOCAL_VERIFY false');
+      safeLine(`STRIPE_LOCAL_VERIFY_REASON ${stripe.reason ?? 'unknown'}`);
+    }
+  } else {
+    safeLine('STRIPE_LOCAL_VERIFY skipped');
+    safeLine('STRIPE_LOCAL_VERIFY_REASON stripe_test_key_missing_in_env');
+  }
+
+  const evaluation = evaluateL11RefundTarget({
+    preflightPass: true,
+    orderId: pre.orderId,
+    db,
+    stripe: stripe?.verified ? stripe : null,
+  });
+
+  safeLine(`ORDER_ID_SUFFIX ${idSuffix(pre.orderId)}`);
+  safeLine(`POST_PAYMENT_INCIDENT_STATUS ${db.postPaymentIncidentStatus}`);
+  safeLine(
+    `REFUND_ALREADY_EXISTS ${db.refundAlreadyRecordedInApp || stripe?.refundAlreadyExists ? 'true' : 'false'}`,
+  );
+  if (db.amountUsdCents != null) {
+    safeLine(`AMOUNT ${db.amountUsdCents}`);
+    safeLine(`CURRENCY ${db.currency}`);
+  } else {
+    safeLine('AMOUNT unknown');
+    safeLine(`CURRENCY ${db.currency}`);
+  }
+  safeLine(`STRIPE_PAYMENT_INTENT_ID_SUFFIX ${db.stripePaymentIntentIdSuffix}`);
+  safeLine(
+    `STRIPE_CHARGE_ID_SUFFIX ${stripe?.verified ? stripe.chargeIdSuffix : 'unknown'}`,
+  );
+  safeLine(
+    `DASHBOARD_SEARCH_HINT ${buildDashboardSearchHint(db.stripePaymentIntentIdSuffix, idSuffix(pre.orderId))}`,
+  );
+  safeLine('DASHBOARD_MANUAL_REFUND deprecated_use_l11_refund_execute');
+
+  for (const [k, v] of Object.entries(evaluation.checks)) {
+    safeLine(`L11_REFUND_TARGET_CHECK_${k.toUpperCase()} ${v ? 'true' : 'false'}`);
+  }
+
+  if (evaluation.pass) {
+    safeLine('L11_REFUND_TARGET_VERDICT PASS');
+    safeLine('NEXT_SAFE_COMMAND node tools/staging-auth-checkout-operator.mjs l11-refund-execute');
+    safeLine(
+      `L11_REFUND_APPROVAL_REQUIRED set_env_L11_REFUND_APPROVAL_exact_phrase`,
+    );
+    process.exitCode = 0;
+    return;
+  }
+
+  safeLine('L11_REFUND_TARGET_VERDICT BLOCKED');
+  safeLine(`BLOCKED_REASON ${evaluation.blockedReason ?? 'refund_target_failed'}`);
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-refund-target')}`);
+  process.exitCode = 1;
+}
+
+async function modeL11RefundExecute() {
+  safeLine('MODE l11-refund-execute');
+  safeLine('DO_NOT_REFUND false');
+
+  const approval = String(process.env.L11_REFUND_APPROVAL ?? '');
+  safeLine(`L11_REFUND_APPROVAL_PRESENT ${approval.length > 0 ? 'true' : 'false'}`);
+  safeLine(
+    `L11_REFUND_APPROVAL_EXACT ${refundApprovalPhraseMatches(approval) ? 'true' : 'false'}`,
+  );
+
+  const pre = await runL11PreflightCore({ verbose: false });
+  if (!pre.pass) {
+    safeLine('FINAL_REFUND_GUARD_PASS false');
+    safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
+    safeLine('DO_NOT_REFUND true');
+    process.exitCode = 1;
+    return;
+  }
+
+  const targetRes = await fetchRefundTargetFromApi(pre.token, pre.orderId);
+  const db = dbMappingFromRefundTargetApi(targetRes.json);
+  const stripeMap = await resolveStripeMappingForOrder(pre.orderId);
+  const targetEval = evaluateL11RefundTarget({
+    preflightPass: true,
+    orderId: pre.orderId,
+    db,
+    stripe: stripeMap.verified ? stripeMap : null,
+  });
+
+  const secret = readStripeSecretForL11();
+  const executeEval = evaluateL11RefundExecuteGuards({
+    targetPass: targetEval.pass,
+    orderId: pre.orderId,
+    approvalPhrase: approval,
+    stripeKeyMode: stripeSecretKeyMode(secret),
+    db,
+    stripe: stripeMap.verified ? stripeMap : null,
+  });
+
+  for (const [k, v] of Object.entries(executeEval.checks)) {
+    safeLine(`L11_REFUND_EXECUTE_CHECK_${k.toUpperCase()} ${v ? 'true' : 'false'}`);
+  }
+
+  if (!executeEval.pass) {
+    safeLine('FINAL_REFUND_GUARD_PASS false');
+    safeLine(`BLOCKED_REASON ${executeEval.blockedReason ?? 'execute_guard_failed'}`);
+    safeLine('DO_NOT_REFUND true');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-refund-target')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine('FINAL_REFUND_GUARD_PASS true');
+  safeLine('REFUND_MODE full');
+  safeLine('STRIPE_MODE test_only');
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    safeLine('REFUND_CREATED false');
+    safeLine('REFUND_ERROR_CODE stripe_test_key_missing');
+    process.exitCode = 1;
+    return;
+  }
+  const paymentIntentId = stripeMap.paymentIntentId;
+
+  try {
+    const result = await createFullPaymentIntentRefund(
+      stripe,
+      paymentIntentId,
+      db.amountUsdCents,
+    );
+    safeLine('REFUND_CREATED true');
+    safeLine(`REFUND_ID_SUFFIX ${result.refundIdSuffix}`);
+    safeLine(`REFUND_STATUS ${result.status}`);
+    safeLine('NEXT_SAFE_COMMAND node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify');
+    process.exitCode = 0;
+  } catch (err) {
+    safeLine('REFUND_CREATED false');
+    safeLine(`REFUND_ERROR_CODE ${String(err?.code ?? 'refund_failed')}`);
+    safeLine('DO_NOT_REFUND true');
+    process.exitCode = 1;
+  }
+}
+
+async function modeL11PostRefundVerify() {
+  safeLine('MODE l11-post-refund-verify');
+  safeLine('DO_NOT_REFUND true');
+
+  const orderId = await loadOrderId();
+  if (!orderIdMatchesL11Target(orderId)) {
+    safeLine('L11_REFUND_PROOF_VERDICT BLOCKED');
+    safeLine('BLOCKED_REASON order_id_not_l11_target');
+    process.exitCode = 1;
+    return;
+  }
+
+  const tokenResult = await ensureOperatorToken({ verbose: true });
+  if (!tokenResult.ok) {
+    safeLine('L11_REFUND_PROOF_VERDICT BLOCKED');
+    safeLine(`BLOCKED_REASON ${tokenResult.blockedReason ?? 'token_unavailable'}`);
+    process.exitCode = 2;
+    return;
+  }
+
+  const status = await runStatusCheckCore(tokenResult.token, { verbose: true });
+  const truth = await runPhase1TruthCheckCore(tokenResult.token, { verbose: true });
+
+  const evaluation = evaluateL11PostRefundVerify({ status, truth });
+  for (const [k, v] of Object.entries(evaluation.checks)) {
+    safeLine(`L11_POST_REFUND_CHECK_${k.toUpperCase()} ${v ? 'true' : 'false'}`);
+  }
+
+  if (evaluation.pass) {
+    safeLine('L11_REFUND_PROOF_VERDICT PASS');
+    safeLine('L11_STATUS PLAN_READY');
+    process.exitCode = 0;
+    return;
+  }
+
+  safeLine('L11_REFUND_PROOF_VERDICT BLOCKED');
+  safeLine(`BLOCKED_REASON ${evaluation.blockedReason ?? 'not_refunded_yet'}`);
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-post-refund-verify')}`);
+  process.exitCode = 1;
+}
+
 async function modeL11Preflight() {
   safeLine('MODE l11-preflight');
   safeLine('DO_NOT_REFUND true');
@@ -1734,6 +2051,15 @@ async function main() {
       break;
     case 'l11-preflight':
       await modeL11Preflight();
+      break;
+    case 'l11-refund-target':
+      await modeL11RefundTarget();
+      break;
+    case 'l11-refund-execute':
+      await modeL11RefundExecute();
+      break;
+    case 'l11-post-refund-verify':
+      await modeL11PostRefundVerify();
       break;
     case 'staging-api-smoke':
       await modeStagingApiSmoke();
