@@ -46,6 +46,7 @@ import {
   getEffectiveStripePublishableKey,
   getPublicApiBaseUrl,
   getStripePublishableKeyDiagnostics,
+  isStagingPreviewApp,
 } from '@/lib/env/publicRuntime';
 
 import { OrderSuccessPanel } from './OrderSuccessPanel';
@@ -693,6 +694,21 @@ export function ZoraWalatTopUp() {
   const planSummaryLabel =
     planLabel.length > 0 ? planLabel : m.summary.notSet;
 
+  const continueDisabledReason = ((): string | null => {
+    if (busyIntent) return null;
+    if (!apiBase) return m.error.configApi;
+    if (stripeEnvFault) {
+      return buildStripePublishableKeySetupMessage(stripeDiag);
+    }
+    if (stripeJsError) return m.error.stripeInit;
+    if (!operatorId.length) return m.form.validationOperator;
+    if (!isPhonePlausible(digits)) return m.form.validationPhone;
+    if (!selectedOption) return m.form.validationProduct;
+    return null;
+  })();
+
+  const showStagingBadge = isStagingPreviewApp();
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -707,6 +723,9 @@ export function ZoraWalatTopUp() {
         </div>
         <div className={styles.headerRight}>
           <LanguageSwitcher />
+          {showStagingBadge ? (
+            <span className={styles.stagingBadge}>{m.header.stagingBadge}</span>
+          ) : null}
           <nav className={styles.headerNav} aria-label="Secondary">
             <Link href="/history" className={styles.navLink}>
               {m.header.navOrderHistory}
@@ -965,9 +984,23 @@ export function ZoraWalatTopUp() {
                         Boolean(stripeJsError)
                       }
                       onClick={startPayment}
+                      aria-describedby={
+                        continueDisabledReason ? 'continue-disabled-reason' : undefined
+                      }
                     >
                       {busyIntent ? m.form.continuing : m.form.continueCta}
                     </button>
+                    {continueDisabledReason ? (
+                      <p
+                        id="continue-disabled-reason"
+                        className={styles.disabledHint}
+                        role="status"
+                      >
+                        {continueDisabledReason}
+                      </p>
+                    ) : (
+                      <p className={styles.disabledHintMuted}>{m.form.stripeRedirectNote}</p>
+                    )}
                   </div>
                 )}
               </article>
@@ -1028,7 +1061,22 @@ export function ZoraWalatTopUp() {
                     <span className={styles.summaryKey}>{m.summary.total}</span>
                     <span className={styles.totalAmount}>{summaryMoney}</span>
                   </div>
+                  <p className={styles.summaryFootnote}>
+                    {m.summary.stripeRedirectReminder}
+                  </p>
                 </div>
+              </article>
+
+              <article className={styles.card} aria-labelledby="trust-title">
+                <h2 id="trust-title" className={styles.cardTitle}>
+                  {m.trust.title}
+                </h2>
+                <ul className={styles.trustList}>
+                  <li>{m.trust.stripe}</li>
+                  <li>{m.trust.verify}</li>
+                  <li>{m.trust.tracking}</li>
+                  <li>{m.trust.noStore}</li>
+                </ul>
               </article>
 
               <article className={styles.card} aria-labelledby="pay-title">

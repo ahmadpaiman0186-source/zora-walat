@@ -17,6 +17,14 @@ export function getPublicApiBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_API_URL ?? '').replace(/\/+$/, '');
 }
 
+/** When true, show a small staging-only badge (set NEXT_PUBLIC_ZW_APP_ENV=staging). */
+export function isStagingPreviewApp(): boolean {
+  const v = String(process.env.NEXT_PUBLIC_ZW_APP_ENV ?? '')
+    .trim()
+    .toLowerCase();
+  return v === 'staging' || v === 'preview';
+}
+
 export type StripePublishableKeyDiagnostics = {
   present: boolean;
   malformed: boolean;
