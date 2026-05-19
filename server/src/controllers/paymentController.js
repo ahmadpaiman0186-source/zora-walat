@@ -615,7 +615,7 @@ export async function createCheckoutSession(req, res) {
 
     recordMissionPaymentCreated(row.id, req.traceId ?? null);
 
-    console.log('STRIPE_SESSION_CREATED', session.id);
+    console.log('STRIPE_SESSION_CREATED', safeSuffix(session.id, 12));
 
     await writeOrderAudit(prisma, {
       event: 'checkout_session_created',
@@ -628,7 +628,7 @@ export async function createCheckoutSession(req, res) {
     });
 
     req.log?.info(
-      { checkoutId: row.id, sessionId: session.id },
+      { checkoutId: row.id, sessionIdSuffix: safeSuffix(session.id, 12) },
       'checkout session created',
     );
     recordCheckoutSessionCreated();
