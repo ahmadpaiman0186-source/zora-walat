@@ -17,6 +17,8 @@ export const OPERATOR_MODES = Object.freeze([
   'l11-preflight',
   'l11-refund-target',
   'l11-stripe-diagnose',
+  'l11-db-stripe-mapping',
+  'l11-discover-refundable-order',
   'l11-refund-execute',
   'l11-post-refund-verify',
   'staging-api-smoke',

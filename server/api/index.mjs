@@ -208,6 +208,20 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Staging operator L-11 refundable candidates (Bearer JWT): read-only list (suffix-only).
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'GET' &&
+      p === '/api/ops/staging-operator-refundable-candidates'
+    ) {
+      return import('./slimStagingOperatorRefundableCandidatesHandler.mjs').then(
+        (m) => m.handleSlimStagingOperatorRefundableCandidatesGet(req, res),
+      );
+    }
+  }
+  /**
    * Staging operator L-11 refund target mapping (Bearer JWT): read-only DB payment mapping.
    */
   {

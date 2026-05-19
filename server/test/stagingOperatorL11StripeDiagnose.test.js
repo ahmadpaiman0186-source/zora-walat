@@ -10,6 +10,7 @@ import {
   rootCauseToBlockedReason,
 } from '../tools/stagingOperatorL11StripeDiagnose.mjs';
 import { idSuffix, stripeSecretKeyMode } from '../tools/stagingOperatorL11Refund.mjs';
+import { normalizeSuffixTail } from '../tools/stagingOperatorL11StripeMapping.mjs';
 
 const TEST_KEY = `sk_test_${'a'.repeat(60)}`;
 const LIVE_KEY = `sk_live_${'b'.repeat(60)}`;
@@ -108,11 +109,41 @@ describe('diagnoseL11StripePayment', () => {
     const pi = mockPi({ id: 'pi_other_suffix_mismatch_id' });
     const d = await diagnoseL11StripePayment({
       secretRaw: TEST_KEY,
-      db: baseDb,
+      db: {
+        ...baseDb,
+        paymentIntentIdForVerify: pi.id,
+        stripePaymentIntentIdSuffix: 'wrong_suffix0',
+      },
       stripe: mockStripe(pi),
     });
     assert.equal(d.rootCauseCode, ROOT_CAUSE.STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH);
     assert.equal(d.paymentIntentSuffixMatch, false);
+  });
+
+  it('passes hosted checkout PI without metadata when session has internalCheckoutId', async () => {
+    const pi = mockPi({ metadata: {} });
+    const stripe = mockStripe(pi);
+    stripe.checkout = {
+      sessions: {
+        retrieve: async () => ({
+          id: 'cs_test_session_01',
+          metadata: { internalCheckoutId: baseDb.orderId },
+          client_reference_id: baseDb.orderId,
+        }),
+      },
+    };
+    const d = await diagnoseL11StripePayment({
+      secretRaw: TEST_KEY,
+      db: {
+        ...baseDb,
+        stripePaymentIntentIdSuffix: normalizeSuffixTail(pi.id),
+        checkoutSessionIdForVerify: 'cs_test_session_01',
+      },
+      stripe,
+    });
+    assert.equal(d.rootCauseCode, ROOT_CAUSE.OK);
+    assert.equal(d.paymentIntentSuffixMatch, true);
+    assert.equal(d.metadataOrderMatch, true);
   });
 
   it('detects amount mismatch', async () => {

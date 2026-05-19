@@ -58,6 +58,15 @@ export function dbMappingFromRefundTargetApi(apiJson) {
       apiJson?.stripePaymentIntentIdSuffix ?? 'unknown',
     ),
     paymentIntentIdForVerify: String(apiJson?.paymentIntentIdForVerify ?? '').trim(),
+    checkoutSessionIdForVerify: String(
+      apiJson?.checkoutSessionIdForVerify ?? '',
+    ).trim(),
+    internalCheckoutIdSuffix: String(
+      apiJson?.internalCheckoutIdSuffix ?? apiJson?.orderIdSuffix ?? 'unknown',
+    ),
+    checkoutSessionIdSuffix: String(
+      apiJson?.checkoutSessionIdSuffix ?? 'unknown',
+    ),
     amountUsdCents:
       typeof apiJson?.amountUsdCents === 'number' ? apiJson.amountUsdCents : null,
     currency: String(apiJson?.currency ?? 'usd'),

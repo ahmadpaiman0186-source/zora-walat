@@ -24,7 +24,8 @@ Until that line is recorded (chat/ticket), this document is **plan only**.
 | **Refund executed** | **No** — `l11-refund-execute` stopped at guards (`L11_REFUND_EXECUTE_CHECK_STRIPE_VERIFIED false`) |
 | **Root cause (repo)** | `l11-refund-target` could **PASS without Stripe verification** when `STRIPE_SECRET_KEY` was missing or lookup failed (`!input.stripe` short-circuited stripe checks). Execute correctly required `stripe.verified === true`. |
 | **Likely operator cause** | Test key present but PI verify failed: wrong Stripe account, restricted key lacking `payment_intents` read/search, metadata-only lookup without DB full `paymentIntentId`, or amount/suffix mismatch. |
-| **Fix (repo)** | Align target + execute on **DB PaymentIntent retrieve first**; require `stripe_verified` for target PASS; add read-only **`l11-stripe-diagnose`** with enum-only `ROOT_CAUSE_CODE`. |
+| **Diagnose follow-up (2026-05-18)** | `ROOT_CAUSE_CODE stripe_order_metadata_mismatch` with PI retrieve OK — **verification logic bug**: (1) suffix compare used `…` ellipsis vs API `safeSuffix` tails; (2) hosted Checkout stores `metadata.internalCheckoutId` on **Checkout Session**, not always on **PaymentIntent**. |
+| **Fix (repo)** | Normalize suffix tails; accept session `metadata.internalCheckoutId` / `client_reference_id` when DB `stripePaymentIntentId` matches retrieved PI; modes **`l11-db-stripe-mapping`**, **`l11-discover-refundable-order`**. |
 | **L-11 PASS** | **Not** claimed — remains **PLAN_READY** until `l11-stripe-diagnose` PASS + `l11-refund-target` PASS + approved `l11-refund-execute` + `l11-post-refund-verify` PASS. |
 
 **Next safe command (operator):**
@@ -206,6 +207,22 @@ On failure: `ROOT_CAUSE_CODE` one of `stripe_key_missing`, `stripe_key_not_test`
 
 Typo alias: `111-stripe-diagnose` → canonical `l11-stripe-diagnose` (harness prints `CANONICAL_MODE`).
 
+### 5b2. DB ↔ Stripe mapping (read-only — when diagnose shows `stripe_order_metadata_mismatch`)
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-db-stripe-mapping
+```
+
+Prints suffix-only: `ORDER_ID_SUFFIX`, `INTERNAL_CHECKOUT_ID_SUFFIX`, `CHECKOUT_SESSION_ID_SUFFIX`, `DB_PAYMENT_INTENT_ID_SUFFIX`, `STRIPE_PAYMENT_INTENT_ID_SUFFIX`, `STRIPE_METADATA_KEYS_PRESENT`, `STRIPE_METADATA_INTERNAL_CHECKOUT_MATCH`, `STRIPE_HOSTED_CHECKOUT_LINKAGE`, `DB_TO_STRIPE_MAPPING_VERDICT`.
+
+### 5b3. Discover refundable staging orders (read-only)
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-discover-refundable-order
+```
+
+Lists recent **FULFILLED** + **RECHARGE_COMPLETED** rows with PI mapped (suffix-only). If `L11_TARGET_ORDER_IN_CANDIDATES false`, update gitignored `.staging-order-id.local` from the newest candidate (full id not printed).
+
 ### 5c. Refund target discovery (read-only — **preferred over Dashboard**)
 
 **Manual Stripe Dashboard navigation is deprecated** (error-prone). Use harness mapping from DB + optional local Stripe test-key verify.
@@ -276,8 +293,8 @@ Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refu
 | Candidate order identified (suffix only) | **`…04pvq0dr78`** |
 | Execution path documented | **Dashboard full refund** (pending approval) |
 | Refund executed | **No** (use §5c only with `L11_REFUND_APPROVAL` env) |
-| Guarded operator modes | **`l11-stripe-diagnose`**, **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
+| Guarded operator modes | **`l11-stripe-diagnose`**, **`l11-db-stripe-mapping`**, **`l11-discover-refundable-order`**, **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
 | Stripe verification blocker | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** — diagnose before execute |
 | **Overall** | **PLAN_READY** — **not PASS** — proof commit blocked until `l11-post-refund-verify` PASS |
 
-**Next:** `l11-stripe-diagnose` → `l11-refund-target` → (with approval env) `l11-refund-execute` → `l11-post-refund-verify` → then record enums and commit proof (separate approval).
+**Next:** `l11-db-stripe-mapping` → `l11-stripe-diagnose` (expect PASS) → `l11-refund-target` → (with approval env) `l11-refund-execute` → `l11-post-refund-verify` → then record enums and commit proof (separate approval).

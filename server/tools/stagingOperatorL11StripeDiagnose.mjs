@@ -3,6 +3,11 @@
  */
 
 import { idSuffix, stripeSecretKeyMode } from './stagingOperatorL11Refund.mjs';
+import {
+  evaluateDbStripeMapping,
+  retrieveCheckoutSessionSafe,
+  suffixTailMatch,
+} from './stagingOperatorL11StripeMapping.mjs';
 
 /** @typedef {import('stripe').Stripe} Stripe */
 
@@ -269,6 +274,7 @@ export async function resolvePaymentIntentForL11(stripe, db) {
  *     stripePaymentIntentIdSuffix: string,
  *     amountUsdCents: number | null,
  *     currency: string,
+ *     checkoutSessionIdForVerify?: string,
  *   },
  *   stripe: Stripe | null,
  * }} input
@@ -293,6 +299,7 @@ export async function diagnoseL11StripePayment(input) {
     refundAlreadyExists: false,
     rootCauseCode: ROOT_CAUSE.STRIPE_KEY_MISSING,
     stripePermissionCapability: 'none',
+    mapping: null,
   };
 
   const secret = String(input.secretRaw ?? '').trim();
@@ -377,8 +384,24 @@ export async function diagnoseL11StripePayment(input) {
     expectedPiSuffix: input.db.stripePaymentIntentIdSuffix,
   });
 
-  out.paymentIntentSuffixMatch = snap.suffixMatch;
-  out.metadataOrderMatch = snap.metadataMatch;
+  let checkoutSession = null;
+  const csId = String(input.db.checkoutSessionIdForVerify ?? '').trim();
+  if (csId.startsWith('cs_')) {
+    const cs = await retrieveCheckoutSessionSafe(input.stripe, csId);
+    checkoutSession = cs.ok ? cs.session : null;
+  }
+
+  const mapping = evaluateDbStripeMapping({
+    pi: resolved.pi,
+    orderId: input.db.orderId,
+    expectedPiSuffix: input.db.stripePaymentIntentIdSuffix,
+    paymentIntentIdForVerify: input.db.paymentIntentIdForVerify,
+    checkoutSession,
+  });
+  out.mapping = mapping;
+
+  out.paymentIntentSuffixMatch = mapping.suffixMatch;
+  out.metadataOrderMatch = mapping.linkageOk;
   out.chargeIdPresent = snap.chargePresent;
   out.chargeRetrieveOk = snap.chargePresent;
   out.amountMatch = snap.amountMatch;
@@ -396,12 +419,12 @@ export async function diagnoseL11StripePayment(input) {
     out.rootCauseCode = ROOT_CAUSE.STRIPE_LIVEMODE_NOT_FALSE;
     return out;
   }
-  if (!snap.metadataMatch) {
-    out.rootCauseCode = ROOT_CAUSE.STRIPE_ORDER_METADATA_MISMATCH;
+  if (!mapping.suffixMatch) {
+    out.rootCauseCode = ROOT_CAUSE.STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH;
     return out;
   }
-  if (!snap.suffixMatch) {
-    out.rootCauseCode = ROOT_CAUSE.STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH;
+  if (!mapping.linkageOk) {
+    out.rootCauseCode = ROOT_CAUSE.STRIPE_ORDER_METADATA_MISMATCH;
     return out;
   }
   if (!snap.amountMatch) {
@@ -448,6 +471,7 @@ export async function resolveStripePaymentForL11(stripe, db) {
       stripePaymentIntentIdSuffix: db.stripePaymentIntentIdSuffix,
       amountUsdCents: db.amountUsdCents,
       currency: db.currency,
+      checkoutSessionIdForVerify: db.checkoutSessionIdForVerify ?? '',
     },
     stripe,
   });
@@ -476,13 +500,14 @@ export async function resolveStripePaymentForL11(stripe, db) {
     expectedPiSuffix: db.stripePaymentIntentIdSuffix,
   });
   const refundState = await listRefundsForPiSafe(stripe, resolved.pi);
+  const mapping = diag.mapping;
 
   return {
     verified: true,
     reason: ROOT_CAUSE.OK,
     paymentIntentId: resolved.pi.id,
-    paymentIntentIdSuffix: snap.paymentIntentIdSuffix,
-    chargeIdSuffix: snap.chargeIdSuffix,
+    paymentIntentIdSuffix: mapping?.piSuffixDisplay ?? snap.paymentIntentIdSuffix,
+    chargeIdSuffix: mapping?.chargeIdSuffix ?? snap.chargeIdSuffix,
     amountCents: snap.amountCents,
     currency: snap.currency,
     stripeMode: snap.stripeMode,

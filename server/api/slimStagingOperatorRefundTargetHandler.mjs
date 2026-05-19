@@ -120,6 +120,7 @@ export async function handleSlimStagingOperatorRefundTargetGet(req, res) {
       amountUsdCents: true,
       currency: true,
       stripePaymentIntentId: true,
+      stripeCheckoutSessionId: true,
       postPaymentIncidentStatus: true,
     },
   });
@@ -130,6 +131,7 @@ export async function handleSlimStagingOperatorRefundTargetGet(req, res) {
   }
 
   const pi = String(row.stripePaymentIntentId ?? '').trim();
+  const cs = String(row.stripeCheckoutSessionId ?? '').trim();
   const incidentRaw = String(row.postPaymentIncidentStatus ?? '').trim();
   const incident = Object.values(POST_PAYMENT_INCIDENT_STATUS).includes(incidentRaw)
     ? incidentRaw
@@ -147,8 +149,11 @@ export async function handleSlimStagingOperatorRefundTargetGet(req, res) {
     currency: String(row.currency ?? 'usd'),
     paymentIntentMapped: pi.length > 0,
     stripePaymentIntentIdSuffix: pi.length > 0 ? safeSuffix(pi, 10) : 'unknown',
+    internalCheckoutIdSuffix: safeSuffix(orderId, 10),
+    checkoutSessionIdSuffix: cs.length > 0 ? safeSuffix(cs, 10) : 'unknown',
     /** Harness-only: full PI id for Stripe retrieve — never log or commit. */
     paymentIntentIdForVerify: pi.length > 0 ? pi : '',
+    checkoutSessionIdForVerify: cs.length > 0 ? cs : '',
     postPaymentIncidentStatus: incident,
     refundAlreadyRecordedInApp: incident === POST_PAYMENT_INCIDENT_STATUS.REFUNDED,
   });
