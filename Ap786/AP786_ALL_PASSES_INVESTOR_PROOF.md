@@ -4,7 +4,8 @@
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
 **Last updated:** L-11 refund PASS + frontend UX (2026-05-19)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
-**Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).
+**Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
+**Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.
 
 ---
 
