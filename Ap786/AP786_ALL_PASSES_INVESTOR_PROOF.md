@@ -7,6 +7,7 @@
 **Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
 **Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.  
 **CI guard (2026-05-19):** GitHub Actions `super-system-guard.yml` runs secrets scan + static zw-doctor + **incident classifier** (`incidents --strict --ci-static`) on every PR — **not** production fully certified.  
+**PR #21 CI (2026-05-19):** Operator reports **green** Super-System Guard checks and **Ready to merge** on PR #21 (`d61923d`); Vercel Preview Comments succeeded; **PR not merged yet** — see `PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md`. This is **CI gate evidence only**, not production certification.  
 **L-13:** **Readiness checklist prepared** (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **NOT PASS**, **not** executed.  
 **Incident response workflow (2026-05-19):** `zw-doctor incidents` + approval doc — **not** autonomous production repair.
 
