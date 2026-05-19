@@ -47,6 +47,8 @@ FRONTEND_UX: 2026-05-19 — production copy + payment CTA safety (FRONTEND_PRODU
 GLOBAL AUDIT 2026-05-18: PARTIAL — see GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_18.md (secrets:scan PASS; focused unit tests PASS; full test:ci NOT re-run this session).
 SUPER-SYSTEM AUDIT 2026-03-28..2026-05-19: PARTIAL global / PASS staging L-1..L-11 — SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md @ 0f2c4e0. L-12/L-13 PENDING. Weighted readiness 68%.
 CONTROL PLANE v1 2026-05-19: zw-doctor CLI (diagnose + propose-only) — SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md, SUPER_SYSTEM_CONTROL_PLANE_PROOF.md. No money mutations.
+CI GUARD 2026-05-19: .github/workflows/super-system-guard.yml — secrets:scan + zw-doctor summary --strict --no-operator --no-staging (no repo secrets). STAGING_SMOKE: SUPER_SYSTEM_STAGING_SMOKE_PROOF.md, npm run zw:smoke:staging.
+L-13: CHECKLIST_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (not executed).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)

@@ -1,0 +1,58 @@
+# Safe PR gate: secrets scan + zw-doctor static invariants + control-plane unit tests.
+# No Stripe secrets, operator tokens, DATABASE_URL, or money-moving operations.
+name: Super-System Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+
+concurrency:
+  group: super-system-guard-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        run: npm ci
+
+      - name: Secrets scan (tracked sources)
+        run: npm run secrets:scan
+
+      - name: zw-doctor summary (strict, no operator, no staging)
+        run: npm run zw:doctor -- summary --strict --no-operator --no-staging
+
+      - name: zw-doctor control-plane unit tests
+        run: node --test test/zwDoctor.test.js
+
+      - name: Sanitizer unit tests
+        run: node --test test/zwSanitizeReport.test.js
+
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Super-System Guard"
+            echo ""
+            echo "- secrets:scan on tracked files"
+            echo "- zw-doctor summary --strict --no-operator --no-staging"
+            echo "- zwDoctor + sanitizer unit tests"
+            echo ""
+            echo "Does **not** run refunds, payments, webhooks, or require repository secrets."
+          } >> "$GITHUB_STEP_SUMMARY"

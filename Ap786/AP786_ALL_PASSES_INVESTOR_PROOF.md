@@ -5,7 +5,9 @@
 **Last updated:** L-11 refund PASS + frontend UX (2026-05-19)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
 **Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
-**Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.
+**Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.  
+**CI guard (2026-05-19):** GitHub Actions `super-system-guard.yml` runs secrets scan + static zw-doctor on every PR — **not** production fully certified.  
+**L-13:** Checklist only (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **not** executed.
 
 ---
 

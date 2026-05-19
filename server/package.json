@@ -92,6 +92,7 @@
     "gate:check:scale": "node scripts/gate-check.mjs --strict --scale",
     "doctor:super-system": "node scripts/doctor-super-system.mjs",
     "zw:doctor": "node tools/zw-doctor.mjs",
+    "zw:smoke:staging": "node tools/zw-staging-smoke.mjs",
     "repair:local-safe": "node scripts/repair-local-safe.mjs"
   },
   "dependencies": {
