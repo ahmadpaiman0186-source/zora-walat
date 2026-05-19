@@ -28,6 +28,19 @@ Safe changes only. No payment/ledger/refund behavior changes.
 
 ---
 
+## REP-004 — L-11 Stripe key resolution and diagnostics
+
+| Field | Value |
+|-------|--------|
+| **Files** | `stagingOperatorL11StripeKey.mjs`, `stagingOperatorAuthEnv.mjs`, `stripeEnv.js`, `staging-auth-checkout-operator.mjs`, `stagingOperatorL11Refund.mjs`, tests |
+| **Why** | `l11-discover-refundable-order` blocked with `stripe_key_not_test` while staging login worked — `.env.local` test key ignored when shell operator creds disabled dotenv override |
+| **Risk** | **Low** — operator read paths only; live keys still blocked; no refund executed |
+| **Runtime behavior** | `.env.local` overrides `.env` for Stripe; shell `STRIPE_SECRET_KEY` preserved; `l11-key-diagnose` mode; normalized key applied before `getStripeClient()` |
+| **Tests** | `stagingOperatorL11StripeKey.test.js` + L11/CLI suites |
+| **Rollback** | Revert commit `fix(operator): harden L11 Stripe key diagnostics` |
+
+---
+
 ## REP-003 — L-11 mapping diagnostics and refund-safety hardening
 
 | Field | Value |

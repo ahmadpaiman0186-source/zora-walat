@@ -99,11 +99,14 @@ import {
   pickBestL11RefundableCandidate,
   scoreL11RefundableCandidate,
 } from './stagingOperatorL11Discover.mjs';
-import {
-  getValidatedStripeSecretKey,
-  resolveStripeSecretRaw,
-} from '../src/config/stripeEnv.js';
+import { getValidatedStripeSecretKey } from '../src/config/stripeEnv.js';
 import { getStripeClient } from '../src/services/stripe.js';
+import {
+  applyL11StripeKeyToProcessEnv,
+  printL11StripeKeyDiagnosticLines,
+  resolveL11OperatorStripeKey,
+} from './stagingOperatorL11StripeKey.mjs';
+import { retrieveStripeAccountSafe } from './stagingOperatorL11StripeDiagnose.mjs';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
 const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -126,6 +129,11 @@ const STAGING_OPERATOR_REFUNDABLE_CANDIDATES_PATH =
   '/api/ops/staging-operator-refundable-candidates';
 
 const MODES = OPERATOR_MODES_SET;
+
+/** Captured before `loadOperatorDotenv` — shell precedence for L-11 Stripe key. */
+let l11StripeKeyBeforeDotenv;
+/** @type {ReturnType<typeof resolveL11OperatorStripeKey> | null} */
+let l11StripeKeyResolution = null;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FETCH_TIMEOUT_MS = 30_000;
@@ -1637,11 +1645,65 @@ async function modeStagingApiSmoke() {
 }
 
 function readStripeSecretForL11() {
+  ensureL11StripeKeyResolved();
   return getValidatedStripeSecretKey();
 }
 
+function ensureL11StripeKeyResolved() {
+  if (!l11StripeKeyResolution) {
+    l11StripeKeyResolution = resolveL11OperatorStripeKey({
+      serverRoot: SERVER_ROOT,
+      stripeKeyBeforeDotenv: l11StripeKeyBeforeDotenv,
+    });
+    applyL11StripeKeyToProcessEnv(l11StripeKeyResolution);
+  }
+  return l11StripeKeyResolution;
+}
+
+/**
+ * @param {string} verdictPrefix e.g. DISCOVER_VERDICT
+ * @returns {{ stripe: import('stripe').Stripe, secretRaw: string, resolution: ReturnType<typeof resolveL11OperatorStripeKey> } | null}
+ */
+function requireL11TestStripeKey(verdictPrefix) {
+  const resolution = ensureL11StripeKeyResolved();
+  for (const [key, value] of printL11StripeKeyDiagnosticLines(resolution)) {
+    safeLine(`${key} ${value}`);
+  }
+
+  const testOk =
+    resolution.keyMode === 'test_secret' ||
+    resolution.keyMode === 'test_restricted';
+
+  if (!testOk) {
+    safeLine(`${verdictPrefix} BLOCKED`);
+    if (resolution.keyMode === 'live_blocked') {
+      safeLine('KEY_MODE live_blocked');
+    }
+    safeLine(`ROOT_CAUSE_CODE ${resolution.rootCauseCode}`);
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-key-diagnose')}`);
+    process.exitCode = 1;
+    return null;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe || !resolution.effectiveKey) {
+    safeLine(`${verdictPrefix} BLOCKED`);
+    safeLine('ROOT_CAUSE_CODE stripe_key_missing');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-key-diagnose')}`);
+    process.exitCode = 1;
+    return null;
+  }
+
+  return {
+    stripe,
+    secretRaw: resolution.effectiveKey,
+    resolution,
+  };
+}
+
 function readStripeSecretRawForL11() {
-  return resolveStripeSecretRaw();
+  const resolution = ensureL11StripeKeyResolved();
+  return resolution.effectiveKey ?? '';
 }
 
 async function fetchRefundTargetFromApi(token, orderId) {
@@ -1939,6 +2001,59 @@ async function modeL11DbStripeMapping() {
   process.exitCode = 1;
 }
 
+async function modeL11KeyDiagnose() {
+  safeLine('MODE l11-key-diagnose');
+  safeLine('CANONICAL_MODE l11-key-diagnose');
+  safeLine('DO_NOT_REFUND true');
+
+  const resolution = ensureL11StripeKeyResolved();
+  for (const [key, value] of printL11StripeKeyDiagnosticLines(resolution)) {
+    safeLine(`${key} ${value}`);
+  }
+
+  const testOk =
+    resolution.keyMode === 'test_secret' ||
+    resolution.keyMode === 'test_restricted';
+
+  if (resolution.keyMode === 'live_blocked') {
+    safeLine('KEY_MODE live_blocked');
+  }
+
+  if (!testOk) {
+    safeLine('L11_KEY_DIAG_VERDICT BLOCKED');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-key-diagnose')}`);
+    safeLine('HINT set sk_test or rk_test in server/.env.local or stripe_secret.key; never commit keys');
+    process.exitCode = 1;
+    return;
+  }
+
+  const stripe = getStripeClient();
+  if (!stripe) {
+    safeLine('STRIPE_ACCOUNT_REACHABLE false');
+    safeLine('L11_KEY_DIAG_VERDICT BLOCKED');
+    safeLine('ROOT_CAUSE_CODE stripe_key_missing');
+    process.exitCode = 1;
+    return;
+  }
+
+  const acct = await retrieveStripeAccountSafe(stripe);
+  safeLine(`STRIPE_ACCOUNT_REACHABLE ${acct.reachable ? 'true' : 'false'}`);
+  safeLine(
+    `STRIPE_ACCOUNT_MODE ${acct.reachable ? (acct.livemode ? 'live_blocked' : 'test_only') : 'unknown'}`,
+  );
+
+  if (!acct.reachable || acct.livemode) {
+    safeLine('L11_KEY_DIAG_VERDICT BLOCKED');
+    safeLine(`ROOT_CAUSE_CODE ${acct.livemode ? 'stripe_key_not_test' : 'stripe_account_unreachable'}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine('L11_KEY_DIAG_VERDICT PASS');
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+  process.exitCode = 0;
+}
+
 async function modeL11DiscoverRefundableOrder() {
   safeLine('MODE l11-discover-refundable-order');
   safeLine('CANONICAL_MODE l11-discover-refundable-order');
@@ -1952,15 +2067,9 @@ async function modeL11DiscoverRefundableOrder() {
     return;
   }
 
-  const secretRaw = readStripeSecretRawForL11();
-  const stripe = getStripeClient();
-  if (!secretRaw || !stripe || !isStripeTestModeSecret(secretRaw)) {
-    safeLine('DISCOVER_VERDICT BLOCKED');
-    safeLine('ROOT_CAUSE_CODE stripe_key_not_test');
-    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-stripe-diagnose')}`);
-    process.exitCode = 1;
-    return;
-  }
+  const stripeCtx = requireL11TestStripeKey('DISCOVER_VERDICT');
+  if (!stripeCtx) return;
+  const { stripe, secretRaw } = stripeCtx;
 
   const res = await apiGet(
     STAGING_OPERATOR_REFUNDABLE_CANDIDATES_PATH,
@@ -2022,14 +2131,9 @@ async function modeL11RefreshOrderRef() {
     return;
   }
 
-  const secretRaw = readStripeSecretRawForL11();
-  const stripe = getStripeClient();
-  if (!secretRaw || !stripe || !isStripeTestModeSecret(secretRaw)) {
-    safeLine('REFRESH_VERDICT BLOCKED');
-    safeLine('ROOT_CAUSE_CODE stripe_key_not_test');
-    process.exitCode = 1;
-    return;
-  }
+  const stripeCtx = requireL11TestStripeKey('REFRESH_VERDICT');
+  if (!stripeCtx) return;
+  const { stripe, secretRaw } = stripeCtx;
 
   const res = await apiGet(
     STAGING_OPERATOR_REFUNDABLE_CANDIDATES_PATH,
@@ -2564,6 +2668,7 @@ async function modeL11Preflight() {
 }
 
 async function main() {
+  l11StripeKeyBeforeDotenv = process.env.STRIPE_SECRET_KEY;
   loadOperatorDotenv(SERVER_ROOT);
 
   const parsed = parseOperatorCliArgv(process.argv);
@@ -2620,6 +2725,9 @@ async function main() {
       break;
     case 'l11-db-stripe-mapping':
       await modeL11DbStripeMapping();
+      break;
+    case 'l11-key-diagnose':
+      await modeL11KeyDiagnose();
       break;
     case 'l11-discover-refundable-order':
       await modeL11DiscoverRefundableOrder();

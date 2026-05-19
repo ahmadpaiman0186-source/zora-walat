@@ -16,21 +16,26 @@ Until that line is recorded (chat/ticket), this document is **plan only**.
 
 ---
 
-## Current blocker (2026-05-18, post-hardening)
+## Current blocker (2026-05-19)
 
 | Item | Detail |
 |------|--------|
-| **Blocker code** | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** (operator must re-run read-only chain on staging) |
+| **Blocker code** | **STRIPE_KEY_RESOLUTION_BLOCKED** / `ROOT_CAUSE_CODE stripe_key_not_test` |
+| **Symptom** | `l11-discover-refundable-order` → `DISCOVER_VERDICT BLOCKED` after staging login succeeds |
+| **Root cause (repo)** | When operator sets `STAGING_OPERATOR_EMAIL` / `PASSWORD` in shell, harness used `override: false` for **both** `.env` and `.env.local`, so `.env.local` could **not** override `.env` `STRIPE_SECRET_KEY` (e.g. live/placeholder in `.env`, test key only in `.env.local`). Secondary: quoted keys and raw-vs-normalized mismatch between `resolveStripeSecretRaw` and `isStripeTestModeSecret`. |
+| **Fix (repo)** | `loadOperatorDotenv`: `.env` no override, `.env.local` override; canonical `resolveL11OperatorStripeKey`; mode **`l11-key-diagnose`**; discover/diagnose use normalized test key only. |
+| **Prior blocker** | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** (metadata/suffix — addressed in `46d77ea`) |
 | **Refund executed** | **No** — `l11-refund-execute` **not** run this session |
 | **Last operator diagnose (pre-fix)** | `L11_STRIPE_DIAG_VERDICT BLOCKED`, `ROOT_CAUSE_CODE stripe_order_metadata_mismatch` with `PAYMENT_INTENT_RETRIEVE_BY_FULL_ID true`, `PAYMENT_INTENT_SEARCH_BY_METADATA false`, `PAYMENT_INTENT_SUFFIX_MATCH false`, amount/currency/livemode OK |
 | **Root cause (forensic)** | (1) **Hosted Checkout**: order linkage often on **Checkout Session** metadata / `client_reference_id`, not PI metadata — metadata search fails by design. (2) **Suffix compare bug**: API `safeSuffix` tails vs harness `…` ellipsis / wrong DB suffix column → false `PAYMENT_INTENT_SUFFIX_MATCH`. (3) **Stale `.staging-order-id.local`** or wrong candidate order → metadata mismatch despite valid PI retrieve. (4) **`evaluateL11RefundTarget`** referenced missing `order_id_present` check → false `missing_order_id` on target path (fixed). |
 | **Fix (repo, this commit)** | `piSuffixesMatch` / `normalizeSuffixTail`; `stale_db_payment_intent_suffix` vs `stripe_payment_intent_suffix_mismatch`; **strong PI id proof** allows `PASS_WITH_METADATA_WARNING` (not L-11 PASS); modes **`l11-mapping-diagnose`**, **`l11-discover-refundable-order`** (Stripe-scored), **`l11-refresh-order-ref`** (gitignored order file only); refund-target uses suffix-safe mapping + `READY_FOR_OPERATOR_APPROVAL` (never `PASS`). |
 | **L-11 PASS** | **Not** claimed — remains **PLAN_READY** until live `l11-stripe-diagnose` shows `READY_*` + `l11-refund-target` `READY_FOR_OPERATOR_APPROVAL` + approved `l11-refund-execute` + `l11-post-refund-verify` shows **REFUNDED** with fulfillment count **1**. |
 
-**Next safe command (operator, tomorrow):**
+**Next safe command (operator):**
 
 ```powershell
 cd C:\Users\ahmad\zora_walat\server
+node tools/staging-auth-checkout-operator.mjs l11-key-diagnose
 node tools/staging-auth-checkout-operator.mjs l11-discover-refundable-order
 node tools/staging-auth-checkout-operator.mjs l11-refresh-order-ref
 node tools/staging-auth-checkout-operator.mjs l11-mapping-diagnose
@@ -199,6 +204,17 @@ Expect `L11_PREFLIGHT_VERDICT PASS`, `DO_NOT_REFUND true`, `STATUS_CHECK_HTTP 20
 If `LOCAL_VALIDATION_ERROR command_concatenation_detected`, run the `NEXT_SAFE_COMMAND` line only.
 
 Individual modes (optional): `login`, `status-check`, `phase1-truth-check`, `auth-check`.
+
+### 5a2. Stripe key diagnose (read-only — **run first when discover shows `stripe_key_not_test`**)
+
+No refund. Enum-only output. Does **not** call Stripe when key is missing, live, malformed, or placeholder.
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-key-diagnose
+```
+
+Expect on success: `L11_KEY_DIAG_VERDICT PASS`, `STRIPE_SECRET_KEY_MODE test_secret` or `test_restricted`, `STRIPE_SECRET_KEY_EFFECTIVE_SOURCE env_local` (typical), `STRIPE_ACCOUNT_MODE test_only`.  
+On live key: `KEY_MODE live_blocked`, `ROOT_CAUSE_CODE stripe_key_not_test` — fix `server/.env.local` (gitignored) with `sk_test_…` or `rk_test_…` only; ensure `.env.local` overrides `.env`.
 
 ### 5b. Stripe diagnose (read-only — **run when execute blocked on STRIPE_VERIFIED**)
 

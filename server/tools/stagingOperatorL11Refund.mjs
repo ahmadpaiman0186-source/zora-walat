@@ -24,7 +24,13 @@ export function idSuffix(id, len = 10) {
  * @param {string | null | undefined} key
  */
 export function stripeSecretKeyMode(key) {
-  const k = String(key ?? '').trim();
+  let k = String(key ?? '').trim();
+  if (
+    (k.startsWith('"') && k.endsWith('"')) ||
+    (k.startsWith("'") && k.endsWith("'"))
+  ) {
+    k = k.slice(1, -1).trim();
+  }
   if (k.startsWith('sk_test_') || k.startsWith('rk_test_')) return 'test';
   if (k.startsWith('sk_live_') || k.startsWith('rk_live_')) return 'live';
   return 'unknown';

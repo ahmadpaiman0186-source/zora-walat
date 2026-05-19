@@ -12,15 +12,15 @@ export const LOGIN_API_PATH = '/api/auth/login';
  * @param {string} serverRoot
  */
 export function loadOperatorDotenv(serverRoot) {
-  /** When caller set STAGING_OPERATOR_* (even empty), do not let dotenv files override. */
-  const preserveOperator =
-    process.env.STAGING_OPERATOR_EMAIL !== undefined ||
-    process.env.STAGING_OPERATOR_PASSWORD !== undefined;
-  const override = !preserveOperator;
-  dotenv.config({ path: resolve(serverRoot, '.env'), override });
+  /**
+   * Stripe / general config: `.env` fills unset vars; `.env.local` overrides `.env`.
+   * Shell `STRIPE_SECRET_KEY` (set before node) is preserved — not overwritten by `.env`.
+   * Operator email/password: when set in shell before node, `.env` must not clobber them.
+   */
+  dotenv.config({ path: resolve(serverRoot, '.env'), override: false });
   const localPath = resolve(serverRoot, '.env.local');
   if (existsSync(localPath)) {
-    dotenv.config({ path: localPath, override });
+    dotenv.config({ path: localPath, override: true });
   }
 }
 
