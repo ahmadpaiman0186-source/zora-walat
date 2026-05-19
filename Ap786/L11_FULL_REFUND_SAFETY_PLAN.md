@@ -1,6 +1,6 @@
 # L-11 — Full refund safety plan (pre-execution)
 
-**Status:** **PLAN_READY** — **L-11 execution PENDING** — **no refund executed**  
+**Status:** **PLAN_READY** — **EXECUTION_BLOCKED_STRIPE_VERIFICATION** — **no refund executed**  
 **Date:** 2026-05-18  
 **Rules:** No secrets, JWTs, env values, API keys, full card numbers, customer PII, or raw webhook payloads.
 
@@ -13,6 +13,25 @@
 > **`Approved: L-11 execute full refund`**
 
 Until that line is recorded (chat/ticket), this document is **plan only**.
+
+---
+
+## Current blocker (2026-05-18)
+
+| Item | Detail |
+|------|--------|
+| **Blocker code** | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** |
+| **Refund executed** | **No** — `l11-refund-execute` stopped at guards (`L11_REFUND_EXECUTE_CHECK_STRIPE_VERIFIED false`) |
+| **Root cause (repo)** | `l11-refund-target` could **PASS without Stripe verification** when `STRIPE_SECRET_KEY` was missing or lookup failed (`!input.stripe` short-circuited stripe checks). Execute correctly required `stripe.verified === true`. |
+| **Likely operator cause** | Test key present but PI verify failed: wrong Stripe account, restricted key lacking `payment_intents` read/search, metadata-only lookup without DB full `paymentIntentId`, or amount/suffix mismatch. |
+| **Fix (repo)** | Align target + execute on **DB PaymentIntent retrieve first**; require `stripe_verified` for target PASS; add read-only **`l11-stripe-diagnose`** with enum-only `ROOT_CAUSE_CODE`. |
+| **L-11 PASS** | **Not** claimed — remains **PLAN_READY** until `l11-stripe-diagnose` PASS + `l11-refund-target` PASS + approved `l11-refund-execute` + `l11-post-refund-verify` PASS. |
+
+**Next safe command (operator):**
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-stripe-diagnose
+```
 
 ---
 
@@ -174,7 +193,20 @@ If `LOCAL_VALIDATION_ERROR command_concatenation_detected`, run the `NEXT_SAFE_C
 
 Individual modes (optional): `login`, `status-check`, `phase1-truth-check`, `auth-check`.
 
-### 5b. Refund target discovery (read-only — **preferred over Dashboard**)
+### 5b. Stripe diagnose (read-only — **run when execute blocked on STRIPE_VERIFIED**)
+
+No refund, no mutations. Enum-only output (`ROOT_CAUSE_CODE`, suffix-only account id, boolean checks).
+
+```powershell
+cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-stripe-diagnose
+```
+
+Expect on success: `L11_STRIPE_DIAG_VERDICT PASS`, `ROOT_CAUSE_CODE ok`, `PAYMENT_INTENT_RETRIEVE_BY_FULL_ID true`, `AMOUNT_MATCH true`, `LIVEMODE_FALSE true`, `REFUND_ALREADY_EXISTS false`.  
+On failure: `ROOT_CAUSE_CODE` one of `stripe_key_missing`, `stripe_key_not_test`, `stripe_account_mismatch`, `stripe_payment_intent_not_found`, `stripe_payment_intent_suffix_mismatch`, `stripe_permission_denied`, `stripe_amount_mismatch`, etc.
+
+Typo alias: `111-stripe-diagnose` → canonical `l11-stripe-diagnose` (harness prints `CANONICAL_MODE`).
+
+### 5c. Refund target discovery (read-only — **preferred over Dashboard**)
 
 **Manual Stripe Dashboard navigation is deprecated** (error-prone). Use harness mapping from DB + optional local Stripe test-key verify.
 
@@ -188,7 +220,7 @@ Expect: `L11_REFUND_TARGET_VERDICT PASS`, `DO_NOT_REFUND true`, `STRIPE_PAYMENT_
 
 Slim API: `GET /api/ops/staging-operator-refund-target/:orderId` (suffix-only Stripe ids in response).
 
-### 5c. Full refund execution (**second approval gate**)
+### 5d. Full refund execution (**second approval gate**)
 
 **Guarded path — Stripe Refund API (test mode only, full amount):**
 
@@ -198,14 +230,14 @@ $env:L11_REFUND_APPROVAL = "Approved: L-11 execute full refund"
 node tools/staging-auth-checkout-operator.mjs l11-refund-execute
 ```
 
-Requires: `l11-preflight` PASS, `l11-refund-target` PASS, exact order id, test key only, no prior refund.
+Requires: `l11-preflight` PASS, `l11-stripe-diagnose` PASS, `l11-refund-target` PASS, exact order id, test key only, no prior refund.
 
 Expect before refund: `FINAL_REFUND_GUARD_PASS true`, `REFUND_MODE full`, `STRIPE_MODE test_only`.  
 After: `REFUND_CREATED true`, `REFUND_ID_SUFFIX` only (no full ids).
 
 **Dashboard manual refund:** fallback only if `l11-refund-execute` blocked — use `DASHBOARD_SEARCH_HINT` from `l11-refund-target`.
 
-### 5d. Post-refund verification
+### 5e. Post-refund verification
 
 ```powershell
 cd C:\Users\ahmad\zora_walat\server; node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
@@ -244,7 +276,8 @@ Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refu
 | Candidate order identified (suffix only) | **`…04pvq0dr78`** |
 | Execution path documented | **Dashboard full refund** (pending approval) |
 | Refund executed | **No** (use §5c only with `L11_REFUND_APPROVAL` env) |
-| Guarded operator modes | **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
-| **Overall** | **PLAN_READY** — proof commit blocked until `l11-post-refund-verify` PASS |
+| Guarded operator modes | **`l11-stripe-diagnose`**, **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
+| Stripe verification blocker | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** — diagnose before execute |
+| **Overall** | **PLAN_READY** — **not PASS** — proof commit blocked until `l11-post-refund-verify` PASS |
 
-**Next:** `l11-refund-target` → (optional) `l11-refund-execute` with approval env → `l11-post-refund-verify` → then record enums and commit proof (separate approval).
+**Next:** `l11-stripe-diagnose` → `l11-refund-target` → (with approval env) `l11-refund-execute` → `l11-post-refund-verify` → then record enums and commit proof (separate approval).

@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   detectCommandConcatenation,
+  normalizeOperatorModeAlias,
   parseOperatorCliArgv,
   safeOperatorCommandLine,
 } from '../tools/stagingOperatorCliSafety.mjs';
@@ -56,6 +57,18 @@ describe('parseOperatorCliArgv', () => {
     const parsed = parseOperatorCliArgv(['node', 'script', 'l11-preflight']);
     assert.equal(parsed.ok, true);
     if (parsed.ok) assert.equal(parsed.mode, 'l11-preflight');
+  });
+
+  it('normalizes accidental 111-stripe-diagnose to l11-stripe-diagnose', () => {
+    const alias = normalizeOperatorModeAlias('111-stripe-diagnose');
+    assert.equal(alias.mode, 'l11-stripe-diagnose');
+    assert.equal(alias.aliasFrom, '111-stripe-diagnose');
+    const parsed = parseOperatorCliArgv(['node', 'script', '111-stripe-diagnose']);
+    assert.equal(parsed.ok, true);
+    if (parsed.ok) {
+      assert.equal(parsed.mode, 'l11-stripe-diagnose');
+      assert.equal(parsed.aliasFrom, '111-stripe-diagnose');
+    }
   });
 
   it('accepts staging-api-smoke', () => {

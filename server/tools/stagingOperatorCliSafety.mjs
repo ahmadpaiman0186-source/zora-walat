@@ -16,6 +16,7 @@ export const OPERATOR_MODES = Object.freeze([
   'phase1-truth-check',
   'l11-preflight',
   'l11-refund-target',
+  'l11-stripe-diagnose',
   'l11-refund-execute',
   'l11-post-refund-verify',
   'staging-api-smoke',
@@ -88,6 +89,21 @@ export function powershellSafeOneLiners() {
  *   nextSafeCommand: string,
  * }}
  */
+/**
+ * Accept accidental `111-*` typos when they mirror an existing `l11-*` mode.
+ * @param {string} raw
+ */
+export function normalizeOperatorModeAlias(raw) {
+  const mode = String(raw ?? '').trim().toLowerCase();
+  if (mode.startsWith('111-')) {
+    const candidate = `l11-${mode.slice(4)}`;
+    if (OPERATOR_MODES_SET.has(candidate)) {
+      return { mode: candidate, aliasFrom: mode };
+    }
+  }
+  return { mode, aliasFrom: null };
+}
+
 export function parseOperatorCliArgv(argv) {
   const raw = String(argv[2] ?? '').trim();
   const nextSafeCommand = safeOperatorCommandLine('l11-preflight');
@@ -111,7 +127,10 @@ export function parseOperatorCliArgv(argv) {
     };
   }
 
-  const mode = raw.toLowerCase();
+  const { mode, aliasFrom } = normalizeOperatorModeAlias(raw);
+  if (aliasFrom) {
+    // Caller may print CANONICAL_MODE when aliasFrom is set.
+  }
   if (!OPERATOR_MODES_SET.has(mode)) {
     return {
       ok: false,
@@ -120,7 +139,7 @@ export function parseOperatorCliArgv(argv) {
     };
   }
 
-  return { ok: true, mode };
+  return { ok: true, mode, aliasFrom };
 }
 
 export function operatorUsageLines() {

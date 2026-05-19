@@ -53,6 +53,29 @@ describe('evaluateL11RefundTarget', () => {
       stripe: baseStripe,
     });
     assert.equal(r.pass, true);
+    assert.equal(r.checks.stripe_verified, true);
+  });
+
+  it('fails when stripe verification is missing (no false PASS)', () => {
+    const r = evaluateL11RefundTarget({
+      preflightPass: true,
+      orderId: L11_TARGET_ORDER_ID,
+      db: baseDb,
+      stripe: null,
+    });
+    assert.equal(r.pass, false);
+    assert.equal(r.blockedReason, 'stripe_key_missing');
+  });
+
+  it('fails when stripe is not verified', () => {
+    const r = evaluateL11RefundTarget({
+      preflightPass: true,
+      orderId: L11_TARGET_ORDER_ID,
+      db: baseDb,
+      stripe: { verified: false, blockedReason: 'stripe_payment_intent_not_found' },
+    });
+    assert.equal(r.pass, false);
+    assert.equal(r.blockedReason, 'stripe_payment_intent_not_found');
   });
 
   it('does not pass when already REFUNDED in app', () => {

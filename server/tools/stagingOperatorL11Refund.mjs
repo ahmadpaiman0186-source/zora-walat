@@ -88,23 +88,21 @@ export function evaluateL11RefundTarget(input) {
     incident_not_refunded: input.db.postPaymentIncidentStatus !== 'REFUNDED',
     order_fulfilled: input.db.orderStatus === 'FULFILLED',
     payment_recharge_completed: input.db.paymentStatus === 'RECHARGE_COMPLETED',
+    stripe_verified: Boolean(input.stripe?.verified),
     stripe_test_only:
-      !input.stripe || (input.stripe.verified && input.stripe.stripeMode === 'test_only'),
+      input.stripe?.verified === true && input.stripe.stripeMode === 'test_only',
     stripe_amount_matches:
-      !input.stripe ||
-      (input.stripe.verified &&
-        input.stripe.amountCents === input.db.amountUsdCents),
+      input.stripe?.verified === true &&
+      input.stripe.amountCents === input.db.amountUsdCents,
     stripe_currency_matches:
-      !input.stripe ||
-      (input.stripe.verified &&
-        String(input.stripe.currency).toLowerCase() ===
-          String(input.db.currency).toLowerCase()),
+      input.stripe?.verified === true &&
+      String(input.stripe.currency).toLowerCase() ===
+        String(input.db.currency).toLowerCase(),
     stripe_pi_suffix_matches:
-      !input.stripe ||
-      (input.stripe.verified &&
-        input.stripe.paymentIntentIdSuffix === input.db.stripePaymentIntentIdSuffix),
+      input.stripe?.verified === true &&
+      input.stripe.paymentIntentIdSuffix === input.db.stripePaymentIntentIdSuffix,
     no_prior_refund:
-      !input.stripe || (input.stripe.verified && input.stripe.refundAlreadyExists !== true),
+      input.stripe?.verified === true && input.stripe.refundAlreadyExists !== true,
   };
 
   const pass = Object.values(checks).every(Boolean);
@@ -114,9 +112,15 @@ export function evaluateL11RefundTarget(input) {
   else if (!checks.payment_intent_mapped) blockedReason = 'payment_intent_not_mapped';
   else if (!checks.amount_present) blockedReason = 'amount_not_verified';
   else if (!checks.incident_not_refunded) blockedReason = 'already_refunded_incident';
-  else if (input.stripe && !input.stripe.verified) blockedReason = 'stripe_mapping_not_verified';
-  else if (input.stripe?.stripeMode === 'live') blockedReason = 'stripe_live_mode_forbidden';
+  else if (!checks.stripe_verified) {
+    blockedReason = input.stripe?.blockedReason ?? 'stripe_key_missing';
+  } else if (input.stripe?.stripeMode === 'live') blockedReason = 'stripe_key_not_test';
   else if (input.stripe?.refundAlreadyExists) blockedReason = 'stripe_refund_already_exists';
+  else if (!checks.stripe_amount_matches) blockedReason = 'stripe_amount_mismatch';
+  else if (!checks.stripe_currency_matches) blockedReason = 'stripe_currency_mismatch';
+  else if (!checks.stripe_pi_suffix_matches) {
+    blockedReason = 'stripe_payment_intent_suffix_mismatch';
+  }
   else if (!pass) blockedReason = 'refund_target_guard_failed';
 
   return { pass, blockedReason, checks };
@@ -154,7 +158,9 @@ export function evaluateL11RefundExecuteGuards(input) {
   else if (!checks.order_id_exact) blockedReason = 'order_id_not_l11_target';
   else if (!checks.target_pass) blockedReason = 'refund_target_not_pass';
   else if (!checks.no_prior_stripe_refund) blockedReason = 'stripe_refund_already_exists';
-  else if (!pass) blockedReason = 'refund_execute_guard_failed';
+  else if (!checks.stripe_verified) {
+    blockedReason = input.stripe?.blockedReason ?? 'stripe_key_missing';
+  } else if (!pass) blockedReason = 'refund_execute_guard_failed';
 
   return { pass, blockedReason, checks };
 }

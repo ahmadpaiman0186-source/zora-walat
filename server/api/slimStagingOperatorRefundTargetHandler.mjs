@@ -147,6 +147,8 @@ export async function handleSlimStagingOperatorRefundTargetGet(req, res) {
     currency: String(row.currency ?? 'usd'),
     paymentIntentMapped: pi.length > 0,
     stripePaymentIntentIdSuffix: pi.length > 0 ? safeSuffix(pi, 10) : 'unknown',
+    /** Harness-only: full PI id for Stripe retrieve — never log or commit. */
+    paymentIntentIdForVerify: pi.length > 0 ? pi : '',
     postPaymentIncidentStatus: incident,
     refundAlreadyRecordedInApp: incident === POST_PAYMENT_INCIDENT_STATUS.REFUNDED,
   });

@@ -57,6 +57,7 @@ export function dbMappingFromRefundTargetApi(apiJson) {
     stripePaymentIntentIdSuffix: String(
       apiJson?.stripePaymentIntentIdSuffix ?? 'unknown',
     ),
+    paymentIntentIdForVerify: String(apiJson?.paymentIntentIdForVerify ?? '').trim(),
     amountUsdCents:
       typeof apiJson?.amountUsdCents === 'number' ? apiJson.amountUsdCents : null,
     currency: String(apiJson?.currency ?? 'usd'),
