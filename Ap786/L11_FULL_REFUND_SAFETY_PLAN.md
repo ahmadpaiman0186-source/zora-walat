@@ -16,7 +16,21 @@ Until that line is recorded (chat/ticket), this document is **plan only**.
 
 ---
 
-## Current blocker (2026-05-19)
+## Current blocker (2026-05-19, post-execute)
+
+| Item | Detail |
+|------|--------|
+| **Blocker code** | **WEBHOOK_MIRROR_PENDING** / `L11_REFUND_PROOF_VERDICT BLOCKED` |
+| **Refund executed** | **Yes** (operator harness `l11-refund-execute`, test mode, full amount) |
+| **Stripe** | Refund succeeded (`REFUND_ALREADY_EXISTS` becomes true) |
+| **App** | `POST_PAYMENT_INCIDENT_STATUS` still **NONE** until `charge.refunded` webhook mirrors |
+| **State** | **STATE_C_REFUND_EXISTS_APP_NOT_UPDATED** |
+| **Fix** | Deploy slim `charge.refunded` handler; resend test-mode `charge.refunded` (no second refund) |
+| **Evidence** | `Ap786/L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md` |
+
+---
+
+## Prior blocker (2026-05-19, key resolution)
 
 | Item | Detail |
 |------|--------|

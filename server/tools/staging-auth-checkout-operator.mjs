@@ -106,6 +106,10 @@ import {
   printL11StripeKeyDiagnosticLines,
   resolveL11OperatorStripeKey,
 } from './stagingOperatorL11StripeKey.mjs';
+import {
+  classifyL11RefundState,
+  postRefundBlockedReason,
+} from './stagingOperatorL11PostRefund.mjs';
 import { retrieveStripeAccountSafe } from './stagingOperatorL11StripeDiagnose.mjs';
 
 const STAGING_API_BASE = 'https://zora-walat-api-staging.vercel.app';
@@ -2539,10 +2543,41 @@ async function modeL11PostRefundVerify() {
   const status = await runStatusCheckCore(tokenResult.token, { verbose: true });
   const truth = await runPhase1TruthCheckCore(tokenResult.token, { verbose: true });
 
+  let stripeRefundAlreadyExists = null;
+  const stripeCtx = requireL11TestStripeKey('POST_REFUND_STRIPE');
+  if (stripeCtx) {
+    const targetRes = await fetchRefundTargetFromApi(tokenResult.token, orderId);
+    if (targetRes.status === 200 && targetRes.json?.orderFound === true) {
+      const db = dbMappingFromRefundTargetApi(targetRes.json);
+      const diag = await diagnoseL11StripePayment({
+        secretRaw: stripeCtx.secretRaw,
+        db: {
+          orderId,
+          paymentIntentIdForVerify: db.paymentIntentIdForVerify,
+          stripePaymentIntentIdSuffix: db.stripePaymentIntentIdSuffix,
+          amountUsdCents: db.amountUsdCents,
+          currency: db.currency,
+          checkoutSessionIdForVerify: db.checkoutSessionIdForVerify,
+        },
+        stripe: stripeCtx.stripe,
+      });
+      stripeRefundAlreadyExists = diag.refundAlreadyExists === true;
+      safeLine(`STRIPE_REFUND_ALREADY_EXISTS ${stripeRefundAlreadyExists ? 'true' : 'false'}`);
+      safeLine(`STRIPE_ACCOUNT_MODE ${diag.stripeAccountMode ?? 'unknown'}`);
+    }
+  }
+
   const evaluation = evaluateL11PostRefundVerify({ status, truth });
   for (const [k, v] of Object.entries(evaluation.checks)) {
     safeLine(`L11_POST_REFUND_CHECK_${k.toUpperCase()} ${v ? 'true' : 'false'}`);
   }
+
+  const classified = classifyL11RefundState({
+    postPaymentIncidentStatus: truth.postPaymentIncidentStatus ?? 'unknown',
+    stripeRefundAlreadyExists,
+  });
+  safeLine(`L11_REFUND_STATE ${classified.state}`);
+  safeLine(`POST_PAYMENT_INCIDENT_STATUS ${truth.postPaymentIncidentStatus ?? 'unknown'}`);
 
   if (evaluation.pass) {
     safeLine('L11_REFUND_PROOF_VERDICT PASS');
@@ -2552,8 +2587,17 @@ async function modeL11PostRefundVerify() {
   }
 
   safeLine('L11_REFUND_PROOF_VERDICT BLOCKED');
-  safeLine(`BLOCKED_REASON ${evaluation.blockedReason ?? 'not_refunded_yet'}`);
-  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-post-refund-verify')}`);
+  const blockedReason = postRefundBlockedReason(stripeRefundAlreadyExists === true);
+  safeLine(`BLOCKED_REASON ${blockedReason}`);
+  if (classified.state === 'STATE_C_REFUND_EXISTS_APP_NOT_UPDATED') {
+    safeLine('WEBHOOK_MIRROR_HINT charge.refunded must reach staging POST /webhooks/stripe');
+    safeLine('WEBHOOK_MIRROR_ACTION stripe_dashboard_test_mode_resend_event charge.refunded');
+    safeLine(
+      'WEBHOOK_MIRROR_DEPLOY deploy server slim_charge_refunded path before resend if not yet deployed',
+    );
+    safeLine('WAIT_HINT retry_l11_post_refund_verify_after_30_to_90_seconds');
+  }
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine(classified.nextSafeCommand)}`);
   process.exitCode = 1;
 }
 

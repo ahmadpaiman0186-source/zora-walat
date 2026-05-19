@@ -38,6 +38,20 @@ describe('stripeEventSlimUnmatchedFastAck (L-7 classifier)', () => {
     assert.equal(stripeEventSlimUnmatchedFastAck(ev), true);
   });
 
+  it('charge.refunded is not slim-unmatched (slim charge.refunded path or handoff)', () => {
+    const ev = {
+      type: 'charge.refunded',
+      data: {
+        object: {
+          id: 'ch_test_refund_suffix_01',
+          object: 'charge',
+          payment_intent: 'pi_test_refund_suffix_01',
+        },
+      },
+    };
+    assert.equal(stripeEventSlimUnmatchedFastAck(ev), false);
+  });
+
   it('customer.created is not slim-unmatched (hands off to full handler)', () => {
     const ev = {
       type: 'customer.created',

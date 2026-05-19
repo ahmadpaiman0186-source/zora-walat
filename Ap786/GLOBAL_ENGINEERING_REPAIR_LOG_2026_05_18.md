@@ -28,6 +28,18 @@ Safe changes only. No payment/ledger/refund behavior changes.
 
 ---
 
+## REP-005 — L-11 slim charge.refunded webhook mirror
+
+| Field | Value |
+|-------|--------|
+| **Files** | `slimStripeWebhookChargeRefunded.mjs`, `slimStripeWebhookHandler.mjs`, `stagingOperatorL11PostRefund.mjs`, post-refund verify harness |
+| **Why** | Harness refund succeeded but `postPaymentIncidentStatus` stayed NONE — `charge.refunded` did not mirror on staging (cold webhook handoff) |
+| **Risk** | **Low** — same `applyPhase1ChargeRefunded` as full Express path; idempotent ledger |
+| **Operator recovery** | Deploy staging API; resend test-mode `charge.refunded` (no second refund); `l11-post-refund-verify` |
+| **Tests** | `slimStripeWebhookChargeRefunded.test.js`, `stagingOperatorL11PostRefund.test.js` |
+
+---
+
 ## REP-004 — L-11 Stripe key resolution and diagnostics
 
 | Field | Value |
