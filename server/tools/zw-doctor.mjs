@@ -6,11 +6,11 @@
  *   node tools/zw-doctor.mjs [mode] [--json] [--strict] [--no-staging] [--no-operator]
  *
  * Modes: summary | money-path | stripe-env | webhook | operator-auth |
- *        frontend-env | deploy-root | evidence | all
+ *        frontend-env | deploy-root | evidence | incidents | all
  *
  * Never executes refunds, payments, or webhook resends.
  */
-import { runZwDoctor, MODES } from './zwDoctor/run.mjs';
+import { runZwDoctor, runZwDoctorIncidents, MODES } from './zwDoctor/run.mjs';
 
 function printUsage() {
   process.stderr.write(
@@ -43,11 +43,16 @@ if (!MODES.includes(mode)) {
   process.exit(2);
 }
 
-const result = await runZwDoctor(mode, {
+const opts = {
   json: flags.has('--json'),
   strict: flags.has('--strict'),
   probeStaging: !flags.has('--no-staging'),
   probeOperator: !flags.has('--no-operator'),
-});
+};
+
+const result =
+  mode === 'incidents'
+    ? await runZwDoctorIncidents(opts)
+    : await runZwDoctor(mode, opts);
 
 process.exit(result.exitCode);

@@ -163,3 +163,5 @@ server/test/zwDoctor.test.js        # Unit tests
 ```
 
 Wraps existing tools: `stagingOperatorL11StripeKey.mjs`, `stagingOperatorAuthEnv.mjs`, `assert-vercel-api-deploy-root.mjs`, `secret-scan.mjs`, `staging-auth-checkout-operator.mjs` (status-check only).
+
+Incident classifier: `zwDoctor/incidents.mjs` — `npm run zw:doctor -- incidents`. See `SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md`.

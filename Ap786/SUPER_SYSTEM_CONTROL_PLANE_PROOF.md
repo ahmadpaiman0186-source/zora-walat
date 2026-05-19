@@ -20,6 +20,17 @@ A **diagnostic and proposal** control plane foundation. It improves detection, c
 
 ---
 
+## Incident response (v1.1)
+
+```bash
+npm run zw:doctor -- incidents
+npm run zw:doctor -- incidents --json --no-operator --no-staging
+npm run zw:doctor -- incidents --strict   # exit 1 if HIGH/CRITICAL active
+```
+
+Classifier: `server/tools/zwDoctor/incidents.mjs` — 21 incident types, propose-only runbooks.  
+Workflow doc: `SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md`.
+
 ## Safety confirmations
 
 | Check | Result |
@@ -28,6 +39,7 @@ A **diagnostic and proposal** control plane foundation. It improves detection, c
 | Payments created | **No** |
 | Webhooks resent | **No** |
 | Production data mutated | **No** |
+| Auto-repair executed | **No** |
 | Raw secrets in output | **No** (redaction + tests) |
 
 ---
@@ -43,7 +55,7 @@ npm run zw:doctor -- money-path --no-operator
 npm run zw:doctor -- deploy-root
 ```
 
-Modes: `summary`, `money-path`, `stripe-env`, `webhook`, `operator-auth`, `frontend-env`, `deploy-root`, `evidence`, `all`.
+Modes: `summary`, `money-path`, `stripe-env`, `webhook`, `operator-auth`, `frontend-env`, `deploy-root`, `evidence`, `incidents`, `all`.
 
 ---
 

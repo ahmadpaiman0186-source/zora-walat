@@ -73,9 +73,20 @@ ZW_STAGING_SMOKE_VERDICT PASS
 
 ---
 
+## Incident classification (operator)
+
+After smoke, operators may run:
+
+```bash
+npm run zw:doctor -- incidents --json
+```
+
+See `SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md` for approval phrases.
+
 ## Honest readiness note
 
 **Control-plane CI guard added** — improves detection on every PR.  
+**Incident response workflow added** — classification and approval gates only.  
 **Not** “production fully certified.” Staging money-path L-8–L-11 proofs remain separate Ap786 evidence.
 
 ---

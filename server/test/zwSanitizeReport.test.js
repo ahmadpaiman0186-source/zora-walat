@@ -14,7 +14,7 @@ import { stripeLiveSkUnderscore } from '../tools/zwDoctor/secretPatterns.mjs';
 
 describe('sanitizeReport', () => {
   it('stripeIdToSuffix keeps last 8 chars only', () => {
-    assert.equal(stripeIdToSuffix('pi_abcdefghijklmnopqrstuvwxyz'), '…uvwxyz');
+    assert.equal(stripeIdToSuffix('pi_abcdefghijklmnopqrstuvwxyz'), '…stuvwxyz');
   });
 
   it('redacts sensitive object keys', () => {
