@@ -37,6 +37,45 @@ export function suffixTailMatch(a, b, len = 10) {
 }
 
 /**
+ * Compare API `safeSuffix` tail vs harness `idSuffix` / full `pi_` id.
+ * @param {string | null | undefined} apiSuffixOrTail
+ * @param {string | null | undefined} stripePiIdOrHarnessSuffix
+ * @param {number} [len]
+ */
+export function piSuffixesMatch(apiSuffixOrTail, stripePiIdOrHarnessSuffix, len = 10) {
+  const full = String(stripePiIdOrHarnessSuffix ?? '').trim();
+  if (full.startsWith('pi_')) {
+    return suffixTailMatch(apiSuffixOrTail, full, len);
+  }
+  return suffixTailMatch(apiSuffixOrTail, stripePiIdOrHarnessSuffix, len);
+}
+
+/**
+ * Strong read-only proof: DB full PI id retrieves the same Stripe object; money fields align.
+ * Metadata may still be absent on hosted-checkout PaymentIntents.
+ * @param {{
+ *   mapping: ReturnType<typeof evaluateDbStripeMapping>,
+ *   amountMatch: boolean,
+ *   currencyMatch: boolean,
+ *   livemodeFalse: boolean,
+ *   chargePresent: boolean,
+ *   refundAlreadyExists: boolean,
+ * }} input
+ */
+export function hasStrongPiIdProof(input) {
+  const m = input.mapping;
+  return (
+    m.dbPiIdMatchesRetrieved === true &&
+    m.suffixMatch === true &&
+    input.amountMatch === true &&
+    input.currencyMatch === true &&
+    input.livemodeFalse === true &&
+    input.chargePresent === true &&
+    input.refundAlreadyExists !== true
+  );
+}
+
+/**
  * @param {import('stripe').Stripe.PaymentIntent} pi
  */
 export function stripeMetadataKeyNames(pi) {
@@ -135,7 +174,7 @@ export function evaluateDbStripeMapping(input) {
 
   const piSuffixDisplay = idSuffix(pi.id);
   const dbPiSuffixDisplay = idSuffix(dbPiId || pi.id);
-  const suffixMatch = suffixTailMatch(piSuffixDisplay, input.expectedPiSuffix);
+  const suffixMatch = piSuffixesMatch(input.expectedPiSuffix, pi.id);
   const dbPiIdMatchesRetrieved =
     dbPiId.length > 0 && dbPiId === String(pi.id ?? '').trim();
 
@@ -165,14 +204,30 @@ export function evaluateDbStripeMapping(input) {
     (sessionInternalMatch ||
       String(input.checkoutSession?.client_reference_id ?? '').trim() === orderId);
 
+  const checkoutSessionIdSuffix = input.checkoutSession?.id
+    ? idSuffix(input.checkoutSession.id)
+    : 'unknown';
+
+  const stripeMetadataCheckoutSessionMatch =
+    sessionInternalMatch ||
+    String(input.checkoutSession?.client_reference_id ?? '').trim() === orderId;
+
   const linkageOk =
     dbPiIdMatchesRetrieved &&
     suffixMatch &&
-    (anyMatch.match || piInternalMatch || sessionInternalMatch || hostedCheckoutLinkage);
+    (anyMatch.match ||
+      piInternalMatch ||
+      sessionInternalMatch ||
+      hostedCheckoutLinkage);
+
+  const staleDbPiSuffix =
+    dbPiIdMatchesRetrieved && !suffixMatch;
 
   let rootCauseCode = 'ok';
   if (!dbPiIdMatchesRetrieved) {
     rootCauseCode = 'stripe_payment_intent_not_found';
+  } else if (staleDbPiSuffix) {
+    rootCauseCode = 'stale_db_payment_intent_suffix';
   } else if (!suffixMatch) {
     rootCauseCode = 'stripe_payment_intent_suffix_mismatch';
   } else if (!linkageOk) {
@@ -182,11 +237,13 @@ export function evaluateDbStripeMapping(input) {
   return {
     suffixMatch,
     dbPiIdMatchesRetrieved,
+    staleDbPiSuffix,
     metadataMatch: linkageOk,
     piInternalMatch,
     sessionInternalMatch,
     orderIdMetaMatch,
     hostedCheckoutLinkage,
+    stripeMetadataCheckoutSessionMatch,
     metadataMatchedSource: anyMatch.matchedSource,
     stripeMetadataKeysPresent: stripeMetadataKeyNames(pi),
     linkageOk,
@@ -194,9 +251,7 @@ export function evaluateDbStripeMapping(input) {
     piSuffixDisplay,
     dbPiSuffixDisplay,
     internalCheckoutIdSuffix: idSuffix(orderId),
-    checkoutSessionIdSuffix: input.checkoutSession?.id
-      ? idSuffix(input.checkoutSession.id)
-      : 'unknown',
+    checkoutSessionIdSuffix,
     chargeIdSuffix:
       typeof pi.latest_charge === 'object' && pi.latest_charge?.id
         ? idSuffix(pi.latest_charge.id)

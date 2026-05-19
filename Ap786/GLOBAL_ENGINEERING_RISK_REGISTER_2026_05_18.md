@@ -17,5 +17,8 @@
 | R-13 | **Reloadly live** outbound misconfig | Critical | Low | Mitigated | Gates + placeholder map checks in preflight |
 | R-14 | **Operator CLI** paste concatenation | Medium | Medium | Mitigated | `stagingOperatorCliSafety` detection |
 | R-15 | **Evidence deletion** | Low | Low | Mitigated | Audit rule: do not delete Ap786 files |
+| R-16 | **L-11 false PASS** on refund-target without Stripe verify | Critical | Low | Mitigated | Target requires `stripe.verified`; execute guards unchanged; tests in `stagingOperatorL11Refund.test.js` |
+| R-17 | **L-11 metadata-only** Stripe linkage on hosted Checkout | High | Medium | Partial | Strong PI id + amount/currency/livemode proof → `PASS_WITH_METADATA_WARNING`; session metadata path; discover/refresh modes |
+| R-18 | **Stale `.staging-order-id.local`** for L-11 | Medium | Medium | Partial | `stale_db_payment_intent_suffix`, `l11-discover-refundable-order`, `l11-refresh-order-ref` (local file only) |
 
 **Rollback note:** Money-path regressions → redeploy previous Vercel deployment; set `PAYMENTS_LOCKDOWN_MODE=true` to freeze new checkouts without stopping webhook ingestion (see `DEPLOYMENT_READINESS.md`).

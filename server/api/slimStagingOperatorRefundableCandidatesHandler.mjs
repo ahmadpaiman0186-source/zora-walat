@@ -107,12 +107,15 @@ export async function handleSlimStagingOperatorRefundableCandidatesGet(req, res)
       currency: true,
       stripePaymentIntentId: true,
       stripeCheckoutSessionId: true,
+      status: true,
+      _count: { select: { fulfillmentAttempts: true } },
     },
   });
 
   const candidates = rows.map((row) => {
     const pi = String(row.stripePaymentIntentId ?? '').trim();
     const cs = String(row.stripeCheckoutSessionId ?? '').trim();
+    const fulfillmentAttemptCount = row._count?.fulfillmentAttempts ?? 0;
     return {
       orderIdSuffix: safeSuffix(row.id, 10),
       internalCheckoutIdSuffix: safeSuffix(row.id, 10),
@@ -120,6 +123,8 @@ export async function handleSlimStagingOperatorRefundableCandidatesGet(req, res)
       paymentIntentIdSuffix: pi.length > 0 ? safeSuffix(pi, 10) : 'unknown',
       amountUsdCents: row.amountUsdCents,
       currency: String(row.currency ?? 'usd'),
+      paidConfirmed: row.status === PAYMENT_CHECKOUT_STATUS.RECHARGE_COMPLETED,
+      fulfillmentAttemptCount,
       /** Harness-only — never log. */
       orderIdForHarness: row.id,
       paymentIntentIdForVerify: pi,

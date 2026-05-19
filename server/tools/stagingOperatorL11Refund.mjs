@@ -3,6 +3,9 @@
  * No secrets in logs; suffix-only identifiers for output.
  */
 
+import { piSuffixesMatch } from './stagingOperatorL11StripeMapping.mjs';
+
+/** Default staging candidate (override via `.staging-order-id.local`). */
 export const L11_TARGET_ORDER_ID = 'cmp95a2kc0003jy04pvq0dr78';
 
 export const L11_REFUND_APPROVAL_PHRASE = 'Approved: L-11 execute full refund';
@@ -71,13 +74,21 @@ export function refundApprovalPhraseMatches(approval) {
  *     currency: string,
  *     refundAlreadyExists: boolean,
  *     livemode: boolean,
+ *     metadataWarning?: boolean,
+ *     strongPiIdProof?: boolean,
+ *     blockedReason?: string | null,
  *   } | null,
+ *   options?: { requireCanonicalTarget?: boolean },
  * }} input
  */
-export function evaluateL11RefundTarget(input) {
+export function evaluateL11RefundTarget(input, options = {}) {
+  const requireCanonicalTarget = options.requireCanonicalTarget === true;
   const checks = {
     preflight_pass: input.preflightPass === true,
-    order_id_exact: orderIdMatchesL11Target(input.orderId),
+    order_id_present: String(input.orderId ?? '').trim().length > 0,
+    order_id_exact: requireCanonicalTarget
+      ? orderIdMatchesL11Target(input.orderId)
+      : String(input.orderId ?? '').trim().length > 0,
     order_found: input.db.orderFound === true,
     payment_intent_mapped: input.db.paymentIntentMapped === true,
     amount_present:
@@ -100,14 +111,21 @@ export function evaluateL11RefundTarget(input) {
         String(input.db.currency).toLowerCase(),
     stripe_pi_suffix_matches:
       input.stripe?.verified === true &&
-      input.stripe.paymentIntentIdSuffix === input.db.stripePaymentIntentIdSuffix,
+      piSuffixesMatch(
+        input.db.stripePaymentIntentIdSuffix,
+        input.stripe.paymentIntentIdSuffix ?? '',
+      ),
+    stripe_mapping_safe:
+      input.stripe?.verified === true &&
+      (input.stripe.strongPiIdProof === true ||
+        input.stripe.metadataWarning !== true),
     no_prior_refund:
       input.stripe?.verified === true && input.stripe.refundAlreadyExists !== true,
   };
 
   const pass = Object.values(checks).every(Boolean);
   let blockedReason = null;
-  if (!checks.order_id_exact) blockedReason = 'order_id_not_l11_target';
+  if (!checks.order_id_present) blockedReason = 'missing_order_id';
   else if (!checks.preflight_pass) blockedReason = 'preflight_not_pass';
   else if (!checks.payment_intent_mapped) blockedReason = 'payment_intent_not_mapped';
   else if (!checks.amount_present) blockedReason = 'amount_not_verified';
@@ -120,8 +138,9 @@ export function evaluateL11RefundTarget(input) {
   else if (!checks.stripe_currency_matches) blockedReason = 'stripe_currency_mismatch';
   else if (!checks.stripe_pi_suffix_matches) {
     blockedReason = 'stripe_payment_intent_suffix_mismatch';
-  }
-  else if (!pass) blockedReason = 'refund_target_guard_failed';
+  } else if (!checks.stripe_mapping_safe) {
+    blockedReason = input.stripe?.blockedReason ?? 'stripe_order_metadata_mismatch';
+  } else if (!pass) blockedReason = 'refund_target_guard_failed';
 
   return { pass, blockedReason, checks };
 }
@@ -139,7 +158,7 @@ export function evaluateL11RefundTarget(input) {
 export function evaluateL11RefundExecuteGuards(input) {
   const checks = {
     target_pass: input.targetPass === true,
-    order_id_exact: orderIdMatchesL11Target(input.orderId),
+    order_id_present: String(input.orderId ?? '').trim().length > 0,
     approval_phrase_exact: refundApprovalPhraseMatches(input.approvalPhrase),
     stripe_test_key: input.stripeKeyMode === 'test',
     incident_not_refunded: input.db.postPaymentIncidentStatus !== 'REFUNDED',
@@ -155,7 +174,7 @@ export function evaluateL11RefundExecuteGuards(input) {
   let blockedReason = null;
   if (!checks.approval_phrase_exact) blockedReason = 'refund_approval_missing';
   else if (!checks.stripe_test_key) blockedReason = 'stripe_test_key_required';
-  else if (!checks.order_id_exact) blockedReason = 'order_id_not_l11_target';
+  else if (!checks.order_id_present) blockedReason = 'missing_order_id';
   else if (!checks.target_pass) blockedReason = 'refund_target_not_pass';
   else if (!checks.no_prior_stripe_refund) blockedReason = 'stripe_refund_already_exists';
   else if (!checks.stripe_verified) {

@@ -105,7 +105,7 @@ describe('diagnoseL11StripePayment', () => {
     assert.equal(d.paymentIntentRetrieveByFullId, false);
   });
 
-  it('detects suffix mismatch', async () => {
+  it('detects stale DB PI suffix when full id retrieves but tail mismatches', async () => {
     const pi = mockPi({ id: 'pi_other_suffix_mismatch_id' });
     const d = await diagnoseL11StripePayment({
       secretRaw: TEST_KEY,
@@ -116,8 +116,42 @@ describe('diagnoseL11StripePayment', () => {
       },
       stripe: mockStripe(pi),
     });
-    assert.equal(d.rootCauseCode, ROOT_CAUSE.STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH);
+    assert.equal(d.rootCauseCode, ROOT_CAUSE.STALE_DB_PAYMENT_INTENT_SUFFIX);
+    assert.equal(d.staleDbPiSuffix, true);
     assert.equal(d.paymentIntentSuffixMatch, false);
+  });
+
+  it('detects suffix mismatch when retrieved PI id does not match DB full id', async () => {
+    const pi = mockPi({ id: 'pi_other_suffix_mismatch_id' });
+    const d = await diagnoseL11StripePayment({
+      secretRaw: TEST_KEY,
+      db: {
+        ...baseDb,
+        paymentIntentIdForVerify: 'pi_db_points_elsewhere',
+        stripePaymentIntentIdSuffix: normalizeSuffixTail(pi.id),
+      },
+      stripe: mockStripe(pi, { retrieveFails: true, searchFails: true }),
+    });
+    assert.equal(d.rootCauseCode, ROOT_CAUSE.STRIPE_PAYMENT_INTENT_NOT_FOUND);
+    assert.equal(d.paymentIntentRetrieveByFullId, false);
+  });
+
+  it('passes with metadata warning when strong PI proof but no metadata linkage', async () => {
+    const pi = mockPi({ metadata: {} });
+    const stripe = mockStripe(pi);
+    const d = await diagnoseL11StripePayment({
+      secretRaw: TEST_KEY,
+      db: {
+        ...baseDb,
+        stripePaymentIntentIdSuffix: normalizeSuffixTail(pi.id),
+        checkoutSessionIdForVerify: '',
+      },
+      stripe,
+    });
+    assert.equal(d.rootCauseCode, ROOT_CAUSE.STRIPE_METADATA_WARNING_STRONG_PI_PROOF);
+    assert.equal(d.strongPiIdProof, true);
+    assert.equal(d.metadataWarningStrongPiProof, true);
+    assert.equal(d.paymentIntentSuffixMatch, true);
   });
 
   it('passes hosted checkout PI without metadata when session has internalCheckoutId', async () => {

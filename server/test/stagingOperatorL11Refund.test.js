@@ -35,6 +35,8 @@ const baseStripe = {
   currency: 'usd',
   refundAlreadyExists: false,
   livemode: false,
+  strongPiIdProof: true,
+  metadataWarning: false,
 };
 
 describe('orderIdMatchesL11Target', () => {
@@ -89,15 +91,30 @@ describe('evaluateL11RefundTarget', () => {
     assert.equal(r.blockedReason, 'already_refunded_incident');
   });
 
-  it('refuses wrong order id', () => {
+  it('passes any non-empty order id when canonical target not required', () => {
     const r = evaluateL11RefundTarget({
       preflightPass: true,
-      orderId: 'wrong-order-id',
+      orderId: 'cmpother0003jy04pvq0dr78',
       db: baseDb,
       stripe: baseStripe,
     });
+    assert.equal(r.pass, true);
+  });
+
+  it('blocks metadata mismatch without strong PI proof', () => {
+    const r = evaluateL11RefundTarget({
+      preflightPass: true,
+      orderId: L11_TARGET_ORDER_ID,
+      db: baseDb,
+      stripe: {
+        ...baseStripe,
+        metadataWarning: true,
+        strongPiIdProof: false,
+        verified: true,
+      },
+    });
     assert.equal(r.pass, false);
-    assert.equal(r.blockedReason, 'order_id_not_l11_target');
+    assert.equal(r.blockedReason, 'stripe_order_metadata_mismatch');
   });
 
   it('refuses live stripe mode', () => {

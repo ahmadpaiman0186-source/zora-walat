@@ -52,6 +52,23 @@ describe('evaluateDbStripeMapping', () => {
     assert.equal(m.sessionInternalMatch, true);
   });
 
+  it('detects stale DB suffix when full id retrieves but tail mismatches', () => {
+    const pi = {
+      id: 'pi_test_8G1gSpd5PB',
+      metadata: { internalCheckoutId: orderId },
+      latest_charge: { id: 'ch_x' },
+    };
+    const m = evaluateDbStripeMapping({
+      pi,
+      orderId,
+      expectedPiSuffix: 'WRONGSUFFIX',
+      paymentIntentIdForVerify: pi.id,
+      checkoutSession: null,
+    });
+    assert.equal(m.staleDbPiSuffix, true);
+    assert.equal(m.rootCauseCode, 'stale_db_payment_intent_suffix');
+  });
+
   it('fails when PI metadata and session both missing order id', () => {
     const pi = {
       id: piId,

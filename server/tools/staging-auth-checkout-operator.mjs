@@ -92,8 +92,13 @@ import {
   diagnoseL11StripePayment,
   resolveStripePaymentForL11,
   rootCauseToBlockedReason,
+  rootCauseToDiagnosticVerdict,
   ROOT_CAUSE,
 } from './stagingOperatorL11StripeDiagnose.mjs';
+import {
+  pickBestL11RefundableCandidate,
+  scoreL11RefundableCandidate,
+} from './stagingOperatorL11Discover.mjs';
 import {
   getValidatedStripeSecretKey,
   resolveStripeSecretRaw,
@@ -301,6 +306,20 @@ async function loadOrderId() {
   } catch {
     return '';
   }
+}
+
+/**
+ * Gitignored local harness pointer only — never commit.
+ * @param {string} orderId
+ */
+async function writeOrderIdLocal(orderId) {
+  const id = String(orderId ?? '').trim();
+  if (!id) return false;
+  await writeFile(ORDER_ID_PATH, `${id}\n`, { encoding: 'utf8', mode: 0o600 });
+  if (process.platform !== 'win32') {
+    await chmod(ORDER_ID_PATH, 0o600).catch(() => {});
+  }
+  return true;
 }
 
 function redactIdPreview(id) {
@@ -1631,15 +1650,16 @@ async function fetchRefundTargetFromApi(token, orderId) {
 }
 
 /**
- * @param {{ verbose?: boolean }} [options]
+ * @param {{ verbose?: boolean, requireCanonicalTarget?: boolean }} [options]
  */
 async function runL11PreflightCore(options = {}) {
   const verbose = options.verbose === true;
+  const requireCanonicalTarget = options.requireCanonicalTarget === true;
   const orderId = await loadOrderId();
   if (!orderId) {
     return { pass: false, blockedReason: 'missing_order_id', orderId: '' };
   }
-  if (!orderIdMatchesL11Target(orderId)) {
+  if (requireCanonicalTarget && !orderIdMatchesL11Target(orderId)) {
     return {
       pass: false,
       blockedReason: 'order_id_not_l11_target',
@@ -1759,6 +1779,11 @@ function printL11StripeDiagnoseLines(diag, verdict) {
     `PAYMENT_INTENT_SEARCH_BY_METADATA ${diag.paymentIntentSearchByMetadata ? 'true' : 'false'}`,
   );
   safeLine(`PAYMENT_INTENT_SUFFIX_MATCH ${diag.paymentIntentSuffixMatch ? 'true' : 'false'}`);
+  safeLine(`STRONG_PI_ID_PROOF ${diag.strongPiIdProof ? 'true' : 'false'}`);
+  safeLine(
+    `METADATA_WARNING_STRONG_PI_PROOF ${diag.metadataWarningStrongPiProof ? 'true' : 'false'}`,
+  );
+  safeLine(`STALE_DB_PI_SUFFIX ${diag.staleDbPiSuffix ? 'true' : 'false'}`);
   safeLine(`CHARGE_ID_PRESENT ${diag.chargeIdPresent ? 'true' : 'false'}`);
   safeLine(`CHARGE_RETRIEVE_OK ${diag.chargeRetrieveOk ? 'true' : 'false'}`);
   safeLine(`AMOUNT_MATCH ${diag.amountMatch ? 'true' : 'false'}`);
@@ -1766,6 +1791,45 @@ function printL11StripeDiagnoseLines(diag, verdict) {
   safeLine(`LIVEMODE_FALSE ${diag.livemodeFalse ? 'true' : 'false'}`);
   safeLine(`REFUND_ALREADY_EXISTS ${diag.refundAlreadyExists ? 'true' : 'false'}`);
   safeLine(`ROOT_CAUSE_CODE ${diag.rootCauseCode}`);
+}
+
+/**
+ * @param {import('./stagingOperatorL11StripeMapping.mjs').evaluateDbStripeMapping extends (...args: any) => infer R ? R : never} mapping
+ * @param {string} orderId
+ * @param {{
+ *   orderStatus?: string,
+ *   paymentStatus?: string,
+ *   paidConfirmed?: boolean,
+ *   fulfillmentAttemptCount?: number,
+ * }} status
+ */
+function printL11MappingDiagnoseLines(mapping, orderId, status = {}) {
+  safeLine(`ORDER_ID_SUFFIX ${idSuffix(orderId)}`);
+  safeLine(`ORDER_STATUS ${status.orderStatus ?? 'unknown'}`);
+  safeLine(`PAYMENT_STATUS ${status.paymentStatus ?? 'unknown'}`);
+  safeLine(`PAID_CONFIRMED ${status.paidConfirmed === true ? 'true' : 'false'}`);
+  safeLine(
+    `FULFILLMENT_ATTEMPT_COUNT ${status.fulfillmentAttemptCount ?? 'unknown'}`,
+  );
+  safeLine(`INTERNAL_CHECKOUT_ID_SUFFIX ${mapping.internalCheckoutIdSuffix}`);
+  safeLine(`CHECKOUT_SESSION_ID_SUFFIX ${mapping.checkoutSessionIdSuffix}`);
+  safeLine(`DB_PAYMENT_INTENT_ID_SUFFIX ${mapping.dbPiSuffixDisplay}`);
+  safeLine(`STRIPE_PAYMENT_INTENT_ID_SUFFIX ${mapping.piSuffixDisplay}`);
+  safeLine(`STRIPE_CHARGE_ID_SUFFIX ${mapping.chargeIdSuffix}`);
+  safeLine(
+    `STRIPE_METADATA_KEYS_PRESENT ${mapping.stripeMetadataKeysPresent.length > 0 ? mapping.stripeMetadataKeysPresent.join(',') : 'none'}`,
+  );
+  safeLine(
+    `STRIPE_METADATA_INTERNAL_CHECKOUT_MATCH ${mapping.piInternalMatch || mapping.sessionInternalMatch ? 'true' : 'false'}`,
+  );
+  safeLine(`STRIPE_METADATA_ORDER_ID_MATCH ${mapping.orderIdMetaMatch ? 'true' : 'false'}`);
+  safeLine(
+    `STRIPE_METADATA_CHECKOUT_SESSION_MATCH ${mapping.stripeMetadataCheckoutSessionMatch ? 'true' : 'false'}`,
+  );
+  safeLine(
+    `DB_TO_STRIPE_MAPPING_VERDICT ${mapping.linkageOk ? 'PASS' : mapping.staleDbPiSuffix ? 'STALE_SUFFIX' : 'BLOCKED'}`,
+  );
+  safeLine(`ROOT_CAUSE_CODE ${mapping.rootCauseCode}`);
 }
 
 /**
@@ -1798,7 +1862,7 @@ async function modeL11DbStripeMapping() {
   safeLine('CANONICAL_MODE l11-db-stripe-mapping');
   safeLine('DO_NOT_REFUND true');
 
-  const pre = await runL11PreflightCore({ verbose: false });
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
   if (!pre.pass) {
     safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
     safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
@@ -1880,10 +1944,20 @@ async function modeL11DiscoverRefundableOrder() {
   safeLine('CANONICAL_MODE l11-discover-refundable-order');
   safeLine('DO_NOT_REFUND true');
 
-  const pre = await runL11PreflightCore({ verbose: false });
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
   if (!pre.pass) {
     safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
     safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const secretRaw = readStripeSecretRawForL11();
+  const stripe = getStripeClient();
+  if (!secretRaw || !stripe || !isStripeTestModeSecret(secretRaw)) {
+    safeLine('DISCOVER_VERDICT BLOCKED');
+    safeLine('ROOT_CAUSE_CODE stripe_key_not_test');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-stripe-diagnose')}`);
     process.exitCode = 1;
     return;
   }
@@ -1904,31 +1978,156 @@ async function modeL11DiscoverRefundableOrder() {
 
   const list = Array.isArray(res.json?.candidates) ? res.json.candidates : [];
   safeLine(`CANDIDATE_COUNT ${list.length}`);
-  safeLine(`L11_TARGET_ORDER_ID_SUFFIX ${idSuffix(L11_TARGET_ORDER_ID)}`);
 
-  let targetListed = false;
-  for (let i = 0; i < list.length; i++) {
-    const c = list[i];
-    const n = i + 1;
-    safeLine(`CANDIDATE_${n}_ORDER_ID_SUFFIX ${c.orderIdSuffix ?? 'unknown'}`);
-    safeLine(`CANDIDATE_${n}_PAYMENT_INTENT_ID_SUFFIX ${c.paymentIntentIdSuffix ?? 'unknown'}`);
-    safeLine(`CANDIDATE_${n}_CHECKOUT_SESSION_ID_SUFFIX ${c.checkoutSessionIdSuffix ?? 'unknown'}`);
-    safeLine(`CANDIDATE_${n}_AMOUNT ${c.amountUsdCents ?? 'unknown'}`);
-    safeLine(`CANDIDATE_${n}_CURRENCY ${c.currency ?? 'usd'}`);
-    if (c.orderIdForHarness === L11_TARGET_ORDER_ID) {
-      targetListed = true;
-    }
+  const scored = [];
+  for (const c of list) {
+    scored.push(await scoreL11RefundableCandidate(stripe, c, secretRaw));
   }
 
-  safeLine(`L11_TARGET_ORDER_IN_CANDIDATES ${targetListed ? 'true' : 'false'}`);
-  safeLine(
-    `DISCOVER_VERDICT ${targetListed ? 'TARGET_STILL_ELIGIBLE' : 'TARGET_NOT_IN_TOP_CANDIDATES'}`,
+  for (let i = 0; i < scored.length; i += 1) {
+    const s = scored[i];
+    const n = i + 1;
+    safeLine(`CANDIDATE_${n}_ORDER_ID_SUFFIX ${s.orderIdSuffix}`);
+    safeLine(`CANDIDATE_${n}_DIAGNOSTIC_VERDICT ${s.diagnosticVerdict}`);
+    safeLine(`CANDIDATE_${n}_ROOT_CAUSE_CODE ${s.rootCauseCode}`);
+    safeLine(`CANDIDATE_${n}_STRONG_PI_ID_PROOF ${s.strongPiIdProof ? 'true' : 'false'}`);
+  }
+
+  const best = pickBestL11RefundableCandidate(scored);
+  if (!best) {
+    safeLine('DISCOVER_VERDICT NO_ELIGIBLE_CANDIDATE');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  safeLine(`BEST_CANDIDATE_ORDER_ID_SUFFIX ${best.orderIdSuffix}`);
+  safeLine(`BEST_CANDIDATE_DIAGNOSTIC_VERDICT ${best.diagnosticVerdict}`);
+  safeLine(`BEST_CANDIDATE_ROOT_CAUSE_CODE ${best.rootCauseCode}`);
+  safeLine('DISCOVER_VERDICT CANDIDATE_FOUND');
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-refresh-order-ref')}`);
+  process.exitCode = 0;
+}
+
+async function modeL11RefreshOrderRef() {
+  safeLine('MODE l11-refresh-order-ref');
+  safeLine('CANONICAL_MODE l11-refresh-order-ref');
+  safeLine('DO_NOT_REFUND true');
+
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
+  if (!pre.pass) {
+    safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const secretRaw = readStripeSecretRawForL11();
+  const stripe = getStripeClient();
+  if (!secretRaw || !stripe || !isStripeTestModeSecret(secretRaw)) {
+    safeLine('REFRESH_VERDICT BLOCKED');
+    safeLine('ROOT_CAUSE_CODE stripe_key_not_test');
+    process.exitCode = 1;
+    return;
+  }
+
+  const res = await apiGet(
+    STAGING_OPERATOR_REFUNDABLE_CANDIDATES_PATH,
+    { Authorization: `Bearer ${pre.token}` },
+    PHASE1_TRUTH_SLIM_TIMEOUT_MS,
   );
-  safeLine(
-    `HINT update_gitignored_staging_order_id_local_if_DISCOVER_VERDICT_TARGET_NOT_IN_TOP_CANDIDATES`,
-  );
-  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-db-stripe-mapping')}`);
-  process.exitCode = targetListed ? 0 : 1;
+  if (res.status !== 200) {
+    safeLine('REFRESH_VERDICT BLOCKED');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const list = Array.isArray(res.json?.candidates) ? res.json.candidates : [];
+  const scored = [];
+  for (const c of list) {
+    scored.push(await scoreL11RefundableCandidate(stripe, c, secretRaw));
+  }
+  const best = pickBestL11RefundableCandidate(scored);
+  if (!best?.orderId) {
+    safeLine('REFRESH_VERDICT BLOCKED');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  await writeOrderIdLocal(best.orderId);
+  safeLine(`ORDER_ID_SUFFIX ${best.orderIdSuffix}`);
+  safeLine(`REFRESH_VERDICT UPDATED_LOCAL_REF_ONLY`);
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-mapping-diagnose')}`);
+  process.exitCode = 0;
+}
+
+async function modeL11MappingDiagnose() {
+  safeLine('MODE l11-mapping-diagnose');
+  safeLine('CANONICAL_MODE l11-mapping-diagnose');
+  safeLine('DO_NOT_REFUND true');
+
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
+  if (!pre.pass) {
+    safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-preflight')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const targetRes = await fetchRefundTargetFromApi(pre.token, pre.orderId);
+  if (targetRes.status !== 200 || targetRes.json?.orderFound !== true) {
+    safeLine('DB_TO_STRIPE_MAPPING_VERDICT BLOCKED');
+    safeLine('ROOT_CAUSE_CODE stripe_payment_intent_not_found');
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const db = dbMappingFromRefundTargetApi(targetRes.json);
+  const secretRaw = readStripeSecretRawForL11();
+  const stripe = getStripeClient();
+  const diag = await diagnoseL11StripePayment({
+    secretRaw,
+    db: {
+      orderId: pre.orderId,
+      paymentIntentIdForVerify: db.paymentIntentIdForVerify,
+      stripePaymentIntentIdSuffix: db.stripePaymentIntentIdSuffix,
+      amountUsdCents: db.amountUsdCents,
+      currency: db.currency,
+      checkoutSessionIdForVerify: db.checkoutSessionIdForVerify,
+    },
+    stripe,
+  });
+
+  const status = await runStatusCheckCore(pre.token, { verbose: false });
+
+  if (diag.mapping) {
+    printL11MappingDiagnoseLines(diag.mapping, pre.orderId, {
+      orderStatus: db.orderStatus,
+      paymentStatus: db.paymentStatus,
+      paidConfirmed: db.paidConfirmed,
+      fulfillmentAttemptCount: status.fulfillmentAttemptCount,
+    });
+  }
+
+  const diagnosticVerdict = rootCauseToDiagnosticVerdict(diag.rootCauseCode);
+  const ready =
+    diagnosticVerdict === 'PASS' ||
+    diagnosticVerdict === 'PASS_WITH_METADATA_WARNING';
+  safeLine(`L11_MAPPING_DIAG_VERDICT ${ready ? diagnosticVerdict : 'BLOCKED'}`);
+  if (ready) {
+    safeLine(
+      `L11_READINESS ${diagnosticVerdict === 'PASS' ? 'READY_FOR_OPERATOR_APPROVAL' : 'READY_WITH_METADATA_WARNING'}`,
+    );
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-refund-target')}`);
+    process.exitCode = 0;
+    return;
+  }
+
+  safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+  process.exitCode = 1;
 }
 
 async function modeL11StripeDiagnose() {
@@ -1936,7 +2135,7 @@ async function modeL11StripeDiagnose() {
   safeLine('CANONICAL_MODE l11-stripe-diagnose');
   safeLine('DO_NOT_REFUND true');
 
-  const pre = await runL11PreflightCore({ verbose: false });
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
   safeLine(`L11_PREFLIGHT_VERDICT ${pre.pass ? 'PASS' : 'BLOCKED'}`);
   if (!pre.pass) {
     safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
@@ -1990,8 +2189,14 @@ async function modeL11StripeDiagnose() {
     stripe,
   });
 
-  const pass = diag.rootCauseCode === ROOT_CAUSE.OK;
-  printL11StripeDiagnoseLines(diag, pass ? 'PASS' : 'BLOCKED');
+  const diagnosticVerdict = rootCauseToDiagnosticVerdict(diag.rootCauseCode);
+  const ready =
+    diagnosticVerdict === 'PASS' ||
+    diagnosticVerdict === 'PASS_WITH_METADATA_WARNING';
+  printL11StripeDiagnoseLines(
+    diag,
+    ready ? diagnosticVerdict : 'BLOCKED',
+  );
   if (diag.mapping) {
     printL11DbStripeMappingLines(diag.mapping, pre.orderId);
   }
@@ -1999,15 +2204,20 @@ async function modeL11StripeDiagnose() {
     safeLine(`STRIPE_PERMISSION_CAPABILITY ${diag.stripePermissionCapability}`);
   }
 
-  if (pass) {
+  if (ready) {
+    safeLine(
+      `L11_READINESS ${diagnosticVerdict === 'PASS' ? 'READY_FOR_OPERATOR_APPROVAL' : 'READY_WITH_METADATA_WARNING'}`,
+    );
     safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-refund-target')}`);
     process.exitCode = 0;
     return;
   }
 
-  safeLine(
-    `NEXT_SAFE_COMMAND node tools/staging-auth-checkout-operator.mjs l11-stripe-diagnose`,
-  );
+  if (diag.rootCauseCode === ROOT_CAUSE.STALE_DB_PAYMENT_INTENT_SUFFIX) {
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-discover-refundable-order')}`);
+  } else {
+    safeLine(`NEXT_SAFE_COMMAND ${safeOperatorCommandLine('l11-mapping-diagnose')}`);
+  }
   process.exitCode = 1;
 }
 
@@ -2016,7 +2226,7 @@ async function modeL11RefundTarget() {
   safeLine('CANONICAL_MODE l11-refund-target');
   safeLine('DO_NOT_REFUND true');
 
-  const pre = await runL11PreflightCore({ verbose: false });
+  const pre = await runL11PreflightCore({ verbose: false, requireCanonicalTarget: false });
   safeLine(`L11_PREFLIGHT_VERDICT ${pre.pass ? 'PASS' : 'BLOCKED'}`);
   if (!pre.pass) {
     safeLine(`BLOCKED_REASON ${pre.blockedReason ?? 'preflight_failed'}`);
@@ -2052,14 +2262,17 @@ async function modeL11RefundTarget() {
     stripe = { verified: false, blockedReason: 'stripe_key_missing' };
   }
 
-  const evaluation = evaluateL11RefundTarget({
-    preflightPass: true,
-    orderId: pre.orderId,
-    db,
-    stripe: stripe?.verified
-      ? stripe
-      : { verified: false, blockedReason: stripe?.blockedReason ?? 'stripe_key_missing' },
-  });
+  const evaluation = evaluateL11RefundTarget(
+    {
+      preflightPass: true,
+      orderId: pre.orderId,
+      db,
+      stripe: stripe?.verified
+        ? stripe
+        : { verified: false, blockedReason: stripe?.blockedReason ?? 'stripe_key_missing' },
+    },
+    { requireCanonicalTarget: false },
+  );
 
   safeLine(`ORDER_ID_SUFFIX ${idSuffix(pre.orderId)}`);
   safeLine(`POST_PAYMENT_INCIDENT_STATUS ${db.postPaymentIncidentStatus}`);
@@ -2087,7 +2300,10 @@ async function modeL11RefundTarget() {
   }
 
   if (evaluation.pass) {
-    safeLine('L11_REFUND_TARGET_VERDICT PASS');
+    safeLine('L11_REFUND_TARGET_VERDICT READY_FOR_OPERATOR_APPROVAL');
+    safeLine(
+      `METADATA_WARNING ${stripe?.metadataWarning ? 'true' : 'false'}`,
+    );
     safeLine(
       'NEXT_SAFE_COMMAND node tools/staging-auth-checkout-operator.mjs l11-stripe-diagnose',
     );
@@ -2201,9 +2417,9 @@ async function modeL11PostRefundVerify() {
   safeLine('DO_NOT_REFUND true');
 
   const orderId = await loadOrderId();
-  if (!orderIdMatchesL11Target(orderId)) {
+  if (!orderId) {
     safeLine('L11_REFUND_PROOF_VERDICT BLOCKED');
-    safeLine('BLOCKED_REASON order_id_not_l11_target');
+    safeLine('BLOCKED_REASON missing_order_id');
     process.exitCode = 1;
     return;
   }
@@ -2407,6 +2623,12 @@ async function main() {
       break;
     case 'l11-discover-refundable-order':
       await modeL11DiscoverRefundableOrder();
+      break;
+    case 'l11-mapping-diagnose':
+      await modeL11MappingDiagnose();
+      break;
+    case 'l11-refresh-order-ref':
+      await modeL11RefreshOrderRef();
       break;
     case 'l11-refund-execute':
       await modeL11RefundExecute();

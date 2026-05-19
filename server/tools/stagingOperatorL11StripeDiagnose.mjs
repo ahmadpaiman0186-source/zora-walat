@@ -5,8 +5,8 @@
 import { idSuffix, stripeSecretKeyMode } from './stagingOperatorL11Refund.mjs';
 import {
   evaluateDbStripeMapping,
+  hasStrongPiIdProof,
   retrieveCheckoutSessionSafe,
-  suffixTailMatch,
 } from './stagingOperatorL11StripeMapping.mjs';
 
 /** @typedef {import('stripe').Stripe} Stripe */
@@ -21,6 +21,8 @@ export const ROOT_CAUSE = Object.freeze({
   STRIPE_PAYMENT_INTENT_NOT_FOUND: 'stripe_payment_intent_not_found',
   STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH: 'stripe_payment_intent_suffix_mismatch',
   STRIPE_ORDER_METADATA_MISMATCH: 'stripe_order_metadata_mismatch',
+  STRIPE_METADATA_WARNING_STRONG_PI_PROOF: 'stripe_metadata_warning_strong_pi_proof',
+  STALE_DB_PAYMENT_INTENT_SUFFIX: 'stale_db_payment_intent_suffix',
   STRIPE_CHARGE_NOT_FOUND: 'stripe_charge_not_found',
   STRIPE_AMOUNT_MISMATCH: 'stripe_amount_mismatch',
   STRIPE_CURRENCY_MISMATCH: 'stripe_currency_mismatch',
@@ -33,10 +35,28 @@ export const ROOT_CAUSE = Object.freeze({
 /**
  * @param {string} code
  */
+/**
+ * @param {string} code
+ * @returns {'BLOCKED' | 'PASS' | 'PASS_WITH_METADATA_WARNING'}
+ */
+export function rootCauseToDiagnosticVerdict(code) {
+  if (code === ROOT_CAUSE.OK) return 'PASS';
+  if (code === ROOT_CAUSE.STRIPE_METADATA_WARNING_STRONG_PI_PROOF) {
+    return 'PASS_WITH_METADATA_WARNING';
+  }
+  return 'BLOCKED';
+}
+
 export function rootCauseToBlockedReason(code) {
   if (code === ROOT_CAUSE.OK) return null;
+  if (code === ROOT_CAUSE.STRIPE_METADATA_WARNING_STRONG_PI_PROOF) {
+    return null;
+  }
   if (code === ROOT_CAUSE.STRIPE_ORDER_METADATA_MISMATCH) {
     return 'stripe_account_mismatch';
+  }
+  if (code === ROOT_CAUSE.STALE_DB_PAYMENT_INTENT_SUFFIX) {
+    return 'stale_db_payment_intent_suffix';
   }
   if (code === ROOT_CAUSE.STRIPE_LIVE_BLOCKED || code === ROOT_CAUSE.STRIPE_LIVEMODE_NOT_FALSE) {
     return 'stripe_key_not_test';
@@ -291,6 +311,9 @@ export async function diagnoseL11StripePayment(input) {
     paymentIntentSearchByMetadata: false,
     paymentIntentSuffixMatch: false,
     metadataOrderMatch: false,
+    metadataWarningStrongPiProof: false,
+    strongPiIdProof: false,
+    staleDbPiSuffix: false,
     chargeIdPresent: false,
     chargeRetrieveOk: false,
     amountMatch: false,
@@ -402,6 +425,7 @@ export async function diagnoseL11StripePayment(input) {
 
   out.paymentIntentSuffixMatch = mapping.suffixMatch;
   out.metadataOrderMatch = mapping.linkageOk;
+  out.staleDbPiSuffix = mapping.staleDbPiSuffix === true;
   out.chargeIdPresent = snap.chargePresent;
   out.chargeRetrieveOk = snap.chargePresent;
   out.amountMatch = snap.amountMatch;
@@ -419,11 +443,32 @@ export async function diagnoseL11StripePayment(input) {
     out.rootCauseCode = ROOT_CAUSE.STRIPE_LIVEMODE_NOT_FALSE;
     return out;
   }
+
+  const strongPi = hasStrongPiIdProof({
+    mapping,
+    amountMatch: snap.amountMatch,
+    currencyMatch: snap.currencyMatch,
+    livemodeFalse: snap.livemode === false,
+    chargePresent: snap.chargePresent,
+    refundAlreadyExists: refundState.refundAlreadyExists,
+  });
+  out.strongPiIdProof = strongPi;
+
+  if (mapping.staleDbPiSuffix) {
+    out.rootCauseCode = ROOT_CAUSE.STALE_DB_PAYMENT_INTENT_SUFFIX;
+    return out;
+  }
   if (!mapping.suffixMatch) {
     out.rootCauseCode = ROOT_CAUSE.STRIPE_PAYMENT_INTENT_SUFFIX_MISMATCH;
     return out;
   }
   if (!mapping.linkageOk) {
+    if (strongPi) {
+      out.metadataWarningStrongPiProof = true;
+      out.metadataOrderMatch = false;
+      out.rootCauseCode = ROOT_CAUSE.STRIPE_METADATA_WARNING_STRONG_PI_PROOF;
+      return out;
+    }
     out.rootCauseCode = ROOT_CAUSE.STRIPE_ORDER_METADATA_MISMATCH;
     return out;
   }
@@ -476,7 +521,10 @@ export async function resolveStripePaymentForL11(stripe, db) {
     stripe,
   });
 
-  if (diag.rootCauseCode !== ROOT_CAUSE.OK) {
+  if (
+    diag.rootCauseCode !== ROOT_CAUSE.OK &&
+    diag.rootCauseCode !== ROOT_CAUSE.STRIPE_METADATA_WARNING_STRONG_PI_PROOF
+  ) {
     return {
       verified: false,
       reason: diag.rootCauseCode,
@@ -504,7 +552,7 @@ export async function resolveStripePaymentForL11(stripe, db) {
 
   return {
     verified: true,
-    reason: ROOT_CAUSE.OK,
+    reason: diag.rootCauseCode,
     paymentIntentId: resolved.pi.id,
     paymentIntentIdSuffix: mapping?.piSuffixDisplay ?? snap.paymentIntentIdSuffix,
     chargeIdSuffix: mapping?.chargeIdSuffix ?? snap.chargeIdSuffix,
@@ -515,5 +563,8 @@ export async function resolveStripePaymentForL11(stripe, db) {
     refundAlreadyExists: refundState.refundAlreadyExists,
     partialRefundExists: refundState.partialRefundExists,
     accountIdSuffix: diag.stripeAccountIdSuffix,
+    metadataWarning: diag.metadataWarningStrongPiProof === true,
+    strongPiIdProof: diag.strongPiIdProof === true,
+    blockedReason: null,
   };
 }
