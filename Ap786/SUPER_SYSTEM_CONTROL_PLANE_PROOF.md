@@ -26,6 +26,7 @@ A **diagnostic and proposal** control plane foundation. It improves detection, c
 npm run zw:doctor -- incidents
 npm run zw:doctor -- incidents --json --no-operator --no-staging
 npm run zw:doctor -- incidents --strict   # exit 1 if HIGH/CRITICAL active
+npm run zw:doctor -- incidents --strict --ci-static   # CI profile (suppresses env-local MEDIUM)
 ```
 
 Classifier: `server/tools/zwDoctor/incidents.mjs` — 21 incident types, propose-only runbooks.  

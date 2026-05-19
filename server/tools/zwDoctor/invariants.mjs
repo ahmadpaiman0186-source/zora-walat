@@ -606,6 +606,10 @@ export async function runOperationalInvariants(ctx) {
     );
   }
 
+  if (ctx.probeOperator === false) {
+    return results;
+  }
+
   const tokenPath = join(SERVER_ROOT, '.staging-token.local');
   let tokenStatus = 'WARN';
   let tokenEvidence = 'no_token_file';

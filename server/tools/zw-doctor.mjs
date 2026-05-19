@@ -3,7 +3,7 @@
  * Zora-Walat Super-System Control Plane — diagnostic CLI (propose-only).
  *
  * Usage:
- *   node tools/zw-doctor.mjs [mode] [--json] [--strict] [--no-staging] [--no-operator]
+ *   node tools/zw-doctor.mjs [mode] [--json] [--strict] [--ci-static] [--no-staging] [--no-operator]
  *
  * Modes: summary | money-path | stripe-env | webhook | operator-auth |
  *        frontend-env | deploy-root | evidence | incidents | all
@@ -15,7 +15,7 @@ import { runZwDoctor, runZwDoctorIncidents, MODES } from './zwDoctor/run.mjs';
 function printUsage() {
   process.stderr.write(
     `zw-doctor — Super-System diagnostic (propose-only)\n\n` +
-      `Usage: node tools/zw-doctor.mjs <mode> [--json] [--strict] [--no-staging] [--no-operator]\n\n` +
+      `Usage: node tools/zw-doctor.mjs <mode> [--json] [--strict] [--ci-static] [--no-staging] [--no-operator]\n\n` +
       `Modes: ${MODES.join(', ')}\n`,
   );
 }
@@ -43,11 +43,13 @@ if (!MODES.includes(mode)) {
   process.exit(2);
 }
 
+const ciStatic = flags.has('--ci-static');
 const opts = {
   json: flags.has('--json'),
   strict: flags.has('--strict'),
-  probeStaging: !flags.has('--no-staging'),
-  probeOperator: !flags.has('--no-operator'),
+  ciStatic,
+  probeStaging: ciStatic ? false : !flags.has('--no-staging'),
+  probeOperator: ciStatic ? false : !flags.has('--no-operator'),
 };
 
 const result =

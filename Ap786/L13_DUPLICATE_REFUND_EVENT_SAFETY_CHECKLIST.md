@@ -1,7 +1,7 @@
 # L-13 — Duplicate refund event safety (checklist only)
 
-**Status:** NOT EXECUTED — planning and approval gate only  
-**Prerequisite:** L-11 PASS (`POST_PAYMENT_INCIDENT_STATUS REFUNDED`, fulfillment count 1, no second refund)  
+**Status:** NOT EXECUTED — readiness checklist only (do **not** mark L-13 PASS until operator proof)  
+**Prerequisite:** L-11 PASS (`POST_PAYMENT_INCIDENT_STATUS REFUNDED`, fulfillment count **1**, no second refund)  
 **Environment:** Stripe **test mode** + staging API only  
 **Policy:** Phase 1 does not auto-refund from app code; `charge.refunded` mirrors incident state via webhook only.
 
@@ -9,42 +9,21 @@
 
 ## Goal
 
-Prove that a **duplicate** `charge.refunded` delivery (Dashboard resend or second event) does **not**:
+Prove that a **duplicate** `charge.refunded` delivery (Dashboard resend of the **same** event) does **not**:
 
 - create a second refund in Stripe  
 - corrupt `postPaymentIncidentStatus`  
 - increase fulfillment count  
 - duplicate incident rows unsafely  
 
-Expected steady state after duplicate delivery:
-
-| Field | Expected |
-|-------|----------|
-| `POST_PAYMENT_INCIDENT_STATUS` | **REFUNDED** (unchanged) |
-| Fulfillment attempt count | **1** (unchanged) |
-| L11/L13 proof verdict | **PASS** |
-| New refund in Stripe | **No** |
-
 ---
 
-## Approval gate (required before any action)
+## Preflight (read-only — before any resend)
 
-Exact line required in operator chat/ticket:
-
-```text
-Approved: L-13 duplicate refund event proof on staging
-```
-
-**Do not** resend events or execute refunds without this approval.
-
----
-
-## Safe manual procedure (do not run from CI)
-
-### Before
-
-1. Confirm L-11 PASS evidence in `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`.  
-2. Run read-only baseline:
+1. Confirm L-11 PASS in `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`.  
+2. Confirm branch and deploy: staging API from `server/` root (`deploy:staging:guard` PASS).  
+3. Operator session: `node tools/staging-auth-checkout-operator.mjs login` (local only; never commit token).  
+4. Capture **before** enums (no ids, no payloads):
 
 ```bash
 cd server
@@ -52,57 +31,106 @@ node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
 node tools/staging-auth-checkout-operator.mjs status-check
 ```
 
-Capture **enum-only** lines (no ids, no payloads).
+| Field | Expected **before** resend |
+|-------|----------------------------|
+| `POST_PAYMENT_INCIDENT_STATUS` | **REFUNDED** |
+| `FULFILLMENT_ATTEMPT_COUNT` | **1** |
+| `STRIPE_REFUND_ALREADY_EXISTS` | **true** |
+| `L11_REFUND_PROOF_VERDICT` | **PASS** (or equivalent post-refund verify PASS) |
+| New refund in Stripe Dashboard | **No** (visual check test mode only) |
 
-### Duplicate delivery (test mode only)
+5. Optional static gate: `npm run zw:doctor -- incidents --json` (operator machine; not CI money action).
 
-3. In Stripe Dashboard (**test mode**), locate the **same** `charge.refunded` event tied to the L-11 order (suffix reference only in local gitignored files).  
-4. Use **Resend** on that event to the staging webhook endpoint (same method as L-4/L-5 resend discipline).  
-5. **Do not** create a new refund in Dashboard.  
-6. **Do not** run `l11-refund-execute`.
+---
 
-### After (within 5 minutes)
+## Approval gate (required before any action)
 
-7. Re-run read-only:
+Exact line required in operator chat/ticket (this document does **not** execute it):
+
+```text
+Approved: L-13 duplicate refund event proof
+```
+
+Alternate accepted form (legacy):
+
+```text
+Approved: L-13 duplicate refund event proof on staging
+```
+
+**Do not** resend events, run `l11-refund-execute`, or create refunds without this approval.
+
+---
+
+## Manual action (test mode only — after approval only)
+
+1. Stripe Dashboard → **Test mode** → Events.  
+2. Locate the **same** `charge.refunded` event tied to the L-11 order (suffix reference only in local gitignored notes).  
+3. **Resend** that event to the staging webhook endpoint (same discipline as L-4/L-5 — no new refund, no new charge).  
+4. **Forbidden:** `l11-refund-execute`, new Dashboard refund, live Stripe, webhook replay from CI.
+
+---
+
+## Verify (read-only — within 5 minutes after resend)
 
 ```bash
+cd server
 node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
 node tools/staging-auth-checkout-operator.mjs status-check
 ```
 
-8. Compare before/after enums — must be **unchanged** for incident and fulfillment count.
-
-9. Optional: `npm run zw:smoke:staging` (no money mutations).
-
----
-
-## Pass criteria
-
-- `POST_PAYMENT_INCIDENT_STATUS` remains **REFUNDED**  
-- `L11_REFUND_PROOF_VERDICT` / post-refund verify remains **PASS**  
-- Fulfillment count **1**  
-- No second refund object created in Stripe (operator visual check in Dashboard test mode — do not paste ids into git)  
-- `assessPhase1RefundOperatorChecklist` would deny duplicate manual refund (`already_recorded_refunded_incident` class) if consulted
+| Field | Expected **after** resend |
+|-------|---------------------------|
+| `POST_PAYMENT_INCIDENT_STATUS` | **REFUNDED** (unchanged) |
+| `FULFILLMENT_ATTEMPT_COUNT` | **1** (unchanged) |
+| `STRIPE_REFUND_ALREADY_EXISTS` | **true** |
+| `L13_DUPLICATE_REFUND_EVENT_VERDICT` | **PASS** (record in new Ap786 proof file) |
+| Second refund in Stripe | **No** |
+| Duplicate fulfillment | **No** |
+| Incident corruption | **No** |
 
 ---
 
-## Rollback / abort
+## Pass criteria (future proof only)
+
+- All **after** enums match **before** for incident + fulfillment count  
+- `L13_DUPLICATE_REFUND_EVENT_VERDICT` **PASS** in sanitized evidence  
+- No second refund object in Stripe (operator visual check — do not paste ids into git)  
+- `assessPhase1RefundOperatorChecklist` would deny duplicate manual refund (`already_recorded_refunded_incident` class) if consulted  
+
+**Until then:** L-13 remains **NOT PASS** in `AP786_ALL_PASSES_INVESTOR_PROOF.md`.
+
+---
+
+## No-second-refund warning
+
+Resending `charge.refunded` is **not** the same as issuing a refund. If Dashboard shows a **new** refund or fulfillment count rises:
+
+- **Stop immediately**  
+- Do **not** “fix” with another refund or resend  
+- Treat as **CRITICAL** payment-safety incident (`REFUND_DOUBLE_EXECUTION_RISK` / `DUPLICATE_FULFILLMENT_ATTEMPT`)  
+- Freeze fulfillment kicks until root cause documented  
+
+---
+
+## Rollback / containment
 
 | Situation | Action |
 |-----------|--------|
-| Wrong event resent | Stop; document event type; do **not** issue new refunds to “fix” |
-| Incident flips away from REFUNDED | Freeze fulfillment; open payment-safety incident; capture enum-only readouts |
+| Wrong event type resent | Stop; document event type; no new refunds to “fix” |
+| Incident flips away from REFUNDED | Freeze fulfillment; open payment-safety incident; enum-only readouts |
 | Fulfillment count > 1 | **CRITICAL** — freeze operator fulfillment kicks; no automated repair |
-| Stripe shows second refund | Stop proof; treat as L-11 regression; no further Dashboard actions without new approval |
+| Stripe shows second refund | Stop proof; treat as L-11 regression; new approval required for any further action |
+| Webhook storm / 5xx | Pause resends; check staging logs; no CI auto-resend |
 
 ---
 
 ## Evidence to capture (sanitized)
 
-- Before/after enum tables in a new Ap786 file (suffix-only order reference)  
-- Note: “Dashboard resend of existing charge.refunded”  
+- New file: `L13_DUPLICATE_REFUND_EVENT_PROOF.md` (create **after** PASS only)  
+- Before/after enum tables (suffix-only order reference)  
+- Note: “Dashboard resend of existing charge.refunded (test mode)”  
 - Update `AP786_EVIDENCE_INDEX.txt` only after PASS  
-- Update `AP786_ALL_PASSES_INVESTOR_PROOF.md` with honest L-13 row  
+- Update investor proof L-13 row only with honest PASS wording  
 
 ---
 
@@ -110,7 +138,8 @@ node tools/staging-auth-checkout-operator.mjs status-check
 
 - No webhook resend  
 - No refund execution  
-- L-13 remains **manual** until operator completes this checklist under approval
+- No L-13 PASS in CI  
+- CI runs: `npm run zw:doctor -- incidents --strict --ci-static` (static HIGH/CRITICAL only)
 
 ---
 
@@ -118,4 +147,5 @@ node tools/staging-auth-checkout-operator.mjs status-check
 
 - `DAY2_L8_L13_EXECUTION_PLAN.md` § L-13  
 - `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`  
-- `L4_STRIPE_WEBHOOK_RESEND_PLAN.md` (resend discipline)
+- `L4_STRIPE_WEBHOOK_RESEND_PLAN.md` (resend discipline)  
+- `SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md`

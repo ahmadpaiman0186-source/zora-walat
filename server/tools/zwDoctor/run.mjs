@@ -12,6 +12,7 @@ import {
 } from './proposals.mjs';
 import {
   classifyDoctorReport,
+  filterIncidentsForCiStatic,
   incidentsStrictExitCode,
 } from './incidents.mjs';
 import {
@@ -132,12 +133,14 @@ function printHumanReport(report) {
 }
 
 /**
- * @param {{ json?: boolean, strict?: boolean, probeStaging?: boolean, probeOperator?: boolean }} opts
+ * @param {{ json?: boolean, strict?: boolean, probeStaging?: boolean, probeOperator?: boolean, ciStatic?: boolean }} opts
  */
 export async function runZwDoctorIncidents(opts = {}) {
+  const ciStatic = opts.ciStatic === true;
   const ctx = {
-    probeStaging: opts.probeStaging !== false,
-    probeOperator: opts.probeOperator !== false,
+    probeStaging: !ciStatic && opts.probeStaging !== false,
+    probeOperator: !ciStatic && opts.probeOperator !== false,
+    ciStatic,
   };
 
   const invariants = await runInvariantsForMode('all', ctx);
@@ -161,7 +164,13 @@ export async function runZwDoctorIncidents(opts = {}) {
     },
   };
 
-  const { incidents, runbooks } = classifyDoctorReport(doctorReport, signals);
+  let { incidents, runbooks } = classifyDoctorReport(doctorReport, signals);
+  if (ciStatic) {
+    incidents = filterIncidentsForCiStatic(incidents);
+    runbooks = runbooks.filter((rb) =>
+      incidents.some((i) => i.id === rb.incident_id && i.status === 'ACTIVE'),
+    );
+  }
   const active = incidents.filter((i) => i.status === 'ACTIVE');
   const incidentVerdict =
     active.length === 0
@@ -189,6 +198,7 @@ export async function runZwDoctorIncidents(opts = {}) {
       production_data_mutated: false,
       auto_repair_executed: false,
     },
+    ci_static: ciStatic,
   };
 
   assertProposalOutputHasNoSecrets(proposals, JSON.stringify(payload));
@@ -199,7 +209,10 @@ export async function runZwDoctorIncidents(opts = {}) {
     printIncidentsReport(payload);
   }
 
-  const exitCode = opts.strict === true ? incidentsStrictExitCode(incidents) : 0;
+  const exitCode =
+    opts.strict === true
+      ? incidentsStrictExitCode(incidents, { ciStatic })
+      : 0;
   return { payload, exitCode, incidents };
 }
 

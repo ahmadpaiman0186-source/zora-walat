@@ -1,4 +1,4 @@
-# Safe PR gate: secrets scan + zw-doctor static invariants + control-plane unit tests.
+# Safe PR gate: secrets scan + zw-doctor static invariants + incident classifier + unit tests.
 # No Stripe secrets, operator tokens, DATABASE_URL, or money-moving operations.
 name: Super-System Guard
 
@@ -38,11 +38,17 @@ jobs:
       - name: zw-doctor summary (strict, no operator, no staging)
         run: npm run zw:doctor -- summary --strict --no-operator --no-staging
 
+      - name: zw-doctor incidents (strict, CI static profile)
+        run: npm run zw:doctor -- incidents --strict --ci-static
+
       - name: zw-doctor control-plane unit tests
         run: node --test test/zwDoctor.test.js
 
       - name: Sanitizer unit tests
         run: node --test test/zwSanitizeReport.test.js
+
+      - name: Incident classifier unit tests
+        run: node --test test/zwDoctorIncidents.test.js
 
       - name: Job summary
         if: always()
@@ -52,7 +58,8 @@ jobs:
             echo ""
             echo "- secrets:scan on tracked files"
             echo "- zw-doctor summary --strict --no-operator --no-staging"
-            echo "- zwDoctor + sanitizer unit tests"
+            echo "- zw-doctor incidents --strict --ci-static"
+            echo "- zwDoctor + sanitizer + incident classifier unit tests"
             echo ""
             echo "Does **not** run refunds, payments, webhooks, or require repository secrets."
           } >> "$GITHUB_STEP_SUMMARY"

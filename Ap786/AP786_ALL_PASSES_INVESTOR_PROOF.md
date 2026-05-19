@@ -6,8 +6,8 @@
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
 **Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
 **Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.  
-**CI guard (2026-05-19):** GitHub Actions `super-system-guard.yml` runs secrets scan + static zw-doctor on every PR — **not** production fully certified.  
-**L-13:** Checklist only (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **not** executed.  
+**CI guard (2026-05-19):** GitHub Actions `super-system-guard.yml` runs secrets scan + static zw-doctor + **incident classifier** (`incidents --strict --ci-static`) on every PR — **not** production fully certified.  
+**L-13:** **Readiness checklist prepared** (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **NOT PASS**, **not** executed.  
 **Incident response workflow (2026-05-19):** `zw-doctor incidents` + approval doc — **not** autonomous production repair.
 
 ---

@@ -50,6 +50,8 @@ CONTROL PLANE v1 2026-05-19: zw-doctor CLI (diagnose + propose-only) — SUPER_S
 CI GUARD 2026-05-19: .github/workflows/super-system-guard.yml — secrets:scan + zw-doctor summary --strict --no-operator --no-staging (no repo secrets). STAGING_SMOKE: SUPER_SYSTEM_STAGING_SMOKE_PROOF.md, npm run zw:smoke:staging.
 L-13: CHECKLIST_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (not executed).
 INCIDENT_RESPONSE 2026-05-19: SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md + zw-doctor incidents mode (propose-only).
+CI_INCIDENT_GUARD 2026-05-19: super-system-guard.yml runs incidents --strict --ci-static (no L-13 execution).
+L-13: READINESS_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (NOT PASS, not executed).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)

@@ -688,11 +688,38 @@ export function classifyDoctorReport(report, runtimeSignals = {}) {
   return { incidents, runbooks };
 }
 
+/** Incident ids suppressed in CI static mode (missing local secrets / operator token). */
+export const CI_STATIC_SUPPRESS_INCIDENT_IDS = Object.freeze([
+  'STRIPE_KEY_MISSING_OR_MALFORMED',
+  'STAGING_API_DOWN',
+  'OPERATOR_AUTH_FAILED',
+  'TOKEN_EXPIRED',
+]);
+
+/**
+ * Drop env-local incidents for CI (no Stripe key, token, or staging probe required).
+ * Never suppresses CRITICAL money-path or live-key incidents.
+ *
+ * @param {IncidentResult[]} incidents
+ * @returns {IncidentResult[]}
+ */
+export function filterIncidentsForCiStatic(incidents) {
+  const suppress = new Set(CI_STATIC_SUPPRESS_INCIDENT_IDS);
+  return incidents.filter((i) => {
+    if (!suppress.has(i.id)) return true;
+    if (i.severity === 'CRITICAL') return true;
+    return false;
+  });
+}
+
 /**
  * @param {IncidentResult[]} incidents
+ * @param {{ ciStatic?: boolean }} [opts]
  */
-export function incidentsStrictExitCode(incidents) {
-  const active = incidents.filter((i) => i.status === 'ACTIVE');
+export function incidentsStrictExitCode(incidents, opts = {}) {
+  const pool =
+    opts.ciStatic === true ? filterIncidentsForCiStatic(incidents) : incidents;
+  const active = pool.filter((i) => i.status === 'ACTIVE');
   const bad = active.filter(
     (i) => i.severity === 'HIGH' || i.severity === 'CRITICAL',
   );

@@ -8,7 +8,9 @@ import {
   assertNoDangerousAutoRepair,
   classifyDoctorReport,
   classifyIncident,
+  filterIncidentsForCiStatic,
   incidentSeverityRank,
+  incidentsStrictExitCode,
   INCIDENT_TAXONOMY,
 } from '../tools/zwDoctor/incidents.mjs';
 import { invariant } from '../tools/zwDoctor/types.mjs';
@@ -125,6 +127,44 @@ describe('assertNoDangerousAutoRepair', () => {
 describe('incidentSeverityRank', () => {
   it('orders CRITICAL above LOW', () => {
     assert.ok(incidentSeverityRank('CRITICAL') > incidentSeverityRank('LOW'));
+  });
+});
+
+describe('filterIncidentsForCiStatic', () => {
+  it('suppresses missing Stripe key but keeps live key CRITICAL', () => {
+    const filtered = filterIncidentsForCiStatic([
+      classifyIncident({
+        incidentId: 'STRIPE_KEY_MISSING_OR_MALFORMED',
+        status: 'ACTIVE',
+      }),
+      classifyIncident({
+        incidentId: 'STRIPE_LIVE_KEY_IN_TEST_CONTEXT',
+        status: 'ACTIVE',
+      }),
+    ]);
+    assert.equal(filtered.length, 1);
+    assert.equal(filtered[0].id, 'STRIPE_LIVE_KEY_IN_TEST_CONTEXT');
+  });
+
+  it('ci-static strict gate passes without local Stripe key', () => {
+    const incidents = [
+      classifyIncident({
+        incidentId: 'STRIPE_KEY_MISSING_OR_MALFORMED',
+        status: 'ACTIVE',
+      }),
+    ];
+    assert.equal(incidentsStrictExitCode(incidents, { ciStatic: true }), 0);
+    assert.equal(incidentsStrictExitCode(incidents, { ciStatic: false }), 0);
+  });
+
+  it('ci-static strict gate fails on CRITICAL secrets scan', () => {
+    const incidents = [
+      classifyIncident({
+        incidentId: 'SECRETS_SCAN_FAILED',
+        status: 'ACTIVE',
+      }),
+    ];
+    assert.equal(incidentsStrictExitCode(incidents, { ciStatic: true }), 1);
   });
 });
 

@@ -3,7 +3,7 @@
 **Version:** 1.0.0 (2026-05-19)  
 **Branch:** `fix/post-l40-slim-stripe-webhook-invalid-signature`  
 **Classifier:** `server/tools/zwDoctor/incidents.mjs`  
-**CLI:** `npm run zw:doctor -- incidents [--json] [--strict]`
+**CLI:** `npm run zw:doctor -- incidents [--json] [--strict] [--ci-static]`
 
 ---
 
@@ -128,6 +128,18 @@ npm run zw:smoke:staging                   # operator optional
 - forbidden_actions  
 - evidence_required  
 - rollback_hint  
+
+---
+
+## CI guard (static profile)
+
+GitHub Actions `super-system-guard.yml` runs:
+
+```bash
+npm run zw:doctor -- incidents --strict --ci-static
+```
+
+`--ci-static` implies `--no-operator` and `--no-staging`. It suppresses env-local incidents (missing local Stripe key, operator token, staging health) so CI does not fail on expected absent secrets. **HIGH/CRITICAL** static incidents (secrets scan, live key in repo, deploy root, money-path invariants) still fail the job.
 
 ---
 

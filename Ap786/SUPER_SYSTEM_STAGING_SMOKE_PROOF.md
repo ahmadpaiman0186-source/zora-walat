@@ -14,8 +14,10 @@ Workflow: `.github/workflows/super-system-guard.yml`
 |------|---------|------------------|
 | Secrets scan | `npm run secrets:scan` | No |
 | Control plane | `npm run zw:doctor -- summary --strict --no-operator --no-staging` | No |
+| Incident classifier | `npm run zw:doctor -- incidents --strict --ci-static` | No |
 | Unit tests | `node --test test/zwDoctor.test.js` | No |
 | Sanitizer tests | `node --test test/zwSanitizeReport.test.js` | No |
+| Incident tests | `node --test test/zwDoctorIncidents.test.js` | No |
 
 **Does not run:** refunds, payments, webhook resend, operator login, DATABASE_URL, live Stripe.
 
@@ -43,7 +45,7 @@ npm run zw:smoke:staging -- --write-artifact   # writes Ap786/smoke/latest-sanit
 ## What is intentionally not automated
 
 - L-12 partial refund proof  
-- L-13 duplicate `charge.refunded` resend (checklist only — see `L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`)  
+- L-13 duplicate `charge.refunded` resend (readiness checklist only — `L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`; **NOT PASS**)  
 - Full `test:ci` integration DB suite (separate `ci.yml` job)  
 - Production launch certification  
 - Unattended money repair (`ZW_SELF_HEALING_APPLY` remains off)
