@@ -2,8 +2,9 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** L-8 card declined safety + L-9/L-10 + P-2 auth (2026-05-18)  
-**Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.
+**Last updated:** L-11 refund PASS + frontend UX (2026-05-19)  
+**Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
+**Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).
 
 ---
 
@@ -27,7 +28,9 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **L-11 (2026-05-19):** **PASS** — single test-mode refund via harness (`REFUND_CREATED true`, `REFUND_STATUS succeeded`); **no second refund**. Final `l11-post-refund-verify`: `POST_PAYMENT_INCIDENT_STATUS REFUNDED`, `L11_REFUND_PROOF_VERDICT PASS`, fulfillment count **1**, lifecycle FULFILLED / RECHARGE_COMPLETED. Evidence: `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`. Order suffix `…04pvq0dr78`.
 
-**What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
+**What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery). **L-12** (partial refund) and **L-13** (duplicate refund event) are **not** PASS — see Day 2 plan.
+
+**Frontend (2026-05-19):** Production payment copy and CTA safety on web (`ec4cc69`, `0f2c4e0`); see `FRONTEND_PRODUCTION_UX_AUDIT_2026_05_19.md`.
 
 ---
 
