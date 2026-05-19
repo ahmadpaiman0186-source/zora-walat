@@ -24,6 +24,8 @@ Upgraded Next.js web top-up and Flutter checkout copy from MVP/test/demo tone to
 | `server/` test/mock references | **INTERNAL_ONLY_OK** | No change |
 | `lib/core/utils/afghan_phone_utils.dart` demo comment | **INTERNAL_ONLY_OK** | Code comment only |
 | Flutter `checkout_screen` — pay enabled during quote load | **PAYMENT_UX_RISK** | `_canPay` + disabled reason |
+| `buildStripePublishableKeySetupMessage` — hardcoded dev paths / env names in UI | **INVESTOR_TRUST_RISK** | Customer-safe messages in production; dev detail only in `NODE_ENV=development` |
+| `error.configApi` — `NEXT_PUBLIC_API_URL` in user string | **INVESTOR_TRUST_RISK** | Support-oriented copy without env var names |
 
 ---
 
@@ -46,6 +48,11 @@ Upgraded Next.js web top-up and Flutter checkout copy from MVP/test/demo tone to
 ### Locales
 
 - `messages/en.ts` (source), `fa.ts`, `ar.ts`, `tr.ts` aligned
+
+### Error copy (`lib/env/publicRuntime.ts`)
+
+- Production/staging builds: investor-safe Stripe setup message (no paths, no env var names)
+- Local development: detailed dev setup hint (masked key preview only when malformed)
 
 ---
 

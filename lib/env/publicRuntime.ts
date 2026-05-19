@@ -82,30 +82,48 @@ export function getEffectiveStripePublishableKey(): string {
   return getStripePublishableKey();
 }
 
+/** Investor-safe message — no env var names, paths, or masked key previews. */
+export function buildStripePublishableKeyCustomerMessage(
+  diag: StripePublishableKeyDiagnostics,
+): string {
+  if (diag.present && diag.malformed) {
+    return 'Payment setup is incomplete. Contact support if this persists.';
+  }
+  return 'Payment is not available on this deployment. Contact support if this persists.';
+}
+
 /**
- * User-visible setup hint (English). Does not include full secrets — masked preview only when malformed.
+ * Developer setup hint (local dev only). Masked preview when malformed — never full key.
  */
-export function buildStripePublishableKeySetupMessage(
+export function buildStripePublishableKeyDevSetupMessage(
   diag: StripePublishableKeyDiagnostics,
 ): string {
   const required = 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY';
   const rootHint =
-    '.env.local at the repository root (same folder as package.json and next.config.mjs — not inside server/).';
+    '.env.local at the repository root (same folder as package.json — not inside server/).';
   const restart =
-    'Restart the Next.js dev server (`npm run dev` / `npm start`) after editing .env.local.';
-  const examplePath =
-    'Example path (this workspace): C:\\Users\\ahmad\\zora_walat\\.env.local';
+    'Restart the Next.js dev server after editing .env.local.';
 
   if (diag.present && diag.malformed) {
     return (
       `Malformed Stripe publishable key. Detected value (masked): ${diag.maskedPreview}. ` +
-      `Must start with pk_test_ or pk_live_, use ASCII only, and contain no spaces or quotes. ` +
-      `Fix ${required} in ${rootHint} ${restart} ${examplePath}`
+      `Must start with pk_test_ or pk_live_, ASCII only, no spaces or quotes. ` +
+      `Fix ${required} in ${rootHint} ${restart}`
     );
   }
 
   return (
     `Stripe publishable key is missing for the Next.js app. Set ${required} in ${rootHint} ` +
-    `${restart} If you only added it to server/.env.local, it will not load — copy to the repo root. ${examplePath}`
+    `${restart} If you only added it to server/.env.local, copy it to the repo root.`
   );
+}
+
+/** Customer-safe in production; detailed dev hint when NODE_ENV is development. */
+export function buildStripePublishableKeySetupMessage(
+  diag: StripePublishableKeyDiagnostics,
+): string {
+  if (process.env.NODE_ENV === 'development') {
+    return buildStripePublishableKeyDevSetupMessage(diag);
+  }
+  return buildStripePublishableKeyCustomerMessage(diag);
 }

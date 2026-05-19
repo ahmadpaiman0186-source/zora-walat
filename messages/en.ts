@@ -134,7 +134,7 @@ export const en = {
     /** @deprecated UI uses `buildStripePublishableKeySetupMessage` / diagnostics */
     configStripe: 'Missing publishable key in environment.',
     configApi:
-      'Payment API URL is not configured. Set NEXT_PUBLIC_API_URL for this deployment.',
+      'Payment service is unavailable on this deployment. Contact support if this persists.',
     stripeInit: 'Payment SDK could not load.',
     network: 'Cannot reach the API. Is the server running?',
     requestTimeout: 'The payment API took too long to respond. Try again.',

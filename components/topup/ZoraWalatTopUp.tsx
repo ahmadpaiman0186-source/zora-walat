@@ -262,7 +262,11 @@ export function ZoraWalatTopUp() {
 
     if (!stripePublishableKey) {
       setStep('error');
-      setErrorMessage(buildStripePublishableKeySetupMessage(stripeDiag));
+      setErrorMessage(
+        process.env.NODE_ENV === 'development'
+          ? buildStripePublishableKeySetupMessage(stripeDiag)
+          : m.form.validationStripe,
+      );
       return;
     }
     if (!stripePromise) {
@@ -698,7 +702,7 @@ export function ZoraWalatTopUp() {
     if (busyIntent) return null;
     if (!apiBase) return m.error.configApi;
     if (stripeEnvFault) {
-      return buildStripePublishableKeySetupMessage(stripeDiag);
+      return m.form.validationStripe;
     }
     if (stripeJsError) return m.error.stripeInit;
     if (!operatorId.length) return m.form.validationOperator;
@@ -790,7 +794,9 @@ export function ZoraWalatTopUp() {
 
           {stripeEnvFault && step === 'idle' && (
             <div className={styles.alertError} role="alert">
-              {buildStripePublishableKeySetupMessage(stripeDiag)}
+              {process.env.NODE_ENV === 'development'
+                ? buildStripePublishableKeySetupMessage(stripeDiag)
+                : m.form.validationStripe}
             </div>
           )}
 
