@@ -25,7 +25,7 @@ Zora-Walat has demonstrated a **complete staging path** from hosted Stripe Check
 
 **L-8 (2026-05-18):** Automated tests plus **staging** Stripe Checkout decline (test card ending **0002**, browser message *credit card was declined*) — order stays **PENDING**, **`PAID_CONFIRMED` false**, **zero** fulfillment; **not** recharge-complete or fulfilled.
 
-**L-11 (2026-05-19):** **PARTIAL / PLAN_READY** — read-only gates PASS; test-mode **refund executed** via harness (`REFUND_CREATED true`). **Not PASS:** `l11-post-refund-verify` blocked — `POST_PAYMENT_INCIDENT_STATUS` **NONE** (webhook mirror pending). **STATE_C** — see `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`. Slim `charge.refunded` handler + event resend required; **no second refund** if `STRIPE_REFUND_ALREADY_EXISTS true`.
+**L-11 (2026-05-19):** **PASS** — single test-mode refund via harness (`REFUND_CREATED true`, `REFUND_STATUS succeeded`); **no second refund**. Final `l11-post-refund-verify`: `POST_PAYMENT_INCIDENT_STATUS REFUNDED`, `L11_REFUND_PROOF_VERDICT PASS`, fulfillment count **1**, lifecycle FULFILLED / RECHARGE_COMPLETED. Evidence: `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md`. Order suffix `…04pvq0dr78`.
 
 **What is not claimed:** Broader production readiness (live Stripe, scale, compliance, disaster recovery).
 

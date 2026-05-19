@@ -41,7 +41,7 @@ P-2: PASS 2026-05-18 — operator login + status-check HTTP 200; TOKEN_EXPIRED f
 L-9: PASS 2026-05-18 — /cancel HTTP 200 no 504; unpaid checkout PENDING, PAID_CONFIRMED false, fulfillment count 0 (L9_CHECKOUT_CANCEL_SAFETY.md).
 L-10: PASS (automated) 2026-05-18 — expired webhook 200; unknown id no row; pending→CANCELLED not PAID; fulfillment 0 (L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md). Staging expire PENDING.
 L-8: PASS 2026-05-18 — automated + staging decline card (0002); post-decline PENDING, PAID_CONFIRMED false, fulfillment 0 (L8_CARD_DECLINED_SAFETY.md).
-L-11: PLAN_READY 2026-05-19 — refund EXECUTED in operator session (test mode); post-refund verify BLOCKED (incident NONE). STATE_C: Stripe refund OK, webhook mirror pending. Fix: slim charge.refunded path + resend event (L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md). NOT PASS until L11_REFUND_PROOF_VERDICT PASS. Key fix ae57d4e; mapping 46d77ea.
+L-11: PASS 2026-05-19 — single test-mode refund (harness l11-refund-execute); no second refund. Final l11-post-refund-verify PASS: POST_PAYMENT_INCIDENT_STATUS REFUNDED, fulfillment count 1, L11_REFUND_PROOF_VERDICT PASS (L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md). Repo: mapping 46d77ea, key ae57d4e, webhook mirror f728047.
 
 GLOBAL AUDIT 2026-05-18: PARTIAL — see GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_18.md (secrets:scan PASS; focused unit tests PASS; full test:ci NOT re-run this session).
 

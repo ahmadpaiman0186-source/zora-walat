@@ -1,7 +1,7 @@
 # L-11 — Full refund safety plan (pre-execution)
 
-**Status:** **PLAN_READY** — **EXECUTION_BLOCKED_STRIPE_VERIFICATION** — **no refund executed**  
-**Date:** 2026-05-18  
+**Status:** **PASS** (2026-05-19) — full test-mode refund + post-refund proof verified  
+**Date:** 2026-05-18 (plan); **PASS recorded:** 2026-05-19  
 **Rules:** No secrets, JWTs, env values, API keys, full card numbers, customer PII, or raw webhook payloads.
 
 ---
@@ -16,17 +16,22 @@ Until that line is recorded (chat/ticket), this document is **plan only**.
 
 ---
 
-## Current blocker (2026-05-19, post-execute)
+## L-11 PASS (2026-05-19)
 
 | Item | Detail |
 |------|--------|
-| **Blocker code** | **WEBHOOK_MIRROR_PENDING** / `L11_REFUND_PROOF_VERDICT BLOCKED` |
-| **Refund executed** | **Yes** (operator harness `l11-refund-execute`, test mode, full amount) |
-| **Stripe** | Refund succeeded (`REFUND_ALREADY_EXISTS` becomes true) |
-| **App** | `POST_PAYMENT_INCIDENT_STATUS` still **NONE** until `charge.refunded` webhook mirrors |
-| **State** | **STATE_C_REFUND_EXISTS_APP_NOT_UPDATED** |
-| **Fix** | Deploy slim `charge.refunded` handler; resend test-mode `charge.refunded` (no second refund) |
+| **Verdict** | **PASS** — `L11_REFUND_PROOF_VERDICT PASS` |
+| **Incident** | `POST_PAYMENT_INCIDENT_STATUS REFUNDED` |
+| **Stripe** | `STRIPE_REFUND_ALREADY_EXISTS true`, `STRIPE_ACCOUNT_MODE test_only` |
+| **Lifecycle** | FULFILLED, RECHARGE_COMPLETED, `FULFILLMENT_ATTEMPT_COUNT` **1** |
+| **Refunds** | **One** harness execute only; **no second refund** |
 | **Evidence** | `Ap786/L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md` |
+
+---
+
+## Resolved interim blocker (2026-05-19)
+
+Webhook mirror lag after first execute (**STATE_C**) — resolved via slim `charge.refunded` path + event resend; final `l11-post-refund-verify` PASS.
 
 ---
 
@@ -332,6 +337,6 @@ Requires `TEST_DATABASE_URL` + `registerChaosWebhookEnv.mjs`; signs `charge.refu
 | Refund executed | **No** (use §5c only with `L11_REFUND_APPROVAL` env) |
 | Guarded operator modes | **`l11-mapping-diagnose`**, **`l11-discover-refundable-order`**, **`l11-refresh-order-ref`**, **`l11-stripe-diagnose`**, **`l11-refund-target`**, **`l11-refund-execute`**, **`l11-post-refund-verify`** |
 | Stripe verification blocker | **EXECUTION_BLOCKED_STRIPE_VERIFICATION** — run discover → refresh → mapping → diagnose on staging |
-| **Overall** | **PLAN_READY** — **not PASS** — proof commit blocked until `l11-post-refund-verify` PASS |
+| **Overall** | **PASS** (2026-05-19) — `l11-post-refund-verify` PASS; see `L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md` |
 
 **Next:** `l11-discover-refundable-order` → `l11-refresh-order-ref` → `l11-mapping-diagnose` → `l11-stripe-diagnose` (`READY_*`) → `l11-refund-target` (`READY_FOR_OPERATOR_APPROVAL`) → (separate approval) `l11-refund-execute` → `l11-post-refund-verify` → then record enums and commit proof.
