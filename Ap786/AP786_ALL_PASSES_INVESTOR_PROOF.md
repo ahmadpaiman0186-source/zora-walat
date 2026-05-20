@@ -10,6 +10,7 @@
 **PR #21 CI (2026-05-19):** Operator reports **green** Super-System Guard checks and **Ready to merge** on PR #21 (`d61923d`); Vercel Preview Comments succeeded; **PR not merged yet** — see `PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md`. This is **CI gate evidence only**, not production certification.  
 **L-13:** **Readiness checklist prepared** (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **NOT PASS**, **not** executed.  
 **Incident response workflow (2026-05-19):** `zw-doctor incidents` + approval doc — **not** autonomous production repair.
+**Neon branch governance (2026-05-19):** `P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md` added — **final Neon/Vercel dashboard confirmation pending**; **no** database branch deletion; **no** staging env mutation.
 
 ---
 

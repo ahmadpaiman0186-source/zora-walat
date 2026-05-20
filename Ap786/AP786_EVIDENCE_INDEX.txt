@@ -53,6 +53,7 @@ INCIDENT_RESPONSE 2026-05-19: SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFL
 CI_INCIDENT_GUARD 2026-05-19: super-system-guard.yml runs incidents --strict --ci-static (no L-13 execution).
 L-13: READINESS_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (NOT PASS, not executed).
 PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — GitHub PR #21 checks green @ d61923d; Ready to merge; NOT merged; L-13 not executed.
+P0_NEON_GOVERNANCE 2026-05-19: P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md — branch staging-stripe-test-2026-05-12 / project neon-bistre-flame; dashboard confirmation pending; no delete/expire/env change.
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
