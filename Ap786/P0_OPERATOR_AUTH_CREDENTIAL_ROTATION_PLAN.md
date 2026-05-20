@@ -247,6 +247,33 @@ node tools/staging-auth-checkout-operator.mjs credential-rotation-dry-run
 
 ---
 
+## Dry-Run Validation — 2026-05-20
+
+| Field | Value |
+|-------|--------|
+| **IMPLEMENTATION_COMMIT** | `b460789` |
+| **IMPLEMENTATION_PUSHED** | `true` |
+| **DRY_RUN_EXECUTED** | `true` |
+| **DRY_RUN_VERDICT** | `BLOCKED` |
+| **BLOCKED_REASON** | `BLOCKED_MISSING_OPERATOR_EMAIL` (also `database_url_not_configured` in harness process) |
+| **DB_MUTATION_OCCURRED** | `false` |
+| **EXECUTE_MODE_RUN** | `false` |
+| **CREDENTIAL_ROTATION_EXECUTED** | `false` |
+| **APPROVAL_PHRASE_PROVIDED** | `false` |
+| **DATABASE_URL_PRINTED** | `false` |
+| **SECRET_EXPOSURE** | `false` |
+| **TESTS_RESULT** | `pass` (25 tests: credential rotation + CLI safety) |
+| **SECRETS_SCAN** | `pass` |
+| **HAS_OPERATOR_EMAIL** (auth-env-check) | `false` |
+| **HAS_OPERATOR_PASSWORD** (auth-env-check) | `false` |
+| **NEW_PASSWORD_LENGTH** (dry-run session) | `18` (throwaway; not printed; cleared after run) |
+
+**Honest note:** Dry-run did **not** PASS. Local workstation has no `STAGING_OPERATOR_EMAIL` in gitignored `server/.env.local` and no `DATABASE_URL` in the harness process. This is expected on CI/agent hosts — operator must set email (and DB URL for diagnose) in a **local gitignored session** before dry-run can PASS. Execute mode was **not** run.
+
+**NEXT_STEP:** Set `STAGING_OPERATOR_EMAIL` in gitignored `server/.env.local` (same PowerShell session), confirm staging `DATABASE_URL` available for diagnose, re-run `credential-rotation-dry-run` with `ZW_STAGING_CREDENTIAL_ROTATION=true` and a new throwaway `STAGING_OPERATOR_NEW_PASSWORD`. Do **not** run execute until a separate approved execution step.
+
+---
+
 ## Related evidence
 
 - `P2_OPERATOR_AUTH_RELIABILITY.md` (prior PASS — may be stale vs current DB/password)
