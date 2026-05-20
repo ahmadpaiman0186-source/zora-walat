@@ -13,6 +13,7 @@
 **Neon branch governance (2026-05-19):** `P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md` added — **final Neon/Vercel dashboard confirmation pending**; **no** database branch deletion; **no** staging env mutation.
 **Operator auth (2026-05-19):** Staging login **401** (`invalid_credentials`) — `P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md`; **password rotation required** (screenshot exposure); **no** DB reset or env change in repo; P-2 harness PASS may be stale until rotation completes.  
 **Operator rotation tooling (2026-05-20):** Guarded workflow implemented (`b460789`, pushed); **dry-run BLOCKED** (missing local operator email config); **real credential rotation not executed**; exposed password still considered compromised until separate approved execution; **no** DB/Vercel/Neon mutation in this step.
+**Super-System intelligence (2026-05-20):** Read-only `zw-doctor intelligence` + `SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md` — staging money-path strong; global platform **PARTIAL**; self-healing apply **off**; L-13 **not** executed.
 
 ---
 

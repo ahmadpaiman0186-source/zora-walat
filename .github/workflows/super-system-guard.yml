@@ -41,6 +41,9 @@ jobs:
       - name: zw-doctor incidents (strict, CI static profile)
         run: npm run zw:doctor -- incidents --strict --ci-static
 
+      - name: zw-doctor intelligence (read-only, CI static)
+        run: npm run zw:doctor -- intelligence --ci-static
+
       - name: zw-doctor control-plane unit tests
         run: node --test test/zwDoctor.test.js
 
@@ -49,6 +52,9 @@ jobs:
 
       - name: Incident classifier unit tests
         run: node --test test/zwDoctorIncidents.test.js
+
+      - name: Super-System intelligence unit tests
+        run: node --test test/superSystemIntelligence.test.js
 
       - name: Job summary
         if: always()
@@ -59,7 +65,8 @@ jobs:
             echo "- secrets:scan on tracked files"
             echo "- zw-doctor summary --strict --no-operator --no-staging"
             echo "- zw-doctor incidents --strict --ci-static"
-            echo "- zwDoctor + sanitizer + incident classifier unit tests"
+            echo "- zw-doctor intelligence --ci-static (read-only)"
+            echo "- zwDoctor + sanitizer + incident + intelligence unit tests"
             echo ""
             echo "Does **not** run refunds, payments, webhooks, or require repository secrets."
           } >> "$GITHUB_STEP_SUMMARY"

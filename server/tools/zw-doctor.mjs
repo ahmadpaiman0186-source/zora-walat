@@ -6,7 +6,7 @@
  *   node tools/zw-doctor.mjs [mode] [--json] [--strict] [--ci-static] [--no-staging] [--no-operator]
  *
  * Modes: summary | money-path | stripe-env | webhook | operator-auth |
- *        frontend-env | deploy-root | evidence | incidents | all
+ *        frontend-env | deploy-root | evidence | incidents | intelligence | all
  *
  * Never executes refunds, payments, or webhook resends.
  */
@@ -55,6 +55,8 @@ const opts = {
 const result =
   mode === 'incidents'
     ? await runZwDoctorIncidents(opts)
-    : await runZwDoctor(mode, opts);
+    : mode === 'intelligence'
+      ? await runZwDoctorIntelligence(opts)
+      : await runZwDoctor(mode, opts);
 
 process.exit(result.exitCode);

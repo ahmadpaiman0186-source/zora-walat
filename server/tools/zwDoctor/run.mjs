@@ -21,8 +21,9 @@ import {
   summarizeInvariants,
   ZW_DOCTOR_VERSION,
 } from './types.mjs';
+import { runZwDoctorIntelligence } from './superSystemIntelligence.mjs';
 
-const MODES = [
+export const MODES = [
   'summary',
   'money-path',
   'stripe-env',
@@ -32,6 +33,7 @@ const MODES = [
   'deploy-root',
   'evidence',
   'incidents',
+  'intelligence',
   'all',
 ];
 
@@ -249,5 +251,3 @@ function printIncidentsReport(payload) {
     );
   }
 }
-
-export { MODES };

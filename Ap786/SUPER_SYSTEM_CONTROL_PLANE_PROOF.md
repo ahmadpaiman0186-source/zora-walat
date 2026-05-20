@@ -27,6 +27,7 @@ npm run zw:doctor -- incidents
 npm run zw:doctor -- incidents --json --no-operator --no-staging
 npm run zw:doctor -- incidents --strict   # exit 1 if HIGH/CRITICAL active
 npm run zw:doctor -- incidents --strict --ci-static   # CI profile (suppresses env-local MEDIUM)
+npm run zw:doctor -- intelligence --ci-static         # read-only category synthesis
 ```
 
 Classifier: `server/tools/zwDoctor/incidents.mjs` — 21 incident types, propose-only runbooks.  
@@ -56,7 +57,7 @@ npm run zw:doctor -- money-path --no-operator
 npm run zw:doctor -- deploy-root
 ```
 
-Modes: `summary`, `money-path`, `stripe-env`, `webhook`, `operator-auth`, `frontend-env`, `deploy-root`, `evidence`, `incidents`, `all`.
+Modes: `summary`, `money-path`, `stripe-env`, `webhook`, `operator-auth`, `frontend-env`, `deploy-root`, `evidence`, `incidents`, `intelligence`, `all`.
 
 ---
 
