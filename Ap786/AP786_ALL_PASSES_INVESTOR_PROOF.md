@@ -11,6 +11,7 @@
 **L-13:** **Readiness checklist prepared** (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **NOT PASS**, **not** executed.  
 **Incident response workflow (2026-05-19):** `zw-doctor incidents` + approval doc — **not** autonomous production repair.
 **Neon branch governance (2026-05-19):** `P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md` added — **final Neon/Vercel dashboard confirmation pending**; **no** database branch deletion; **no** staging env mutation.
+**Operator auth (2026-05-19):** Staging login **401** (`invalid_credentials`) — `P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md`; **password rotation required** (screenshot exposure); **no** DB reset or env change in repo; P-2 harness PASS may be stale until rotation completes.
 
 ---
 
