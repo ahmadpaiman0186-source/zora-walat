@@ -306,7 +306,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get walletTopUpHint =>
-      'Add funds securely. Credits apply instantly for testing your integration.';
+      'Add funds securely. Wallet credits apply only after payment is confirmed on our servers.';
 
   @override
   String topUpSuccessSnack(String amount) {

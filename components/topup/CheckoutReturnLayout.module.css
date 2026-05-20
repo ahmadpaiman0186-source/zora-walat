@@ -1,0 +1,216 @@
+.page {
+  min-height: 100vh;
+  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brandLink {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #34d399;
+  text-decoration: none;
+}
+
+.brandLink:hover {
+  text-decoration: underline;
+}
+
+.stagingBadge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fcd34d;
+  background: rgba(252, 211, 77, 0.12);
+  border: 1px solid rgba(252, 211, 77, 0.35);
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.35rem;
+}
+
+.card {
+  padding: 1.35rem 1.4rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(165deg, rgba(22, 30, 40, 0.92) 0%, rgba(14, 19, 26, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 1rem;
+}
+
+.cardSuccess {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.cardWarn {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.cardNeutral {
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #f8fafc;
+  margin-bottom: 0.65rem;
+  line-height: 1.25;
+}
+
+.lead {
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.statusPill {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.pillVerifying {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.pillOk {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.pillMuted {
+  color: rgba(148, 163, 184, 0.95);
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.refRow {
+  font-size: 0.88rem;
+  color: rgba(148, 163, 184, 0.9);
+  margin-bottom: 0.75rem;
+}
+
+.refValue {
+  font-weight: 700;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.note {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: rgba(148, 163, 184, 0.9);
+  margin-top: 0.75rem;
+}
+
+.noteStrong {
+  color: #cbd5e1;
+}
+
+.list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.15rem;
+  color: rgba(203, 213, 225, 0.92);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.list li {
+  margin-bottom: 0.4rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 480px) {
+  .actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.15rem;
+  border-radius: 0.55rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #042f1a;
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  border: none;
+  cursor: pointer;
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.05);
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.15rem;
+  border-radius: 0.55rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btnSecondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.alert {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.85rem 1rem;
+  border-radius: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.alertWarn {
+  color: #fde68a;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+}
+
+.muted {
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.85);
+  line-height: 1.5;
+}
