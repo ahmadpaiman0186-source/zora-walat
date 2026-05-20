@@ -8,6 +8,7 @@
 | Document | Contents |
 |----------|----------|
 | [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Canonical reboot brief** — read first after memory reset |
+| [ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md](./ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md) | **Executive engineering brief** — investors, founders, CTO summary |
 
 ## Master project memory (2026-05-20)
 

@@ -62,6 +62,7 @@ PR21_POST_MERGE 2026-05-20: PR21_POST_MERGE_VERIFICATION.md — merged @ 2ea64a2
 PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — superseded for merge status by PR21_POST_MERGE (pre-merge PR checks green).
 GLOBAL_AUDIT_2026_05_20: PROJECT_MEMORY_ZORA_WALAT_MASTER.md + GLOBAL_SECURITY_AUDIT + FAILURE_DETECTION + MONEY_PATH + HEALTH_2026_05_20 + GATED_OPERATIONS — readiness 68% PARTIAL; no DB/env/payment mutation.
 REBOOT_BRIEF 2026-05-20: ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md — canonical handoff for ChatGPT/Cursor/agents; docs only.
+EXEC_BRIEF 2026-05-20: ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md — founder/investor/CTO engineering brief; 68% PARTIAL; not production-ready.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
