@@ -10,22 +10,28 @@ export const tr: UiMessages = {
     ...en.brand,
     badge: 'Küresel telekom · Kontör, internet ve arama',
   },
+  header: {
+    ...en.header,
+    trustRibbon: 'Güvenli ödeme · Stripe',
+  },
   hero: {
     ...en.hero,
     subline:
-      'Yurt dışından güvenli ödeme ile çok ülkeli mobil yükleme.',
+      'Stripe ile güvenli ödeme — çok ülkeli mobil yükleme.',
     statCoverage: 'Çok ülkeli katalog',
-    routeFootnote: 'Katalog rotası (önizleme)',
+    routeFootnote: 'Katalog rotası · Teslimattan önce ödeme doğrulaması',
   },
   form: {
     ...en.form,
     title: 'Ürün ve alıcı',
+    subtitle:
+      'Ürün, operatör ve tutarı seçin. Ödemeden önce toplamı gözden geçirirsiniz.',
     countryFrom: 'Gönderen ülke',
     countryTo: 'Alıcı ülke',
     operator: 'GSM operatörü',
     operatorPlaceholder: 'Operatör seçin',
     phone: 'Cep numarası',
-    continueCta: 'Güvenli ödemeye devam',
+    continueCta: 'Stripe Checkout\'a devam',
     continuing: 'Hazırlanıyor…',
     validationPhone: 'Geçerli bir numara girin.',
     validationOperator: 'Bir operatör seçin.',

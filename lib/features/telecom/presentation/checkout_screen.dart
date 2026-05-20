@@ -102,8 +102,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  bool get _canPay {
+    if (_busy) return false;
+    if (!StripeKeys.isPublishableKeyConfigured) return false;
+    if (widget.order.line == TelecomServiceLine.airtime) {
+      if (_quoteBusy) return false;
+      if (_quoteFailed || _breakdown == null) return false;
+    }
+    return true;
+  }
+
+  String? _payDisabledReason(AppLocalizations l10n) {
+    if (_busy) return null;
+    if (!StripeKeys.isPublishableKeyConfigured) {
+      return l10n.stripeKeyMissing;
+    }
+    if (widget.order.line == TelecomServiceLine.airtime) {
+      if (_quoteBusy) return l10n.checkoutPricingLoading;
+      if (_quoteFailed || _breakdown == null) return l10n.checkoutQuoteFailed;
+    }
+    return null;
+  }
+
   Future<void> _pay() async {
-    if (_busy) return;
+    if (!_canPay) return;
     if (widget.order.line != TelecomServiceLine.airtime) {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
@@ -723,13 +745,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
           ),
           const SizedBox(height: 28),
+          if (_payDisabledReason(l10n) != null && !_busy)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                _payDisabledReason(l10n)!,
+                style: t.textTheme.bodySmall?.copyWith(
+                  color: t.colorScheme.error,
+                  height: 1.35,
+                ),
+              ),
+            ),
           ZwPrimaryButton(
             label: _busy
                 ? l10n.checkoutSecuringCheckout
                 : l10n.payWithStripe,
             icon: Icons.credit_card_rounded,
-            onPressed: _busy ? null : _pay,
+            onPressed: _canPay ? _pay : null,
           ),
+          if (_canPay && !_busy) ...[
+            const SizedBox(height: 10),
+            Text(
+              l10n.checkoutScreenStripeSecureNote,
+              style: t.textTheme.bodySmall?.copyWith(
+                color: t.colorScheme.outline,
+                height: 1.4,
+              ),
+            ),
+          ],
         ],
       ),
     );

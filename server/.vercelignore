@@ -1,0 +1,6 @@
+# Keep local secrets off Vercel uploads when deploying from server/.
+# Project env must supply DATABASE_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, etc.
+.env
+.env.local
+.env.production
+.env.production.local

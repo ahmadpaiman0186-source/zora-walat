@@ -1,0 +1,2 @@
+# Local smoke JSON artifacts may contain enum readouts — never commit secrets.
+*.json

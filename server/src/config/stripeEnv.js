@@ -48,9 +48,8 @@ export function effectiveStripeSecretKey(raw) {
   return k;
 }
 
-/** Single-line file at server/stripe_secret.key (gitignored). */
-function readStripeSecretKeyFile() {
-  const serverRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+/** @param {string} serverRoot */
+export function readStripeSecretKeyFileFromRoot(serverRoot) {
   const p = join(serverRoot, 'stripe_secret.key');
   if (!existsSync(p)) return null;
   try {
@@ -61,15 +60,32 @@ function readStripeSecretKeyFile() {
   }
 }
 
+/** Single-line file at server/stripe_secret.key (gitignored). */
+function readStripeSecretKeyFile() {
+  const serverRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+  return readStripeSecretKeyFileFromRoot(serverRoot);
+}
+
 /**
- * Raw env value or file contents (may be invalid). Used only after bootstrap.
+ * Normalized secret or null (quotes stripped, placeholders rejected).
+ * @param {string | undefined} raw
+ */
+export function normalizeStripeSecretRaw(raw) {
+  return effectiveStripeSecretKey(raw);
+}
+
+/**
+ * Resolved secret for Stripe SDK: normalized test/live key, or empty string if none valid.
+ * Precedence after bootstrap dotenv: process.env then stripe_secret.key file.
  */
 export function resolveStripeSecretRaw() {
   const env = String(process.env.STRIPE_SECRET_KEY ?? '').trim();
   const file = readStripeSecretKeyFile();
-  if (effectiveStripeSecretKey(env)) return env;
-  if (file && effectiveStripeSecretKey(file)) return file;
-  return env || file || '';
+  return (
+    effectiveStripeSecretKey(env) ??
+    (file ? effectiveStripeSecretKey(file) : null) ??
+    ''
+  );
 }
 
 /** One validated secret for Stripe SDK, or null. */

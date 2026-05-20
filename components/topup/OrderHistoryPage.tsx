@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
-import { useLocale } from '@/components/i18n/localeContext';
+import { useLocale } from '@/components/i18n/LocaleContext';
 import type { PublicTopupOrder } from '@/topup/publicTopupOrder';
 import { getOrCreateCheckoutSessionKey } from '@/topup/checkoutSession';
 

@@ -107,12 +107,12 @@ router.post(
 router.post(
   '/checkout-pricing-quote',
   requireJsonContentType,
-  blockMoneyRoutesIfPrelaunch,
-  apiIpLimiter,
-  attachAnonymousPricingQuoteTrustContext,
   validateRequest(checkoutPricingQuoteEdgeSchema, (d) =>
     toCheckoutSessionParseInput(normalizeCheckoutQuoteEdge(d)),
   ),
+  blockMoneyRoutesIfPrelaunch,
+  apiIpLimiter,
+  attachAnonymousPricingQuoteTrustContext,
   asyncHandler(createCheckoutPricingQuote),
 );
 

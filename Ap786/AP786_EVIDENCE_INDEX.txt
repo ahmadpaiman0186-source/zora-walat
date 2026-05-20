@@ -1,0 +1,67 @@
+Ap786 — Evidence index (repo: zora_walat)
+========================================
+Date anchor: Day 1 production-readiness start + global audit 2026-05-18
+Sanitized: no secrets, env values, keys, JWTs, PII, raw webhooks
+
+Files:
+  README.md
+  L1_RELEASE_CONTROL_REPORT.md
+  DAY1_PAYMENT_TO_FULFILLMENT_PASS.md
+  DAY1_STATUS_CHECK_FINAL.md
+  DAY1_SUCCESS_ROUTE_FIX.md
+  DAY1_WEBHOOK_SLIM_PATH.md
+  DAY1_DUPLICATE_SAFETY.md
+  DAY1_COMMIT_AND_DEPLOY_SUMMARY.md
+  DAY1_REMAINING_RISKS.md
+  DAY1_ROADMAP_L3_L7.md
+  L3_PAYMENT_CORE_REVERIFICATION.md
+  L4_STRIPE_WEBHOOK_RESEND_PLAN.md
+  L5_DUPLICATE_WEBHOOK_SAFETY_PROOF_PLAN.md
+  L6_EVENT_ORDERING_PAYMENT_INTENT_VS_CHECKOUT.md
+  L7_UNMATCHED_STRIPE_EVENT_SAFETY_PLAN.md
+  AP786_ALL_PASSES_INVESTOR_PROOF.md
+  DAY1_CLOSEOUT_REPORT.md
+  DAY2_L8_L13_EXECUTION_PLAN.md
+  P2_OPERATOR_AUTH_RELIABILITY.md
+  L9_CHECKOUT_CANCEL_SAFETY.md
+  L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md
+  L8_CARD_DECLINED_SAFETY.md
+  L11_FULL_REFUND_SAFETY_PLAN.md
+  GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_18.md
+  GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_18.md
+  GLOBAL_ENGINEERING_RISK_REGISTER_2026_05_18.md
+  GLOBAL_ENGINEERING_REPAIR_LOG_2026_05_18.md
+
+L-3: PASS — desk re-verification (L3_PAYMENT_CORE_REVERIFICATION.md).
+L-4/L-5: PASS 2026-05-18 — Dashboard checkout.session.completed resend; operator before/after enums unchanged (see L4/L5 files).
+L-6: PASS (automated) 2026-05-18 — ordering tests in stripeWebhookHttpChaos; staging replay PENDING (L6 file).
+L-7: PASS (automated) 2026-05-18 — slimStripeWebhookUnmatchedFastAck + chaos HTTP tests; staging fixtures PENDING (L7 file).
+
+P-2: PASS 2026-05-18 — operator login + status-check HTTP 200; TOKEN_EXPIRED false; terminal enums (P2_OPERATOR_AUTH_RELIABILITY.md). Harness commit 5d6fa2f.
+L-9: PASS 2026-05-18 — /cancel HTTP 200 no 504; unpaid checkout PENDING, PAID_CONFIRMED false, fulfillment count 0 (L9_CHECKOUT_CANCEL_SAFETY.md).
+L-10: PASS (automated) 2026-05-18 — expired webhook 200; unknown id no row; pending→CANCELLED not PAID; fulfillment 0 (L10_EXPIRED_CHECKOUT_SESSION_SAFETY.md). Staging expire PENDING.
+L-8: PASS 2026-05-18 — automated + staging decline card (0002); post-decline PENDING, PAID_CONFIRMED false, fulfillment 0 (L8_CARD_DECLINED_SAFETY.md).
+L-11: PASS 2026-05-19
+FRONTEND_UX: 2026-05-19 — production copy + payment CTA safety (FRONTEND_PRODUCTION_UX_AUDIT_2026_05_19.md) — single test-mode refund (harness l11-refund-execute); no second refund. Final l11-post-refund-verify PASS: POST_PAYMENT_INCIDENT_STATUS REFUNDED, fulfillment count 1, L11_REFUND_PROOF_VERDICT PASS (L11_REFUND_EXECUTION_AND_POST_REFUND_PROOF.md). Repo: mapping 46d77ea, key ae57d4e, webhook mirror f728047.
+
+GLOBAL AUDIT 2026-05-18: PARTIAL — see GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_18.md (secrets:scan PASS; focused unit tests PASS; full test:ci NOT re-run this session).
+SUPER-SYSTEM AUDIT 2026-03-28..2026-05-19: PARTIAL global / PASS staging L-1..L-11 — SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md @ 0f2c4e0. L-12/L-13 PENDING. Weighted readiness 68%.
+CONTROL PLANE v1 2026-05-19: zw-doctor CLI (diagnose + propose-only) — SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md, SUPER_SYSTEM_CONTROL_PLANE_PROOF.md. No money mutations.
+CI GUARD 2026-05-19: .github/workflows/super-system-guard.yml — secrets:scan + zw-doctor summary --strict --no-operator --no-staging (no repo secrets). STAGING_SMOKE: SUPER_SYSTEM_STAGING_SMOKE_PROOF.md, npm run zw:smoke:staging.
+L-13: CHECKLIST_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (not executed).
+INCIDENT_RESPONSE 2026-05-19: SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md + zw-doctor incidents mode (propose-only).
+CI_INCIDENT_GUARD 2026-05-19: super-system-guard.yml runs incidents --strict --ci-static (no L-13 execution).
+L-13: READINESS_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (NOT PASS, not executed).
+PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — GitHub PR #21 checks green @ d61923d; Ready to merge; NOT merged; L-13 not executed.
+P0_NEON_GOVERNANCE 2026-05-19: P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md — branch staging-stripe-test-2026-05-12 / project neon-bistre-flame; dashboard confirmation pending; no delete/expire/env change.
+P0_OPERATOR_AUTH 2026-05-19: P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md — LOGIN_HTTP 401 invalid_credentials; ROTATION_REQUIRED; no DB/env mutation.
+P0_OPERATOR_ROTATION_WORKFLOW 2026-05-20: b460789 pushed; dry-run BLOCKED_MISSING_OPERATOR_EMAIL; execute not run; no DB/env mutation.
+P0_OPERATOR_LOCAL_CONFIG 2026-05-20: P0_OPERATOR_LOCAL_CONFIG_GUIDE.md — dry-run blocker = missing gitignored env; not tooling failure.
+SUPER_SYSTEM_INTELLIGENCE 2026-05-20: SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md + zw-doctor intelligence mode (read-only); no DB/money mutation.
+CI_INTELLIGENCE_WIRING_FIX 2026-05-20: zw-doctor import runZwDoctorIntelligence — Super-System Guard ReferenceError fixed.
+
+Verified milestone (staging, operator harness):
+  Stripe Checkout opened (test mode)
+  GET /success — no 504
+  checkout.session.completed — slim webhook path deployed
+  status-check — terminal fulfillment state confirmed (see DAY1_STATUS_CHECK_FINAL.md, P2_OPERATOR_AUTH_RELIABILITY.md)

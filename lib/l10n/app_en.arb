@@ -100,7 +100,7 @@
   "enterRecipientError": "Enter a recipient number.",
   "noPackagesForOperator": "No packages are available for this operator right now.",
   "orderPlacedDefault": "Order placed",
-  "confirmMockSnack": "{label} · confirmed",
+  "confirmMockSnack": "{label} selected",
   "@confirmMockSnack": {
     "placeholders": {
       "label": {

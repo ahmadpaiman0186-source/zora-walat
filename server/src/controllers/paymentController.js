@@ -41,6 +41,7 @@ import {
   logIdempotencyReplayHit,
   tryReuseHostedCheckoutSession,
 } from '../payment/idempotencyService.js';
+import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../constants/webTopupStripePiMetadata.js';
 import {
   createInitiatedRow,
   markCheckoutCreated,
@@ -614,7 +615,7 @@ export async function createCheckoutSession(req, res) {
 
     recordMissionPaymentCreated(row.id, req.traceId ?? null);
 
-    console.log('STRIPE_SESSION_CREATED', session.id);
+    console.log('STRIPE_SESSION_CREATED', safeSuffix(session.id, 12));
 
     await writeOrderAudit(prisma, {
       event: 'checkout_session_created',
@@ -627,7 +628,7 @@ export async function createCheckoutSession(req, res) {
     });
 
     req.log?.info(
-      { checkoutId: row.id, sessionId: session.id },
+      { checkoutId: row.id, sessionIdSuffix: safeSuffix(session.id, 12) },
       'checkout session created',
     );
     recordCheckoutSessionCreated();
@@ -818,7 +819,9 @@ export async function createTestPaymentIntent(req, res) {
    * integration / CI without STRIPE_SECRET_KEY still receives **403** for invalid session (contract),
    * not **503** stripe_not_configured.
    */
-  let metadata = { source: 'zora_walat_next_test' };
+  let metadata = {
+    source: WEBTOPUP_STRIPE_PI_METADATA_SOURCE,
+  };
   if (parsed.orderId != null && parsed.orderId !== '') {
     let orderRow;
     try {

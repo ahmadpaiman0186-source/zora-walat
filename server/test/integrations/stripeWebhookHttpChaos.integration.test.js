@@ -153,6 +153,12 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
 
     assert.equal(p1.body.received, true);
 
+    const afterPiOnly = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assert.equal(afterPiOnly?.orderStatus, ORDER_STATUS.PENDING);
+    assert.notEqual(afterPiOnly?.status, PAYMENT_CHECKOUT_STATUS.PAYMENT_SUCCEEDED);
+    const nAttAfterPi = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAttAfterPi, 0);
+
     const p2 = await signAndPost('checkout.session.completed', {
       id: sessionId,
       object: 'checkout.session',
@@ -462,6 +468,117 @@ describe('Stripe webhook HTTP chaos (Phase 1)', { skip: !runIntegration }, () =>
     assert.equal(dto.postPaymentIncident.mapSource, POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_PAYLOAD_PI);
     assert.equal(dto.postPaymentIncident.disputeSupportMapping, 'direct_from_stripe_dispute_payload');
     assert.equal(dto.postPaymentIncident.incidentMappingAuditComplete, true);
+  });
+
+  it('L-7: checkout.session.expired for unknown internalCheckoutId: 200, no row, no fulfillment', async () => {
+    const fakeOrderId = `${'b'.repeat(25)}`;
+    const res = await signAndPost('checkout.session.expired', {
+      id: `cs_http_exp_unk_${randomUUID().slice(0, 8)}`,
+      object: 'checkout.session',
+      metadata: { internalCheckoutId: fakeOrderId },
+    }).req.expect(200);
+
+    assert.equal(res.body.received, true);
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: fakeOrderId } });
+    assert.equal(row, null);
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: fakeOrderId } });
+    assert.equal(nAtt, 0);
+  });
+
+  it('L-7: checkout.session.expired on pending checkout cancels without PAID or fulfillment', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+
+    await signAndPost('checkout.session.expired', {
+      id: `cs_http_exp_${randomUUID().slice(0, 8)}`,
+      object: 'checkout.session',
+      metadata: { internalCheckoutId: order.id },
+    }).req.expect(200);
+
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assert.equal(row?.orderStatus, ORDER_STATUS.CANCELLED);
+    assert.equal(row?.status, PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED);
+    assert.notEqual(row?.orderStatus, ORDER_STATUS.PAID);
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAtt, 0);
+  });
+
+  it('L-7: customer.created does not mutate pending checkout or create fulfillment', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+
+    const res = await signAndPost('customer.created', {
+      id: `cus_http_${randomUUID().slice(0, 8)}`,
+      object: 'customer',
+      email: `noop_${randomUUID().slice(0, 8)}@test.invalid`,
+    }).req.expect(200);
+
+    assert.equal(res.body.received, true);
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assert.equal(row?.orderStatus, ORDER_STATUS.PENDING);
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAtt, 0);
+  });
+
+  it('L-6: late duplicate payment_intent.succeeded after checkout completed does not increase fulfillment', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+    const piId = `pi_http_late_${randomUUID().slice(0, 8)}`;
+
+    await signAndPost('checkout.session.completed', {
+      id: `cs_http_late_${randomUUID().slice(0, 8)}`,
+      object: 'checkout.session',
+      amount_total: 1000,
+      currency: 'usd',
+      payment_intent: piId,
+      customer: 'cus_http_test',
+      metadata: { internalCheckoutId: order.id },
+    }).req.expect(200);
+    await settle();
+
+    const nAttBefore = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAttBefore, 1);
+
+    await signAndPost('payment_intent.succeeded', {
+      id: piId,
+      object: 'payment_intent',
+      status: 'succeeded',
+      currency: 'usd',
+      amount: 1000,
+      metadata: {},
+    }).req.expect(200);
+    await signAndPost('payment_intent.succeeded', {
+      id: piId,
+      object: 'payment_intent',
+      status: 'succeeded',
+      currency: 'usd',
+      amount: 1000,
+      metadata: {},
+    }).req.expect(200);
+    await settle();
+
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assertOrderPaidOrFulfilled(row?.orderStatus);
+    const nAttAfter = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAttAfter, 1);
+  });
+
+  it('L-7: signature-valid unsupported event (invoice.created) returns 200 without crashing', async () => {
+    const user = await makeUser();
+    const order = await makePendingCheckout(user.id);
+
+    const res = await signAndPost('invoice.created', {
+      id: `in_http_${randomUUID().slice(0, 8)}`,
+      object: 'invoice',
+      status: 'draft',
+      customer: `cus_${randomUUID().slice(0, 8)}`,
+    }).req.expect(200);
+
+    assert.equal(res.body.received, true);
+    const row = await prisma.paymentCheckout.findUnique({ where: { id: order.id } });
+    assert.equal(row?.orderStatus, ORDER_STATUS.PENDING);
+    const nAtt = await prisma.fulfillmentAttempt.count({ where: { orderId: order.id } });
+    assert.equal(nAtt, 0);
   });
 
   it('measures sequential webhook POST latency (same process; lab only)', async () => {
