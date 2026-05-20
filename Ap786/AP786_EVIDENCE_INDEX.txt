@@ -66,6 +66,9 @@ EXEC_BRIEF 2026-05-20: ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md — fou
 INVESTOR_PASSES 2026-05-20: ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md — 30-area pass matrix, claim boundary, readiness scores; main @ 54e0615 (PR #22–#24); not production-ready.
 PR23_FRONTEND_PHASE_A 2026-05-20: merged @ 32584e3 — /success and /cancel investor-grade return routes (4f4fce0).
 PR24_FRONTEND_PHASE_B 2026-05-20: merged @ 54e0615 — return-route fa/ar/tr i18n, header/support anchors, hero claim safety (11b56c8); CI+Guard green (operator attestation).
+PR25_INVESTOR_PASSES 2026-05-20: merged @ 864e884 — ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md pass matrix + claim boundary (b9c2c45); CI+Guard green (operator attestation).
+MARKET_READINESS 2026-05-20: ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md — investor demo script, GTM boundary, diligence Q&A; main @ 864e884; not production-ready.
+FRONTEND_QA_v1 2026-05-20: ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md — required screenshots/RTL/a11y; all rows PENDING EVIDENCE until captures filed.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
