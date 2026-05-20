@@ -128,7 +128,7 @@
   "balanceHeroLabel": "Account balance",
   "availableLabel": "Available",
   "quickTopUp": "Quick top-up",
-  "walletTopUpHint": "Add funds securely. Credits apply instantly for testing your integration.",
+  "walletTopUpHint": "Add funds securely. Wallet credits apply only after payment is confirmed on our servers.",
   "topUpSuccessSnack": "Added {amount} · balance updated",
   "@topUpSuccessSnack": {
     "placeholders": {

@@ -130,6 +130,53 @@ export const en = {
     loadError: 'Could not load orders.',
     refresh: 'Refresh',
   },
+  returnSuccess: {
+    titleVerifying: 'Verifying your payment',
+    titleConfirmed: 'Payment confirmed on our servers',
+    titleUnknown: 'Payment return received',
+    leadVerifying:
+      'Stripe Checkout finished on your side. We are confirming payment with our servers before any top-up is delivered.',
+    leadConfirmed:
+      'Our servers recorded your payment. Fulfillment proceeds only after this confirmation — not from this page alone.',
+    leadUnknown:
+      'If you just paid, confirmation may take a moment. Do not start another payment unless support advises you to.',
+    leadNoParams:
+      'This page works best when opened from Stripe Checkout. If you paid, wait a moment and check your orders.',
+    statusVerifying: 'Verification in progress',
+    statusConfirmed: 'Server payment status: confirmed',
+    statusPending: 'Server payment status: still pending',
+    statusFailed: 'Server payment status: not completed',
+    statusUnavailable: 'Could not load order status from the payment service.',
+    refLabel: 'Order reference',
+    duplicateTitle: 'Avoid duplicate payments',
+    duplicateBody:
+      'Do not refresh this page repeatedly or submit another checkout for the same top-up unless support asks you to. Duplicate payments can cause delays and manual review.',
+    delayTitle: 'Taking longer than expected?',
+    delayBody:
+      'Bank or Stripe confirmation can take a short time. Your top-up is not delivered until our servers mark the order paid. Check recent orders or contact support with your reference suffix.',
+    noServiceNote:
+      'No airtime or data is sent from this page alone. Service requires server-confirmed payment.',
+    ctaHome: 'Back to top-up',
+    ctaHistory: 'View recent orders',
+    ctaRefresh: 'Check status again',
+    supportNote:
+      'If verification is delayed, contact support with your order reference suffix and the time of payment.',
+  },
+  returnCancel: {
+    title: 'Checkout not completed',
+    lead: 'You left Stripe Checkout before payment finished, or your bank did not complete the charge.',
+    noCharge: 'No charge was completed for this checkout attempt.',
+    noService:
+      'No top-up or airtime has been sent. Service is only delivered after our servers confirm payment.',
+    abuseNote:
+      'If you try again, use a single checkout at a time. Repeated unpaid attempts do not grant service and may be rate-limited for abuse protection.',
+    retryNote:
+      'When you are ready, start a new top-up from the home page. We do not auto-retry or charge your card from this page.',
+    ctaHome: 'Start a new top-up',
+    ctaHistory: 'View recent orders',
+    supportNote:
+      'If you believe you were charged despite seeing this page, contact support — do not submit another payment until verified.',
+  },
   error: {
     /** @deprecated UI uses `buildStripePublishableKeySetupMessage` / diagnostics */
     configStripe: 'Missing publishable key in environment.',
