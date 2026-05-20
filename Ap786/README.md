@@ -3,6 +3,12 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here (handoff)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Canonical reboot brief** — read first after memory reset |
+
 ## Master project memory (2026-05-20)
 
 | Document | Contents |

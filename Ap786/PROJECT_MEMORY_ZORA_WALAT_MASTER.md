@@ -4,6 +4,7 @@
 **Audit branch:** `audit/global-super-system-health-2026-05-20`  
 **Production line:** `main` @ merge `2ea64a2` (PR #21) + evidence `ab5817d`  
 **Classification:** Super-System Intelligent Production Platform (target) · **current global readiness ~68% PARTIAL**  
+**Handoff entry point:** `ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md` (canonical for ChatGPT/Cursor after memory reset)  
 **Sanitization:** No secrets, env values, DATABASE_URL, tokens, JWTs, Stripe keys, PII, or raw webhooks.
 
 ---

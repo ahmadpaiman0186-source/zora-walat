@@ -15,6 +15,7 @@
 **Operator rotation tooling (2026-05-20):** Guarded workflow implemented (`b460789`, pushed); **dry-run BLOCKED** (missing local operator email config); **real credential rotation not executed**; exposed password still considered compromised until separate approved execution; **no** DB/Vercel/Neon mutation in this step.
 **Super-System intelligence (2026-05-20):** Read-only `zw-doctor intelligence` + `SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md` — staging money-path strong; global platform **PARTIAL**; self-healing apply **off**; L-13 **not** executed.
 **Global audit pack (2026-05-20):** `PROJECT_MEMORY_ZORA_WALAT_MASTER.md`, `GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_20.md` — **68% PARTIAL**; frontend investor-grade **NOT PASS**; gated ops in `GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md`.
+**Reboot handoff (2026-05-20):** `ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md` — single canonical file for ChatGPT/Cursor/agents after memory reset.
 
 ---
 
