@@ -23,6 +23,8 @@ import {
 } from './types.mjs';
 import { runZwDoctorIntelligence } from './superSystemIntelligence.mjs';
 
+export { runZwDoctorIntelligence };
+
 export const MODES = [
   'summary',
   'money-path',

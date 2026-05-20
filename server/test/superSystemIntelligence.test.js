@@ -2,6 +2,9 @@
  * Super-System intelligence — error classification (no secrets in output).
  */
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
 
 import {
@@ -9,9 +12,48 @@ import {
   classifyInvariant,
   buildIntelligencePayload,
   ERROR_CATEGORIES,
+  runZwDoctorIntelligence,
   summarizeByCategory,
 } from '../tools/zwDoctor/superSystemIntelligence.mjs';
+import { MODES } from '../tools/zwDoctor/run.mjs';
 import { invariant } from '../tools/zwDoctor/types.mjs';
+
+const SERVER_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+describe('zw-doctor CLI wiring', () => {
+  it('MODES includes intelligence', () => {
+    assert.ok(MODES.includes('intelligence'));
+  });
+
+  it('run.mjs re-exports runZwDoctorIntelligence', () => {
+    assert.equal(typeof runZwDoctorIntelligence, 'function');
+  });
+
+  it('zw-doctor intelligence --ci-static exits without ReferenceError', () => {
+    const r = spawnSync(
+      process.execPath,
+      ['tools/zw-doctor.mjs', 'intelligence', '--ci-static'],
+      {
+        cwd: SERVER_ROOT,
+        env: {
+          ...process.env,
+          ZW_STAGING_CREDENTIAL_ROTATION: 'true',
+        },
+        encoding: 'utf8',
+        timeout: 60_000,
+      },
+    );
+    const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
+    assert.notEqual(r.status, null);
+    assert.ok(
+      !/ReferenceError.*runZwDoctorIntelligence/.test(out),
+      'missing intelligence runner import',
+    );
+    assert.match(out, /ZW_INTELLIGENCE_VERDICT/);
+    assert.match(out, /MONEY_MUTATION_EXECUTED false/);
+    assert.match(out, /SELF_HEALING_APPLY_ALLOWED false/);
+  });
+});
 
 describe('classifyErrorSignal', () => {
   it('classifies auth from http 401', () => {

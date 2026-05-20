@@ -10,7 +10,12 @@
  *
  * Never executes refunds, payments, or webhook resends.
  */
-import { runZwDoctor, runZwDoctorIncidents, MODES } from './zwDoctor/run.mjs';
+import {
+  runZwDoctor,
+  runZwDoctorIncidents,
+  runZwDoctorIntelligence,
+  MODES,
+} from './zwDoctor/run.mjs';
 
 function printUsage() {
   process.stderr.write(

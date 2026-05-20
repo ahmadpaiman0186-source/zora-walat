@@ -213,6 +213,20 @@ Operator-facing: enum-only via harness and zw-doctor.
 
 ---
 
+## CI repair note (2026-05-20)
+
+| Field | Value |
+|-------|--------|
+| **Failure** | Super-System Guard — `ReferenceError: runZwDoctorIntelligence is not defined` at `zw-doctor.mjs` |
+| **Root cause** | `runZwDoctorIntelligence` implemented and used in CLI but **not imported** in `server/tools/zw-doctor.mjs` |
+| **Fix** | Import + re-export from `zwDoctor/run.mjs`; CLI wiring test added |
+| **DB/env/payment/refund/webhook mutation** | **false** |
+| **Secrets scan** | **pass** (post-fix) |
+| **MONEY_MUTATION_EXECUTED** | **false** |
+| **SELF_HEALING_APPLY_ALLOWED** | **false** |
+
+---
+
 ## Related evidence
 
 - `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md`

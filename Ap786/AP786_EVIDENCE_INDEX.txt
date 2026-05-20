@@ -58,6 +58,7 @@ P0_OPERATOR_AUTH 2026-05-19: P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md — LO
 P0_OPERATOR_ROTATION_WORKFLOW 2026-05-20: b460789 pushed; dry-run BLOCKED_MISSING_OPERATOR_EMAIL; execute not run; no DB/env mutation.
 P0_OPERATOR_LOCAL_CONFIG 2026-05-20: P0_OPERATOR_LOCAL_CONFIG_GUIDE.md — dry-run blocker = missing gitignored env; not tooling failure.
 SUPER_SYSTEM_INTELLIGENCE 2026-05-20: SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md + zw-doctor intelligence mode (read-only); no DB/money mutation.
+CI_INTELLIGENCE_WIRING_FIX 2026-05-20: zw-doctor import runZwDoctorIntelligence — Super-System Guard ReferenceError fixed.
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
