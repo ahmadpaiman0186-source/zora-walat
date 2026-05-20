@@ -2,12 +2,12 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** L-11 refund PASS + frontend UX (2026-05-19)  
+**Last updated:** PR #21 post-merge verification (2026-05-20)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
 **Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
 **Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.  
 **CI guard (2026-05-19):** GitHub Actions `super-system-guard.yml` runs secrets scan + static zw-doctor + **incident classifier** (`incidents --strict --ci-static`) on every PR — **not** production fully certified.  
-**PR #21 CI (2026-05-19):** Operator reports **green** Super-System Guard checks and **Ready to merge** on PR #21 (`d61923d`); Vercel Preview Comments succeeded; **PR not merged yet** — see `PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md`. This is **CI gate evidence only**, not production certification.  
+**PR #21 (2026-05-20):** **Merged** to `main` at `2ea64a2`. Post-merge: GitHub Actions CI + Super-System Guard **green** on `main`; read-only zw-doctor signals (`MONEY_MUTATION_EXECUTED false`, `SELF_HEALING_APPLY_ALLOWED false`, `incident_verdict PASS`, zero active money incidents). See `PR21_POST_MERGE_VERIFICATION.md`. Pre-merge CI gate: `PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md`. **Not** production go-live certification.  
 **L-13:** **Readiness checklist prepared** (`L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md`) — **NOT PASS**, **not** executed.  
 **Incident response workflow (2026-05-19):** `zw-doctor incidents` + approval doc — **not** autonomous production repair.
 **Neon branch governance (2026-05-19):** `P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md` added — **final Neon/Vercel dashboard confirmation pending**; **no** database branch deletion; **no** staging env mutation.
@@ -65,7 +65,7 @@ No deployment secrets or preview hostnames are listed in this document.
 | L4/L5 index note | `1c03477aaf4b10498a590023187b465f232b2500` | `1c03477` |
 | P-2 operator auth harness | `5d6fa2f4d6a5d52caeb67aae07c744ca9d068ad4` | `5d6fa2f` |
 
-Evidence is **version-controlled** on branch `fix/post-l40-slim-stripe-webhook-invalid-signature` and **pushed** to the remote repository.
+Evidence is **version-controlled** on `main` (PR #21 merged `2ea64a2`) and **pushed** to the remote repository.
 
 ---
 

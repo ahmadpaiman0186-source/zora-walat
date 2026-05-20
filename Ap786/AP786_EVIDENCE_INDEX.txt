@@ -52,13 +52,14 @@ L-13: CHECKLIST_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (not exe
 INCIDENT_RESPONSE 2026-05-19: SUPER_SYSTEM_INCIDENT_RESPONSE_AND_APPROVAL_WORKFLOW.md + zw-doctor incidents mode (propose-only).
 CI_INCIDENT_GUARD 2026-05-19: super-system-guard.yml runs incidents --strict --ci-static (no L-13 execution).
 L-13: READINESS_ONLY — L13_DUPLICATE_REFUND_EVENT_SAFETY_CHECKLIST.md (NOT PASS, not executed).
-PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — GitHub PR #21 checks green @ d61923d; Ready to merge; NOT merged; L-13 not executed.
 P0_NEON_GOVERNANCE 2026-05-19: P0_NEON_STAGING_BRANCH_GOVERNANCE_AUDIT.md — branch staging-stripe-test-2026-05-12 / project neon-bistre-flame; dashboard confirmation pending; no delete/expire/env change.
 P0_OPERATOR_AUTH 2026-05-19: P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md — LOGIN_HTTP 401 invalid_credentials; ROTATION_REQUIRED; no DB/env mutation.
 P0_OPERATOR_ROTATION_WORKFLOW 2026-05-20: b460789 pushed; dry-run BLOCKED_MISSING_OPERATOR_EMAIL; execute not run; no DB/env mutation.
 P0_OPERATOR_LOCAL_CONFIG 2026-05-20: P0_OPERATOR_LOCAL_CONFIG_GUIDE.md — dry-run blocker = missing gitignored env; not tooling failure.
 SUPER_SYSTEM_INTELLIGENCE 2026-05-20: SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md + zw-doctor intelligence mode (read-only); no DB/money mutation.
 CI_INTELLIGENCE_WIRING_FIX 2026-05-20: zw-doctor import runZwDoctorIntelligence — Super-System Guard ReferenceError fixed.
+PR21_POST_MERGE 2026-05-20: PR21_POST_MERGE_VERIFICATION.md — merged @ 2ea64a2; main CI+Guard green; read-only zw-doctor PASS; no money/DB/env mutation.
+PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — superseded for merge status by PR21_POST_MERGE (pre-merge PR checks green).
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
