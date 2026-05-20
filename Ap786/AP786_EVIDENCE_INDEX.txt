@@ -63,6 +63,9 @@ PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — super
 GLOBAL_AUDIT_2026_05_20: PROJECT_MEMORY_ZORA_WALAT_MASTER.md + GLOBAL_SECURITY_AUDIT + FAILURE_DETECTION + MONEY_PATH + HEALTH_2026_05_20 + GATED_OPERATIONS — readiness 68% PARTIAL; no DB/env/payment mutation.
 REBOOT_BRIEF 2026-05-20: ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md — canonical handoff for ChatGPT/Cursor/agents; docs only.
 EXEC_BRIEF 2026-05-20: ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md — founder/investor/CTO engineering brief; 68% PARTIAL; not production-ready.
+INVESTOR_PASSES 2026-05-20: ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md — 30-area pass matrix, claim boundary, readiness scores; main @ 54e0615 (PR #22–#24); not production-ready.
+PR23_FRONTEND_PHASE_A 2026-05-20: merged @ 32584e3 — /success and /cancel investor-grade return routes (4f4fce0).
+PR24_FRONTEND_PHASE_B 2026-05-20: merged @ 54e0615 — return-route fa/ar/tr i18n, header/support anchors, hero claim safety (11b56c8); CI+Guard green (operator attestation).
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
