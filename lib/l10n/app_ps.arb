@@ -114,7 +114,7 @@
   "balanceHeroLabel": "د حساب بیلانس",
   "availableLabel": "شته",
   "quickTopUp": "چټک شارژ",
-  "walletTopUpHint": "په خوندي ډول پیسې زیات کړئ؛ ازمایښي کریډیټ سمدستي پلي کېږي.",
+  "walletTopUpHint": "په خوندي ډول پیسې زیات کړئ. د بټۍ کریډیټ یوازې وروسته له دې چې زموږ سرورونه تادیه تایید کړي پلي کېږي.",
   "topUpSuccessSnack": "{amount} زیات شو · بیلانس تازه شو",
   "apiUnreachableWallet": "اړیکه نشوه. خپل انټرنټ مو چیک کړئ او بیا هڅه وکړئ.",
   "telecomHomeSubtitle": "افغان موبایل · USD تادیه · خوندي",

@@ -28,7 +28,7 @@ export const en = {
     headlineTail: ' in minutes.',
     subline:
       'Multi-country mobile top-up with Stripe-hosted checkout — built for diaspora communities and frequent travelers.',
-    statInstant: 'Fast delivery',
+    statInstant: 'Status-aware top-up',
     statSecure: 'Stripe-hosted checkout',
     statCoverage: 'Multi-country catalog',
     routeFootnote: 'Route-aware catalog · Payment verified before fulfillment',
@@ -91,6 +91,12 @@ export const en = {
     verify: 'Payment confirmation is verified before fulfillment starts.',
     tracking: 'Refund and fulfillment states are tracked to reduce duplicate delivery risk.',
     noStore: 'We do not store your full card number on our servers.',
+  },
+  support: {
+    title: 'Support guidance',
+    body:
+      'Check recent orders for payment and fulfillment status. If you need help, contact your usual support channel with your order reference suffix and the time of payment.',
+    ctaHistory: 'View recent orders',
   },
   success: {
     title: 'Payment successful',
@@ -183,7 +189,7 @@ export const en = {
     configApi:
       'Payment service is unavailable on this deployment. Contact support if this persists.',
     stripeInit: 'Payment SDK could not load.',
-    network: 'Cannot reach the API. Is the server running?',
+    network: 'Payment service is temporarily unavailable. Try again shortly.',
     requestTimeout: 'The payment API took too long to respond. Try again.',
     noSecret: 'No client secret returned.',
     orderCreate: 'Could not create your order. Check the API and try again.',

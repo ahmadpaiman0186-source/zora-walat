@@ -304,7 +304,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get walletTopUpHint =>
-      'وجه را به‌صورت امن اضافه کنید؛ برای آزمایش یکپارچگی، اعتبار فوراً اعمال می‌شود.';
+      'وجه را به‌صورت امن اضافه کنید. اعتبار کیف پول فقط پس از تأیید پرداخت در سرورهای ما اعمال می‌شود.';
 
   @override
   String topUpSuccessSnack(String amount) {
