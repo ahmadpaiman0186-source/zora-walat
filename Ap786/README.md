@@ -3,6 +3,24 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here (handoff)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Canonical reboot brief** — read first after memory reset |
+| [ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md](./ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md) | **Executive engineering brief** — investors, founders, CTO summary |
+
+## Master project memory (2026-05-20)
+
+| Document | Contents |
+|----------|----------|
+| [PROJECT_MEMORY_ZORA_WALAT_MASTER.md](./PROJECT_MEMORY_ZORA_WALAT_MASTER.md) | **Durable project memory** — architecture, safety models, blockers |
+| [GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_20.md](./GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_20.md) | Health summary · **68% PARTIAL** |
+| [GLOBAL_SECURITY_AUDIT_2026_03_28_TO_2026_05_20.md](./GLOBAL_SECURITY_AUDIT_2026_03_28_TO_2026_05_20.md) | Security PASS/WARN/BLOCKED table |
+| [MONEY_PATH_ZERO_DUPLICATE_NO_PAY_NO_SERVICE_AUDIT.md](./MONEY_PATH_ZERO_DUPLICATE_NO_PAY_NO_SERVICE_AUDIT.md) | Money path deep audit |
+| [SUPER_SYSTEM_FAILURE_DETECTION_AND_AUTO_REPAIR_REPORT.md](./SUPER_SYSTEM_FAILURE_DETECTION_AND_AUTO_REPAIR_REPORT.md) | Detect/repair boundaries |
+| [GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md](./GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md) | Deferred dangerous ops runbooks |
+
 | Document | Contents |
 |----------|----------|
 | [L1_RELEASE_CONTROL_REPORT.md](./L1_RELEASE_CONTROL_REPORT.md) | Branch, clean status, recent commits, push parity |

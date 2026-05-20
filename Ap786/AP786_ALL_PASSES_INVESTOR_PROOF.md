@@ -2,7 +2,7 @@
 
 **Audience:** Investors and non-technical reviewers  
 **Environment:** Staging only (Stripe **test mode** in operator flows)  
-**Last updated:** PR #21 post-merge verification (2026-05-20)  
+**Last updated:** Global super-system health audit (2026-05-20)  
 **Rules for this document:** No secrets, API keys, passwords, database connection strings, customer data, or raw payment/webhook payloads.  
 **Master engineering audit:** `SUPER_SYSTEM_GLOBAL_ENGINEERING_AUDIT_2026_03_28_TO_2026_05_19.md` (global readiness **68%**; L-12/L-13 **not** executed).  
 **Control plane (diagnostic only):** `SUPER_SYSTEM_CONTROL_PLANE_ARCHITECTURE.md` — `zw-doctor` proposes repairs; does **not** perform unattended money fixes.  
@@ -14,6 +14,8 @@
 **Operator auth (2026-05-19):** Staging login **401** (`invalid_credentials`) — `P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md`; **password rotation required** (screenshot exposure); **no** DB reset or env change in repo; P-2 harness PASS may be stale until rotation completes.  
 **Operator rotation tooling (2026-05-20):** Guarded workflow implemented (`b460789`, pushed); **dry-run BLOCKED** (missing local operator email config); **real credential rotation not executed**; exposed password still considered compromised until separate approved execution; **no** DB/Vercel/Neon mutation in this step.
 **Super-System intelligence (2026-05-20):** Read-only `zw-doctor intelligence` + `SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md` — staging money-path strong; global platform **PARTIAL**; self-healing apply **off**; L-13 **not** executed.
+**Global audit pack (2026-05-20):** `PROJECT_MEMORY_ZORA_WALAT_MASTER.md`, `GLOBAL_ENGINEERING_HEALTH_REPORT_2026_05_20.md` — **68% PARTIAL**; frontend investor-grade **NOT PASS**; gated ops in `GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md`.
+**Reboot handoff (2026-05-20):** `ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md` — single canonical file for ChatGPT/Cursor/agents after memory reset.
 
 ---
 
