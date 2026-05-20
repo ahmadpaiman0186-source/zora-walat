@@ -270,7 +270,17 @@ node tools/staging-auth-checkout-operator.mjs credential-rotation-dry-run
 
 **Honest note:** Dry-run did **not** PASS. Local workstation has no `STAGING_OPERATOR_EMAIL` in gitignored `server/.env.local` and no `DATABASE_URL` in the harness process. This is expected on CI/agent hosts — operator must set email (and DB URL for diagnose) in a **local gitignored session** before dry-run can PASS. Execute mode was **not** run.
 
-**NEXT_STEP:** Set `STAGING_OPERATOR_EMAIL` in gitignored `server/.env.local` (same PowerShell session), confirm staging `DATABASE_URL` available for diagnose, re-run `credential-rotation-dry-run` with `ZW_STAGING_CREDENTIAL_ROTATION=true` and a new throwaway `STAGING_OPERATOR_NEW_PASSWORD`. Do **not** run execute until a separate approved execution step.
+**NEXT_STEP:** Follow `P0_OPERATOR_LOCAL_CONFIG_GUIDE.md` — configure gitignored `server/.env.local`, run `auth-env-check`, then re-run dry-run. Do **not** run execute until a separate approved execution step.
+
+### Dry-run blocker closure (2026-05-20)
+
+| Fact | Value |
+|------|--------|
+| Blocked because local env not configured? | **Yes** |
+| Tooling failure? | **No** |
+| Agent/CI expected to PASS dry-run? | **No** — human workstation with gitignored config only |
+| Next step | `P0_OPERATOR_LOCAL_CONFIG_GUIDE.md` |
+| Execute mode | **Forbidden** in this phase |
 
 ---
 
