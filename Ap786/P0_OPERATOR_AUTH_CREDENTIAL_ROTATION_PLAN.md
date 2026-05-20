@@ -213,6 +213,40 @@ After approval: execute §5 rotation phases; record PASS in a new sanitized evid
 
 ---
 
+## 8. Implementation (2026-05-20) — workflow added, execution not run
+
+| Item | Status |
+|------|--------|
+| Tool | `server/tools/stagingOperatorCredentialRotation.mjs` |
+| Harness modes | `credential-rotation-diagnose`, `-plan`, `-dry-run`, `-execute` |
+| Tests | `server/test/stagingOperatorCredentialRotation.test.js` |
+| Credential rotation executed | **No** |
+| DB mutation performed | **No** |
+| Execute mode run (this session) | **No** |
+| Rotation still pending | **Yes** — requires future operator phrase `Approved: staging operator credential rotation` |
+
+### Arm staging rotation (required before diagnose/dry-run)
+
+```powershell
+cd server
+$env:ZW_STAGING_CREDENTIAL_ROTATION = "true"
+$env:STAGING_OPERATOR_EMAIL = "<staging operator email>"
+# Do NOT reuse compromised password. For dry-run only (length check):
+$env:STAGING_OPERATOR_NEW_PASSWORD = "<new password — never commit>"
+```
+
+### Safe commands (read-only / dry-run only until approved)
+
+```powershell
+node tools/staging-auth-checkout-operator.mjs credential-rotation-diagnose
+node tools/staging-auth-checkout-operator.mjs credential-rotation-plan
+node tools/staging-auth-checkout-operator.mjs credential-rotation-dry-run
+# Execute blocked until STAGING_OPERATOR_ROTATION_APPROVAL exact phrase is set:
+# node tools/staging-auth-checkout-operator.mjs credential-rotation-execute
+```
+
+---
+
 ## Related evidence
 
 - `P2_OPERATOR_AUTH_RELIABILITY.md` (prior PASS — may be stale vs current DB/password)

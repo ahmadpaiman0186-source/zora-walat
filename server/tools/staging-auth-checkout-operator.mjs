@@ -20,6 +20,13 @@
  *   node tools/staging-auth-checkout-operator.mjs l11-stripe-diagnose
  *   node tools/staging-auth-checkout-operator.mjs l11-refund-execute
  *   node tools/staging-auth-checkout-operator.mjs l11-post-refund-verify
+ *   node tools/staging-auth-checkout-operator.mjs credential-rotation-diagnose
+ *   node tools/staging-auth-checkout-operator.mjs credential-rotation-plan
+ *   node tools/staging-auth-checkout-operator.mjs credential-rotation-dry-run
+ *   node tools/staging-auth-checkout-operator.mjs credential-rotation-execute
+ *
+ * Credential rotation requires ZW_STAGING_CREDENTIAL_ROTATION=true (staging only).
+ * Execute requires exact STAGING_OPERATOR_ROTATION_APPROVAL phrase (not run by default).
  *
  * PowerShell (one command per line — do not concatenate):
  *   cd .\server
@@ -60,6 +67,7 @@ import {
   powershellSafeOneLiners,
   safeOperatorCommandLine,
 } from './stagingOperatorCliSafety.mjs';
+import { runCredentialRotationMode } from './stagingOperatorCredentialRotation.mjs';
 import {
   evaluateL11Preflight,
   L11_PREFLIGHT_SLIM_PHASE1_TRUTH_PREFIX,
@@ -1038,6 +1046,31 @@ async function runPhase1TruthCheckCore(token, { verbose = false } = {}) {
   }
 
   return base;
+}
+
+/**
+ * @param {'diagnose'|'plan'|'dry-run'|'execute'} subMode
+ */
+async function modeCredentialRotation(subMode) {
+  safeLine(`MODE credential-rotation-${subMode}`);
+  /** @type {import('@prisma/client').PrismaClient | null} */
+  let prisma = null;
+  if (subMode !== 'plan') {
+    const dbUrl = String(process.env.DATABASE_URL ?? '').trim();
+    if (dbUrl.length >= 80) {
+      const { prisma: p } = await import('../src/db.js');
+      prisma = p;
+    }
+  }
+  const code = await runCredentialRotationMode({
+    mode: subMode,
+    emit: (key, value) => safeLine(`${key} ${value}`),
+    prisma,
+    tokenPath: TOKEN_PATH,
+    env: process.env,
+  });
+  if (prisma) await prisma.$disconnect().catch(() => {});
+  process.exitCode = code;
 }
 
 async function modeAuthEnvCheck() {
@@ -2790,6 +2823,18 @@ async function main() {
       break;
     case 'staging-api-smoke':
       await modeStagingApiSmoke();
+      break;
+    case 'credential-rotation-diagnose':
+      await modeCredentialRotation('diagnose');
+      break;
+    case 'credential-rotation-plan':
+      await modeCredentialRotation('plan');
+      break;
+    case 'credential-rotation-dry-run':
+      await modeCredentialRotation('dry-run');
+      break;
+    case 'credential-rotation-execute':
+      await modeCredentialRotation('execute');
       break;
     default:
       usage();

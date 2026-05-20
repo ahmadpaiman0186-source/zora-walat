@@ -25,6 +25,10 @@ export const OPERATOR_MODES = Object.freeze([
   'l11-refund-execute',
   'l11-post-refund-verify',
   'staging-api-smoke',
+  'credential-rotation-diagnose',
+  'credential-rotation-plan',
+  'credential-rotation-dry-run',
+  'credential-rotation-execute',
 ]);
 
 export const OPERATOR_MODES_SET = new Set(OPERATOR_MODES);
