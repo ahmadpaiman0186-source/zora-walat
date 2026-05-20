@@ -11,9 +11,9 @@
 ## How to use this brief
 
 1. Read §1–§8 for identity, repo state, architecture, money path, security, super-system, frontend, agent policy.  
-2. Read §9–§12 for blockers, next steps, forbidden actions, approval gates.  
+2. Read §9–§12 for blockers, next safe steps, forbidden operations, ChatGPT start prompt.  
 3. Use §13 document map for deep dives.  
-4. Paste §14 agent prompt template into new Cursor/ChatGPT sessions.  
+4. Paste §12 into ChatGPT after memory reset; use §13 template for Cursor agents.  
 5. Never claim PASS for production, L-13, rotation complete, or frontend investor-grade unless a linked Ap786 doc explicitly records executed proof.
 
 ---
@@ -40,8 +40,9 @@
 | **PR #21** | **Merged** @ `2ea64a2` — Super-System Guard, zw-doctor, incidents, intelligence, slim paths, Ap786 evidence |
 | **Post-merge evidence on main** | `ab5817d` — `PR21_POST_MERGE_VERIFICATION.md` |
 | **Pre-merge CI fix** | `2c04d8b` — wire `runZwDoctorIntelligence` (fixed Guard ReferenceError) |
-| **Global audit branch** | `audit/global-super-system-health-2026-05-20` @ `4b32db9` — full 2026-05-20 audit pack (**merge to main recommended**) |
-| **Frontend plan branch (optional)** | `chore/composer-frontend-investor-plan` @ `dac5f7e` — Composer policy + investor upgrade plan (**not necessarily on main**) |
+| **Global audit branch** | `audit/global-super-system-health-2026-05-20` @ `e8583d3` (includes this reboot brief + audit pack @ `4b32db9`) — **merge docs-only PR to main after green CI** |
+| **Frontend plan branch (optional)** | `chore/composer-frontend-investor-plan` @ `dac5f7e` — `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md`, `FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md` (**merge if not on main**) |
+| **Current active branch (authoring)** | `audit/global-super-system-health-2026-05-20` |
 | **Readiness** | **68% PARTIAL** — staging money-path strong; production/live/L-13/rotation/frontend not closed |
 | **CI on main** | **Green** (operator attestation): CI server, CI flutter, Super-System Guard, Phase 1 money-path integrity **PASS** |
 | **Working tree (audit branch)** | Clean at authoring; verify with `git status -sb` before edits |
@@ -58,6 +59,7 @@
 | `2ea64a2` | **PR #21 merge** |
 | `ab5817d` | Post-merge verification doc |
 | `4b32db9` | Global audit pack (audit branch) |
+| `e8583d3` | Reboot brief (this file) |
 
 ---
 
@@ -264,11 +266,12 @@ Runs on PR and push to `main`/`master`:
 4. Real support/how-it-works routes or remove placeholders.  
 5. Qualify “Fast delivery” hero stat.
 
-### Next frontend branch and scope
+### Next frontend branch and scope (Phase A)
 
-- **Branch:** `chore/composer-frontend-investor-plan` (or new branch from `main`) — docs may exist there: `FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md`, `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md`.  
-- **Scope Phase A:** success/cancel routes only — **no** DB/env/payment/deploy.  
-- **On main today:** `FRONTEND_PRODUCTION_UX_AUDIT_2026_05_19.md` records prior top-up fixes.
+- **Branch to create:** `feat/frontend-phase-a-investor-grade` (from `main` after audit docs merge).  
+- **Scope only:** `app/success/page.tsx`, `app/cancel/page.tsx`, Flutter `walletTopUpHint` copy, i18n customer-safe copy.  
+- **No:** DB, env, payment, deploy.  
+- **Planning docs:** `FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md` on `chore/composer-frontend-investor-plan`; on `main`: `FRONTEND_PRODUCTION_UX_AUDIT_2026_05_19.md`.
 
 **Do not mark frontend investor-grade PASS until Phase A merged and reviewed.**
 
@@ -278,42 +281,85 @@ Runs on PR and push to `main`/`master`:
 
 | Rule | Value |
 |------|--------|
-| **Cursor plan** | **Pro+ sufficient** — do not upgrade to Ultra without CTO approval |
+| **Cursor plan** | **Pro+ sufficient** — **Ultra not needed** now |
 | **Fast mode** | Not default — prefer accuracy on money-path tasks |
 | **On-demand spend** | Keep capped |
-| **Allowed** | Audit, Ap786 docs, refactors, tests, read-only `zw-doctor`, `secrets:scan`, CI wiring, gitignore |
-| **Forbidden** | DB, migrations, Vercel/Neon env, deploy, payments, refunds, webhook resend, `credential-rotation-execute`, setting rotation approval env, false PASS claims |
-| **Sensitive ops** | Human approval + phrases in §12; runbooks in `GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md` |
-| **Every prompt** | Include Super-System safety rules + honest non-claims |
 
-Full policy (if on branch): `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md`.
+### Agent allowed
+
+- Audit and Ap786 evidence/docs  
+- Read-only diagnostics: `zw-doctor` with `--ci-static`, `secrets:scan`  
+- Refactors and tests (no live secrets / no DB mutation)  
+- **Scoped implementation** only when task explicitly limits scope (e.g. frontend Phase A files only)  
+- CI wiring, gitignore, sanitizer/redaction improvements  
+
+### Agent forbidden
+
+- DB mutation, migrations  
+- Vercel or Neon env change, deploy  
+- Payments, refunds, webhook resend  
+- `credential-rotation-execute`  
+- Setting `STAGING_OPERATOR_ROTATION_APPROVAL`  
+- `ZW_SELF_HEALING_APPLY` money/state repair without approval  
+- False PASS claims (production-ready, L-13, rotation complete, frontend investor PASS)  
+- Printing or storing secrets, DATABASE_URL, tokens, JWTs, Stripe keys, PII  
+
+### Approval gates (human only — agents propose, never execute)
+
+| Operation | Gate |
+|-----------|------|
+| L-11 refund execute | `Approved: L-11 execute full refund` |
+| L-13 webhook resend | `Approved: resend duplicate charge.refunded event for L-13 proof` |
+| Credential rotation execute | Exact phrase in `STAGING_OPERATOR_ROTATION_APPROVAL` (operator local only) |
+| Self-healing money apply | `ZW_SELF_HEALING_APPLY` + incident commander sign-off |
+| Production go-live | External release control |
+
+Runbooks: `GATED_OPERATIONS_REQUIRED_AFTER_GLOBAL_AUDIT.md`. Extended policy: `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md` (on `chore/composer-frontend-investor-plan` if not merged).
 
 ---
 
 ## 9. REMAINING BLOCKERS
 
-1. Credential rotation **execute** — pending; forbidden without approval.  
-2. **L-13** duplicate `charge.refunded` proof — NOT EXECUTED.  
-3. **L-12** partial refund — PENDING.  
-4. **Production live-money** — not claimed.  
-5. **Frontend investor-grade** — NOT PASS.  
-6. **Operator login 401** — blocks harness until rotation.  
-7. **Neon/Vercel dashboard** final branch/env alignment — operator confirmation.  
-8. Merge **audit branch** docs to `main` if not yet merged.
+Exactly as of 2026-05-20 — do not mark complete without new Ap786 proof:
+
+1. **Credential rotation execute** — pending; forbidden without separate approval.  
+2. **L-13 duplicate refund proof** — pending; checklist only; **NOT PASS**.  
+3. **L-12 partial refund** — pending; not implemented.  
+4. **Production live-money certification** — not claimed.  
+5. **Frontend investor-grade** — **NOT PASS** (`/success`, `/cancel`, wallet copy, i18n gaps).  
+6. **Neon/Vercel final operator confirmation** — pending dashboard alignment with staging branch governance.  
+7. **Intelligence WARN review** — pending: `zw-doctor intelligence --ci-static` may report `ZW_INTELLIGENCE_VERDICT WARN` on static profile; review categories — **not** a money incident (`ACTIVE_MONEY_INCIDENT_COUNT 0`).
 
 ---
 
-## 10. EXACT NEXT SAFE STEPS
+## 10. NEXT SAFE 3 STEPS
 
-| Order | Action |
-|-------|--------|
-| 1 | Merge `audit/global-super-system-health-2026-05-20` → `main` (docs only). |
-| 2 | Merge or cherry-pick reboot brief + this file to `main` (this commit). |
-| 3 | Open PR: Frontend Phase A — `/success` + `/cancel` only. |
-| 4 | Operator: `P0_OPERATOR_LOCAL_CONFIG_GUIDE.md` → `credential-rotation-dry-run` only. |
-| 5 | After approval: L-13 on governed Neon branch — never in CI/agents. |
+Execute in this order:
 
-**Safe validation commands (from `server/`):**
+**A. Merge audit docs into `main`**
+
+- Branch: `audit/global-super-system-health-2026-05-20`  
+- PR: **docs-only** (audit pack + this reboot brief)  
+- Wait for **green CI** and **Super-System Guard** on the PR  
+- Then merge to `main`  
+
+**B. Merge composer frontend plan docs (if not already on `main`)**
+
+- Branch: `chore/composer-frontend-investor-plan`  
+- PR: **docs-only** — `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md`, `FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md`  
+- Skip if already merged  
+
+**C. Start frontend Phase A implementation**
+
+- Create branch: `feat/frontend-phase-a-investor-grade` from updated `main`  
+- Scope **only:**  
+  - `app/success/page.tsx`  
+  - `app/cancel/page.tsx`  
+  - Flutter `walletTopUpHint` copy (`lib/l10n/app_en.arb` + synced locales)  
+  - i18n customer-safe copy (`messages/*`, related ARB)  
+- **No** DB, env, payment, deploy  
+
+**Safe validation (from `server/`):**
 
 ```bash
 npm run secrets:scan
@@ -323,29 +369,32 @@ npm run zw:doctor -- intelligence --ci-static
 
 ---
 
-## 11. FORBIDDEN ACTIONS (agents, CI extensions, automation)
+## 11. FORBIDDEN UNTIL EXPLICIT APPROVAL
 
-- Mutate DB; run migrations  
-- Change Vercel or Neon environment  
-- Deploy to staging/production  
-- Stripe payments, refunds, Dashboard webhook resend  
+Do not run or automate these without documented human approval:
+
 - `credential-rotation-execute`  
-- Set `STAGING_OPERATOR_ROTATION_APPROVAL`  
-- Enable `ZW_SELF_HEALING_APPLY` for money repair  
-- Print or commit secrets, DATABASE_URL, tokens, PII  
-- Claim production-ready, L-13 PASS, rotation complete, frontend investor PASS without proof  
+- `STAGING_OPERATOR_ROTATION_APPROVAL` (agents must never set)  
+- refund (including `l11-refund-execute`)  
+- payment / live Stripe charges  
+- webhook resend (Stripe Dashboard or API)  
+- migration / Prisma migrate deploy to shared DB  
+- Vercel env change  
+- Neon change (branch delete, expire, connection target change)  
+- deploy (staging or production)  
+- self-healing apply that mutates infra or money state (`ZW_SELF_HEALING_APPLY`)  
 
 ---
 
-## 12. APPROVAL GATES (human only)
+## 12. COPY-PASTE START PROMPT FOR FUTURE CHATGPT SESSION
 
-| Operation | Approval |
-|-----------|------------|
-| L-11 refund execute | Phrase: `Approved: L-11 execute full refund` |
-| L-13 webhook resend | Phrase: `Approved: resend duplicate charge.refunded event for L-13 proof` |
-| Credential rotation execute | Exact match in env var `STAGING_OPERATOR_ROTATION_APPROVAL` (operator sets locally — never agent) |
-| Self-healing money apply | Explicit `ZW_SELF_HEALING_APPLY` + incident commander sign-off |
-| Production go-live | Outside repo — formal release control |
+Paste this after memory reset:
+
+```text
+Read this Zora-Walat reboot brief. Continue from the current state. Do not assume production-ready. Follow Super-System standard. First ask me which track to continue: frontend Phase A, credential rotation approval, L-13 proof, or readiness review.
+```
+
+**File to attach or paste path:** `Ap786/ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md`
 
 ---
 
@@ -373,7 +422,7 @@ npm run zw:doctor -- intelligence --ci-static
 
 ---
 
-## 14. AGENT PROMPT TEMPLATE (copy-paste)
+## 14. CURSOR AGENT PROMPT TEMPLATE (copy-paste)
 
 ```text
 You are working on Zora-Walat. Read Ap786/ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md first.
