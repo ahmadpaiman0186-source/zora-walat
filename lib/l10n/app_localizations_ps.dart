@@ -301,7 +301,7 @@ class AppLocalizationsPs extends AppLocalizations {
 
   @override
   String get walletTopUpHint =>
-      'په خوندي ډول پیسې زیات کړئ؛ ازمایښي کریډیټ سمدستي پلي کېږي.';
+      'په خوندي ډول پیسې زیات کړئ. د بټۍ کریډیټ یوازې وروسته له دې چې زموږ سرورونه تادیه تایید کړي پلي کېږي.';
 
   @override
   String topUpSuccessSnack(String amount) {

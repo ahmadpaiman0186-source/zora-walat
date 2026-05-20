@@ -734,8 +734,12 @@ export function ZoraWalatTopUp() {
             <Link href="/history" className={styles.navLink}>
               {m.header.navOrderHistory}
             </Link>
-            <span className={styles.navLink}>{m.header.navHowItWorks}</span>
-            <span className={styles.navLink}>{m.header.navSupport}</span>
+            <a href="#how-it-works" className={styles.navLink}>
+              {m.header.navHowItWorks}
+            </a>
+            <a href="#support-guidance" className={styles.navLink}>
+              {m.header.navSupport}
+            </a>
             <span className={styles.trustChip}>{m.header.trustRibbon}</span>
           </nav>
         </div>
@@ -1073,7 +1077,11 @@ export function ZoraWalatTopUp() {
                 </div>
               </article>
 
-              <article className={styles.card} aria-labelledby="trust-title">
+              <article
+                id="how-it-works"
+                className={styles.card}
+                aria-labelledby="trust-title"
+              >
                 <h2 id="trust-title" className={styles.cardTitle}>
                   {m.trust.title}
                 </h2>
@@ -1083,6 +1091,22 @@ export function ZoraWalatTopUp() {
                   <li>{m.trust.tracking}</li>
                   <li>{m.trust.noStore}</li>
                 </ul>
+              </article>
+
+              <article
+                id="support-guidance"
+                className={styles.card}
+                aria-labelledby="support-title"
+              >
+                <h2 id="support-title" className={styles.cardTitle}>
+                  {m.support.title}
+                </h2>
+                <p className={styles.cardSubtitle}>{m.support.body}</p>
+                <p style={{ marginTop: '0.75rem' }}>
+                  <Link href="/history" className={styles.navLink}>
+                    {m.support.ctaHistory}
+                  </Link>
+                </p>
               </article>
 
               <article className={styles.card} aria-labelledby="pay-title">
