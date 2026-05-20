@@ -14,6 +14,7 @@
 **Operator auth (2026-05-19):** Staging login **401** (`invalid_credentials`) — `P0_OPERATOR_AUTH_CREDENTIAL_ROTATION_PLAN.md`; **password rotation required** (screenshot exposure); **no** DB reset or env change in repo; P-2 harness PASS may be stale until rotation completes.  
 **Operator rotation tooling (2026-05-20):** Guarded workflow implemented (`b460789`, pushed); **dry-run BLOCKED** (missing local operator email config); **real credential rotation not executed**; exposed password still considered compromised until separate approved execution; **no** DB/Vercel/Neon mutation in this step.
 **Super-System intelligence (2026-05-20):** Read-only `zw-doctor intelligence` + `SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md` — staging money-path strong; global platform **PARTIAL**; self-healing apply **off**; L-13 **not** executed.
+**Composer / frontend plan (2026-05-20):** `CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md` (Pro+ sufficient; agent guardrails) + `FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md` — investor-grade frontend **not PASS**; `/success` and `/cancel` routes remain a gap; implementation planned in phases — **no code changed** in this tranche.
 
 ---
 

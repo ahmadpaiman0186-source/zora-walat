@@ -60,6 +60,8 @@ SUPER_SYSTEM_INTELLIGENCE 2026-05-20: SUPER_SYSTEM_INTELLIGENT_APP_AUDIT.md + zw
 CI_INTELLIGENCE_WIRING_FIX 2026-05-20: zw-doctor import runZwDoctorIntelligence — Super-System Guard ReferenceError fixed.
 PR21_POST_MERGE 2026-05-20: PR21_POST_MERGE_VERIFICATION.md — merged @ 2ea64a2; main CI+Guard green; read-only zw-doctor PASS; no money/DB/env mutation.
 PR21_CI_GREEN 2026-05-19: PR21_SUPER_SYSTEM_GUARD_CI_GREEN_EVIDENCE.md — superseded for merge status by PR21_POST_MERGE (pre-merge PR checks green).
+COMPOSER_AGENT_POLICY 2026-05-20: CURSOR_COMPOSER_2_5_DECISION_AND_AGENT_POLICY.md — Pro+ sufficient; Ultra not recommended; forbidden ops list.
+FRONTEND_INVESTOR_PLAN 2026-05-20: FRONTEND_INVESTOR_GRADE_UPGRADE_PLAN.md — post-PR21 audit; web PARTIAL; success/cancel routes GAP; no code change.
 
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
