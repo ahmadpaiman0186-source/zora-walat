@@ -11,6 +11,7 @@
 |------------|------|
 | **2026-05-20** | **One** local fail-closed screenshot filed: `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — home `/` on **local** dev with **missing Stripe publishable key** warning visible. Documents fail-closed UX when payment setup is incomplete; **does not** complete full frontend QA, **does not** satisfy investor-clean `HOME-DESKTOP-EN`, and **does not** imply QA PASS or production-ready. |
 | **2026-05-21** | **One** clean investor screenshot filed: `HOME-DESKTOP-EN-CLEAN.png` — home `/` EN desktop after **test** publishable key configured in gitignored `.env.local`; no missing-key warning. **Partial evidence only** — **no** full QA PASS, **no** payment-flow proof, **no** real-money claim; **9** other investor-hard screenshots still **PENDING CAPTURE**. |
+| **2026-05-21** (continued) | **Two** additional investor-hard anchor screenshots filed: `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png`, `SUPPORT-ANCHOR-DESKTOP-EN.png`. **3** investor-hard screenshots captured total (including `HOME-DESKTOP-EN-CLEAN` from PR #31). Remaining pack **incomplete**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready claim, **no** real-money-ready claim. |
 
 ---
 
@@ -62,7 +63,7 @@
 
 | # | Area | Locale | Expected | Observed | Status | Manifest ID |
 |---|------|--------|----------|----------|--------|-------------|
-| 1 | Home load | EN | Form + hero + switcher; no missing-key banner | Clean home captured locally (test key) | PARTIAL EVIDENCE | HOME-DESKTOP-EN-CLEAN **CAPTURED**; 9 IDs still pending |
+| 1 | Home load | EN | Form + hero + switcher; no missing-key banner | Clean home captured (PR #31) | PARTIAL EVIDENCE | HOME-DESKTOP-EN-CLEAN **CAPTURED** |
 | 2 | Home mobile | EN | Usable layout | | PENDING EVIDENCE | HOME-MOBILE-EN |
 | 3 | Home RTL | FA | RTL correct | | PENDING EVIDENCE | HOME-FA-RTL |
 | 4 | Home RTL | AR | RTL correct | | PENDING EVIDENCE | HOME-AR-RTL |
@@ -71,7 +72,7 @@
 | 7 | Success i18n | FA/AR/TR | Localized | | PENDING EVIDENCE | SUCCESS-* |
 | 8 | Cancel no-service | EN | No service copy | | PENDING EVIDENCE | CANCEL-EN |
 | 9 | Cancel i18n | FA/AR/TR | Localized | | PENDING EVIDENCE | CANCEL-* |
-| 10 | Nav anchors | EN | Scroll targets | | PENDING EVIDENCE | HEADER-ANCHOR-* |
+| 10 | Nav anchors | EN | How-it-works + support guidance in viewport | Both anchor sections captured | PARTIAL EVIDENCE | HOW-IT-WORKS-ANCHOR-DESKTOP-EN, SUPPORT-ANCHOR-DESKTOP-EN **CAPTURED**; 7 IDs pending |
 | 11 | CI / Guard | — | Green on main | | PENDING EVIDENCE | CI-GREEN-*, GUARD-GREEN-* |
 
 **Status values:** `PASS`, `FAIL`, `PENDING EVIDENCE`, `BLOCKED`, `NOT APPLICABLE`

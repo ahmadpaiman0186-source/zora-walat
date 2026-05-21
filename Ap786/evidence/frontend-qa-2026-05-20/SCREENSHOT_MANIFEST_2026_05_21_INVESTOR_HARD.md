@@ -39,8 +39,8 @@
 | SUCCESS-DESKTOP-EN-FAIL-CLOSED | Success — verifying/unknown/pending (not PAID-confirmed) | `/success` | EN | **PENDING CAPTURE** | `SUCCESS-DESKTOP-EN-FAIL-CLOSED.png` | No “confirmed on servers” unless server PAID; no-params OK |
 | CANCEL-DESKTOP-EN | Cancel — no service | `/cancel` | EN | **PENDING CAPTURE** | `CANCEL-DESKTOP-EN.png` | no charge, no service, no auto-retry visible |
 | ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED | Recent orders — empty or safe error | `/` (history section) | EN | **PENDING CAPTURE** | `ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png` | Empty state or fail-closed load error — **not** fake paid orders |
-| SUPPORT-ANCHOR-DESKTOP-EN | Support guidance section in viewport | `/` → `#support-guidance` | EN | **PENDING CAPTURE** | `SUPPORT-ANCHOR-DESKTOP-EN.png` | In-page guidance only |
-| HOW-IT-WORKS-ANCHOR-DESKTOP-EN | How it works / trust section in viewport | `/` → `#how-it-works` | EN | **PENDING CAPTURE** | `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | Trust / payment verification copy |
+| SUPPORT-ANCHOR-DESKTOP-EN | Support guidance section in viewport | `/` → `#support-guidance` | EN | **SCREENSHOT CAPTURED** | `SUPPORT-ANCHOR-DESKTOP-EN.png` | In-page guidance only; investor-hard pack (partial) |
+| HOW-IT-WORKS-ANCHOR-DESKTOP-EN | How it works / trust section in viewport | `/` → `#how-it-works` | EN | **SCREENSHOT CAPTURED** | `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | Trust / payment verification copy; investor-hard pack (partial) |
 
 ---
 
@@ -56,8 +56,8 @@
 
 | Category | Count |
 |----------|-------|
-| Investor-hard IDs **PENDING CAPTURE** | **9** |
-| Investor-clean **SCREENSHOT CAPTURED** | **1** (`HOME-DESKTOP-EN-CLEAN.png`) |
+| Investor-hard IDs **PENDING CAPTURE** | **7** |
+| Investor-clean **SCREENSHOT CAPTURED** | **3** (`HOME-DESKTOP-EN-CLEAN.png` [PR #31], `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png`, `SUPPORT-ANCHOR-DESKTOP-EN.png`) |
 | Local fail-closed (separate) | **1** (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`) |
 
-**QA PASS:** **Not claimed** — 9 investor-hard captures remain; RTL/a11y and signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
+**QA PASS:** **Not claimed** — 7 investor-hard captures remain; RTL/a11y and signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
