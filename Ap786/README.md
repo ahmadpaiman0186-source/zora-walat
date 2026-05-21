@@ -9,7 +9,9 @@
 |----------|----------|
 | [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Canonical reboot brief** — read first after memory reset |
 | [ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md](./ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md) | **Executive engineering brief** — investors, founders, CTO summary |
-| [ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md](./ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md) | **Investor required pass matrix** — 30 areas, verdicts, claim boundary, 7-day plan (`main` @ PR #24) |
+| [ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md](./ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md) | **Investor required pass matrix** — 30 areas, verdicts, claim boundary, 7-day plan (`main` @ PR #25) |
+| [ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md](./ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md) | **Market readiness pack** — demo script, GTM boundary, diligence answers (`main` @ `864e884`) |
+| [ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md](./ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md) | **Frontend QA checklist v1** — screenshot/a11y requirements; **PENDING EVIDENCE** until filed |
 
 ## Master project memory (2026-05-20)
 
