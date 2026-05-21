@@ -12,7 +12,13 @@
 | [ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md](./ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md) | **Investor required pass matrix** — 30 areas, verdicts, claim boundary, 7-day plan (`main` @ PR #25) |
 | [ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md](./ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md) | **Market readiness pack** — demo script, GTM boundary, diligence answers (`main` @ `864e884`) |
 | [ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md](./ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md) | **Frontend QA checklist v1** — screenshot/a11y requirements; **PENDING EVIDENCE** until filed |
-| [ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md](./ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md) | **Super-System enforcement pack** — 30 controls, money-path + abuse policy, self-healing levels (`main` @ PR #26) |
+| [ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md](./ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md) | **Super-System enforcement pack** — 30 controls, money-path + abuse policy, self-healing levels (`main` @ PR #27) |
+
+## Investor evidence capture (2026-05-20)
+
+| Location | Contents |
+|----------|----------|
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA scaffold** — screenshot manifest, run report template, RTL/a11y + payment-safety reviews (**PENDING CAPTURE**) |
 
 ## Master project memory (2026-05-20)
 
