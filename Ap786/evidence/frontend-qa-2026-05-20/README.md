@@ -4,7 +4,13 @@
 
 **Base commit (latest):** `fa88b0b` — `main` after PR #29 (local fail-closed screenshot)
 **Investor-hard plan (2026-05-21):** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)
-**Branch for capture work:** `evidence/investor-hard-frontend-qa-2026-05-21` (recommended)
+**Branch for capture work:** `evidence/clean-investor-screenshots-2026-05-21` (recommended)
+
+---
+
+## Dated evidence note (2026-05-21)
+
+**One** clean investor desktop English screenshot captured: `HOME-DESKTOP-EN-CLEAN.png` — local dev with **test** Stripe publishable key in gitignored `.env.local`; missing-key warning **not** visible. The **full** investor-hard screenshot pack (**9** remaining IDs), RTL/a11y review, and signoff are **incomplete**. **Not** QA PASS, production-ready, or real-money ready.
 
 ---
 
@@ -12,8 +18,8 @@
 
 | Item | Status |
 |------|--------|
-| Evidence pack | **SCAFFOLD ONLY** — templates and manifest created |
-| Screenshots | **PARTIAL** — 1× local fail-closed PNG (PR #29); **0** investor-clean captures; 10× investor-hard IDs **PENDING** — see [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
+| Evidence pack | **IN PROGRESS** — templates + partial captures |
+| Screenshots | **PARTIAL** — 1× investor-clean (`HOME-DESKTOP-EN-CLEAN.png`); 1× local fail-closed (PR #29); **9** investor-hard IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
 | Signoff | **PENDING SIGNOFF** — [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
 | RTL/a11y smoke | **PENDING EVIDENCE** — see `RTL_A11Y_SMOKE_REVIEW.md` |
