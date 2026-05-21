@@ -30,7 +30,7 @@ Investor-hard screenshot evidence **partial** — **3** of **10** captured:
 | Screenshots | **PARTIAL** — **3**× investor-hard clean; 1× local fail-closed (PR #29); **7** IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
 | Signoff | **PENDING SIGNOFF** — [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
-| RTL/a11y smoke | **PENDING EVIDENCE** — see `RTL_A11Y_SMOKE_REVIEW.md` |
+| RTL/a11y smoke | **PARTIAL** — `RTL_A11Y_SMOKE_REVIEW.md` §8 (2026-05-21); EN desktop visual only; RTL + manual QA **PENDING** |
 | Payment-safety UX | **CODE REVIEW EVIDENCE** (partial) + **PENDING EVIDENCE** (visual) — see `PAYMENT_SAFETY_UX_REVIEW.md` |
 
 ---

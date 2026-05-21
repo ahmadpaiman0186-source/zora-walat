@@ -79,6 +79,7 @@ INVESTOR_HARD_FRONTEND_QA 2026-05-21: ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_
 FRONTEND_QA_HOME_DESKTOP_EN_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-CLEAN.png — investor-clean home EN desktop; PR #31; NOT payment-flow proof; NOT QA PASS.
 FRONTEND_QA_HOW_IT_WORKS_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png — #how-it-works trust section; investor-hard partial; NOT QA PASS.
 FRONTEND_QA_SUPPORT_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/SUPPORT-ANCHOR-DESKTOP-EN.png — #support-guidance section; investor-hard partial; NOT QA PASS.
+FRONTEND_QA_RTL_A11Y_SMOKE_REVIEW_2026_05_21 2026-05-21: RTL_A11Y_SMOKE_REVIEW.md §8 — conservative smoke from 3 EN PNGs (PR #31–#32); RTL PENDING; keyboard/screen-reader PENDING MANUAL QA; PARTIAL visual only; NOT full a11y PASS; NOT QA PASS.
 PROD_OBSERVABILITY_PLAN 2026-05-21: ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md — plan only; NOT PROVEN YET in production.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)

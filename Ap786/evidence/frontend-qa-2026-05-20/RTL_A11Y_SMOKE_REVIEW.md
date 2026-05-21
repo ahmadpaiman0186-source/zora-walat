@@ -2,7 +2,7 @@
 
 **Base commit:** `8b2b7f8`  
 **Review type:** Manual smoke (not a formal WCAG audit)  
-**Overall status:** **PENDING EVIDENCE**
+**Overall status:** **PARTIAL** (§8, 2026-05-21) — EN desktop visual only; RTL and manual a11y **PENDING**
 
 **Status legend:** `PENDING EVIDENCE` · `PASS` · `FAIL` · `CODE REVIEW EVIDENCE` · `BLOCKED` · `NOT APPLICABLE`
 
@@ -103,8 +103,53 @@
 | 7.9 | Fail-closed warning behavior | Missing key OR unknown success state | **PARTIAL** | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (local key only) |
 | 7.10 | Mobile responsiveness | Home + return at ~390px | **PENDING EVIDENCE** | `HOME-MOBILE-EN-CLEAN.png` pending |
 
-**§7 verdict:** **PENDING EVIDENCE** — not complete for investor-hard signoff.
+**§7 verdict:** **PENDING EVIDENCE** — superseded for baseline by §8 (2026-05-21).
 
 ---
 
-*Smoke review template · main @ `fa88b0b` (PR #29) · not production-ready*
+## 8. RTL / accessibility smoke review (2026-05-21)
+
+**Baseline:** `main` after PR #31 + PR #32 (`dc86ab3`)
+**Investor-hard screenshots:** **3 of 10** captured · **7** pending
+**Separate fail-closed (PR #29):** `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — not RTL/a11y PASS evidence
+
+**Status legend (§8):** `PENDING EVIDENCE` · `PENDING MANUAL QA` · `PARTIAL VISUAL EVIDENCE` · `PARTIAL CODE/VISUAL EVIDENCE` · `CODE REVIEW EVIDENCE` · `NOT APPLICABLE`
+
+### 8.1 Conservative evidence matrix
+
+| # | Area | Expected | Status | Evidence basis |
+|---|------|----------|--------|----------------|
+| 8.1 | English desktop — clean home (LTR) | Readable EN home; no missing Stripe key banner | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-EN-CLEAN.png` (PR #31) — desktop EN only; not mobile |
+| 8.2 | How-it-works anchor — trust copy | `#how-it-works` trust/payment-safe bullets visible | **PARTIAL VISUAL EVIDENCE** | `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` (PR #32) |
+| 8.3 | Support-guidance anchor | In-page support guidance; no fake ticketing | **PARTIAL VISUAL EVIDENCE** | `SUPPORT-ANCHOR-DESKTOP-EN.png` (PR #32) |
+| 8.4 | FA RTL visual QA | RTL layout correct on home/return | **PENDING EVIDENCE** | No `HOME-DESKTOP-FA-RTL.png` or FA return PNG |
+| 8.5 | AR RTL visual QA | RTL layout correct on home/return | **PENDING EVIDENCE** | No `HOME-DESKTOP-AR-RTL.png` or AR return PNG |
+| 8.6 | TR / other locales visual | TR home and localized returns | **PENDING EVIDENCE** | No TR/FA/AR investor-hard PNGs |
+| 8.7 | Keyboard navigation | Tab order home/success/cancel | **PENDING MANUAL QA** | Not proven by screenshots alone |
+| 8.8 | Focus visibility | Visible focus indicators | **PENDING MANUAL QA** | Not proven by screenshots alone |
+| 8.9 | Screen reader semantics | Titles/labels announce correctly | **PENDING MANUAL QA** | No NVDA/VoiceOver log filed |
+| 8.10 | Contrast / readability (spot) | Body text readable on captured EN views | **PARTIAL CODE/VISUAL EVIDENCE** | Visual from 3 EN PNGs only; no contrast tool report |
+| 8.11 | Payment safety copy (visual) | Trust/duplicate/no-service messaging where shown | **PARTIAL VISUAL EVIDENCE** | Trust section PNG; success/cancel PNGs **not** captured |
+| 8.12 | No-pay-no-service copy | Cancel/success no-service language | **CODE REVIEW EVIDENCE** | `messages/*`, components — **not** live-money proof |
+| 8.13 | Fail-closed missing-key (local) | Warning when publishable key absent | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (PR #29) — separate from clean home |
+| 8.14 | Mobile responsiveness | ~390px layouts | **PENDING EVIDENCE** | No `HOME-MOBILE-EN-CLEAN.png` |
+| 8.15 | Language switcher behavior | en↔fa↔ar↔tr without break | **PENDING MANUAL QA** | No switcher exercise log |
+| 8.16 | Full accessibility PASS | WCAG / complete a11y signoff | **NOT APPLICABLE** | **Not claimed** |
+
+### 8.2 §8 verdict
+
+| Field | Value |
+|-------|-------|
+| **RTL smoke** | **PENDING EVIDENCE** (no FA/AR/TR screenshots) |
+| **A11y smoke** | **PARTIAL** — limited EN desktop visual only; manual keyboard/screen-reader **PENDING MANUAL QA** |
+| **Investor-hard screenshots** | **3 / 10** — pack incomplete |
+| **QA PASS** | **Not claimed** |
+| **Production-ready** | **Not claimed** |
+| **Real-money-ready** | **Not claimed** |
+| **Payment-flow proof** | **Not claimed** |
+
+**Reviewer:** __________ **Date:** __________
+
+---
+
+*Smoke review · main @ PR #31–#32 (`dc86ab3`) · conservative · not production-ready*

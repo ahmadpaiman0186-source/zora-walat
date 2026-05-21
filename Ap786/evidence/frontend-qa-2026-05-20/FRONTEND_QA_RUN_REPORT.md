@@ -12,6 +12,7 @@
 | **2026-05-20** | **One** local fail-closed screenshot filed: `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — home `/` on **local** dev with **missing Stripe publishable key** warning visible. Documents fail-closed UX when payment setup is incomplete; **does not** complete full frontend QA, **does not** satisfy investor-clean `HOME-DESKTOP-EN`, and **does not** imply QA PASS or production-ready. |
 | **2026-05-21** | **One** clean investor screenshot filed: `HOME-DESKTOP-EN-CLEAN.png` — home `/` EN desktop after **test** publishable key configured in gitignored `.env.local`; no missing-key warning. **Partial evidence only** — **no** full QA PASS, **no** payment-flow proof, **no** real-money claim; **9** other investor-hard screenshots still **PENDING CAPTURE**. |
 | **2026-05-21** (continued) | **Two** additional investor-hard anchor screenshots filed: `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png`, `SUPPORT-ANCHOR-DESKTOP-EN.png`. **3** investor-hard screenshots captured total (including `HOME-DESKTOP-EN-CLEAN` from PR #31). Remaining pack **incomplete**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready claim, **no** real-money-ready claim. |
+| **2026-05-21** (RTL/a11y) | [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) §8 updated — conservative smoke from **3** EN desktop PNGs (PR #31–#32). Status **PARTIAL** / **PENDING EVIDENCE** / **PENDING MANUAL QA**. Investor-hard screenshots remain **3 of 10**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready, **no** real-money-ready claim. |
 
 ---
 
@@ -94,7 +95,7 @@
 | Document | Completed? |
 |----------|------------|
 | [SCREENSHOT_MANIFEST.md](./SCREENSHOT_MANIFEST.md) | [ ] All required captures |
-| [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) | [ ] |
+| [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) | [x] §8 updated 2026-05-21 — **PARTIAL**, not PASS |
 | [PAYMENT_SAFETY_UX_REVIEW.md](./PAYMENT_SAFETY_UX_REVIEW.md) | [ ] |
 
 ---
