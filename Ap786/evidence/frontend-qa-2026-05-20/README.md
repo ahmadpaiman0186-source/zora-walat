@@ -12,7 +12,7 @@
 | Item | Status |
 |------|--------|
 | Evidence pack | **SCAFFOLD ONLY** — templates and manifest created |
-| Screenshots | **PENDING CAPTURE** — no image files in this folder yet |
+| Screenshots | **PARTIAL** — `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (local fail-closed only); investor-clean and other captures **PENDING CAPTURE** |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
 | RTL/a11y smoke | **PENDING EVIDENCE** — see `RTL_A11Y_SMOKE_REVIEW.md` |
 | Payment-safety UX | **CODE REVIEW EVIDENCE** (partial) + **PENDING EVIDENCE** (visual) — see `PAYMENT_SAFETY_UX_REVIEW.md` |

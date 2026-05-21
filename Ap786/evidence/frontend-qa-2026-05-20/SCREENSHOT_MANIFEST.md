@@ -11,9 +11,18 @@
 | Status | Meaning |
 |--------|---------|
 | **PENDING CAPTURE** | Required; file not present |
-| **SCREENSHOT CAPTURED** | File exists at **File Name** path |
+| **SCREENSHOT CAPTURED** | File exists at **File Name** path (investor-clean or approved capture) |
+| **SCREENSHOT CAPTURED (local fail-closed)** | File exists; documents **local** missing-config / fail-closed behavior — **not** a clean investor home shot |
 | **BLOCKED** | Cannot capture without approval (e.g. live-money) |
 | **NOT APPLICABLE** | Not required for this release |
+
+---
+
+## Local fail-closed evidence (separate from investor-clean home)
+
+| Evidence ID | Required Screenshot | Route / Page | Locale | Status | File Name | Notes |
+|-------------|---------------------|--------------|--------|--------|-----------|-------|
+| HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED | Home — local missing Stripe publishable key warning | `/` | EN | **SCREENSHOT CAPTURED (local fail-closed)** | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` | **Local dev only.** UI shows missing `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (or equivalent) warning — **fail-closed**, not a successful checkout-ready state. **Does not** satisfy `HOME-DESKTOP-EN` investor-clean capture. |
 
 ---
 
@@ -21,7 +30,7 @@
 
 | Evidence ID | Required Screenshot | Route / Page | Locale | Status | File Name | Notes |
 |-------------|---------------------|--------------|--------|--------|-----------|-------|
-| HOME-DESKTOP-EN | Home top-up — desktop viewport | `/` | EN | **PENDING CAPTURE** | `01-home-desktop-en.png` | Hero, form, language switcher |
+| HOME-DESKTOP-EN | Home top-up — desktop viewport (**investor-clean**) | `/` | EN | **PENDING CAPTURE** | `01-home-desktop-en.png` | Hero, form, language switcher; Stripe configured; **no** missing-key warning. **Not** satisfied by `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`. |
 | HOME-MOBILE-EN | Home top-up — mobile viewport | `/` | EN | **PENDING CAPTURE** | `02-home-mobile-en.png` | ~390px width |
 | HOME-FA-RTL | Home — Persian RTL | `/` | FA | **PENDING CAPTURE** | `03-home-fa-rtl.png` | Verify RTL alignment |
 | HOME-AR-RTL | Home — Arabic RTL | `/` | AR | **PENDING CAPTURE** | `04-home-ar-rtl.png` | Verify RTL alignment |
