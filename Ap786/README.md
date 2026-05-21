@@ -3,6 +3,20 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here — Investor QA & sign-off (2026-05-21)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md](./ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md) | **Stakeholder sign-off pack** — matrix, PENDING rows, forbidden claims (`main` @ PR #35) |
+| [ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md](./ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md) | **Investor Final QA packet** — proven / not proven, demo script, **PARTIAL** verdict |
+| [ZORA_WALAT_SUPER_SYSTEM_SELF_REPAIR_AND_OPERATIONS_SIGNOFF_2026_05_21.md](./ZORA_WALAT_SUPER_SYSTEM_SELF_REPAIR_AND_OPERATIONS_SIGNOFF_2026_05_21.md) | **Super-System ops sign-off** — detect/repair **PLAN/GATED ONLY**; apply **not** enabled |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **10/10** screenshots; [manifest](./evidence/frontend-qa-2026-05-20/SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
+| [evidence/frontend-qa-2026-05-20/STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./evidence/frontend-qa-2026-05-20/STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) | Sign-off template — **PENDING**; use with sign-off pack above |
+
+**Boundary:** PR #35 registered **10/10** investor-hard screenshots. **Not** QA PASS · **not** production-ready · **not** live-money proof.
+
+---
+
 ## Start here (handoff)
 
 | Document | Contents |

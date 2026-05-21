@@ -27,6 +27,14 @@ Prior captures (PR #31–#33): EN/FA/AR/TR home desktop, how-it-works + support 
 
 **Not claimed:** QA PASS · production-ready · real-money-ready · payment-flow proof.
 
+**Governance (2026-05-21):**
+
+| Pack | Path |
+|------|------|
+| Stakeholder sign-off | [ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md](../../ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md) |
+| Investor Final QA | [ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md](../../ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md) |
+| Super-System ops | [ZORA_WALAT_SUPER_SYSTEM_SELF_REPAIR_AND_OPERATIONS_SIGNOFF_2026_05_21.md](../../ZORA_WALAT_SUPER_SYSTEM_SELF_REPAIR_AND_OPERATIONS_SIGNOFF_2026_05_21.md) |
+
 ---
 
 ## Status

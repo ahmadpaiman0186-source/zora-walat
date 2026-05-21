@@ -4,6 +4,8 @@
 **Plan:** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)  
 **Evidence folder:** `Ap786/evidence/frontend-qa-2026-05-20/`  
 **Status:** **PENDING SIGNOFF** — **not signed**; do not treat as approval to launch production or live-money
+**Governance pack:** [ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md](../../ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md) · **QA packet:** [ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md](../../ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md)
+**PR #35 baseline:** `986c552` — **10/10** investor-hard screenshots registered (evidence-only merge)
 
 ---
 
@@ -11,7 +13,7 @@
 
 | # | Precondition | Met? |
 |---|--------------|------|
-| 1 | All investor-hard screenshots **SCREENSHOT CAPTURED** per [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) | [ ] |
+| 1 | All investor-hard screenshots **SCREENSHOT CAPTURED** per [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) | [x] **10/10** (PR #35) |
 | 2 | No clean screenshot includes missing Stripe publishable key warning | [ ] |
 | 3 | RTL/a11y smoke review completed — [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) §2026-05-21 | [ ] |
 | 4 | Payment-safety UX review updated with visual evidence | [ ] |
