@@ -32,13 +32,13 @@
 | Evidence ID | Required Screenshot | Route / Page | Locale | Status | File Name | Notes |
 |-------------|---------------------|--------------|--------|--------|-----------|-------|
 | HOME-DESKTOP-EN-CLEAN | Home desktop — investor-clean | `/` | EN | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-EN-CLEAN.png` | Local dev with **test** Stripe publishable key configured (`.env.local`, gitignored); no missing-key warning; hero + form + language switcher. **Not** payment-flow proof. |
-| HOME-MOBILE-EN-CLEAN | Home mobile — investor-clean | `/` | EN | **PENDING CAPTURE** | `HOME-MOBILE-EN-CLEAN.png` | ~390px; same clean rules |
+| HOME-MOBILE-EN-CLEAN | Home mobile — investor-clean | `/` | EN | **SCREENSHOT CAPTURED** | `HOME-MOBILE-EN-CLEAN.png` | ~390×844; Playwright local UI; EN; no missing-key banner; **not** payment-flow proof |
 | HOME-DESKTOP-FA-RTL-CLEAN | Home desktop Persian RTL — investor-clean | `/` | FA | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-FA-RTL-CLEAN.png` | RTL home visual; no missing-key banner; **not** payment-flow proof |
 | HOME-DESKTOP-AR-RTL-CLEAN | Home desktop Arabic RTL — investor-clean | `/` | AR | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-AR-RTL-CLEAN.png` | RTL home visual; no missing-key banner; **not** payment-flow proof |
 | HOME-DESKTOP-TR-CLEAN | Home desktop Turkish — investor-clean | `/` | TR | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-TR-CLEAN.png` | LTR home visual; no missing-key banner; **not** payment-flow proof |
-| SUCCESS-DESKTOP-EN-FAIL-CLOSED | Success — verifying/unknown/pending (not PAID-confirmed) | `/success` | EN | **PENDING CAPTURE** | `SUCCESS-DESKTOP-EN-FAIL-CLOSED.png` | No “confirmed on servers” unless server PAID; no-params OK |
-| CANCEL-DESKTOP-EN | Cancel — no service | `/cancel` | EN | **PENDING CAPTURE** | `CANCEL-DESKTOP-EN.png` | no charge, no service, no auto-retry visible |
-| ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED | Recent orders — empty or safe error | `/` (history section) | EN | **PENDING CAPTURE** | `ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png` | Empty state or fail-closed load error — **not** fake paid orders |
+| SUCCESS-DESKTOP-EN-FAIL-CLOSED | Success — verifying/unknown/pending (not PAID-confirmed) | `/success` | EN | **SCREENSHOT CAPTURED** | `SUCCESS-DESKTOP-EN-FAIL-CLOSED.png` | `sessionKey=missing-test-session`; fail-closed / not PAID-confirmed; **no** service-delivered claim; no payment mutation |
+| CANCEL-DESKTOP-EN | Cancel — no service | `/cancel` | EN | **SCREENSHOT CAPTURED** | `CANCEL-DESKTOP-EN.png` | no charge, no service, no auto-retry; Playwright local UI |
+| ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED | Recent orders — empty or safe error | `/history` via Orders nav | EN | **SCREENSHOT CAPTURED** | `ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png` | Empty or safe fail-closed state — **not** fake paid orders; no data mutation |
 | SUPPORT-ANCHOR-DESKTOP-EN | Support guidance section in viewport | `/` → `#support-guidance` | EN | **SCREENSHOT CAPTURED** | `SUPPORT-ANCHOR-DESKTOP-EN.png` | In-page guidance only; investor-hard pack (partial) |
 | HOW-IT-WORKS-ANCHOR-DESKTOP-EN | How it works / trust section in viewport | `/` → `#how-it-works` | EN | **SCREENSHOT CAPTURED** | `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | Trust / payment verification copy; investor-hard pack (partial) |
 
@@ -56,8 +56,10 @@
 
 | Category | Count |
 |----------|-------|
-| Investor-hard IDs **PENDING CAPTURE** | **4** |
-| Investor-clean **SCREENSHOT CAPTURED** | **6** (EN home PR #31, FA/AR/TR home clean, how-it-works + support anchors PR #32) |
-| Local fail-closed (separate) | **1** (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`) |
+| Investor-hard IDs **PENDING CAPTURE** | **0** |
+| Investor-clean **SCREENSHOT CAPTURED** | **10 / 10** |
+| Local fail-closed (separate) | **1** (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — PR #29; historical; not counted in 10/10) |
 
-**QA PASS:** **Not claimed** — 4 investor-hard captures remain; RTL visual **partial** only; signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
+**Safety (mandatory):** **No QA PASS** claimed · **No** production-ready · **No** real-money-ready · **No** payment mutation · **No** Stripe/payment/refund/webhook operation · Success capture is **fail-closed** (not PAID-confirmed) · Orders capture has **no** fake paid orders.
+
+**Remaining:** Stakeholder sign-off, keyboard/screen-reader manual QA, production/money-path gated blockers unchanged.
