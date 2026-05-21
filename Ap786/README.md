@@ -20,7 +20,7 @@
 
 | Location | Contents |
 |----------|----------|
-| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **3**× investor-hard PNGs; RTL/a11y smoke **PARTIAL** (§8, 2026-05-21); **7** screenshots **PENDING**; not QA PASS |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **6**× investor-hard PNGs; RTL home visual **PARTIAL**; **4** **PENDING**; not QA PASS |
 
 ## Master project memory (2026-05-20)
 

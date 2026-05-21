@@ -33,9 +33,9 @@
 |-------------|---------------------|--------------|--------|--------|-----------|-------|
 | HOME-DESKTOP-EN-CLEAN | Home desktop — investor-clean | `/` | EN | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-EN-CLEAN.png` | Local dev with **test** Stripe publishable key configured (`.env.local`, gitignored); no missing-key warning; hero + form + language switcher. **Not** payment-flow proof. |
 | HOME-MOBILE-EN-CLEAN | Home mobile — investor-clean | `/` | EN | **PENDING CAPTURE** | `HOME-MOBILE-EN-CLEAN.png` | ~390px; same clean rules |
-| HOME-DESKTOP-FA-RTL | Home desktop Persian RTL | `/` | FA | **PENDING CAPTURE** | `HOME-DESKTOP-FA-RTL.png` | RTL alignment; clean payment state |
-| HOME-DESKTOP-AR-RTL | Home desktop Arabic RTL | `/` | AR | **PENDING CAPTURE** | `HOME-DESKTOP-AR-RTL.png` | RTL alignment; clean payment state |
-| HOME-DESKTOP-TR | Home desktop Turkish | `/` | TR | **PENDING CAPTURE** | `HOME-DESKTOP-TR.png` | LTR; clean payment state |
+| HOME-DESKTOP-FA-RTL-CLEAN | Home desktop Persian RTL — investor-clean | `/` | FA | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-FA-RTL-CLEAN.png` | RTL home visual; no missing-key banner; **not** payment-flow proof |
+| HOME-DESKTOP-AR-RTL-CLEAN | Home desktop Arabic RTL — investor-clean | `/` | AR | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-AR-RTL-CLEAN.png` | RTL home visual; no missing-key banner; **not** payment-flow proof |
+| HOME-DESKTOP-TR-CLEAN | Home desktop Turkish — investor-clean | `/` | TR | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-TR-CLEAN.png` | LTR home visual; no missing-key banner; **not** payment-flow proof |
 | SUCCESS-DESKTOP-EN-FAIL-CLOSED | Success — verifying/unknown/pending (not PAID-confirmed) | `/success` | EN | **PENDING CAPTURE** | `SUCCESS-DESKTOP-EN-FAIL-CLOSED.png` | No “confirmed on servers” unless server PAID; no-params OK |
 | CANCEL-DESKTOP-EN | Cancel — no service | `/cancel` | EN | **PENDING CAPTURE** | `CANCEL-DESKTOP-EN.png` | no charge, no service, no auto-retry visible |
 | ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED | Recent orders — empty or safe error | `/` (history section) | EN | **PENDING CAPTURE** | `ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png` | Empty state or fail-closed load error — **not** fake paid orders |
@@ -56,8 +56,8 @@
 
 | Category | Count |
 |----------|-------|
-| Investor-hard IDs **PENDING CAPTURE** | **7** |
-| Investor-clean **SCREENSHOT CAPTURED** | **3** (`HOME-DESKTOP-EN-CLEAN.png` [PR #31], `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png`, `SUPPORT-ANCHOR-DESKTOP-EN.png`) |
+| Investor-hard IDs **PENDING CAPTURE** | **4** |
+| Investor-clean **SCREENSHOT CAPTURED** | **6** (EN home PR #31, FA/AR/TR home clean, how-it-works + support anchors PR #32) |
 | Local fail-closed (separate) | **1** (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`) |
 
-**QA PASS:** **Not claimed** — 7 investor-hard captures remain; RTL/a11y and signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
+**QA PASS:** **Not claimed** — 4 investor-hard captures remain; RTL visual **partial** only; signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
