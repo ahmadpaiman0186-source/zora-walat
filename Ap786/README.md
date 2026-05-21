@@ -13,12 +13,14 @@
 | [ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md](./ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md) | **Market readiness pack** — demo script, GTM boundary, diligence answers (`main` @ `864e884`) |
 | [ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md](./ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md) | **Frontend QA checklist v1** — screenshot/a11y requirements; **PENDING EVIDENCE** until filed |
 | [ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md](./ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md) | **Super-System enforcement pack** — 30 controls, money-path + abuse policy, self-healing levels (`main` @ PR #27) |
+| [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](./ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md) | **Investor-hard frontend QA plan** — screenshots, RTL/a11y, demo, signoff (`main` @ PR #29) |
+| [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md) | **Production observability plan** — plan only; not proven in prod |
 
-## Investor evidence capture (2026-05-20)
+## Investor evidence capture (2026-05-20 / 2026-05-21)
 
 | Location | Contents |
 |----------|----------|
-| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — manifest + templates; **one** local fail-closed screenshot filed (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`); full pack **PENDING**; not QA PASS |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — 1× fail-closed PNG (PR #29); **10** investor-hard clean captures **PENDING**; signoff **PENDING**; not QA PASS |
 
 ## Master project memory (2026-05-20)
 

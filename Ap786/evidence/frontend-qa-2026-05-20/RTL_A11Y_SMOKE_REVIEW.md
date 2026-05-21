@@ -84,4 +84,27 @@
 
 ---
 
-*Smoke review template · main @ `8b2b7f8` · not production-ready*
+---
+
+## 7. Investor-hard continuation (2026-05-21)
+
+**Baseline:** `fa88b0b` (PR #29) · **Plan:** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)
+
+| # | Check | Expected | Status | Evidence file / note |
+|---|-------|----------|--------|-------------------|
+| 7.1 | FA layout review — home + return | RTL correct; no clip | **PENDING EVIDENCE** | `HOME-DESKTOP-FA-RTL.png` pending |
+| 7.2 | AR layout review — home + return | RTL correct; no clip | **PENDING EVIDENCE** | `HOME-DESKTOP-AR-RTL.png` pending |
+| 7.3 | Keyboard navigation — home/success/cancel | All primary actions reachable | **PENDING EVIDENCE** | QA log |
+| 7.4 | Focus visibility | Visible focus ring on Tab | **PENDING EVIDENCE** | QA log |
+| 7.5 | Readable contrast | Body text readable (spot check) | **PENDING EVIDENCE** | Contrast tool |
+| 7.6 | No text overlap — FA/AR | Hero, notes, CTAs | **PENDING EVIDENCE** | Screenshots |
+| 7.7 | Language switcher | en↔fa↔ar↔tr without layout break | **PENDING EVIDENCE** | QA log |
+| 7.8 | Payment safety copy visible | Duplicate + no-service on success/cancel | **PENDING EVIDENCE** | Return route PNGs |
+| 7.9 | Fail-closed warning behavior | Missing key OR unknown success state | **PARTIAL** | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (local key only) |
+| 7.10 | Mobile responsiveness | Home + return at ~390px | **PENDING EVIDENCE** | `HOME-MOBILE-EN-CLEAN.png` pending |
+
+**§7 verdict:** **PENDING EVIDENCE** — not complete for investor-hard signoff.
+
+---
+
+*Smoke review template · main @ `fa88b0b` (PR #29) · not production-ready*
