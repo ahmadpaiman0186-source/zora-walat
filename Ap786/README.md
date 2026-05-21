@@ -20,7 +20,7 @@
 
 | Location | Contents |
 |----------|----------|
-| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — 1× clean home EN (`HOME-DESKTOP-EN-CLEAN.png`); 1× fail-closed PNG (PR #29); **9** investor-hard captures **PENDING**; not QA PASS |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **3**× investor-hard PNGs (home + anchors); 1× fail-closed (PR #29); **7** **PENDING**; not QA PASS |
 
 ## Master project memory (2026-05-20)
 

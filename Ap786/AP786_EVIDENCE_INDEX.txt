@@ -75,8 +75,10 @@ PR27_ENFORCEMENT 2026-05-20: merged @ 8b2b7f8 — Super-System global enforcemen
 FRONTEND_QA_EVIDENCE 2026-05-20: evidence/frontend-qa-2026-05-20/ — screenshot manifest, QA run template, RTL/a11y smoke, payment-safety UX review; main @ 8b2b7f8; not production-ready.
 FRONTEND_QA_SCREENSHOT_LOCAL_FAIL_CLOSED 2026-05-20: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png — local missing Stripe publishable key warning; fail-closed UX only; NOT investor-clean HOME-DESKTOP-EN; does NOT complete QA PASS.
 PR29_LOCAL_FAIL_CLOSED 2026-05-21: merged @ fa88b0b — registers fail-closed screenshot; CI+Guard green (operator attestation).
-INVESTOR_HARD_FRONTEND_QA 2026-05-21: ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md — clean screenshots, RTL/a11y, demo, signoff template, claim boundary; 9 investor-hard PNGs PENDING CAPTURE; not production-ready.
-FRONTEND_QA_HOME_DESKTOP_EN_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-CLEAN.png — investor-clean home EN desktop; local test Stripe publishable key (gitignored .env.local); NOT payment-flow proof; NOT QA PASS; 9 screenshots still pending.
+INVESTOR_HARD_FRONTEND_QA 2026-05-21: ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md — clean screenshots, RTL/a11y, demo, signoff template, claim boundary; 3/10 investor-hard PNGs captured; 7 PENDING CAPTURE; not production-ready.
+FRONTEND_QA_HOME_DESKTOP_EN_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-CLEAN.png — investor-clean home EN desktop; PR #31; NOT payment-flow proof; NOT QA PASS.
+FRONTEND_QA_HOW_IT_WORKS_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png — #how-it-works trust section; investor-hard partial; NOT QA PASS.
+FRONTEND_QA_SUPPORT_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/SUPPORT-ANCHOR-DESKTOP-EN.png — #support-guidance section; investor-hard partial; NOT QA PASS.
 PROD_OBSERVABILITY_PLAN 2026-05-21: ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md — plan only; NOT PROVEN YET in production.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)

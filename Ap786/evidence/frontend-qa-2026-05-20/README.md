@@ -4,13 +4,21 @@
 
 **Base commit (latest):** `fa88b0b` — `main` after PR #29 (local fail-closed screenshot)
 **Investor-hard plan (2026-05-21):** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)
-**Branch for capture work:** `evidence/clean-investor-screenshots-2026-05-21` (recommended)
+**Branch for capture work:** `evidence/remaining-investor-hard-screenshots-2026-05-21` (recommended)
 
 ---
 
 ## Dated evidence note (2026-05-21)
 
-**One** clean investor desktop English screenshot captured: `HOME-DESKTOP-EN-CLEAN.png` — local dev with **test** Stripe publishable key in gitignored `.env.local`; missing-key warning **not** visible. The **full** investor-hard screenshot pack (**9** remaining IDs), RTL/a11y review, and signoff are **incomplete**. **Not** QA PASS, production-ready, or real-money ready.
+Investor-hard screenshot evidence **partial** — **3** of **10** captured:
+
+| File | Source |
+|------|--------|
+| `HOME-DESKTOP-EN-CLEAN.png` | PR #31 — clean home EN desktop (test publishable key; gitignored `.env.local`) |
+| `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | This branch — `#how-it-works` trust section |
+| `SUPPORT-ANCHOR-DESKTOP-EN.png` | This branch — `#support-guidance` section |
+
+**7** investor-hard IDs remain **PENDING CAPTURE**. RTL/a11y review and signoff **incomplete**. **Not** QA PASS, production-ready, real-money ready, or payment-flow proof.
 
 ---
 
@@ -19,7 +27,7 @@
 | Item | Status |
 |------|--------|
 | Evidence pack | **IN PROGRESS** — templates + partial captures |
-| Screenshots | **PARTIAL** — 1× investor-clean (`HOME-DESKTOP-EN-CLEAN.png`); 1× local fail-closed (PR #29); **9** investor-hard IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
+| Screenshots | **PARTIAL** — **3**× investor-hard clean; 1× local fail-closed (PR #29); **7** IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
 | Signoff | **PENDING SIGNOFF** — [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
 | RTL/a11y smoke | **PENDING EVIDENCE** — see `RTL_A11Y_SMOKE_REVIEW.md` |
