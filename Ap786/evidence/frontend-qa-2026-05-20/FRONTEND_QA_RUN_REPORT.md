@@ -10,6 +10,7 @@
 | Date (UTC) | Note |
 |------------|------|
 | **2026-05-20** | **One** local fail-closed screenshot filed: `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — home `/` on **local** dev with **missing Stripe publishable key** warning visible. Documents fail-closed UX when payment setup is incomplete; **does not** complete full frontend QA, **does not** satisfy investor-clean `HOME-DESKTOP-EN`, and **does not** imply QA PASS or production-ready. |
+| **2026-05-21** | **One** clean investor screenshot filed: `HOME-DESKTOP-EN-CLEAN.png` — home `/` EN desktop after **test** publishable key configured in gitignored `.env.local`; no missing-key warning. **Partial evidence only** — **no** full QA PASS, **no** payment-flow proof, **no** real-money claim; **9** other investor-hard screenshots still **PENDING CAPTURE**. |
 
 ---
 
@@ -61,7 +62,7 @@
 
 | # | Area | Locale | Expected | Observed | Status | Manifest ID |
 |---|------|--------|----------|----------|--------|-------------|
-| 1 | Home load | EN | Form + hero + switcher | Local missing Stripe key warning (fail-closed) | PENDING EVIDENCE | HOME-DESKTOP-EN (clean **PENDING**); see HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED |
+| 1 | Home load | EN | Form + hero + switcher; no missing-key banner | Clean home captured locally (test key) | PARTIAL EVIDENCE | HOME-DESKTOP-EN-CLEAN **CAPTURED**; 9 IDs still pending |
 | 2 | Home mobile | EN | Usable layout | | PENDING EVIDENCE | HOME-MOBILE-EN |
 | 3 | Home RTL | FA | RTL correct | | PENDING EVIDENCE | HOME-FA-RTL |
 | 4 | Home RTL | AR | RTL correct | | PENDING EVIDENCE | HOME-AR-RTL |

@@ -31,7 +31,7 @@
 
 | Evidence ID | Required Screenshot | Route / Page | Locale | Status | File Name | Notes |
 |-------------|---------------------|--------------|--------|--------|-----------|-------|
-| HOME-DESKTOP-EN-CLEAN | Home desktop — investor-clean | `/` | EN | **PENDING CAPTURE** | `HOME-DESKTOP-EN-CLEAN.png` | No missing Stripe key warning; hero + form + language switcher |
+| HOME-DESKTOP-EN-CLEAN | Home desktop — investor-clean | `/` | EN | **SCREENSHOT CAPTURED** | `HOME-DESKTOP-EN-CLEAN.png` | Local dev with **test** Stripe publishable key configured (`.env.local`, gitignored); no missing-key warning; hero + form + language switcher. **Not** payment-flow proof. |
 | HOME-MOBILE-EN-CLEAN | Home mobile — investor-clean | `/` | EN | **PENDING CAPTURE** | `HOME-MOBILE-EN-CLEAN.png` | ~390px; same clean rules |
 | HOME-DESKTOP-FA-RTL | Home desktop Persian RTL | `/` | FA | **PENDING CAPTURE** | `HOME-DESKTOP-FA-RTL.png` | RTL alignment; clean payment state |
 | HOME-DESKTOP-AR-RTL | Home desktop Arabic RTL | `/` | AR | **PENDING CAPTURE** | `HOME-DESKTOP-AR-RTL.png` | RTL alignment; clean payment state |
@@ -56,8 +56,8 @@
 
 | Category | Count |
 |----------|-------|
-| Investor-hard IDs **PENDING CAPTURE** | **10** |
-| Investor-clean **SCREENSHOT CAPTURED** | **0** |
-| Local fail-closed (separate) | **1** |
+| Investor-hard IDs **PENDING CAPTURE** | **9** |
+| Investor-clean **SCREENSHOT CAPTURED** | **1** (`HOME-DESKTOP-EN-CLEAN.png`) |
+| Local fail-closed (separate) | **1** (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`) |
 
-**QA PASS:** **Not claimed** until all investor-hard rows are captured, RTL/a11y filed, and signoff complete.
+**QA PASS:** **Not claimed** — 9 investor-hard captures remain; RTL/a11y and signoff incomplete. **No** payment-flow, production-ready, or real-money claim.
