@@ -88,6 +88,10 @@ FRONTEND_QA_HOME_DESKTOP_FA_RTL_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-2
 FRONTEND_QA_HOME_DESKTOP_AR_RTL_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-AR-RTL-CLEAN.png — AR RTL home desktop; investor-hard partial; NOT payment-flow proof; NOT QA PASS.
 FRONTEND_QA_HOME_DESKTOP_TR_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-TR-CLEAN.png — TR home desktop; investor-hard partial; NOT payment-flow proof; NOT QA PASS.
 PROD_OBSERVABILITY_PLAN 2026-05-21: ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md — plan only; NOT PROVEN YET in production.
+PR35_FINAL_INVESTOR_HARD_SCREENSHOTS 2026-05-21: merged @ 986c552 — evidence/frontend-qa-2026-05-20/ final four PNGs + manifest; 10/10 investor-hard captured; docs/evidence-only; NOT QA PASS; NOT production-ready.
+STAKEHOLDER_SIGNOFF_PACK 2026-05-21: ZORA_WALAT_STAKEHOLDER_SIGNOFF_PACK_2026_05_21.md — sign-off matrix; screenshot 10/10 CAPTURED; all stakeholder rows PENDING SIGNOFF; NOT production-ready.
+INVESTOR_FINAL_QA_PACKET 2026-05-21: ZORA_WALAT_INVESTOR_FINAL_QA_PACKET_2026_05_21.md — investor-safe QA summary; proven vs not proven; verdict PARTIAL investor-review-safe; NOT QA PASS.
+SUPER_SYSTEM_OPS_SIGNOFF 2026-05-21: ZORA_WALAT_SUPER_SYSTEM_SELF_REPAIR_AND_OPERATIONS_SIGNOFF_2026_05_21.md — detect/repair PLAN GATED ONLY; self-healing apply NOT enabled; prod APM NOT PROVEN.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
