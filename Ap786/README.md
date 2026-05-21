@@ -20,7 +20,7 @@
 
 | Location | Contents |
 |----------|----------|
-| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **6**× investor-hard PNGs; RTL home visual **PARTIAL**; **4** **PENDING**; not QA PASS |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — **10/10** investor-hard screenshots captured; sign-off **PENDING**; **not** QA PASS · **not** production-ready · **not** live-money proof |
 
 ## Master project memory (2026-05-20)
 

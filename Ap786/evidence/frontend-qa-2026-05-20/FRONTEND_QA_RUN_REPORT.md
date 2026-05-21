@@ -14,6 +14,7 @@
 | **2026-05-21** (continued) | **Two** additional investor-hard anchor screenshots filed: `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png`, `SUPPORT-ANCHOR-DESKTOP-EN.png`. **3** investor-hard screenshots captured total (including `HOME-DESKTOP-EN-CLEAN` from PR #31). Remaining pack **incomplete**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready claim, **no** real-money-ready claim. |
 | **2026-05-21** (RTL/a11y) | [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) §8 updated — conservative smoke from **3** EN desktop PNGs (PR #31–#32). Status **PARTIAL** / **PENDING EVIDENCE** / **PENDING MANUAL QA**. Investor-hard screenshots remain **3 of 10**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready, **no** real-money-ready claim. |
 | **2026-05-21** (RTL visual) | **Three** localized home screenshots filed: `HOME-DESKTOP-FA-RTL-CLEAN.png`, `HOME-DESKTOP-AR-RTL-CLEAN.png`, `HOME-DESKTOP-TR-CLEAN.png`. Investor-hard visual count **6 of 10**. Remaining pack **incomplete**. **No** full QA PASS, **no** payment-flow proof, **no** production-ready claim, **no** real-money-ready claim. |
+| **2026-05-21** (final screenshots) | Final **four** investor-hard screenshots captured via real Playwright-rendered local UI at **http://127.0.0.1:3000** (existing dev server; no env changes): `HOME-MOBILE-EN-CLEAN.png`, `SUCCESS-DESKTOP-EN-FAIL-CLOSED.png`, `CANCEL-DESKTOP-EN.png`, `ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png`. **10/10** investor-hard screenshots registered. Screenshot evidence only — **not** QA PASS. Production/money-path blockers unchanged. **No** payment mutation, **no** Stripe/payment/refund/webhook operations. |
 
 ---
 
@@ -66,15 +67,16 @@
 | # | Area | Locale | Expected | Observed | Status | Manifest ID |
 |---|------|--------|----------|----------|--------|-------------|
 | 1 | Home load | EN | Form + hero + switcher; no missing-key banner | Clean home captured (PR #31) | PARTIAL EVIDENCE | HOME-DESKTOP-EN-CLEAN **CAPTURED** |
-| 2 | Home mobile | EN | Usable layout | | PENDING EVIDENCE | HOME-MOBILE-EN |
+| 2 | Home mobile | EN | Usable layout | Mobile home captured (Playwright) | PARTIAL EVIDENCE | HOME-MOBILE-EN-CLEAN **CAPTURED** |
 | 3 | Home RTL | FA | RTL correct; clean home | FA home captured | PARTIAL EVIDENCE | HOME-DESKTOP-FA-RTL-CLEAN **CAPTURED** |
 | 4 | Home RTL | AR | RTL correct; clean home | AR home captured | PARTIAL EVIDENCE | HOME-DESKTOP-AR-RTL-CLEAN **CAPTURED** |
 | 5 | Home | TR | TR copy; clean home | TR home captured | PARTIAL EVIDENCE | HOME-DESKTOP-TR-CLEAN **CAPTURED** |
-| 6 | Success fail-closed | EN | No false PAID | | PENDING EVIDENCE | SUCCESS-EN-UNKNOWN-OR-PENDING |
+| 6 | Success fail-closed | EN | No false PAID | Fail-closed success captured | PARTIAL EVIDENCE | SUCCESS-DESKTOP-EN-FAIL-CLOSED **CAPTURED** |
 | 7 | Success i18n | FA/AR/TR | Localized | | PENDING EVIDENCE | SUCCESS-* |
-| 8 | Cancel no-service | EN | No service copy | | PENDING EVIDENCE | CANCEL-EN |
+| 8 | Cancel no-service | EN | No service copy | Cancel page captured | PARTIAL EVIDENCE | CANCEL-DESKTOP-EN **CAPTURED** |
 | 9 | Cancel i18n | FA/AR/TR | Localized | | PENDING EVIDENCE | CANCEL-* |
-| 10 | Nav anchors | EN | How-it-works + support guidance in viewport | Both anchor sections captured | PARTIAL EVIDENCE | HOW-IT-WORKS-ANCHOR-DESKTOP-EN, SUPPORT-ANCHOR-DESKTOP-EN **CAPTURED**; 4 IDs pending |
+| 10 | Nav anchors | EN | How-it-works + support guidance in viewport | Both anchor sections captured | PARTIAL EVIDENCE | HOW-IT-WORKS-ANCHOR-DESKTOP-EN, SUPPORT-ANCHOR-DESKTOP-EN **CAPTURED** |
+| 12 | Orders / history | EN | Empty or fail-closed | History via Orders nav captured | PARTIAL EVIDENCE | ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED **CAPTURED** |
 | 11 | CI / Guard | — | Green on main | | PENDING EVIDENCE | CI-GREEN-*, GUARD-GREEN-* |
 
 **Status values:** `PASS`, `FAIL`, `PENDING EVIDENCE`, `BLOCKED`, `NOT APPLICABLE`

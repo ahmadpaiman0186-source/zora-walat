@@ -75,11 +75,15 @@ PR27_ENFORCEMENT 2026-05-20: merged @ 8b2b7f8 — Super-System global enforcemen
 FRONTEND_QA_EVIDENCE 2026-05-20: evidence/frontend-qa-2026-05-20/ — screenshot manifest, QA run template, RTL/a11y smoke, payment-safety UX review; main @ 8b2b7f8; not production-ready.
 FRONTEND_QA_SCREENSHOT_LOCAL_FAIL_CLOSED 2026-05-20: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png — local missing Stripe publishable key warning; fail-closed UX only; NOT investor-clean HOME-DESKTOP-EN; does NOT complete QA PASS.
 PR29_LOCAL_FAIL_CLOSED 2026-05-21: merged @ fa88b0b — registers fail-closed screenshot; CI+Guard green (operator attestation).
-INVESTOR_HARD_FRONTEND_QA 2026-05-21: ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md — clean screenshots, RTL/a11y, demo, signoff template, claim boundary; 6/10 investor-hard PNGs captured; 4 PENDING CAPTURE; not production-ready.
+INVESTOR_HARD_FRONTEND_QA 2026-05-21: ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md — clean screenshots, RTL/a11y, demo, signoff template, claim boundary; 10/10 investor-hard PNGs captured; not production-ready; NOT QA PASS.
 FRONTEND_QA_HOME_DESKTOP_EN_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-EN-CLEAN.png — investor-clean home EN desktop; PR #31; NOT payment-flow proof; NOT QA PASS.
 FRONTEND_QA_HOW_IT_WORKS_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png — #how-it-works trust section; investor-hard partial; NOT QA PASS.
 FRONTEND_QA_SUPPORT_ANCHOR_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/SUPPORT-ANCHOR-DESKTOP-EN.png — #support-guidance section; investor-hard partial; NOT QA PASS.
-FRONTEND_QA_RTL_A11Y_SMOKE_REVIEW_2026_05_21 2026-05-21: RTL_A11Y_SMOKE_REVIEW.md §8 — conservative smoke; 6/10 investor-hard PNGs; FA/AR/TR home PARTIAL visual; keyboard/screen-reader PENDING MANUAL QA; NOT full a11y PASS; NOT QA PASS.
+FRONTEND_QA_RTL_A11Y_SMOKE_REVIEW_2026_05_21 2026-05-21: RTL_A11Y_SMOKE_REVIEW.md §8 — conservative smoke; 10/10 investor-hard PNGs; keyboard/screen-reader PENDING MANUAL QA; NOT full a11y PASS; NOT QA PASS.
+FRONTEND_QA_HOME_MOBILE_EN_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-MOBILE-EN-CLEAN.png — mobile home EN; Playwright local UI; NOT QA PASS.
+FRONTEND_QA_SUCCESS_DESKTOP_EN_FAIL_CLOSED 2026-05-21: evidence/frontend-qa-2026-05-20/SUCCESS-DESKTOP-EN-FAIL-CLOSED.png — success fail-closed; NOT PAID-confirmed; NOT payment-flow proof; NOT QA PASS.
+FRONTEND_QA_CANCEL_DESKTOP_EN 2026-05-21: evidence/frontend-qa-2026-05-20/CANCEL-DESKTOP-EN.png — cancel no-service; NOT QA PASS.
+FRONTEND_QA_ORDERS_DESKTOP_EN_EMPTY_OR_FAIL_CLOSED 2026-05-21: evidence/frontend-qa-2026-05-20/ORDERS-DESKTOP-EN-EMPTY-OR-FAIL-CLOSED.png — orders empty/fail-closed; no fake paid orders; NOT QA PASS.
 FRONTEND_QA_HOME_DESKTOP_FA_RTL_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-FA-RTL-CLEAN.png — FA RTL home desktop; investor-hard partial; NOT payment-flow proof; NOT QA PASS.
 FRONTEND_QA_HOME_DESKTOP_AR_RTL_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-AR-RTL-CLEAN.png — AR RTL home desktop; investor-hard partial; NOT payment-flow proof; NOT QA PASS.
 FRONTEND_QA_HOME_DESKTOP_TR_CLEAN 2026-05-21: evidence/frontend-qa-2026-05-20/HOME-DESKTOP-TR-CLEAN.png — TR home desktop; investor-hard partial; NOT payment-flow proof; NOT QA PASS.
