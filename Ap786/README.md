@@ -17,6 +17,19 @@
 
 ---
 
+## Start here — Production Observability (2026-05-21)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md) | **Observability proof plan** — telemetry, alerts, SLOs; **PLAN ONLY / NOT PROVEN** in prod |
+| [ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md) | **Evidence manifest** — required artifacts; default **PENDING EVIDENCE** |
+| [ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md](./ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md) | **Incident + rollback runbook** — severity, gates, placeholders; drills **PENDING** |
+| [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md) | Earlier signal requirements roadmap (plan only) |
+
+**Boundary:** Production observability is **NOT PROVEN** until manifest rows are filed. **No** fake uptime, APM, or alert claims. Self-healing **apply** remains **GATED / NOT ENABLED**.
+
+---
+
 ## Start here (handoff)
 
 | Document | Contents |
