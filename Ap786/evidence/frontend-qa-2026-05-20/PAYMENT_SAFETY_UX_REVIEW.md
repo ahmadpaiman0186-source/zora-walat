@@ -3,9 +3,11 @@
 **Date:** 2026-05-20  
 **Base commit:** `8b2b7f8`  
 **Scope:** Next.js return routes + top-up copy (not backend money-path proofs)  
-**Overall:** **PENDING EVIDENCE** (visual/screenshot); partial **CODE REVIEW EVIDENCE**
+**Overall:** **PENDING EVIDENCE** (visual/screenshot); partial **CODE REVIEW EVIDENCE** + **one local fail-closed screenshot**
 
 **Related:** `ZORA_WALAT_SUPER_SYSTEM_GLOBAL_ENFORCEMENT_PACK_2026_05_20.md` §4–5; `MONEY_PATH_ZERO_DUPLICATE_NO_PAY_NO_SERVICE_AUDIT.md`
+
+**Filed visual (local fail-closed only):** `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — home page shows missing Stripe publishable key warning; checkout/payment path not offered as ready. **Not** payment-flow PASS.
 
 ---
 
@@ -39,6 +41,7 @@
 | 12 | Refresh is read-only GET | “Check status again” does not POST payment | **CODE REVIEW EVIDENCE** — `loadStatus` uses GET `topup-orders` | **PENDING EVIDENCE** | **PENDING EVIDENCE** | Network tab in QA log |
 | 13 | Hero claim audit-safe | No “instant delivery” guarantee | **CODE REVIEW EVIDENCE** — `hero.statInstant` status-aware (PR #24) | **PENDING EVIDENCE** | **PENDING EVIDENCE** | `01-home-desktop-en.png` |
 | 14 | Backend no-pay-no-service (cross-check) | Server gate denies fulfill without PAID | **CODE REVIEW EVIDENCE** (backend) — `phase1FulfillmentPaymentGate.js`; L-8–L-10 Ap786 | **NOT APPLICABLE** (UX doc) | **CODE REVIEW EVIDENCE** | Not a frontend screenshot |
+| 15 | Missing Stripe publishable key — fail-closed (local) | UI warns/blocks; no fake “ready to pay” without key | **CODE REVIEW EVIDENCE** — `messages/en.ts` `error.configStripe` / validation paths | **SCREENSHOT CAPTURED** (local fail-closed only) | **PENDING EVIDENCE** (full payment UX) | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` |
 
 ---
 
@@ -58,8 +61,9 @@ Do **not** conflate **CODE REVIEW EVIDENCE** on UI with proof of production mone
 | Field | Value |
 |-------|-------|
 | Payment-safety UX (code) | **CODE REVIEW EVIDENCE** — implementation aligned with fail-closed doctrine |
-| Payment-safety UX (visual) | **PENDING EVIDENCE** |
-| Screenshot pack | **PENDING CAPTURE** per [SCREENSHOT_MANIFEST.md](./SCREENSHOT_MANIFEST.md) |
+| Payment-safety UX (visual) | **PENDING EVIDENCE** — one **local fail-closed** screenshot only (row 15) |
+| Screenshot pack | **PENDING CAPTURE** for investor-clean and return-route shots; see manifest |
+| Payment flow PASS | **No** — missing-key local state is not a successful payment UX proof |
 | Production-ready | **No** |
 | Live-money ready | **No** |
 

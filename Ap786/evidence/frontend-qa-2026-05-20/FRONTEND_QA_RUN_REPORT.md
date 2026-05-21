@@ -1,7 +1,15 @@
 # Frontend QA run report — template
 
 **Report ID:** `FRONTEND-QA-RUN-2026-05-20-001`  
-**Status:** **PENDING EVIDENCE** (template only — not a completed test run)
+**Status:** **PENDING EVIDENCE** (partial capture — not a completed test run)
+
+---
+
+## 0. Evidence notes (dated)
+
+| Date (UTC) | Note |
+|------------|------|
+| **2026-05-20** | **One** local fail-closed screenshot filed: `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — home `/` on **local** dev with **missing Stripe publishable key** warning visible. Documents fail-closed UX when payment setup is incomplete; **does not** complete full frontend QA, **does not** satisfy investor-clean `HOME-DESKTOP-EN`, and **does not** imply QA PASS or production-ready. |
 
 ---
 
@@ -53,7 +61,7 @@
 
 | # | Area | Locale | Expected | Observed | Status | Manifest ID |
 |---|------|--------|----------|----------|--------|-------------|
-| 1 | Home load | EN | Form + hero + switcher | | PENDING EVIDENCE | HOME-DESKTOP-EN |
+| 1 | Home load | EN | Form + hero + switcher | Local missing Stripe key warning (fail-closed) | PENDING EVIDENCE | HOME-DESKTOP-EN (clean **PENDING**); see HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED |
 | 2 | Home mobile | EN | Usable layout | | PENDING EVIDENCE | HOME-MOBILE-EN |
 | 3 | Home RTL | FA | RTL correct | | PENDING EVIDENCE | HOME-FA-RTL |
 | 4 | Home RTL | AR | RTL correct | | PENDING EVIDENCE | HOME-AR-RTL |

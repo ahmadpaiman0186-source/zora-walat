@@ -18,7 +18,7 @@
 
 | Location | Contents |
 |----------|----------|
-| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA scaffold** — screenshot manifest, run report template, RTL/a11y + payment-safety reviews (**PENDING CAPTURE**) |
+| [evidence/frontend-qa-2026-05-20/](./evidence/frontend-qa-2026-05-20/) | **Frontend QA evidence** — manifest + templates; **one** local fail-closed screenshot filed (`HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png`); full pack **PENDING**; not QA PASS |
 
 ## Master project memory (2026-05-20)
 
