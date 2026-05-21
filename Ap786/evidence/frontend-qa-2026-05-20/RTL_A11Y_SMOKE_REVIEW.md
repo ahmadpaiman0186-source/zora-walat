@@ -110,7 +110,7 @@
 ## 8. RTL / accessibility smoke review (2026-05-21)
 
 **Baseline:** `main` after PR #31 + PR #32 (`dc86ab3`)
-**Investor-hard screenshots:** **3 of 10** captured · **7** pending
+**Investor-hard screenshots:** **6 of 10** captured · **4** pending (updated after RTL home PNGs)
 **Separate fail-closed (PR #29):** `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` — not RTL/a11y PASS evidence
 
 **Status legend (§8):** `PENDING EVIDENCE` · `PENDING MANUAL QA` · `PARTIAL VISUAL EVIDENCE` · `PARTIAL CODE/VISUAL EVIDENCE` · `CODE REVIEW EVIDENCE` · `NOT APPLICABLE`
@@ -122,13 +122,13 @@
 | 8.1 | English desktop — clean home (LTR) | Readable EN home; no missing Stripe key banner | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-EN-CLEAN.png` (PR #31) — desktop EN only; not mobile |
 | 8.2 | How-it-works anchor — trust copy | `#how-it-works` trust/payment-safe bullets visible | **PARTIAL VISUAL EVIDENCE** | `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` (PR #32) |
 | 8.3 | Support-guidance anchor | In-page support guidance; no fake ticketing | **PARTIAL VISUAL EVIDENCE** | `SUPPORT-ANCHOR-DESKTOP-EN.png` (PR #32) |
-| 8.4 | FA RTL visual QA | RTL layout correct on home/return | **PENDING EVIDENCE** | No `HOME-DESKTOP-FA-RTL.png` or FA return PNG |
-| 8.5 | AR RTL visual QA | RTL layout correct on home/return | **PENDING EVIDENCE** | No `HOME-DESKTOP-AR-RTL.png` or AR return PNG |
-| 8.6 | TR / other locales visual | TR home and localized returns | **PENDING EVIDENCE** | No TR/FA/AR investor-hard PNGs |
+| 8.4 | FA RTL visual QA | RTL layout correct on home (desktop) | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-FA-RTL-CLEAN.png` — home only; return routes **PENDING** |
+| 8.5 | AR RTL visual QA | RTL layout correct on home (desktop) | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-AR-RTL-CLEAN.png` — home only; return routes **PENDING** |
+| 8.6 | TR localized visual QA | TR home (desktop LTR) | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-TR-CLEAN.png` — home only; return routes **PENDING** |
 | 8.7 | Keyboard navigation | Tab order home/success/cancel | **PENDING MANUAL QA** | Not proven by screenshots alone |
 | 8.8 | Focus visibility | Visible focus indicators | **PENDING MANUAL QA** | Not proven by screenshots alone |
 | 8.9 | Screen reader semantics | Titles/labels announce correctly | **PENDING MANUAL QA** | No NVDA/VoiceOver log filed |
-| 8.10 | Contrast / readability (spot) | Body text readable on captured EN views | **PARTIAL CODE/VISUAL EVIDENCE** | Visual from 3 EN PNGs only; no contrast tool report |
+| 8.10 | Contrast / readability (spot) | Body text readable on captured home views | **PARTIAL CODE/VISUAL EVIDENCE** | 6 home/anchor PNGs; no contrast tool report |
 | 8.11 | Payment safety copy (visual) | Trust/duplicate/no-service messaging where shown | **PARTIAL VISUAL EVIDENCE** | Trust section PNG; success/cancel PNGs **not** captured |
 | 8.12 | No-pay-no-service copy | Cancel/success no-service language | **CODE REVIEW EVIDENCE** | `messages/*`, components — **not** live-money proof |
 | 8.13 | Fail-closed missing-key (local) | Warning when publishable key absent | **PARTIAL VISUAL EVIDENCE** | `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (PR #29) — separate from clean home |
@@ -140,9 +140,9 @@
 
 | Field | Value |
 |-------|-------|
-| **RTL smoke** | **PENDING EVIDENCE** (no FA/AR/TR screenshots) |
-| **A11y smoke** | **PARTIAL** — limited EN desktop visual only; manual keyboard/screen-reader **PENDING MANUAL QA** |
-| **Investor-hard screenshots** | **3 / 10** — pack incomplete |
+| **RTL smoke** | **PARTIAL VISUAL EVIDENCE** — FA/AR/TR **home** desktop PNGs captured; return-route RTL **PENDING** |
+| **A11y smoke** | **PARTIAL** — home/anchor visuals; keyboard/screen-reader **PENDING MANUAL QA**; **not** full a11y PASS |
+| **Investor-hard screenshots** | **6 / 10** — pack incomplete |
 | **QA PASS** | **Not claimed** |
 | **Production-ready** | **Not claimed** |
 | **Real-money-ready** | **Not claimed** |
@@ -150,6 +150,16 @@
 
 **Reviewer:** __________ **Date:** __________
 
+### 8.3 Localized home screenshots (2026-05-21, this branch)
+
+| Locale | File | RTL visual | Notes |
+|--------|------|------------|-------|
+| FA | `HOME-DESKTOP-FA-RTL-CLEAN.png` | **Captured** | Home desktop only — **PARTIAL** RTL visual evidence |
+| AR | `HOME-DESKTOP-AR-RTL-CLEAN.png` | **Captured** | Home desktop only — **PARTIAL** RTL visual evidence |
+| TR | `HOME-DESKTOP-TR-CLEAN.png` | **Captured** | Home desktop LTR — localized visual evidence |
+
+Keyboard, focus, and screen reader checks remain **PENDING MANUAL QA**. Payment-flow proof remains **NOT PROVEN**.
+
 ---
 
-*Smoke review · main @ PR #31–#32 (`dc86ab3`) · conservative · not production-ready*
+*Smoke review · main through PR #33 + RTL home PNGs · conservative · not production-ready*

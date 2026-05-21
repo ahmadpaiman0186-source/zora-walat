@@ -4,21 +4,24 @@
 
 **Base commit (latest):** `fa88b0b` — `main` after PR #29 (local fail-closed screenshot)
 **Investor-hard plan (2026-05-21):** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)
-**Branch for capture work:** `evidence/remaining-investor-hard-screenshots-2026-05-21` (recommended)
+**Branch for capture work:** `evidence/rtl-visual-screenshots-2026-05-21` (recommended)
 
 ---
 
 ## Dated evidence note (2026-05-21)
 
-Investor-hard screenshot evidence **partial** — **3** of **10** captured:
+Investor-hard screenshot evidence **partial** — **6** of **10** captured:
 
 | File | Source |
 |------|--------|
-| `HOME-DESKTOP-EN-CLEAN.png` | PR #31 — clean home EN desktop (test publishable key; gitignored `.env.local`) |
-| `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | This branch — `#how-it-works` trust section |
-| `SUPPORT-ANCHOR-DESKTOP-EN.png` | This branch — `#support-guidance` section |
+| `HOME-DESKTOP-EN-CLEAN.png` | PR #31 — clean home EN desktop |
+| `HOW-IT-WORKS-ANCHOR-DESKTOP-EN.png` | PR #32 — `#how-it-works` trust section |
+| `SUPPORT-ANCHOR-DESKTOP-EN.png` | PR #32 — `#support-guidance` section |
+| `HOME-DESKTOP-FA-RTL-CLEAN.png` | RTL visual — FA home desktop |
+| `HOME-DESKTOP-AR-RTL-CLEAN.png` | RTL visual — AR home desktop |
+| `HOME-DESKTOP-TR-CLEAN.png` | Localized visual — TR home desktop |
 
-**7** investor-hard IDs remain **PENDING CAPTURE**. RTL/a11y review and signoff **incomplete**. **Not** QA PASS, production-ready, real-money ready, or payment-flow proof.
+**4** investor-hard IDs remain **PENDING CAPTURE**. RTL visual evidence is **PARTIAL** (home only). Signoff **incomplete**. **Not** QA PASS, production-ready, real-money ready, or payment-flow proof. **No env files** committed with this evidence.
 
 ---
 
@@ -27,10 +30,10 @@ Investor-hard screenshot evidence **partial** — **3** of **10** captured:
 | Item | Status |
 |------|--------|
 | Evidence pack | **IN PROGRESS** — templates + partial captures |
-| Screenshots | **PARTIAL** — **3**× investor-hard clean; 1× local fail-closed (PR #29); **7** IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
+| Screenshots | **PARTIAL** — **6**× investor-hard clean; 1× fail-closed (PR #29); **4** IDs **PENDING** — [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
 | Signoff | **PENDING SIGNOFF** — [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
-| RTL/a11y smoke | **PARTIAL** — `RTL_A11Y_SMOKE_REVIEW.md` §8 (2026-05-21); EN desktop visual only; RTL + manual QA **PENDING** |
+| RTL/a11y smoke | **PARTIAL** — FA/AR/TR home visual PNGs; keyboard/screen-reader **PENDING MANUAL QA** — `RTL_A11Y_SMOKE_REVIEW.md` §8 |
 | Payment-safety UX | **CODE REVIEW EVIDENCE** (partial) + **PENDING EVIDENCE** (visual) — see `PAYMENT_SAFETY_UX_REVIEW.md` |
 
 ---
