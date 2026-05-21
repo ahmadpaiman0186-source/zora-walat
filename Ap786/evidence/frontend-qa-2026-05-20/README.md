@@ -2,8 +2,9 @@
 
 **Purpose:** Canonical location for **investor-safe** frontend verification artifacts: screenshots, manual QA logs, RTL/a11y smoke notes, and payment-safety UX review records.
 
-**Base commit (scaffold):** `8b2b7f8` — `main` after PR #27 (Super-System global enforcement pack)  
-**Branch for capture work:** `evidence/frontend-qa-screenshots-2026-05-20` (recommended)
+**Base commit (latest):** `fa88b0b` — `main` after PR #29 (local fail-closed screenshot)
+**Investor-hard plan (2026-05-21):** [ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md](../../ZORA_WALAT_INVESTOR_HARD_FRONTEND_QA_PLAN_2026_05_21.md)
+**Branch for capture work:** `evidence/investor-hard-frontend-qa-2026-05-21` (recommended)
 
 ---
 
@@ -12,7 +13,8 @@
 | Item | Status |
 |------|--------|
 | Evidence pack | **SCAFFOLD ONLY** — templates and manifest created |
-| Screenshots | **PARTIAL** — `HOME-DESKTOP-EN-LOCAL-FAIL-CLOSED.png` (local fail-closed only); investor-clean and other captures **PENDING CAPTURE** |
+| Screenshots | **PARTIAL** — 1× local fail-closed PNG (PR #29); **0** investor-clean captures; 10× investor-hard IDs **PENDING** — see [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) |
+| Signoff | **PENDING SIGNOFF** — [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) |
 | Manual QA run | **PENDING EVIDENCE** — see `FRONTEND_QA_RUN_REPORT.md` |
 | RTL/a11y smoke | **PENDING EVIDENCE** — see `RTL_A11Y_SMOKE_REVIEW.md` |
 | Payment-safety UX | **CODE REVIEW EVIDENCE** (partial) + **PENDING EVIDENCE** (visual) — see `PAYMENT_SAFETY_UX_REVIEW.md` |
@@ -43,6 +45,8 @@
 | [FRONTEND_QA_RUN_REPORT.md](./FRONTEND_QA_RUN_REPORT.md) | Manual QA session template |
 | [RTL_A11Y_SMOKE_REVIEW.md](./RTL_A11Y_SMOKE_REVIEW.md) | RTL and accessibility smoke checklist |
 | [PAYMENT_SAFETY_UX_REVIEW.md](./PAYMENT_SAFETY_UX_REVIEW.md) | Super-System payment-safety UX verification |
+| [SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md](./SCREENSHOT_MANIFEST_2026_05_21_INVESTOR_HARD.md) | Investor-hard screenshot IDs (2026-05-21) |
+| [STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md](./STAKEHOLDER_SIGNOFF_TEMPLATE_2026_05_21.md) | Signoff template — **not signed** |
 
 **Parent checklist:** [../../ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md](../../ZORA_WALAT_FRONTEND_QA_EVIDENCE_CHECKLIST_2026_05_20.md)
 
