@@ -83,6 +83,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 
 | Field | Value |
 |-------|-------|
+| **Gate 4 pack (2026-05-22)** | [ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md](./ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md) + rotation matrix + custody checklist + blocker register |
 | **Objective** | Complete G-01 approval package for rotation **execute** when authorized |
 | **Allowed files** | `Ap786/**`, `P0_OPERATOR_AUTH_*` updates (docs) |
 | **Forbidden** | rotation execute; env commits; credential values in repo |
