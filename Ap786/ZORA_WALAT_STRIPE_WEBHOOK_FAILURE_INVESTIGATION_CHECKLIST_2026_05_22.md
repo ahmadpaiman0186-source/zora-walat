@@ -152,7 +152,7 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 
 | Rule | Value |
 |------|-------|
-| Path | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` |
+| Path | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — [README](./evidence/stripe-webhook-failure-2026-05-22/README.md) · [manifest](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md) |
 | Filename | `WH-EV-{nn}_{YYYYMMDD}_{scope}.png` or `.md` |
 | Redaction | No secrets, event IDs optional redacted |
 | Index | Update addendum §20 when filed |

@@ -42,7 +42,7 @@ Track blockers arising from **staging test-mode webhook timeouts** and prevent p
 |------------|--------|-------------|------------|----------------|-----------------|-------------------------------------|-------------------|-------------------|--------------------|---------------|-------------|
 | STRIPE-WH-002 | Webhook | Webhook delivery health **not proven** (internal OBS) | High | **PENDING EVIDENCE** | Stripe email only | Gate 3 A-04 blocked | OBS-MONEY-WH; A-04 drill | SRE Owner | Email = OBS proof | Dashboard + alert filed | Gate 3 track |
 | STRIPE-WH-004 | Observability | Webhook observability **not proven** | High | **NOT PROVEN** | External email detect | Blind-spot | Gate 3 artifacts | OBS-G2 | Mark Gate 3 complete | Metrics + alerts | File OBS rows |
-| STRIPE-WH-007 | Evidence | Stripe/Vercel log evidence **not filed** | High | **PENDING EVIDENCE** | Addendum gap | Root cause unknown | SD-01…05, VC-01…05 | Engineering Owner | Guess root cause | Investigation exit | Execute checklist |
+| STRIPE-WH-007 | Evidence | Stripe/Vercel log evidence **not filed** | High | **PENDING EVIDENCE** | Addendum gap | Root cause unknown | SD-01…05, VC-01…05 | Engineering Owner | Guess root cause | Investigation exit | [Evidence scaffold CREATED](./evidence/stripe-webhook-failure-2026-05-22/README.md) — captures **PENDING** |
 
 ---
 

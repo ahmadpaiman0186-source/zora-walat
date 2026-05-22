@@ -17,6 +17,20 @@
 
 ---
 
+## Start here — Stripe Webhook Read-only Investigation Evidence (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [evidence/stripe-webhook-failure-2026-05-22/README.md](./evidence/stripe-webhook-failure-2026-05-22/README.md) | **Evidence folder** — scaffold **CREATED**; captures **PENDING** |
+| [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md) | **Manifest** — artifact IDs; all **PENDING CAPTURE** |
+| [STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md) | **Stripe report** — **READ-ONLY ONLY** |
+| [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | **Vercel report** — **PENDING CAPTURE** |
+| [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | **Root cause template** — **NOT CONFIRMED** |
+
+**Verdict:** Scaffold **CREATED** · dashboard/logs **PENDING CAPTURE** · fix **NOT EXECUTED** · prod/real-money **NO-GO**.
+
+---
+
 ## Start here — Stripe Webhook Failure Evidence (2026-05-22)
 
 | Document | Contents |

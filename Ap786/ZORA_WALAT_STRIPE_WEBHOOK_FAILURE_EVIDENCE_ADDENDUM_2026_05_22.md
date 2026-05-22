@@ -38,7 +38,7 @@
 | **Stripe account ID** | `REDACTED_STRIPE_ACCOUNT_ID` |
 | **Email message ID** | `REDACTED_STRIPE_EMAIL_MESSAGE_ID` |
 | **Filing date (Ap786)** | 2026-05-22 |
-| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` (redacted screenshot optional) |
+| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — **scaffold CREATED**; captures **PENDING** — see [folder README](./evidence/stripe-webhook-failure-2026-05-22/README.md) |
 
 This addendum records **sanitized facts** from the email. It does **not** include raw email headers, dashboard exports, or request/event IDs unless separately filed and redacted.
 
