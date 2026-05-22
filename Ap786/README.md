@@ -3,6 +3,18 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here — Stakeholder Sign-off Execution (2026-05-21)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md](./ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md) | **Sign-off execution evidence** — review workflows; **PENDING** approvals only |
+| [ZORA_WALAT_STAKEHOLDER_APPROVAL_TRACKER_2026_05_21.md](./ZORA_WALAT_STAKEHOLDER_APPROVAL_TRACKER_2026_05_21.md) | **Approval tracker** — decision table; **no** invented signatures |
+| [ZORA_WALAT_SIGNOFF_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_SIGNOFF_EVIDENCE_MANIFEST_2026_05_21.md) | **Sign-off evidence manifest** — filing checklist; default **PENDING EVIDENCE** |
+
+**Boundary:** Converts PR #36 plan into execution tracking. **No** fake stakeholder approval · **not** production-ready · **not** QA PASS.
+
+---
+
 ## Start here — Investor QA & sign-off (2026-05-21)
 
 | Document | Contents |
