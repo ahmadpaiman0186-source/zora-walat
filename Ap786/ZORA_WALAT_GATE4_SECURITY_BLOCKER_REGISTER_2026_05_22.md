@@ -6,7 +6,7 @@
 **Program register:** [ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md)
 
 **Policy:** Placeholder owner roles only. **No** invented approvals or ticket IDs.
-**Related:** Staging webhook timeout — [STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) (STRIPE-WH-001).
+**Related:** Staging webhook timeout — [STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) (STRIPE-WH-001) · [read-only evidence scaffold](./evidence/stripe-webhook-failure-2026-05-22/README.md) (**PENDING CAPTURE**).
 
 ---
 
