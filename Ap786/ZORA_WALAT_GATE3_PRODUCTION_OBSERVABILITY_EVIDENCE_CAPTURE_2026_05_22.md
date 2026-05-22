@@ -96,7 +96,7 @@ Until then, external language must remain **PLAN ONLY / NOT PROVEN**.
 | Frontend availability | Synthetic + RUM (optional) | **NOT PROVEN** |
 | API availability | `/api/health`, `/ready`, 5xx ratio | **PARTIAL** (endpoints exist; prod monitors **NOT PROVEN**) |
 | Checkout / top-up flow | Session create, success route, latency | **NOT PROVEN** (prod) |
-| Stripe webhook health | Processing rate, 5xx, lag | **NOT PROVEN** (prod) |
+| Stripe webhook health | Processing rate, 5xx, lag | **NOT PROVEN** (prod); staging timeout — [webhook failure addendum](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) |
 | Order state transitions | PAID / terminal enums | **PARTIAL** (staging harness) |
 | Wallet credit boundaries | Gate denials; no unauthorized credit | **PARTIAL DESIGN / NOT PROVEN IN PRODUCTION** |
 | No-pay-no-service enforcement | `UNPAID_FULFILLMENT_ATTEMPT` alerts | **NOT PROVEN** (prod) |

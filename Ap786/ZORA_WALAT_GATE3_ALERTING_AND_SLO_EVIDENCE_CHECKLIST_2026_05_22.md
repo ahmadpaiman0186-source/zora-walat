@@ -123,7 +123,7 @@ Checklist for **SLI/SLO definitions**, **alert configuration proof**, **dashboar
 
 | Row | Signal | Alert | Staging | Production |
 |-----|--------|-------|---------|------------|
-| PAY-01 | Webhook processing counter | A-04 | **PARTIAL** | **NOT PROVEN** |
+| PAY-01 | Webhook processing counter | A-04 | **PARTIAL** | **NOT PROVEN** — staging timeout [addendum](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) |
 | PAY-02 | Webhook 5xx rate | A-04 | **PENDING EVIDENCE** | **NOT PROVEN** |
 | PAY-03 | PAID transition visibility | N/A | **PARTIAL** | **NOT PROVEN** |
 | PAY-04 | Stripe Dashboard correlation | Manual IC | **PENDING REVIEW** | **NOT PROVEN** |

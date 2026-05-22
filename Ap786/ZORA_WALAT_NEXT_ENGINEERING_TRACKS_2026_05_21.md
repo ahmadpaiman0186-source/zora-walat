@@ -68,6 +68,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 
 | Field | Value |
 |-------|-------|
+| **Stripe webhook failure (2026-05-22)** | [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) — staging **FAILED / PENDING INVESTIGATION**; fix **NOT EXECUTED** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |

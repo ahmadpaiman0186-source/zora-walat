@@ -43,7 +43,7 @@ Define **required drills**, safe execution constraints, expected artifacts, pass
 | DRILL-G3-01 | Frontend outage | SEV2 | Staging or approved prod window | **NOT EXECUTED** |
 | DRILL-G3-02 | API outage | SEV2 | Staging / sim | **NOT EXECUTED** |
 | DRILL-G3-03 | Checkout degraded | SEV2 | Staging (test Stripe) | **NOT EXECUTED** |
-| DRILL-G3-04 | Stripe webhook failure | SEV1 money | Staging test mode | **NOT EXECUTED** |
+| DRILL-G3-04 | Stripe webhook failure | SEV1 money | Staging test mode | **NOT EXECUTED** — real staging timeout filed [addendum](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) |
 | DRILL-G3-05 | Duplicate transaction anomaly | SEV1 money | Staging L-4/L-5 extend | **PARTIAL** (harness only) |
 | DRILL-G3-06 | No-pay-no-service enforcement | SEV1 money | Staging | **NOT EXECUTED** |
 | DRILL-G3-07 | Wallet credit blocked-state | SEV1 money | Staging / tabletop | **NOT EXECUTED** |
