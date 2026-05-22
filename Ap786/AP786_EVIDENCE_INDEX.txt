@@ -106,6 +106,9 @@ FINAL_INVESTOR_READINESS_INDEX 2026-05-21: ZORA_WALAT_FINAL_INVESTOR_READINESS_I
 MASTER_EVIDENCE_TABLE 2026-05-21: ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md — row-level evidence inventory; prove/do-not-prove per artifact.
 CLAIM_BOUNDARY_BLOCKER_MATRIX 2026-05-21: ZORA_WALAT_CLAIM_BOUNDARY_AND_BLOCKER_MATRIX_2026_05_21.md — allowed/forbidden claims; domain blockers.
 FINAL_APPROVAL_GATE_ROADMAP 2026-05-21: ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md — gates 1-8 + LAUNCH; dangerous ops gated; self-healing apply NOT enabled.
+FINAL_REBOOT_BRIEF 2026-05-21: ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md — canonical post-PR40 handoff; REVIEW-READY; NOT launch-ready; safe tracks; forbidden dangerous ops.
+MASTER_HANDOFF_PR40 2026-05-21: ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md — evidence hierarchy; agent instructions; PR #35-40 summary.
+NEXT_ENGINEERING_TRACKS 2026-05-21: ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md — tracks A-H; implementation Track H requires explicit approval only.
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
