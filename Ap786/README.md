@@ -3,11 +3,24 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here — Final Investor Readiness (2026-05-21)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md](./ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md) | **Final readiness index** — single source of truth after PR #35–#39 |
+| [ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md](./ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md) | **Master evidence table** — per-artifact prove / do-not-prove |
+| [ZORA_WALAT_CLAIM_BOUNDARY_AND_BLOCKER_MATRIX_2026_05_21.md](./ZORA_WALAT_CLAIM_BOUNDARY_AND_BLOCKER_MATRIX_2026_05_21.md) | **Claims & blockers** — allowed / forbidden |
+| [ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md](./ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md) | **Approval gate roadmap** — launch sequence; dangerous ops gated |
+
+**Verdict:** **PARTIAL** — **REVIEW-READY** · **not** production-ready · **not** real-money-ready · sign-off **PENDING** · QA PASS **NOT CLAIMED**.
+
+---
+
 ## Start here — Investor Board Diligence (2026-05-21)
 
 | Document | Contents |
 |----------|----------|
-| [ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md](./ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md) | **Board diligence export** — consolidated state after PR #35–#38 |
+| [ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md](./ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md) | **Board diligence export** — consolidated state after PR #35–#39 |
 | [ZORA_WALAT_BOARD_READY_EXECUTIVE_SUMMARY_2026_05_21.md](./ZORA_WALAT_BOARD_READY_EXECUTIVE_SUMMARY_2026_05_21.md) | **One-page board summary** — REVIEW-READY, not launch-approved |
 | [ZORA_WALAT_DILIGENCE_QA_AND_RISK_REGISTER_2026_05_21.md](./ZORA_WALAT_DILIGENCE_QA_AND_RISK_REGISTER_2026_05_21.md) | **Diligence Q&A + risks** — conservative answers only |
 | [ZORA_WALAT_INVESTOR_EVIDENCE_MAP_PR35_TO_PR38_2026_05_21.md](./ZORA_WALAT_INVESTOR_EVIDENCE_MAP_PR35_TO_PR38_2026_05_21.md) | **PR evidence map** — what each PR proves / does not prove |
