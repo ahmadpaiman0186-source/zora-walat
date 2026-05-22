@@ -24,6 +24,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | **Self-healing apply** | **GATED / NOT ENABLED** |
 | **Global money-path** | **PARTIAL / BLOCKED** |
 | **Overall** | **PARTIAL** — investor-review-safe, **not launch-ready** |
+| **Go/No-Go (2026-05-22)** | **NO-GO** prod/real-money — see [gate pack](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) |
 
 ---
 
@@ -154,7 +155,7 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 | 2 | Production observability evidence capture | **Yes** (planning/filing) |
 | 3 | Money-path gated proof planning | **Yes** |
 | 4 | Credential/security approval planning | **Yes** |
-| 5 | Production Go/No-Go Gate Pack | **Yes** |
+| 5 | Production Go/No-Go Gate Pack | **Yes** — [pack 2026-05-22](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) (**NO-GO** default) |
 | 6 | Investor demo/export refinement | **Yes** |
 | H | Real implementation | **Only with explicit approval** |
 

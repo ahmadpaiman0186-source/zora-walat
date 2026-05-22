@@ -111,13 +111,12 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 
 | Field | Value |
 |-------|-------|
-| **Objective** | Single board-ready **go/no-go** doc tying gates 1–8 to evidence IDs |
-| **Allowed files** | `Ap786/**` new go/no-go pack (docs only) |
-| **Forbidden** | Pre-filled GO without evidence; production-ready claim |
-| **Validation** | Each gate links to MASTER_EVIDENCE_TABLE row |
-| **Exit criteria** | Board can vote GO/NO-GO with explicit **NO-GO** default today |
-| **Business impact** | Launch decision discipline |
-| **Technical risk** | Low (governance) |
+| **Objective** | Board-ready **go/no-go** gates 1–12 + blocker register + decision template |
+| **Delivered (2026-05-22)** | [ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) and companions |
+| **Current verdict** | **NO-GO** prod/real-money — **not** production-ready |
+| **Allowed files** | `Ap786/**` go/no-go docs only |
+| **Forbidden** | Pre-filled GO; fake signatures; production-ready claim |
+| **Exit criteria** | Gates MET + decision record **GO** — **not met today** |
 | **Dependencies** | Tracks A, B, E progress |
 
 ---
