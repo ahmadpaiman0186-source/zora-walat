@@ -1,8 +1,8 @@
 # Zora-Walat — Production Go/No-Go Gate Pack
 
-**Date:** 2026-05-22  
-**Audience:** Board, CTO, program lead, SRE, security, payments safety, incident command  
-**Main baseline:** `f610d55` — Merge PR #41 (verify with `git log -1 main`)  
+**Date:** 2026-05-22
+**Audience:** Board, CTO, program lead, SRE, security, payments safety, incident command
+**Main baseline:** `f610d55` — Merge PR #41 (verify with `git log -1 main`)
 **Companion:** [REAL_MONEY_LAUNCH_GATE_CHECKLIST](./ZORA_WALAT_REAL_MONEY_LAUNCH_GATE_CHECKLIST_2026_05_22.md) · [DECISION_RECORD_TEMPLATE](./ZORA_WALAT_GO_NO_GO_DECISION_RECORD_TEMPLATE_2026_05_22.md) · [BLOCKER_REGISTER](./ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md)
 
 **Policy:** This pack **does not** authorize production launch, live-money, deploy, or dangerous operations. Default verdict: **NO-GO**.
@@ -112,7 +112,7 @@ LAUNCH      Board/CTO decision record — only if ALL gates PASS
 | Field | Value |
 |-------|-------|
 | **Requirement** | OBS manifest prod rows **EVIDENCE FILED**; alerts; synthetics; SLO baseline |
-| **Status** | **PLAN ONLY / NOT PROVEN** |
+| **Status** | **PLAN ONLY / NOT PROVEN** — see [Gate 3 capture pack 2026-05-22](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md) |
 | **Blocks** | Prod launch without blind-spot acceptance |
 
 ---

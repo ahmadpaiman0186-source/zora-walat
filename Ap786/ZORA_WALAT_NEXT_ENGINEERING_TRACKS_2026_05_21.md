@@ -1,8 +1,8 @@
 # Zora-Walat — Next Engineering Tracks
 
-**Date:** 2026-05-21  
-**Post-phase:** Investor evidence / diligence / readiness (PR #35–#40 merged)  
-**Reboot:** [ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md](./ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md)  
+**Date:** 2026-05-21
+**Post-phase:** Investor evidence / diligence / readiness (PR #35–#40 merged)
+**Reboot:** [ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md](./ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md)
 **Gates:** [ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md](./ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md)
 
 **Rule:** **Track H (implementation)** must not start without **explicit user approval**. Dangerous operations remain **approval-gated**.
@@ -52,6 +52,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 
 | Field | Value |
 |-------|-------|
+| **Gate 3 pack (2026-05-22)** | [ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md) + control matrix + checklists |
 | **Objective** | File OBS manifest rows — move prod observability from **NOT PROVEN** toward **PROVEN** |
 | **Allowed files** | `Ap786/evidence/observability-2026-05-21/**`, Ap786 docs updates |
 | **Forbidden** | Fake dashboard PNGs; uptime claims without artifacts; autonomous deploy |

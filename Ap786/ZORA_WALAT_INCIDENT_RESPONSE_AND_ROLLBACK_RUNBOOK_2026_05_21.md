@@ -1,9 +1,9 @@
 # Zora-Walat — Incident Response and Rollback Runbook
 
-**Date:** 2026-05-21  
-**Status:** **PLAN / RUNBOOK** — drills **PENDING EVIDENCE**  
-**Audience:** Incident commander (IC), SRE on-call, payments safety, security  
-**Companion:** [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md) · [ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md)
+**Date:** 2026-05-21
+**Status:** **PLAN / RUNBOOK** — drills **PENDING EVIDENCE**
+**Audience:** Incident commander (IC), SRE on-call, payments safety, security
+**Companion:** [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md) · [ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md) · **Gate 3 drills:** [ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_EVIDENCE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_EVIDENCE_CHECKLIST_2026_05_22.md)
 
 **Safety:** This runbook uses **placeholders** and **approval gates** only. It does **not** authorize autonomous Stripe refunds, webhook replays, DB writes, env changes, wallet credits, fulfillment, production deploy, or self-healing apply.
 
@@ -13,10 +13,10 @@
 
 Provide a **production-grade**, **fail-closed** incident response and rollback procedure for Zora-Walat that:
 
-- Detects via observability + Super-System read-only tools  
-- Triages without mutating money state without approval  
-- Contains customer impact  
-- Rolls back deployments **manually** with verification  
+- Detects via observability + Super-System read-only tools
+- Triages without mutating money state without approval
+- Contains customer impact
+- Rolls back deployments **manually** with verification
 - Files sanitized evidence in `Ap786/evidence/observability-2026-05-21/`
 
 **Not claimed:** This runbook being exercised in production (**drills PENDING**).

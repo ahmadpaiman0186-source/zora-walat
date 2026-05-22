@@ -1,6 +1,6 @@
 # Ap786 — Day 1 production-readiness evidence (sanitized)
 
-**Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
+**Purpose:** Investor- and auditor-readable summaries of verified staging behavior.
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
 ## Start here — Final Reboot Handoff (2026-05-21) — read first in new sessions
@@ -14,6 +14,19 @@
 | [ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md](./ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md) | Master evidence table |
 
 **Verdict:** **PARTIAL** — **REVIEW-READY** · **not** launch-ready · sign-off **PENDING** · QA PASS **NOT CLAIMED**.
+
+---
+
+## Start here — Gate 3 Production Observability Evidence (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md) | **Gate 3 capture pack** — evidence requirements; **PENDING EVIDENCE** |
+| [ZORA_WALAT_GATE3_OBSERVABILITY_CONTROL_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE3_OBSERVABILITY_CONTROL_MATRIX_2026_05_22.md) | **Control matrix** — CTRL-G3-*; placeholder owners |
+| [ZORA_WALAT_GATE3_ALERTING_AND_SLO_EVIDENCE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE3_ALERTING_AND_SLO_EVIDENCE_CHECKLIST_2026_05_22.md) | **Alerting & SLO checklist** — no fake COMPLETE |
+| [ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_EVIDENCE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_EVIDENCE_CHECKLIST_2026_05_22.md) | **Drill checklist** — **NOT EXECUTED** |
+
+**Verdict:** Gate 3 **PENDING EVIDENCE** · observability **PLAN ONLY / NOT PROVEN** · prod/real-money **NO-GO**.
 
 ---
 
@@ -159,7 +172,7 @@
 | [DAY1_CLOSEOUT_REPORT.md](./DAY1_CLOSEOUT_REPORT.md) | Day 1 closeout — L-1…L-7 status and pending items |
 | [DAY2_L8_L13_EXECUTION_PLAN.md](./DAY2_L8_L13_EXECUTION_PLAN.md) | Day 2 plan — L-8…L-13 negative & refund paths |
 
-**Ap786 evidence commit (Day 1 pack):** `5f926295fb0792f563d2c0c7752da0d793d6777e`  
-**Latest closeout / tests:** `fcf928f9dfc4daa70c70672b0448e8fcf7449a48`  
+**Ap786 evidence commit (Day 1 pack):** `5f926295fb0792f563d2c0c7752da0d793d6777e`
+**Latest closeout / tests:** `fcf928f9dfc4daa70c70672b0448e8fcf7449a48`
 
 **External evidence (optional):** Prior packs may exist under `C:\Users\ahmad\zora_walat_evidence\` — this folder is the **repo-canonical** Ap786 pack for Day 1.
