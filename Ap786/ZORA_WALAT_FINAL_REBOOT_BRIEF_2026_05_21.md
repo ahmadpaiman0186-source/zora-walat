@@ -154,7 +154,7 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 | 1 | Stakeholder sign-off execution (Gate 1) | **Yes** — [Gate 1 packet 2026-05-22](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) |
 | 2 | Production observability evidence capture (Gate 3) | **Yes** — [Gate 3 pack 2026-05-22](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md) |
 | 3 | Money-path gated proof planning | **Yes** |
-| 4 | Credential/security approval planning | **Yes** |
+| 4 | Credential/security approval planning (Gate 4) | **Yes** — [Gate 4 pack 2026-05-22](./ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md) |
 | 5 | Production Go/No-Go Gate Pack | **Yes** — [pack 2026-05-22](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) (**NO-GO** default) |
 | 6 | Investor demo/export refinement | **Yes** |
 | H | Real implementation | **Only with explicit approval** |

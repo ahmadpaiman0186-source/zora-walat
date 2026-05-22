@@ -122,7 +122,8 @@ LAUNCH      Board/CTO decision record — only if ALL gates PASS
 | Field | Value |
 |-------|-------|
 | **Requirement** | Security sign-off; G-01 rotation **execute** if required — with evidence |
-| **Status** | **PENDING APPROVAL** / G-01 **BLOCKED** |
+| **Status** | **APPROVAL REQUIRED / PENDING REVIEW** — see [Gate 4 pack 2026-05-22](./ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md) |
+| **Rotation execute** | **NOT EXECUTED** — G-01 **BLOCKED** |
 | **secrets:scan** | **PASS (CI)** — insufficient alone for launch |
 
 ---

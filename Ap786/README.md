@@ -17,6 +17,19 @@
 
 ---
 
+## Start here — Gate 4 Security & Credential Approval (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md](./ZORA_WALAT_GATE4_SECURITY_CREDENTIAL_APPROVAL_PACK_2026_05_22.md) | **Gate 4 approval pack** — planning only; rotation **NOT EXECUTED** |
+| [ZORA_WALAT_GATE4_CREDENTIAL_ROTATION_APPROVAL_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE4_CREDENTIAL_ROTATION_APPROVAL_MATRIX_2026_05_22.md) | **Rotation matrix** — execution **NO** until approved |
+| [ZORA_WALAT_GATE4_SECRET_CUSTODY_AND_ACCESS_CONTROL_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE4_SECRET_CUSTODY_AND_ACCESS_CONTROL_CHECKLIST_2026_05_22.md) | **Custody checklist** — no secret values |
+| [ZORA_WALAT_GATE4_SECURITY_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_GATE4_SECURITY_BLOCKER_REGISTER_2026_05_22.md) | **Security blockers** — burn-down register |
+
+**Verdict:** Gate 4 **APPROVAL REQUIRED** · prod env / live Stripe **NOT APPROVED** · prod/real-money **NO-GO**.
+
+---
+
 ## Start here — Gate 3 Production Observability Evidence (2026-05-22)
 
 | Document | Contents |
