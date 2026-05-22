@@ -1,8 +1,8 @@
 # Zora-Walat — Observability Evidence Manifest
 
-**Date:** 2026-05-21  
-**Status:** All production proof rows **PENDING EVIDENCE** unless noted  
-**Proof plan:** [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md)  
+**Date:** 2026-05-21
+**Status:** All production proof rows **PENDING EVIDENCE** unless noted
+**Proof plan:** [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PROOF_PLAN_2026_05_21.md) · **Gate 3 checklist:** [ZORA_WALAT_GATE3_ALERTING_AND_SLO_EVIDENCE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE3_ALERTING_AND_SLO_EVIDENCE_CHECKLIST_2026_05_22.md)
 **Policy:** Real artifacts only — **no** fabricated screenshots, alerts, or uptime claims.
 
 ---

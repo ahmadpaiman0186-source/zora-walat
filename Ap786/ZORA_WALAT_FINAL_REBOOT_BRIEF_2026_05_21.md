@@ -1,8 +1,8 @@
 # Zora-Walat — Final Reboot Brief (Post–Investor Evidence Phase)
 
-**Date:** 2026-05-21  
-**Audience:** ChatGPT, Cursor Agent, founders, technical reviewers, SRE, program lead  
-**Supersedes for PR #35–#40 context:** Use **this file first**; legacy [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) for pre–May-21 architecture depth.  
+**Date:** 2026-05-21
+**Audience:** ChatGPT, Cursor Agent, founders, technical reviewers, SRE, program lead
+**Supersedes for PR #35–#40 context:** Use **this file first**; legacy [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) for pre–May-21 architecture depth.
 **Handoff:** [ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md](./ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md) · **Tracks:** [ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md](./ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md)
 
 ---
@@ -89,14 +89,14 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 
 ## 6. Current investor-readiness verdict
 
-**REVIEW-READY** — structured diligence, board export, evidence map, master table.  
+**REVIEW-READY** — structured diligence, board export, evidence map, master table.
 **Not** launch approval · **not** investor commitment to live-money.
 
 ---
 
 ## 7. Current production-readiness verdict
 
-**NOT READY** — gates 1–8 open per [FINAL_APPROVAL_GATE_ROADMAP](./ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md).  
+**NOT READY** — gates 1–8 open per [FINAL_APPROVAL_GATE_ROADMAP](./ZORA_WALAT_FINAL_APPROVAL_GATE_ROADMAP_2026_05_21.md).
 Historical program score **~68% PARTIAL** (pre–#35 health report) — **do not** equate to production.
 
 ---
@@ -152,7 +152,7 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 | # | Track | Docs-only default |
 |---|-------|-------------------|
 | 1 | Stakeholder sign-off execution (Gate 1) | **Yes** — [Gate 1 packet 2026-05-22](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) |
-| 2 | Production observability evidence capture | **Yes** (planning/filing) |
+| 2 | Production observability evidence capture (Gate 3) | **Yes** — [Gate 3 pack 2026-05-22](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md) |
 | 3 | Money-path gated proof planning | **Yes** |
 | 4 | Credential/security approval planning | **Yes** |
 | 5 | Production Go/No-Go Gate Pack | **Yes** — [pack 2026-05-22](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) (**NO-GO** default) |
@@ -163,11 +163,11 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 
 ## 14. Forbidden next actions without explicit approval
 
-- Production deploy · live Stripe · DB migration · env edit · credential rotation **execute**  
-- Stripe refund / webhook replay · wallet credit · fulfillment mutation  
-- `ZW_SELF_HEALING_APPLY` / money-path self-heal  
-- Marking stakeholder approved, QA passed, production-ready, OBS proven  
-- Fabricating sign-off signatures or observability screenshots  
+- Production deploy · live Stripe · DB migration · env edit · credential rotation **execute**
+- Stripe refund / webhook replay · wallet credit · fulfillment mutation
+- `ZW_SELF_HEALING_APPLY` / money-path self-heal
+- Marking stakeholder approved, QA passed, production-ready, OBS proven
+- Fabricating sign-off signatures or observability screenshots
 
 ---
 

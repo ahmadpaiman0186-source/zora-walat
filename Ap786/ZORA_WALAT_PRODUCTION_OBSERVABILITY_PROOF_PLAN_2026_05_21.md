@@ -1,9 +1,9 @@
 # Zora-Walat — Production Observability Proof Plan
 
-**Date:** 2026-05-21  
-**Audience:** SRE, CTO, incident command, payments safety, security auditors, investors (technical)  
-**Status:** **PLAN ONLY** — **NOT PROVEN** in production  
-**Companion docs:** [ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md) · [ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md](./ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md)  
+**Date:** 2026-05-21
+**Audience:** SRE, CTO, incident command, payments safety, security auditors, investors (technical)
+**Status:** **PLAN ONLY** — **NOT PROVEN** in production
+**Companion docs:** [ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md) · [ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md](./ZORA_WALAT_INCIDENT_RESPONSE_AND_ROLLBACK_RUNBOOK_2026_05_21.md) · **Gate 3 (2026-05-22):** [ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md)
 **Prior roadmap:** [ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_PLAN_2026_05_21.md) (requirements) — **this document defines proof**, not implementation.
 
 **Policy:** Super-System **detect/report**; self-healing **apply** **GATED / NOT ENABLED**. No autonomous money, credential, DB, or deploy mutations from observability tooling.
@@ -50,11 +50,11 @@
 
 Prove — with **sanitized, filed artifacts** per [manifest](./ZORA_WALAT_OBSERVABILITY_EVIDENCE_MANIFEST_2026_05_21.md) — that production can:
 
-1. **Detect** customer-visible and money-path failures within defined SLO windows.  
-2. **Alert** the on-call rotation with actionable, low-noise pages.  
-3. **Triage** using logs, metrics, traces, and Super-System read-only diagnostics.  
-4. **Contain** without auto-refund, auto-fulfill, or auto-env change.  
-5. **Rollback** deployments manually with recorded verification.  
+1. **Detect** customer-visible and money-path failures within defined SLO windows.
+2. **Alert** the on-call rotation with actionable, low-noise pages.
+3. **Triage** using logs, metrics, traces, and Super-System read-only diagnostics.
+4. **Contain** without auto-refund, auto-fulfill, or auto-env change.
+5. **Rollback** deployments manually with recorded verification.
 6. **Govern** self-repair so **apply** remains disabled unless G-10 approval exists.
 
 **Proof bar:** Each manifest row moves from **PENDING EVIDENCE** → **EVIDENCE FILED** only when acceptance criteria in the manifest are met.
