@@ -133,6 +133,7 @@ LAUNCH      Board/CTO decision record — only if ALL gates PASS
 | Field | Value |
 |-------|-------|
 | **Requirement** | Staging L-1…L-11 documented; prod money monitors; G-04 path defined |
+| **Staging webhook note** | Staging timeout evidence — [addendum](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md); **FAILED / PENDING INVESTIGATION** |
 | **Status** | **PARTIAL / BLOCKED** (staging **test mode** only) |
 | **Blocks** | Live-money; global “money-path proven” claim |
 

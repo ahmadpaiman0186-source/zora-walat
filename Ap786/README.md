@@ -17,6 +17,18 @@
 
 ---
 
+## Start here — Stripe Webhook Failure Evidence (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) | **Addendum** — staging test-mode timeouts; **FAILED / PENDING INVESTIGATION** |
+| [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md) | **Investigation** — read-only; fix **NOT EXECUTED** |
+| [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) | **Blockers** — STRIPE-WH-001…008 |
+
+**Verdict:** Staging webhook **FAILED** · prod webhook **NOT PROVEN** · prod/real-money **NO-GO** · no fix claimed.
+
+---
+
 ## Start here — Gate 4 Security & Credential Approval (2026-05-22)
 
 | Document | Contents |

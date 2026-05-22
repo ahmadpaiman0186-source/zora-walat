@@ -180,6 +180,7 @@ CI scan **does not** replace production env approval or custody proof.
 | Staging webhook secret in test mode | Harness only |
 | Prod webhook secret rotation | **NOT EXECUTED** |
 | Replay without approval | **BLOCKED** |
+| Staging webhook delivery (2026-05) | **FAILED / PENDING INVESTIGATION** — [addendum](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) |
 | Signature verification proof | **PENDING EVIDENCE** (prod) |
 
 ---
