@@ -17,6 +17,19 @@
 
 ---
 
+## Start here — Production Go/No-Go (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md) | **Go/No-Go gate pack** — Gates 1–12; default **NO-GO** |
+| [ZORA_WALAT_REAL_MONEY_LAUNCH_GATE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_REAL_MONEY_LAUNCH_GATE_CHECKLIST_2026_05_22.md) | **Real-money launch checklist** — evidence required per row |
+| [ZORA_WALAT_GO_NO_GO_DECISION_RECORD_TEMPLATE_2026_05_22.md](./ZORA_WALAT_GO_NO_GO_DECISION_RECORD_TEMPLATE_2026_05_22.md) | **Decision record template** — PENDING; no fake signatures |
+| [ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md) | **Blocker register** — critical/high/medium |
+
+**Verdict:** **NO-GO** for production and real-money launch · **REVIEW-READY** for diligence · self-healing apply **GATED / NOT ENABLED**.
+
+---
+
 ## Start here — Final Investor Readiness (2026-05-21)
 
 | Document | Contents |
