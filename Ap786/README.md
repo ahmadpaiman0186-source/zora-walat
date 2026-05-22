@@ -17,6 +17,19 @@
 
 ---
 
+## Start here — Gate 1 Stakeholder Sign-off (2026-05-22)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) | **Gate 1 review packet** — route to stakeholders; **PENDING REVIEW** |
+| [ZORA_WALAT_GATE1_APPROVAL_ROUTING_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE1_APPROVAL_ROUTING_MATRIX_2026_05_22.md) | **Approval routing** — placeholder roles only |
+| [ZORA_WALAT_GATE1_SIGNOFF_EVIDENCE_CHECKLIST_2026_05_22.md](./ZORA_WALAT_GATE1_SIGNOFF_EVIDENCE_CHECKLIST_2026_05_22.md) | **Sign-off evidence checklist** — no fake COMPLETE |
+| [ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md) | **Blocker-to-owner** — burn-down for Gate 1 |
+
+**Verdict:** Gate 1 **PENDING REVIEW** · sign-off **NOT APPROVED YET** · prod/real-money **NO-GO** · QA PASS **NOT CLAIMED**.
+
+---
+
 ## Start here — Production Go/No-Go (2026-05-22)
 
 | Document | Contents |

@@ -1,8 +1,9 @@
 # Zora-Walat — Stakeholder Approval Tracker
 
-**Date:** 2026-05-21  
-**Status:** **ALL ROWS PENDING REVIEW** — **no approvals granted in this file**  
-**Execution pack:** [ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md](./ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md)  
+**Date:** 2026-05-21
+**Status:** **ALL ROWS PENDING REVIEW** — **no approvals granted in this file**
+**Execution pack:** [ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md](./ZORA_WALAT_STAKEHOLDER_SIGNOFF_EXECUTION_EVIDENCE_2026_05_21.md)
+**Gate 1 packet (2026-05-22):** [ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) · [routing](./ZORA_WALAT_GATE1_APPROVAL_ROUTING_MATRIX_2026_05_22.md)
 **Manifest:** [ZORA_WALAT_SIGNOFF_EVIDENCE_MANIFEST_2026_05_21.md](./ZORA_WALAT_SIGNOFF_EVIDENCE_MANIFEST_2026_05_21.md)
 
 ---
@@ -11,9 +12,9 @@
 
 **No stakeholder approval has been granted** unless manually signed by authorized stakeholders and filed as evidence under `Ap786/evidence/signoff-2026-05-21/` per the manifest.
 
-- This tracker is a **blank execution template**.  
-- **Do not** invent reviewer names or signatures.  
-- **Do not** change decision state to **APPROVED** without filed `SIGN-APPR-*` artifacts.  
+- This tracker is a **blank execution template**.
+- **Do not** invent reviewer names or signatures.
+- **Do not** change decision state to **APPROVED** without filed `SIGN-APPR-*` artifacts.
 - Agents and doc authors **must not** mark rows approved.
 
 ---
