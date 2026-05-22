@@ -6,6 +6,8 @@
 **Canonical memory:** This file + `PROJECT_MEMORY_ZORA_WALAT_MASTER.md`
 **Sanitization rule:** All evidence is enum-only, boolean-only, suffix-only, count-only â€” never secrets, DATABASE_URL, tokens, JWTs, Stripe keys, password hashes, full Stripe IDs, PII, or raw webhooks.
 
+> **UPDATE 2026-05-21:** New sessions after PR #35-#40: read **`ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md`** and **`ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md`** first. PR #35-#40 **merged** on main (user: synced with origin). **NOT production-ready**; **NOT real-money-ready**; **QA PASS NOT CLAIMED**; **stakeholder sign-off PENDING**; **self-healing apply NOT ENABLED**; **OBS PLAN ONLY**. Next tracks: `ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md`. Index: `ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md`. PR #40 merge @ `5cca137` (verify with `git log -1 main`).
+
 ---
 
 ## How to use this brief

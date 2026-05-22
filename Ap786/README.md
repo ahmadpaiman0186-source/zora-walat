@@ -3,6 +3,20 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here — Final Reboot Handoff (2026-05-21) — read first in new sessions
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md](./ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md) | **Canonical reboot brief** — post PR #35–#40; safe tracks; forbidden ops |
+| [ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md](./ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md) | **Master handoff** — evidence hierarchy; agent rules |
+| [ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md](./ZORA_WALAT_NEXT_ENGINEERING_TRACKS_2026_05_21.md) | **Next tracks A–H** — implementation requires explicit approval |
+| [ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md](./ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md) | Readiness index — single source of truth |
+| [ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md](./ZORA_WALAT_MASTER_EVIDENCE_TABLE_2026_05_21.md) | Master evidence table |
+
+**Verdict:** **PARTIAL** — **REVIEW-READY** · **not** launch-ready · sign-off **PENDING** · QA PASS **NOT CLAIMED**.
+
+---
+
 ## Start here — Final Investor Readiness (2026-05-21)
 
 | Document | Contents |
@@ -72,7 +86,8 @@
 
 | Document | Contents |
 |----------|----------|
-| [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Canonical reboot brief** — read first after memory reset |
+| [ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md](./ZORA_WALAT_FINAL_REBOOT_BRIEF_2026_05_21.md) | **Canonical reboot brief (2026-05-21)** — post PR #40; read first in new sessions |
+| [ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md](./ZORA_WALAT_REBOOT_BRIEF_FOR_CHATGPT_AND_AGENT.md) | **Legacy reboot brief** — architecture depth pre–investor-evidence phase |
 | [ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md](./ZORA_WALAT_PROJECT_EXECUTIVE_ENGINEERING_BRIEF.md) | **Executive engineering brief** — investors, founders, CTO summary |
 | [ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md](./ZORA_WALAT_INVESTOR_REQUIRED_PASSES_2026_05_20.md) | **Investor required pass matrix** — 30 areas, verdicts, claim boundary, 7-day plan (`main` @ PR #25) |
 | [ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md](./ZORA_WALAT_INVESTOR_SAFE_MARKET_READINESS_PACK_2026_05_20.md) | **Market readiness pack** — demo script, GTM boundary, diligence answers (`main` @ `864e884`) |
