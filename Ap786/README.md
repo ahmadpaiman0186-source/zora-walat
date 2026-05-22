@@ -3,6 +3,19 @@
 **Purpose:** Investor- and auditor-readable summaries of verified staging behavior.  
 **Rules:** No secrets, API keys, JWTs, `DATABASE_URL`, Stripe keys, raw env, raw webhooks, or customer PII.
 
+## Start here — Investor Board Diligence (2026-05-21)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md](./ZORA_WALAT_INVESTOR_BOARD_DILIGENCE_EXPORT_PACK_2026_05_21.md) | **Board diligence export** — consolidated state after PR #35–#38 |
+| [ZORA_WALAT_BOARD_READY_EXECUTIVE_SUMMARY_2026_05_21.md](./ZORA_WALAT_BOARD_READY_EXECUTIVE_SUMMARY_2026_05_21.md) | **One-page board summary** — REVIEW-READY, not launch-approved |
+| [ZORA_WALAT_DILIGENCE_QA_AND_RISK_REGISTER_2026_05_21.md](./ZORA_WALAT_DILIGENCE_QA_AND_RISK_REGISTER_2026_05_21.md) | **Diligence Q&A + risks** — conservative answers only |
+| [ZORA_WALAT_INVESTOR_EVIDENCE_MAP_PR35_TO_PR38_2026_05_21.md](./ZORA_WALAT_INVESTOR_EVIDENCE_MAP_PR35_TO_PR38_2026_05_21.md) | **PR evidence map** — what each PR proves / does not prove |
+
+**Boundary:** **REVIEW-READY** for diligence · **not** production-ready · **not** real-money-ready · sign-off **PENDING** · QA PASS **NOT CLAIMED**.
+
+---
+
 ## Start here — Stakeholder Sign-off Execution (2026-05-21)
 
 | Document | Contents |
