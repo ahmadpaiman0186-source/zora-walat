@@ -151,7 +151,7 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 
 | # | Track | Docs-only default |
 |---|-------|-------------------|
-| 1 | Stakeholder sign-off execution | **Yes** |
+| 1 | Stakeholder sign-off execution (Gate 1) | **Yes** — [Gate 1 packet 2026-05-22](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) |
 | 2 | Production observability evidence capture | **Yes** (planning/filing) |
 | 3 | Money-path gated proof planning | **Yes** |
 | 4 | Credential/security approval planning | **Yes** |

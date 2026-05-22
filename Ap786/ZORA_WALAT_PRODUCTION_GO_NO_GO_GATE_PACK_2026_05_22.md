@@ -90,9 +90,9 @@ LAUNCH      Board/CTO decision record — only if ALL gates PASS
 | Field | Value |
 |-------|-------|
 | **Requirement** | `SIGN-APPR-*` filed; tracker T-01…T-07 reviewed; template signed |
-| **Status** | **PENDING** |
+| **Status** | **PENDING REVIEW** — see [Gate 1 packet 2026-05-22](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) |
 | **Blocks** | Formal program GO; external “approved” language |
-| **Evidence** | PR #38 manifest — **PENDING EVIDENCE** |
+| **Evidence** | PR #38 manifest — **PENDING EVIDENCE**; Gate 1 checklist filed |
 
 ---
 

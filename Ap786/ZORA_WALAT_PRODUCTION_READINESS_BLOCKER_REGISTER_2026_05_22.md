@@ -1,7 +1,8 @@
 # Zora-Walat — Production Readiness Blocker Register
 
-**Date:** 2026-05-22  
-**Go/No-Go pack:** [ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md)  
+**Date:** 2026-05-22
+**Go/No-Go pack:** [ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md](./ZORA_WALAT_PRODUCTION_GO_NO_GO_GATE_PACK_2026_05_22.md)
+**Gate 1 execution:** [ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md)
 **Default verdict:** **NO-GO** until critical blockers **closed**
 
 ---

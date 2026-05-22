@@ -34,6 +34,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 
 | Field | Value |
 |-------|-------|
+| **Gate 1 packet (2026-05-22)** | [ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md](./ZORA_WALAT_GATE1_STAKEHOLDER_SIGNOFF_REVIEW_PACKET_2026_05_22.md) + routing + checklist + blocker matrix |
 | **Objective** | Convert **PENDING** tracker rows to filed `SIGN-APPR-*` without fake approval |
 | **Allowed files** | `Ap786/**`, `evidence/signoff-2026-05-21/**` |
 | **Forbidden** | Invented names/signatures; APPROVED without artifacts; app/env/payment |
