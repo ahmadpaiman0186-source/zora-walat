@@ -12,6 +12,7 @@
 | [STAGING_REPLAY_TEST_PLAN](./ZORA_WALAT_STAGING_REPLAY_TEST_PLAN_2026_05_23.md) | Staging replay and regression tests |
 | [PRODUCTION_OBSERVABILITY_EVIDENCE_PLAN](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_EVIDENCE_PLAN_2026_05_23.md) | Logs, alerts, dashboards, IR |
 | [CONTROLLED_REAL_MONEY_PILOT_GATE](./ZORA_WALAT_CONTROLLED_REAL_MONEY_PILOT_GATE_2026_05_23.md) | Pilot gates before any live-money claim |
+| [IMPLEMENTATION_APPROVAL_GATE](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) | Track H approval gate — **PENDING** |
 
 **Policy:** Conservative engineering evidence. **Do not** claim root cause confirmed, fix executed, or launch readiness.
 
@@ -32,6 +33,7 @@ This pack defines a **future** remediation path: fast ACK, durable receipt, asyn
 | Real-money launch | **NO-GO** |
 | Controlled pilot | **NO-GO** until gates pass |
 | Self-healing apply | **GATED / NOT ENABLED** |
+| Implementation approval | **PENDING** — [gate pack](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) |
 
 ---
 
@@ -121,7 +123,7 @@ See detailed design in companion documents. Summary:
 
 | Branch | Purpose | Depends on |
 |--------|---------|------------|
-| `feat/stripe-webhook-fast-ack-async-processing` | Fast ACK, outbox, async worker | Track H approval |
+| `feat/stripe-webhook-fast-ack-async-processing` | Fast ACK, outbox, async worker | [Implementation approval gate](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) AP-01…AP-03 **PENDING** |
 | `test/stripe-webhook-staging-replay-proof` | Staging replay + evidence PNGs | G-02 + explicit replay approval |
 | `docs/stripe-webhook-observability-evidence` | Dashboard/log evidence filing | Gate 3 OBS rows |
 
@@ -198,6 +200,8 @@ Full gate table: [CONTROLLED_REAL_MONEY_PILOT_GATE](./ZORA_WALAT_CONTROLLED_REAL
 | Verdict | Value |
 |---------|-------|
 | Stripe timeout evidence | **FILED** |
+| Remediation plan | **FILED** |
+| Implementation approval | **PENDING** |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT EXECUTED** |
 | Production launch | **NO-GO** |

@@ -48,6 +48,20 @@
 
 ---
 
+## Start here — Stripe Webhook Fast ACK Implementation Approval (2026-05-23)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) | **Approval gate** — implementation **PENDING** |
+| [ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_ALLOWED_CHANGESET_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_ALLOWED_CHANGESET_2026_05_23.md) | Allowed vs forbidden code scope |
+| [ZORA_WALAT_STRIPE_WEBHOOK_ROLLBACK_AND_ABORT_PLAN_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_ROLLBACK_AND_ABORT_PLAN_2026_05_23.md) | Rollback / abort / reconciliation |
+| [ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_TEST_MATRIX_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_TEST_MATRIX_2026_05_23.md) | Pre-merge test matrix |
+| [ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_RISK_REGISTER_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_IMPLEMENTATION_RISK_REGISTER_2026_05_23.md) | Implementation risks — all **OPEN** |
+
+**Verdict:** Implementation approval **PENDING** · branch **NOT CREATED** · code **NOT STARTED** · prod/real-money/pilot **NO-GO**.
+
+---
+
 ## Start here — Stripe Webhook Failure Evidence (2026-05-22)
 
 | Document | Contents |
