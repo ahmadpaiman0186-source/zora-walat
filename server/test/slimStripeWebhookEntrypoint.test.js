@@ -200,6 +200,61 @@ describe('Slim Stripe webhook serverless entry (POST /webhooks/stripe)', () => {
     }
   });
 
+  it('slim-processes checkout.session.expired with valid internalCheckoutId without calling getHandler', async () => {
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+    assert.ok(
+      typeof secret === 'string' && secret.startsWith('whsec_') && secret.length >= 20,
+      'STRIPE_WEBHOOK_SECRET must be usable (setupTestEnv)',
+    );
+    const internalCheckoutId = 'cmp91xbrt0003jm04m9ub8wrw';
+    const payload = JSON.stringify({
+      id: `evt_slim_exp_ok_${randomUUID().slice(0, 8)}`,
+      object: 'event',
+      type: 'checkout.session.expired',
+      data: {
+        object: {
+          id: `cs_slim_exp_ok_${randomUUID().slice(0, 8)}`,
+          object: 'checkout.session',
+          metadata: { internalCheckoutId },
+        },
+      },
+    });
+    const header = Stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret,
+    });
+    globalThis.__zwSlimWebhookCheckoutSessionExpiredImpl = async () => ({
+      status: 'cancelled',
+      stateTransition: 'pending_to_cancelled',
+      stripeEventType: 'checkout.session.expired',
+      stripeEventIdSuffix: 'suffix12',
+      orderIdSuffix: '8901234',
+      checkoutSessionIdSuffix: '123456789abc',
+      latencyMs: 8,
+    });
+    try {
+      let handlerCalls = 0;
+      const getHandler = async () => {
+        handlerCalls += 1;
+        return () => {};
+      };
+      const req = makeStripeWebhookReq(payload, { 'stripe-signature': header });
+      const res = makeMockRes();
+      const t0 = Date.now();
+      await handleSlimStripeWebhookPost(req, res, getHandler);
+      assert.ok(Date.now() - t0 < 2000);
+      assert.equal(handlerCalls, 0);
+      assert.equal(res.statusCode, 200);
+      const j = JSON.parse(res.body);
+      assert.equal(j.received, true);
+      assert.equal(j.path, 'slim_checkout_session_expired');
+      assert.equal(j.status, 'cancelled');
+      assertNoSecretLeak(res.body);
+    } finally {
+      delete globalThis.__zwSlimWebhookCheckoutSessionExpiredImpl;
+    }
+  });
+
   it('fast-acks checkout.session.expired without internalCheckoutId without calling getHandler', async () => {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
     assert.ok(
