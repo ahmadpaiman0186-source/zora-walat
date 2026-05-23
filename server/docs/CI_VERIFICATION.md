@@ -22,7 +22,7 @@ These prove **application + test** behavior on your machine; they do **not** pro
 | **Concurrent job isolation** | Fresh VM per run. |
 | **`phase1:launch-readiness --strict --require-ci-money-path-certified`** | Expects `PHASE1_CI_MONEY_PATH_CERTIFIED=1` set by the workflow after `test:ci`. |
 
-**This repository cannot execute a real GitHub-hosted workflow from Cursor.** After push/PR, confirm the **Actions** tab: job `server` should show preflight → migrate → `test:ci` → launch-readiness.
+**This repository cannot execute a real GitHub-hosted workflow from Cursor.** After push/PR, confirm the **Actions** tab: job `server` should show preflight → migrate → `test:ci` → launch-readiness; job `flutter` should checkout → `flutter pub get` → analyze → test. Workflow declares `permissions: contents: read` so `actions/checkout@v4` receives a scoped `GITHUB_TOKEN`.
 
 ## `act` (local GitHub Actions emulator)
 
