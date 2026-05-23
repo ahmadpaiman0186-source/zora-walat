@@ -69,6 +69,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | Field | Value |
 |-------|-------|
 | **Stripe webhook failure (2026-05-22)** | [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) — staging **FAILED / PENDING INVESTIGATION**; fix **NOT EXECUTED** |
+| **Checkout expired remediation (2026-05-23)** | [ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) — **PLAN ONLY**; PR #50 evidence **FILED**; root cause **NOT CONFIRMED** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
@@ -162,6 +163,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | DB writes / migrations | G-07 |
 | Stripe refunds | G-03 / G-11 |
 | Webhook replays | G-02 |
+| Webhook remediation (fast ACK / async) | Track H + [remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) |
 | Wallet credits | Human + payments |
 | Service fulfillment | Human + payments |
 | Production deploy | LAUNCH |
