@@ -3,10 +3,7 @@ import { Router } from 'express';
 import { env } from '../config/env.js';
 import { getStripeClient } from '../services/stripe.js';
 import { prisma, Prisma } from '../db.js';
-import { PAYMENT_CHECKOUT_STATUS } from '../constants/paymentCheckoutStatus.js';
-import { ORDER_STATUS } from '../constants/orderStatus.js';
 import { isLikelyPaymentCheckoutId } from '../lib/paymentCheckoutId.js';
-import { assertTransition } from '../domain/orders/orderLifecycle.js';
 import { writeOrderAudit } from '../services/orderAuditService.js';
 import { scheduleFulfillmentProcessing } from '../services/fulfillmentProcessingService.js';
 import {
@@ -42,6 +39,8 @@ import {
   paymentCheckoutPendingForPhase1CheckoutSessionPaidReplay,
   resolvePhase1CheckoutCorrelationTraceId,
 } from '../services/phase1StripeCheckoutSessionCompleted.js';
+import { applyPhase1CheckoutSessionExpired } from '../services/phase1StripeCheckoutSessionExpired.js';
+import { logStripeWebhookLifecycle } from '../lib/stripeWebhookLifecycleLog.js';
 import {
   applyPhase1ChargeRefunded,
   applyPhase1DisputeCreated,
@@ -139,6 +138,10 @@ router.post('/', async (req, res) => {
   emitMoneyPathLog(MONEY_PATH_EVENT.WEBHOOK_HTTP_RECEIVED, {
     traceId: req.traceId ?? null,
   });
+  logStripeWebhookLifecycle('webhook_received', {
+    traceId: req.traceId ?? null,
+    path: 'express',
+  });
 
   const stripe = getStripeClient();
   const secret = env.stripeWebhookSecret;
@@ -185,6 +188,12 @@ router.post('/', async (req, res) => {
       stripeEventType: event.type,
       stripeEventIdSuffix: safeSuffix(event.id, 8),
     });
+    logStripeWebhookLifecycle('signature_verified', {
+      success: true,
+      stripeEventType: event.type,
+      stripeEventIdSuffix: safeSuffix(event.id, 8),
+      traceId: req.traceId ?? null,
+    });
     recordMissionWebhookReceived(req.traceId ?? null, safeSuffix(event.id, 8));
   } catch (err) {
     const body = req.body;
@@ -206,6 +215,11 @@ router.post('/', async (req, res) => {
       severity: l7Sig.severity,
       safeRecoveryAction: l7Sig.safeRecoveryAction,
       orderIdSuffix: null,
+    });
+    logStripeWebhookLifecycle('signature_verified', {
+      success: false,
+      reason: 'construct_event_failed',
+      traceId: req.traceId ?? null,
     });
     emitMoneyPathLog(MONEY_PATH_EVENT.WEBHOOK_VERIFY_FAILED, {
       traceId: req.traceId ?? null,
@@ -261,10 +275,20 @@ router.post('/', async (req, res) => {
     if (shadowFastAck) {
       recordMoneyPathOpsSignal('stripe_webhook_shadow_fast_ack');
       recordRetry('webhook_event_duplicate_redis_shadow');
+      logStripeWebhookLifecycle('duplicate_event_blocked', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        reason: 'redis_shadow_ack',
+      });
       webTopupLog(req.log, 'info', 'webhook_duplicate_ignored', {
         reason: 'redis_shadow_ack',
         stripeEventType: event.type,
         stripeEventIdSuffix,
+      });
+      logStripeWebhookLifecycle('ack_returned', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        path: 'express_shadow_ack',
       });
       return res.json({ received: true });
     }
@@ -309,6 +333,11 @@ router.post('/', async (req, res) => {
     });
     await prisma.$transaction(async (tx) => {
       await tx.stripeWebhookEvent.create({ data: { id: event.id } });
+      logStripeWebhookLifecycle('event_persisted', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        traceId: req.traceId ?? null,
+      });
 
       await writeOrderAudit(tx, {
         event: 'stripe_webhook_received',
@@ -383,44 +412,10 @@ router.post('/', async (req, res) => {
 
       if (event.type === 'checkout.session.expired') {
         const session = event.data.object;
-        const raw = session.metadata?.internalCheckoutId;
-        if (!raw || !isLikelyPaymentCheckoutId(raw)) {
-          if (raw && !isLikelyPaymentCheckoutId(raw)) {
-            req.log?.warn(
-              { securityEvent: 'webhook_invalid_metadata_shape' },
-              'security',
-            );
-          }
-          return;
-        }
-        const row = await tx.paymentCheckout.findUnique({
-          where: { id: raw },
-          select: { orderStatus: true },
-        });
-        if (!row || row.orderStatus !== ORDER_STATUS.PENDING) {
-          return;
-        }
-        assertTransition(row.orderStatus, ORDER_STATUS.CANCELLED);
-        await tx.paymentCheckout.updateMany({
-          where: {
-            id: raw,
-            orderStatus: ORDER_STATUS.PENDING,
-          },
-          data: {
-            orderStatus: ORDER_STATUS.CANCELLED,
-            status: PAYMENT_CHECKOUT_STATUS.PAYMENT_FAILED,
-            cancelledAt: new Date(),
-            failureReason: 'checkout_session_expired',
-          },
-        });
-        await writeOrderAudit(tx, {
-          event: 'order_status_changed',
-          payload: {
-            orderId: raw,
-            to: ORDER_STATUS.CANCELLED,
-            traceId: req.traceId ?? null,
-          },
-          ip: null,
+        await applyPhase1CheckoutSessionExpired(tx, {
+          session,
+          traceId: req.traceId ?? null,
+          log: req.log,
         });
         return;
       }
@@ -449,6 +444,11 @@ router.post('/', async (req, res) => {
         recordMoneyPathOpsSignal('stripe_webhook_shadow_set_unavailable');
       }
     });
+    logStripeWebhookLifecycle('processing_completed', {
+      stripeEventType: event.type,
+      stripeEventIdSuffix,
+      traceId: req.traceId ?? null,
+    });
     webTopupLog(req.log, 'info', 'webhook_processing_completed', {
       stripeEventType: event.type,
       stripeEventIdSuffix,
@@ -474,6 +474,11 @@ router.post('/', async (req, res) => {
         stripeEventType: event.type,
         traceId: req.traceId ?? null,
         stripeEventIdSuffix,
+      });
+      logStripeWebhookLifecycle('duplicate_event_blocked', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        reason: 'db_unique_violation',
       });
       webTopupLog(req.log, 'info', 'webhook_duplicate_ignored', {
         reason: 'db_unique_violation',
@@ -623,6 +628,16 @@ router.post('/', async (req, res) => {
         errCode: e?.code,
         message: typeof e?.message === 'string' ? e.message.slice(0, 200) : undefined,
       });
+      logStripeWebhookLifecycle('processing_failed', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        traceId: req.traceId ?? null,
+      });
+      logStripeWebhookLifecycle('ack_returned', {
+        stripeEventType: event.type,
+        stripeEventIdSuffix,
+        path: 'express_error_ack',
+      });
       return res.status(200).json({ received: true });
     }
   }
@@ -709,6 +724,12 @@ router.post('/', async (req, res) => {
       });
     }
 
+    logStripeWebhookLifecycle('ack_returned', {
+      stripeEventType: event.type,
+      stripeEventIdSuffix,
+      traceId: req.traceId ?? null,
+      path: 'express',
+    });
     return res.json({ received: true });
   } catch (postErr) {
     webTopupLog(req.log, 'error', 'webhook_processing_failed', {
