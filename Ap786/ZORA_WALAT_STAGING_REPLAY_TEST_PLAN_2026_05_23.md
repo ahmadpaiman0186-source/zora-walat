@@ -1,9 +1,10 @@
 # Zora-Walat — Staging Stripe Webhook Replay Test Plan
 
 **Date:** 2026-05-23
-**Status:** **PLAN ONLY** — replay **NOT EXECUTED**
+**Status:** **PLAN ONLY** — replay **NOT EXECUTED** · PR #55 **MERGED** (`c521b0f`) · staging proof scaffold **FILED**
 **Parent:** [CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md)
-**Gate:** G-02 · Track H · **explicit user approval** required before any replay
+**PR #55 proof pack:** [STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) · [evidence folder](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
+**Gate:** G-02 · Track H · **approved for staging-only proof planning** · operator replay still **NOT EXECUTED**
 
 ---
 
@@ -20,9 +21,9 @@ Define tests required to prove staging webhook reliability **after** fast ACK + 
 | # | Precondition | Status |
 |---|--------------|--------|
 | P-01 | [Remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) approved for implementation | **PENDING** |
-| P-02 | Track H written approval | **NOT APPROVED** |
-| P-03 | `feat/stripe-webhook-fast-ack-async-processing` merged to staging branch | **NOT STARTED** |
-| P-04 | Staging deploy SHA recorded in Ap786 | **PENDING** |
+| P-02 | Track H written approval (G-02 staging proof) | **APPROVED** (staging-only replay planning) |
+| P-03 | PR #55 merged to `main` (`c521b0f`) | **CONFIRMED** |
+| P-04 | Staging deploy SHA recorded in Ap786 (DEP-01) | **PENDING CAPTURE** |
 | P-05 | `STRIPE_WEBHOOK_SECRET` staging verified (name only — no values in git) | **PENDING REVIEW** |
 | P-06 | Observability structured logs deployed | **NOT EXECUTED** |
 | P-07 | Ticket ID for replay window | **REQUIRED** |
@@ -82,8 +83,8 @@ Define tests required to prove staging webhook reliability **after** fast ACK + 
 | 1 | Record staging endpoint URL (known) | Ap786 note |
 | 2 | Trigger test-mode `checkout.session.expired` (Stripe test clock or natural expiry) | Stripe event type in dashboard |
 | 3 | **Do not** use dashboard "Resend" on May 19 events without ticket | — |
-| 4 | Capture Stripe delivery **200** | `STRIPE-WH-REPLAY-EXPIRED-200-001.png` (redacted) |
-| 5 | Capture Vercel log sequence within 15 min | `VERCEL-WH-REPLAY-LOG-SEQUENCE-001.png` |
+| 4 | Capture Stripe delivery **200** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` (redacted) — [manifest](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/EVIDENCE_MANIFEST.md) |
+| 5 | Capture Vercel log sequence within 15 min | LOG-01…LOG-04 per [lifecycle checklist](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/VERCEL_LIFECYCLE_LOG_PROOF_CHECKLIST.md) |
 | 6 | Verify DB order/checkout state (enum only in docs) | `STAGING-REPLAY-STATE-ATTESTATION-001.md` |
 
 ### 6.1 Replay forbidden actions
@@ -139,7 +140,7 @@ Ref: [GATE3_INCIDENT_ROLLBACK_DRILL](./ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| E-01 | UT-01…UT-10 CI green on staging SHA | **NOT MET** |
+| E-01 | UT-01…UT-10 CI green on `main` / staging SHA | **MET** (local/CI per operator attestation) · staging deploy **PENDING CAPTURE** |
 | E-02 | ID-T-01…07 pass | **NOT MET** |
 | E-03 | Staging `checkout.session.expired` delivery **200** filed | **NOT MET** |
 | E-04 | Vercel log sequence filed | **NOT MET** |
@@ -164,7 +165,7 @@ Ref: [GATE3_INCIDENT_ROLLBACK_DRILL](./ZORA_WALAT_GATE3_INCIDENT_ROLLBACK_DRILL_
 | Test plan | **FILED** |
 | Replay execution | **NOT EXECUTED** |
 | Root cause | **NOT CONFIRMED** |
-| Fix | **NOT EXECUTED** |
+| Fix (code on `main`) | **MERGED** (PR #55) · staging proof **NOT YET** |
 | Production / pilot | **NO-GO** |
 
 ---
