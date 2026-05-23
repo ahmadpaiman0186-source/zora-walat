@@ -84,7 +84,7 @@ Authoritative checklist: [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PL
 | **H3** | Webhook handler blocked before ack | **NOT CONFIRMED** | **PENDING EVIDENCE** |
 | **H4** | Signature verification / env issue | **NOT CONFIRMED** | **NOT PROVEN** |
 | **H5** | `checkout.session.expired` handler path slow/failing | **NOT CONFIRMED** | **PENDING EVIDENCE** |
-| **H6** | Vercel log retention / window limitation | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H6** | Vercel log retention / window limitation | **NOT CONFIRMED** | RC-06 filed; CL-E plausible | **PARTIAL EVIDENCE** |
 
 **Classification (CL-A…E):** **NOT ASSIGNED** — see capture plan §5.
 
@@ -195,7 +195,8 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 | Verdict | Value |
 |---------|-------|
 | **Root cause** | **NOT CONFIRMED** |
-| **Template completion** | **CAPTURE PLAN CREATED** — RC-01…05 **PENDING CAPTURE** |
+| **Template completion** | **PARTIAL** — Stripe failure PNGs **FILED**; Vercel May 19 window **BLOCKED / INCONCLUSIVE** |
+| **Vercel historical correlation** | **BLOCKED / INCONCLUSIVE** |
 | **Full webhook health** | **NOT globally proven** |
 | **Staging webhook** | **FAILED / PENDING INVESTIGATION** |
 | **Webhook fix** | **NOT EXECUTED** |
@@ -205,7 +206,7 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 
 ## 15. Next safe actions
 
-1. Execute [checkout.session.expired capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) RC-01…RC-05.
+1. RC-04/05 remain **BLOCKED / INCONCLUSIVE** (retention); Stripe RC-01…03 **FILED**.
 2. Update H1…H6 and CL-A…E only after artifacts filed.
 3. Complete WEBHOOK-TIMEOUT-ROOT-CAUSE-NOTES-001.
 4. Escalate before 2026-05-28 21:10:08 UTC disable-risk if delivery still failing.

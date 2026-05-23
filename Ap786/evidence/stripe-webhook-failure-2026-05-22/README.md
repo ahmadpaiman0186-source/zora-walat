@@ -5,7 +5,7 @@
 **Endpoint:** `https://zora-walat-api-staging.vercel.app/webhooks/stripe`
 **Parent docs:** [Evidence addendum](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) · [Investigation checklist](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md)
 
-**Policy:** Redacted PNG dashboard captures **filed 2026-05-22**. Root cause **NOT confirmed**. [checkout.session.expired capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) **CREATED** (read-only). No fix claimed.
+**Policy:** Redacted PNG captures **filed 2026-05-22** (PR #48 + Telegram `18-31-37` batch). Root cause **NOT confirmed**. Vercel May 19 correlation **BLOCKED / INCONCLUSIVE** (retention).
 
 ---
 
@@ -14,11 +14,17 @@
 | PNG (redacted) | Summary |
 |----------------|---------|
 | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Test/sandbox endpoint active for staging URL |
+| [STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png](./STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png) | `checkout.session.expired` deliveries **Failed** (May 19 2026; incl. 2:10:08 PM) |
+| [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png) | Failed delivery detail (2:10:08 PM row + sidebar) |
+| [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png) | Error insight — timed out error |
 | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | `charge.refunded` delivery **Recovered** |
 | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Recovered delivery **HTTP 200** |
-| [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Vercel logs: **no matches** for `"/webhooks/stripe"` in selected timeline |
+| [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Vercel: **no matches** (prior search) |
+| [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png) | Vercel: **no matches** (Last 30 min) |
+| [VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png](./VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png) | **30 days** retention — Observability Plus |
+| [VERCEL-STAGING-LOGS-RETENTION-LIMITATION-002.png](./VERCEL-STAGING-LOGS-RETENTION-LIMITATION-002.png) | Timeline — Observability Plus for >24h |
 
-**Still PENDING CAPTURE (RC-01…RC-05):** see [capture plan §10](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md).
+**PENDING CAPTURE:** May 19 window-aligned Vercel logs (RC-04/05) — **BLOCKED** by retention on current tier.
 
 ---
 
@@ -45,10 +51,12 @@ Provide a **sanitized, read-only** evidence capture structure for investigating 
 | Item | Status |
 |------|--------|
 | **Scaffold** | **CREATED** |
-| **Redacted PNG captures** | **4 FILED** (2026-05-22) |
-| **Missing captures** | **5 PENDING CAPTURE** (RC-01…RC-05 per capture plan) |
-| **Root-cause capture plan** | **CREATED** — [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) |
-| **checkout.session.expired timeout root cause** | **NOT CONFIRMED** — 5 target PNGs **PENDING CAPTURE** |
+| **Redacted PNG captures** | **9 FILED** (2026-05-22) |
+| **Stripe failed checkout.session.expired timeout evidence** | **EVIDENCE FILED (redacted)** |
+| **Stripe error insight timeout evidence** | **EVIDENCE FILED (redacted)** |
+| **Vercel retention limitation** | **EVIDENCE FILED (redacted)** |
+| **Vercel historical log correlation** | **BLOCKED / INCONCLUSIVE** |
+| **checkout.session.expired timeout root cause** | **NOT CONFIRMED** |
 | **Webhook fix** | **NOT EXECUTED** |
 | **Resend / replay (repo task)** | **NOT EXECUTED** |
 | **Dashboard mutation (repo task)** | **NOT EXECUTED** |
@@ -116,8 +124,12 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 | [STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md](./STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md) | Stripe read-only report |
 | [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | Vercel read-only report |
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | Hypothesis template |
-| [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** — RC-01…05; H1…H6; exit criteria |
-| [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Filed capture (redacted) |
+| [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** |
+| [TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md](./TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) | **Telegram source review** |
+| [VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png](./VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png) | Filed capture (redacted) |
+| [STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png](./STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png) | Filed capture (redacted) |
+| [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png) | Filed capture (redacted) |
+| [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png) | Filed capture (redacted) |
 | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | Filed capture (redacted) |
 | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Filed capture (redacted) |
 | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Filed capture (redacted) |
@@ -128,7 +140,10 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 
 | Verdict | Value |
 |---------|-------|
-| **Redacted dashboard evidence** | **4 PNGs FILED** (2026-05-22) |
+| **Redacted dashboard evidence** | **9 PNGs FILED** (2026-05-22) |
+| **Stripe `checkout.session.expired` failure evidence** | **EVIDENCE FILED (redacted)** |
+| **Stripe error insight timeout evidence** | **EVIDENCE FILED (redacted)** |
+| **Vercel log correlation (May 19 window)** | **BLOCKED / INCONCLUSIVE** |
 | **Staging webhook health** | **FAILED / PENDING INVESTIGATION** (timeout root cause **NOT confirmed**) |
 | **Full webhook health** | **NOT globally proven** |
 | **Production webhook health** | **NOT PROVEN** |
@@ -140,11 +155,9 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 
 ## Next safe actions
 
-1. Execute [checkout.session.expired root-cause capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) — RC-01…RC-05 (**PENDING CAPTURE**).
-2. Align Vercel log window to Stripe attempt timestamp from RC-01; run search variants VC-SV-01…05.
-3. Assign classification CL-A…E and update hypothesis matrix — **NOT CONFIRMED** until §8 exit criteria met.
-4. Any fix → Track H + explicit approval — **not** this evidence pack.
+1. Attempt May 19 window-aligned Vercel logs if retention upgraded — RC-04/05 still **PENDING**.
+2. Assign CL-A…E and update H1…H6 — **NOT CONFIRMED** until correlated logs exist.
 
 ---
 
-*Evidence folder · capture plan CREATED · root cause NOT confirmed · not production-ready*
+*Evidence folder · 9 redacted PNGs filed · root cause NOT confirmed · NO-GO*

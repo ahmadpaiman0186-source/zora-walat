@@ -21,14 +21,15 @@
 
 | Document | Contents |
 |----------|----------|
-| [evidence/stripe-webhook-failure-2026-05-22/README.md](./evidence/stripe-webhook-failure-2026-05-22/README.md) | **Evidence folder** — 4 PNGs filed; capture plan **CREATED** |
-| [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** — RC-01…05; H1…H6; **NOT CONFIRMED** |
-| [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md) | **Manifest** — 4 filed; 5 RC PNGs pending |
+| [evidence/stripe-webhook-failure-2026-05-22/README.md](./evidence/stripe-webhook-failure-2026-05-22/README.md) | **Evidence folder** — 5 PNGs; Telegram reviewed; Stripe timeout PNGs **PENDING** |
+| [TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) | **Ingest attestation** — source batch mapping |
+| [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** |
+| [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md) | **Manifest** — 5 filed; Stripe failure PNGs pending |
 | [STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md) | **Stripe report** — partial evidence filed |
 | [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | **Vercel report** — no-match log PNG filed |
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | **Root cause template** — **NOT CONFIRMED** |
 
-**Verdict:** Capture plan **CREATED** · `checkout.session.expired` root cause **NOT confirmed** · fix **NOT EXECUTED** · prod/real-money **NO-GO**.
+**Verdict:** **9 PNGs FILED** · Stripe timeout/error-insight **FILED** · Vercel May 19 correlation **INCONCLUSIVE** · root cause **NOT confirmed** · **NO-GO**.
 
 ---
 

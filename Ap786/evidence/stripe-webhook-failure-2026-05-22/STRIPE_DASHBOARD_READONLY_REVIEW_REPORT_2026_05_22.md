@@ -79,10 +79,10 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 | Finding ID | Observation | Status | Evidence artifact |
 |------------|-------------|--------|-------------------|
 | SD-F-01 | Endpoint URL is staging hostname; endpoint **active** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) |
-| SD-F-02 | Delivery failures show timeout | **PENDING EVIDENCE** | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` — **PENDING CAPTURE** |
-| SD-F-03 | ≥2 timeout failures in window | **PENDING EVIDENCE** | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` — **PENDING CAPTURE** |
-| SD-F-04 | Event types associated with failures | **PENDING EVIDENCE** | STRIPE-WH-DASHBOARD-EVENT-LIST-001 |
-| SD-F-05 | Error class = timeout (not 401) | **NOT PROVEN** | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 |
+| SD-F-02 | Delivery failures show timeout | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png](./STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png) |
+| SD-F-03 | ≥2 timeout failures in window | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png) |
+| SD-F-04 | Event types associated with failures | **EVIDENCE FILED (redacted)** | checkout.session.expired in LIST-001 |
+| SD-F-05 | Error class = timeout (not 401) | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png](./STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png) |
 | SD-F-06 | Production endpoint affected | **NOT PROVEN** | N/A — out of scope |
 | SD-F-07 | `charge.refunded` delivery **Recovered** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) |
 | SD-F-08 | Recovered delivery returned **HTTP 200** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) |
@@ -95,9 +95,9 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 
 | Item | Status |
 |------|--------|
-| Dashboard review executed | **PARTIAL EVIDENCE FILED** (3 redacted PNGs) |
-| Artifacts filed in repo | **4 PNGs FILED** (3 Stripe + 1 Vercel cross-ref) |
-| Missing captures | **2 PENDING CAPTURE** (mixed-status; checkout.session.expired timeout) |
+| Dashboard review executed | **PARTIAL EVIDENCE FILED** (6 redacted Stripe PNGs + Vercel cross-ref) |
+| Artifacts filed in repo | **9 PNGs FILED** |
+| Missing captures | RC-04/05 May 19 window — **BLOCKED / INCONCLUSIVE** (retention) |
 | Root cause from Dashboard alone | **NOT CONFIRMED** |
 | Webhook fix | **NOT FIXED** |
 | Resend / replay (repo task) | **NOT EXECUTED** |
@@ -121,14 +121,14 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 | Verdict | Value |
 |---------|-------|
 | **Report type** | **Read-only review — partial evidence filed** |
-| **Stripe dashboard evidence** | **3 redacted PNGs FILED** (2026-05-22); **2 PENDING CAPTURE** |
+| **Stripe dashboard evidence** | **6 redacted Stripe PNGs FILED** (2026-05-22); Vercel May 19 correlation **BLOCKED / INCONCLUSIVE** |
 | **Staging webhook health** | **FAILED / PENDING INVESTIGATION** |
 | **Full webhook health** | **NOT globally proven** |
 | **Production webhook health** | **NOT PROVEN** |
 | **Webhook fix** | **NOT EXECUTED** |
 | **Dashboard mutation (repo task)** | **NOT EXECUTED** |
 
-**Next action:** File missing mixed-status and `checkout.session.expired` timeout PNGs; complete SD-F-02…05 evidence.
+**Next action:** RC-04/05 May 19 window logs remain **BLOCKED / INCONCLUSIVE**; root cause **NOT CONFIRMED**.
 
 ---
 
