@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [main, master]
 
+# Explicit read scope for actions/checkout (org default GITHUB_TOKEN may omit contents).
+permissions:
+  contents: read
+
 jobs:
   server:
     runs-on: ubuntu-latest
@@ -101,8 +105,11 @@ jobs:
   flutter:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
