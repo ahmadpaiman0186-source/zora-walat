@@ -16,12 +16,14 @@
 | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | Test / sandbox | 2026-05-22 | **EVIDENCE FILED (redacted)** | `charge.refunded` delivery **Recovered** after prior failures | All event types; timeout root cause |
 | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Test / sandbox | 2026-05-22 | **EVIDENCE FILED (redacted)** | Recovered delivery returned **HTTP 200** | Full webhook health; prod |
 | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Staging | 2026-05-22 | **EVIDENCE FILED (redacted)** | Logs search `"/webhooks/stripe"` → **no matching logs** in selected timeline | Handler invoked; timeout duration; deploy SHA |
+| [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png) | Staging | 2026-05-22 | **EVIDENCE FILED (redacted)** | Current-window search `"/webhooks/stripe"` → **no matching logs** (Last 30 min) | May 19 failure window; retention limit |
 
-**Missing from repo (PENDING CAPTURE):** see [checkout.session.expired capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) §10.
+**Missing from repo (PENDING CAPTURE):** [Telegram ingestion attestation](./TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) — source batch reviewed; required Stripe failure PNGs **not present** in `Telegram Desktop`.
 
-- `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` (RC-01)
-- `STRIPE-WH-DASHBOARD-ERROR-INSIGHT-TIMEOUT-001.png` (RC-02)
-- `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` (RC-03)
+- `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png`
+- `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`
+- `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png`
+- `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png`
 - `VERCEL-STAGING-LOGS-WINDOW-MATCH-CHECKOUT-EXPIRED-001.png` (RC-04)
 - `VERCEL-STAGING-LOGS-SEARCH-VARIANTS-CHECKOUT-EXPIRED-001.png` (RC-05)
 
@@ -33,11 +35,13 @@
 |-------------|---------------|---------------|--------------------------|-------------------|----------------|----------------|------------------------|-------------------|-------------|
 | STRIPE-WH-EMAIL-REDacted-001 | Email summary | Stripe notification | Redacted email excerpt or operator attestation `.md` | Account ID, message ID | **PENDING CAPTURE** | Test-mode delivery failures reported | Root cause; prod impact | Payments Owner | Copy sanitized facts from addendum only |
 | STRIPE-WH-DASHBOARD-ENDPOINT-READONLY-001 | Dashboard | Stripe (test mode) | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Account ID, webhook ID in URL | **EVIDENCE FILED (redacted)** | Endpoint registered to staging URL | Handler performance; fix; prod | Payments Owner | Capture missing mixed-status / timeout PNGs |
-| STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 | Dashboard | Stripe (test mode) | PNG: delivery log ≥ failure window | Event IDs optional redact | **PENDING CAPTURE** | Timeout failures occurred | Vercel-side cause | Payments Owner | File RC-03 mixed-status PNG per [capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) |
-| STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 | Dashboard | Stripe (test mode) | `STRIPE-WH-DASHBOARD-ERROR-INSIGHT-TIMEOUT-001.png` | No response bodies with secrets | **PENDING CAPTURE** | Failure class (timeout) / error insight | HTTP status from origin if absent | Payments Owner | RC-02 per capture plan |
+| STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 | Dashboard | Stripe (test mode) | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | Event IDs optional redact | **PENDING CAPTURE** | Failed `checkout.session.expired` rows (e.g. May 19 2026 2:10:08 PM) | Root cause | Payments Owner | Not in Telegram batch — re-export |
+| STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 | Dashboard | Stripe (test mode) | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | No response bodies with secrets | **PENDING CAPTURE** | Error insight / timed out troubleshooting | HTTP from origin | Payments Owner | Not in Telegram batch |
 | STRIPE-WH-DASHBOARD-EVENT-LIST-001 | Dashboard | Stripe (test mode) | PNG or CSV export (event types only) | Event IDs, payloads | **PENDING CAPTURE** | Event types during failures | Business outcome | Payments Owner | Types/enums only |
 | STRIPE-WH-DELIVERY-FAILED-CHECKOUT-EXPIRED-001 | Dashboard | Stripe (test mode) | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | Event ID, account ID | **PENDING CAPTURE** | Failed `checkout.session.expired` delivery detail | Root cause alone | Payments Owner | RC-01 per capture plan |
-| VERCEL-STAGING-FUNCTION-LOGS-001 | Logs | Vercel | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) + RC-04/05 | Request IDs, env, PII | **PARTIAL EVIDENCE FILED (redacted)** | Prior broad search: no rows; window-aligned search **PENDING** | Function ran; timeout proof | Engineering Owner | RC-04/05 aligned to RC-01 timestamp |
+| VERCEL-STAGING-FUNCTION-LOGS-001 | Logs | Vercel | NO-MATCH PNGs + RC-04/05 | Request IDs, env, PII | **PARTIAL EVIDENCE FILED (redacted)** | No rows in filed searches; May 19 window **PENDING** | Invocation at failure time | Engineering Owner | File retention + window-aligned logs |
+| VERCEL-STAGING-LOGS-NO-MATCH-CURRENT-001 | Logs | Vercel | [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png) | Account slug, URL | **EVIDENCE FILED (redacted)** | Current `"/webhooks/stripe"` search → no rows | Historical May 19 correlation | Engineering Owner | — |
+| VERCEL-STAGING-LOGS-RETENTION-001 | Logs | Vercel | `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | Account/project IDs | **PENDING CAPTURE** | Observability Plus / 30-day retention limit | Root cause alone | Engineering Owner | Not in Telegram batch |
 | VERCEL-STAGING-LOGS-WINDOW-MATCH-001 | Logs | Vercel | `VERCEL-STAGING-LOGS-WINDOW-MATCH-CHECKOUT-EXPIRED-001.png` | Request IDs, env | **PENDING CAPTURE** | Logs for exact Stripe attempt window | Root cause if CL-E | Engineering Owner | RC-04 |
 | VERCEL-STAGING-LOGS-SEARCH-VARIANTS-001 | Logs | Vercel | `VERCEL-STAGING-LOGS-SEARCH-VARIANTS-CHECKOUT-EXPIRED-001.png` | PII, env | **PENDING CAPTURE** | VC-SV-01…05 search results | Prod health | Engineering Owner | RC-05 |
 | VERCEL-STAGING-DEPLOYMENT-STATE-001 | Deploy | Vercel | PNG: deployment list + SHA at failure time | Tokens | **PENDING CAPTURE** | Deploy version during incident | Code defect without review | SRE / Operations Owner | Match SHA to failure UTC |
@@ -53,10 +57,10 @@
 
 | Status | Count |
 |--------|-------|
-| **EVIDENCE FILED (redacted PNG)** | 4 |
-| **PARTIAL EVIDENCE FILED** | 1 (Vercel no-match — not invocation proof) |
-| **PENDING CAPTURE** | 5 RC target PNGs + 6 manifest rows |
-| **CAPTURE PLAN** | [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) — **CREATED** |
+| **EVIDENCE FILED (redacted PNG)** | 5 |
+| **PARTIAL EVIDENCE FILED** | 1 (Vercel logs — no-match only) |
+| **PENDING CAPTURE** | 4 Stripe + 2 Vercel RC + retention PNG |
+| **INGESTION ATTESTATION** | [TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md](./TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) |
 | **PENDING EVIDENCE** | 4 |
 
 ---
@@ -70,4 +74,4 @@
 
 ---
 
-*Manifest · capture plan CREATED · 5 RC PNGs PENDING · root cause NOT confirmed*
+*Manifest · 5 PNGs filed · Stripe timeout PNGs PENDING · root cause NOT confirmed*

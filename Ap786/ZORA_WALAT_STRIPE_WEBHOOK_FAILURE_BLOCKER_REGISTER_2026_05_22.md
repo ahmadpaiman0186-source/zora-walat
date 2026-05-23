@@ -42,7 +42,7 @@ Track blockers arising from **staging test-mode webhook timeouts** and prevent p
 |------------|--------|-------------|------------|----------------|-----------------|-------------------------------------|-------------------|-------------------|--------------------|---------------|-------------|
 | STRIPE-WH-002 | Webhook | Webhook delivery health **not proven** (internal OBS) | High | **PENDING EVIDENCE** | Stripe email only | Gate 3 A-04 blocked | OBS-MONEY-WH; A-04 drill | SRE Owner | Email = OBS proof | Dashboard + alert filed | Gate 3 track |
 | STRIPE-WH-004 | Observability | Webhook observability **not proven** | High | **NOT PROVEN** | External email detect | Blind-spot | Gate 3 artifacts | OBS-G2 | Mark Gate 3 complete | Metrics + alerts | File OBS rows |
-| STRIPE-WH-007 | Evidence | Stripe/Vercel log evidence **partially filed**; capture plan **CREATED** | High | **PARTIAL EVIDENCE FILED** | 4 PNGs + capture plan | Root cause unknown | RC-01…05 per [capture plan](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | Engineering Owner | Guess root cause | Investigation exit | Execute RC-01…05 — root cause **NOT CONFIRMED** |
+| STRIPE-WH-007 | Evidence | Stripe/Vercel log evidence **partially filed** | High | **PARTIAL EVIDENCE FILED** | 5 PNGs + Telegram attestation | Root cause unknown | Stripe failure PNGs + retention + May 19 window logs | Engineering Owner | Guess root cause | Investigation exit | [Attestation](./evidence/stripe-webhook-failure-2026-05-22/TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) — Stripe timeout PNGs **PENDING CAPTURE** |
 
 ---
 

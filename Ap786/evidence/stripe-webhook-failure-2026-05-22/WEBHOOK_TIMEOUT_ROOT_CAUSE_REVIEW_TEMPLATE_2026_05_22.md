@@ -84,7 +84,7 @@ Authoritative checklist: [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PL
 | **H3** | Webhook handler blocked before ack | **NOT CONFIRMED** | **PENDING EVIDENCE** |
 | **H4** | Signature verification / env issue | **NOT CONFIRMED** | **NOT PROVEN** |
 | **H5** | `checkout.session.expired` handler path slow/failing | **NOT CONFIRMED** | **PENDING EVIDENCE** |
-| **H6** | Vercel log retention / window limitation | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H6** | Vercel log retention / window limitation | **NOT CONFIRMED** | RC-06; CL-E | **PENDING EVIDENCE** |
 
 **Classification (CL-A…E):** **NOT ASSIGNED** — see capture plan §5.
 
@@ -195,7 +195,8 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 | Verdict | Value |
 |---------|-------|
 | **Root cause** | **NOT CONFIRMED** |
-| **Template completion** | **CAPTURE PLAN CREATED** — RC-01…05 **PENDING CAPTURE** |
+| **Template completion** | **PARTIAL** — Telegram reviewed; Stripe failure PNGs **PENDING**; Vercel current no-match **FILED** |
+| **Vercel historical correlation** | **BLOCKED / INCONCLUSIVE** |
 | **Full webhook health** | **NOT globally proven** |
 | **Staging webhook** | **FAILED / PENDING INVESTIGATION** |
 | **Webhook fix** | **NOT EXECUTED** |

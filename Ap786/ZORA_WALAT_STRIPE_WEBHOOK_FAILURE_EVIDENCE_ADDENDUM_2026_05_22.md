@@ -259,7 +259,7 @@ This addendum records **sanitized facts** from the email. It does **not** includ
 |----|----------|--------|
 | WH-EV-01 | Redacted Stripe Dashboard delivery log (test mode) | **PARTIAL EVIDENCE FILED** — endpoint + charge.refunded recovery; RC-01/02/03 **PENDING CAPTURE** per [capture plan](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) |
 | WH-EV-02 | Redacted Vercel function logs (timeout window) | **PARTIAL EVIDENCE FILED** — broad no-match PNG; RC-04/05 window-aligned **PENDING CAPTURE** |
-| WH-EV-06 | checkout.session.expired timeout root cause (Stripe + Vercel correlated) | **PENDING EVIDENCE** — capture plan RC-01…05; root cause **NOT CONFIRMED** |
+| WH-EV-06 | checkout.session.expired timeout root cause (Stripe + Vercel correlated) | **PENDING EVIDENCE** — Stripe failure + error-insight + retention PNGs **not in Telegram batch**; see [attestation](./evidence/stripe-webhook-failure-2026-05-22/TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) |
 | WH-EV-03 | Handler duration / fast-ack pattern review (docs) | **PENDING REVIEW** |
 | WH-EV-04 | Post-change Stripe test delivery success (if fix applied later) | **NOT EXECUTED** |
 | WH-EV-05 | Idempotency check under retry (staging) | **PENDING EVIDENCE** |

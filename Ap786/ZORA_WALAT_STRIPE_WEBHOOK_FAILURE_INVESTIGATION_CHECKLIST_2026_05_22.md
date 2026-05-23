@@ -42,8 +42,8 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 | Row | Evidence | Mode | Status |
 |-----|----------|------|--------|
 | SD-01 | Webhook endpoint list screenshot (URL visible, secrets redacted) | Test | **EVIDENCE FILED (redacted)** — [ENDPOINT-OVERVIEW-001.png](./evidence/stripe-webhook-failure-2026-05-22/STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) |
-| SD-02 | Delivery log for failure window (2026-05-19 UTC+) | Test | **PENDING EVIDENCE** — RC-03 mixed-status PNG **PENDING CAPTURE** |
-| SD-03 | Failed `checkout.session.expired` delivery detail + timeout/error insight | Test | **PENDING EVIDENCE** — RC-01 + RC-02 **PENDING CAPTURE** |
+| SD-02 | Failed deliveries list incl. `checkout.session.expired` (May 19 2026 2:10:08 PM) | Test | **PENDING CAPTURE** — `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` not in Telegram batch |
+| SD-03 | Failed delivery detail + error insight (timeout) | Test | **PENDING CAPTURE** — `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` + `...ERROR-INSIGHT-001.png` not in source |
 | SD-03a | Attempt timestamp (UTC), event type, delivery status, event ID (redacted) recorded | Test | **PENDING EVIDENCE** — per capture plan §3.1 |
 | SD-04 | Event types associated with failures (enum only) | Test | **PENDING EVIDENCE** |
 | SD-05 | Retry behavior note (no event IDs in git) | Test | **PENDING EVIDENCE** |
@@ -59,7 +59,8 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 |-----|----------|--------|
 | VC-01 | Function invocations for `/webhooks/stripe` around Stripe attempt time | **NOT PROVEN** — broad search filed; window-aligned RC-04 **PENDING CAPTURE** |
 | VC-01a | Log search variants: `/webhooks/stripe`, POST, `checkout.session.expired`, `stripe`, status/error filters | **PENDING EVIDENCE** — RC-05 / VC-SV-01…05 **PENDING CAPTURE** |
-| VC-01b | Classify: no request vs timed out vs route/function failed | **NOT ASSIGNED** — CL-A…E per capture plan §5 |
+| VC-01b | Vercel Observability Plus / 30-day retention limitation | **PENDING CAPTURE** — `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` not in source |
+| VC-01c | Classify: no request vs timed out vs route/function failed | **NOT ASSIGNED** — blocked until RC-01 filed |
 | VC-02 | Duration / timeout indicators (no PII) | **PENDING EVIDENCE** |
 | VC-03 | Cold start pattern note | **NOT PROVEN** |
 | VC-04 | 5xx vs timeout classification | **PENDING EVIDENCE** |
