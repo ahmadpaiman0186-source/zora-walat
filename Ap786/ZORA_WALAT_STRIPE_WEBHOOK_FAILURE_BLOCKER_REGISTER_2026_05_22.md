@@ -3,6 +3,7 @@
 **Date:** 2026-05-22
 **Source:** [STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md)
 **Program registers:** [GATE4_SECURITY_BLOCKER_REGISTER](./ZORA_WALAT_GATE4_SECURITY_BLOCKER_REGISTER_2026_05_22.md) · [PRODUCTION_READINESS_BLOCKER_REGISTER](./ZORA_WALAT_PRODUCTION_READINESS_BLOCKER_REGISTER_2026_05_22.md)
+**Remediation plan (2026-05-23):** [CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) — **PLAN ONLY**; fix **NOT EXECUTED**
 
 **Policy:** No fake fix or prod impact claims. Evidence source = Stripe email (redacted) until logs filed.
 
@@ -30,7 +31,7 @@ Track blockers arising from **staging test-mode webhook timeouts** and prevent p
 
 | Blocker ID | Domain | Description | Risk level | Current status | Evidence source | Why it blocks launch or later gates | Required evidence | Required approval | Forbidden shortcut | Exit criteria | Next action |
 |------------|--------|-------------|------------|----------------|-----------------|-------------------------------------|-------------------|-------------------|--------------------|---------------|-------------|
-| STRIPE-WH-001 | Webhook | Staging test-mode webhook **timeout** (2 failures) | Critical | **FAILED / PENDING INVESTIGATION** | Stripe email 2026-05-22 | Staging money-path unreliable | WH-EV-01…03; SD/VC logs | Payments + Engineering | Resend without ticket | Timeouts resolved + filed proof | Read-only investigation |
+| STRIPE-WH-001 | Webhook | Staging test-mode webhook **timeout** (2 failures) | Critical | **FAILED / PENDING INVESTIGATION** | Stripe email + PR #50 PNGs | Staging money-path unreliable | Remediation plan + staging replay PASS | Payments + Engineering | Resend without ticket | Timeouts resolved + filed proof | [Remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) — fix **NOT EXECUTED** |
 | STRIPE-WH-003 | Fulfillment | Checkout fulfillment safety **not proven** | Critical | **NOT PROVEN** | Addendum §13 | Launch / pilot **NO-GO** | FS checklist; prod cert | G-04 + Gate 5 | Claim L-1 pass covers May incident | Prod + staging green | Block launch claims |
 | STRIPE-WH-008 | Webhook | Production live webhook health **not certified** | Critical | **NOT PROVEN** | No prod email | Real-money **NO-GO** | Prod delivery log 7d | Gate 4 + G-04 | Extrapolate staging email to prod | STRIPE-WH-008 closed | Do not enable live Stripe |
 
@@ -42,7 +43,7 @@ Track blockers arising from **staging test-mode webhook timeouts** and prevent p
 |------------|--------|-------------|------------|----------------|-----------------|-------------------------------------|-------------------|-------------------|--------------------|---------------|-------------|
 | STRIPE-WH-002 | Webhook | Webhook delivery health **not proven** (internal OBS) | High | **PENDING EVIDENCE** | Stripe email only | Gate 3 A-04 blocked | OBS-MONEY-WH; A-04 drill | SRE Owner | Email = OBS proof | Dashboard + alert filed | Gate 3 track |
 | STRIPE-WH-004 | Observability | Webhook observability **not proven** | High | **NOT PROVEN** | External email detect | Blind-spot | Gate 3 artifacts | OBS-G2 | Mark Gate 3 complete | Metrics + alerts | File OBS rows |
-| STRIPE-WH-007 | Evidence | Stripe failure PNGs **filed**; Vercel May 19 correlation **blocked** | High | **PARTIAL EVIDENCE FILED** | 9 PNGs + attestation | Root cause unknown | RC-04/05 May 19 window logs | Engineering Owner | Guess root cause | Investigation exit | Stripe **FILED** · Vercel historical **INCONCLUSIVE** · root cause **NOT CONFIRMED** |
+| STRIPE-WH-007 | Evidence | Stripe failure PNGs **filed**; Vercel May 19 correlation **blocked** | High | **PARTIAL EVIDENCE FILED** | 9 PNGs + attestation | Root cause unknown | RC-04/05 or forward capture | Engineering Owner | Guess root cause | Investigation exit | Remediation **PLAN FILED** · root cause **NOT CONFIRMED** |
 
 ---
 
@@ -79,7 +80,7 @@ Track blockers arising from **staging test-mode webhook timeouts** and prevent p
 | Blocker ID | Domain | Description | Risk level | Current status | Evidence source | Why it blocks launch or later gates | Required evidence | Required approval | Forbidden shortcut | Exit criteria | Next action |
 |------------|--------|-------------|------------|----------------|-----------------|-------------------------------------|-------------------|-------------------|--------------------|---------------|-------------|
 | WH-OPS-01 | Ops | Stripe may **disable** staging endpoint 2026-05-28 21:10 UTC | High | **PENDING REVIEW** | Stripe email | Test harness degraded | WH-EV-04 or fix | Payments Owner | Ignore deadline | Delivery green or documented disable | Escalate before deadline |
-| WH-OPS-02 | Ops | Webhook fix **NOT EXECUTED** | High | **NOT EXECUTED** | Addendum | False “resolved” | WH-EV-04 post-fix | Track H | Docs-only fix claim | Filed success log | Plan Track H if approved |
+| WH-OPS-02 | Ops | Webhook fix **NOT EXECUTED** | High | **NOT EXECUTED** | Remediation plan 2026-05-23 | False “resolved” | Staging replay PASS + WH-EV-04 | Track H | Docs-only fix claim | Filed success log | Await Track H approval |
 
 ---
 

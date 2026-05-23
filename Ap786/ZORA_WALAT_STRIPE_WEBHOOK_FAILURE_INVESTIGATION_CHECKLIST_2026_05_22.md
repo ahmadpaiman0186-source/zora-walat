@@ -192,4 +192,19 @@ Investigation may move from **PENDING INVESTIGATION** to **ROOT CAUSE DOCUMENTED
 
 ---
 
+## 17. Remediation planning (2026-05-23 — plan only)
+
+| Doc | Scope | Status |
+|-----|-------|--------|
+| [CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) | Master plan H1–H7 | **PLAN FILED** |
+| [FAST_ACK_ASYNC_DESIGN](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_ASYNC_PROCESSING_DESIGN_2026_05_23.md) | Architecture | **DESIGN ONLY** |
+| [IDEMPOTENCY_HARDENING_PLAN](./ZORA_WALAT_STRIPE_WEBHOOK_IDEMPOTENCY_HARDENING_PLAN_2026_05_23.md) | Duplicate safety | **PLAN ONLY** |
+| [STAGING_REPLAY_TEST_PLAN](./ZORA_WALAT_STAGING_REPLAY_TEST_PLAN_2026_05_23.md) | Replay proof | **NOT EXECUTED** |
+| [OBSERVABILITY_EVIDENCE_PLAN](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_EVIDENCE_PLAN_2026_05_23.md) | Logs/alerts | **PLAN ONLY** |
+| [CONTROLLED_PILOT_GATE](./ZORA_WALAT_CONTROLLED_REAL_MONEY_PILOT_GATE_2026_05_23.md) | Pilot gates | **NO-GO** |
+
+**Rule:** Remediation docs do **not** satisfy §16 exit criteria until implementation + replay evidence filed.
+
+---
+
 *Investigation Checklist · read-only · fix NOT COMPLETE*

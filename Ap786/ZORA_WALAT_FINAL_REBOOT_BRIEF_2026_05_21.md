@@ -55,6 +55,14 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 
 **Index:** [ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md](./ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md).
 
+### Post–PR #50 (2026-05-23)
+
+| Item | Status |
+|------|--------|
+| PR **#50** | Merged — `checkout.session.expired` Stripe failure PNGs **FILED** |
+| Root cause | **NOT CONFIRMED** — Vercel May 19 logs **BLOCKED / INCONCLUSIVE** |
+| Remediation | [Plan pack](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) **PLAN ONLY** — fix **NOT EXECUTED** |
+
 ---
 
 ## 4. What is proven
@@ -84,6 +92,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | L-12 / L-13 | **NOT PROVEN / BLOCKED** |
 | Credential rotation execute | **BLOCKED** |
 | WCAG / full manual a11y | **NOT PROVEN** |
+| Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 
 ---
 
@@ -173,7 +182,7 @@ Ask user which track (see [NEXT_ENGINEERING_TRACKS](./ZORA_WALAT_NEXT_ENGINEERIN
 
 ## 15. Recommended first question for next session
 
-> **“Which safe track should we continue: (1) stakeholder sign-off execution, (2) production observability evidence capture, (3) money-path gated proof planning, (4) credential/security approval planning, (5) production Go/No-Go gate pack, (6) investor demo/export refinement, or (H) implementation — only if you explicitly approve dangerous operations?”**
+> **“Which safe track should we continue: (1) stakeholder sign-off execution, (2) production observability evidence capture, (3) money-path gated proof planning / [checkout expired remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) (plan only), (4) credential/security approval planning, (5) production Go/No-Go gate pack, (6) investor demo/export refinement, or (H) implementation — only if you explicitly approve dangerous operations?”**
 
 Then read: **this file** → [MASTER_HANDOFF_AFTER_PR40](./ZORA_WALAT_MASTER_HANDOFF_AFTER_PR40_2026_05_21.md) → [FINAL_INVESTOR_READINESS_INDEX](./ZORA_WALAT_FINAL_INVESTOR_READINESS_INDEX_2026_05_21.md).
 

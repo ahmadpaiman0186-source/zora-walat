@@ -21,7 +21,7 @@
 
 | Document | Contents |
 |----------|----------|
-| [evidence/stripe-webhook-failure-2026-05-22/README.md](./evidence/stripe-webhook-failure-2026-05-22/README.md) | **Evidence folder** — 5 PNGs; Telegram reviewed; Stripe timeout PNGs **PENDING** |
+| [evidence/stripe-webhook-failure-2026-05-22/README.md](./evidence/stripe-webhook-failure-2026-05-22/README.md) | **Evidence folder** — 9 PNGs filed (PR #50) |
 | [TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) | **Ingest attestation** — source batch mapping |
 | [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** |
 | [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md) | **Manifest** — 5 filed; Stripe failure PNGs pending |
@@ -30,6 +30,21 @@
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | **Root cause template** — **NOT CONFIRMED** |
 
 **Verdict:** **9 PNGs FILED** · Stripe timeout/error-insight **FILED** · Vercel May 19 correlation **INCONCLUSIVE** · root cause **NOT confirmed** · **NO-GO**.
+
+---
+
+## Start here — Checkout Expired Timeout Remediation Plan (2026-05-23)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) | **Master remediation plan** — H1–H7; plan only |
+| [ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_ASYNC_PROCESSING_DESIGN_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_ASYNC_PROCESSING_DESIGN_2026_05_23.md) | Fast ACK + async worker design |
+| [ZORA_WALAT_STRIPE_WEBHOOK_IDEMPOTENCY_HARDENING_PLAN_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_IDEMPOTENCY_HARDENING_PLAN_2026_05_23.md) | Idempotency + duplicate-event controls |
+| [ZORA_WALAT_STAGING_REPLAY_TEST_PLAN_2026_05_23.md](./ZORA_WALAT_STAGING_REPLAY_TEST_PLAN_2026_05_23.md) | Staging replay tests — **NOT EXECUTED** |
+| [ZORA_WALAT_PRODUCTION_OBSERVABILITY_EVIDENCE_PLAN_2026_05_23.md](./ZORA_WALAT_PRODUCTION_OBSERVABILITY_EVIDENCE_PLAN_2026_05_23.md) | Webhook observability + IR |
+| [ZORA_WALAT_CONTROLLED_REAL_MONEY_PILOT_GATE_2026_05_23.md](./ZORA_WALAT_CONTROLLED_REAL_MONEY_PILOT_GATE_2026_05_23.md) | Controlled pilot gates — **NO-GO** |
+
+**Verdict:** Remediation **PLAN FILED** · fix **NOT EXECUTED** · root cause **NOT CONFIRMED** · prod/real-money/pilot **NO-GO**.
 
 ---
 
