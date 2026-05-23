@@ -40,9 +40,9 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 
 | Row | Evidence | Mode | Status |
 |-----|----------|------|--------|
-| SD-01 | Webhook endpoint list screenshot (URL visible, secrets redacted) | Test | **PENDING EVIDENCE** |
-| SD-02 | Delivery log for failure window (2026-05-19 UTC+) | Test | **PENDING EVIDENCE** |
-| SD-03 | Failure reason column = timeout (redacted export) | Test | **PENDING EVIDENCE** |
+| SD-01 | Webhook endpoint list screenshot (URL visible, secrets redacted) | Test | **EVIDENCE FILED (redacted)** — [ENDPOINT-OVERVIEW-001.png](./evidence/stripe-webhook-failure-2026-05-22/STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) |
+| SD-02 | Delivery log for failure window (2026-05-19 UTC+) | Test | **PENDING EVIDENCE** — mixed-status PNG **PENDING CAPTURE** |
+| SD-03 | Failure reason column = timeout (redacted export) | Test | **PENDING EVIDENCE** — checkout.session.expired timeout PNG **PENDING CAPTURE** |
 | SD-04 | Event types associated with failures (enum only) | Test | **PENDING EVIDENCE** |
 | SD-05 | Retry behavior note (no event IDs in git) | Test | **PENDING EVIDENCE** |
 | SD-06 | Disable-risk deadline confirmation | Test | **READ-ONLY ONLY** — per addendum |
@@ -55,7 +55,7 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 
 | Row | Evidence | Status |
 |-----|----------|--------|
-| VC-01 | Function invocations for `/webhooks/stripe` around 2026-05-19 21:10 UTC | **PENDING EVIDENCE** |
+| VC-01 | Function invocations for `/webhooks/stripe` around 2026-05-19 21:10 UTC | **NOT PROVEN** — filed search shows **no matching logs** in selected timeline |
 | VC-02 | Duration / timeout indicators (no PII) | **PENDING EVIDENCE** |
 | VC-03 | Cold start pattern note | **NOT PROVEN** |
 | VC-04 | 5xx vs timeout classification | **PENDING EVIDENCE** |

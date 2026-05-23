@@ -5,7 +5,7 @@
 **Target project:** `zora-walat-api-staging` (staging)
 **Manifest:** [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md)
 
-**Policy:** Scaffold only. No Vercel env/deploy mutation. No fake logs.
+**Policy:** Read-only review with **1 redacted Vercel log PNG filed 2026-05-22**. No Vercel env/deploy mutation. No fake logs.
 
 ---
 
@@ -94,12 +94,15 @@ Define **read-only** Vercel staging evidence for correlating Stripe webhook **ti
 
 | Finding ID | Observation | Status | Evidence artifact |
 |------------|-------------|--------|-------------------|
-| VC-F-01 | Function invoked during failure window | **PENDING EVIDENCE** | VERCEL-STAGING-FUNCTION-LOGS-001 |
+| VC-F-01 | Function invoked during failure window | **NOT PROVEN** | No invocation rows in filed search |
 | VC-F-02 | Log shows timeout / duration exceeded | **PENDING EVIDENCE** | VERCEL-STAGING-FUNCTION-LOGS-001 |
 | VC-F-03 | Deployment SHA identified | **PENDING EVIDENCE** | VERCEL-STAGING-DEPLOYMENT-STATE-001 |
 | VC-F-04 | Cold start correlated | **NOT PROVEN** | VERCEL-STAGING-FUNCTION-LOGS-001 |
 | VC-F-05 | Staging app sleeping / unavailable | **NOT PROVEN** | VERCEL-STAGING-ROUTE-HEALTH-001 |
 | VC-F-06 | Production logs reviewed | **NOT PROVEN** | Out of scope |
+| VC-F-07 | Logs search `"/webhooks/stripe"` → **no matching logs** in selected timeline | **EVIDENCE FILED (redacted)** | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) |
+
+**Note:** VC-F-07 does **not** prove the handler never ran; window/filter may exclude invocations. Timeout root cause **NOT confirmed**.
 
 ---
 
@@ -107,8 +110,9 @@ Define **read-only** Vercel staging evidence for correlating Stripe webhook **ti
 
 | Item | Status |
 |------|--------|
-| Vercel review executed | **PENDING EVIDENCE** |
-| Log artifacts in repo | **PENDING CAPTURE** |
+| Vercel review executed | **PARTIAL EVIDENCE FILED** |
+| Log artifacts in repo | **1 redacted PNG FILED** (no-match search) |
+| Function invocation proof | **NOT PROVEN** |
 | Root cause confirmed | **NOT CONFIRMED** |
 | Webhook fix | **NOT FIXED** |
 
@@ -129,15 +133,15 @@ Define **read-only** Vercel staging evidence for correlating Stripe webhook **ti
 
 | Verdict | Value |
 |---------|-------|
-| **Report type** | **Scaffold — READ-ONLY ONLY** |
-| **Vercel logs evidence** | **PENDING CAPTURE** |
+| **Report type** | **Read-only review — partial evidence filed** |
+| **Vercel logs evidence** | **1 redacted PNG FILED** (no-match); invocation/timeout **PENDING** |
 | **Staging webhook health** | **FAILED / PENDING INVESTIGATION** |
 | **Production webhook health** | **NOT PROVEN** |
 | **Webhook fix** | **NOT EXECUTED** |
-| **Vercel mutation** | **NOT EXECUTED** |
+| **Vercel mutation (repo task)** | **NOT EXECUTED** |
 
-**Next action:** Engineering Owner / SRE placeholder — export redacted logs; file artifacts; update manifest.
+**Next action:** Widen log window or capture invocation rows; file deployment SHA evidence.
 
 ---
 
-*Vercel Logs Report · PENDING EVIDENCE · no mutation*
+*Vercel Logs Report · 1 redacted PNG filed · root cause NOT confirmed*

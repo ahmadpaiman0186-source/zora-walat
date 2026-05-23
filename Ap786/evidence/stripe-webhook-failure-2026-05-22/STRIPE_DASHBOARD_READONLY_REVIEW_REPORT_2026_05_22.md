@@ -5,7 +5,7 @@
 **Endpoint under review:** `https://zora-walat-api-staging.vercel.app/webhooks/stripe`
 **Manifest:** [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md)
 
-**Policy:** This report is a **scaffold**. No Stripe Dashboard mutation. No fake findings.
+**Policy:** Read-only review with **4 redacted PNGs filed 2026-05-22**. No Stripe Dashboard mutation. No fake findings.
 
 ---
 
@@ -78,12 +78,16 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 
 | Finding ID | Observation | Status | Evidence artifact |
 |------------|-------------|--------|-------------------|
-| SD-F-01 | Endpoint URL is staging hostname | **PENDING EVIDENCE** | STRIPE-WH-DASHBOARD-ENDPOINT-READONLY-001 |
-| SD-F-02 | Delivery failures show timeout | **PENDING EVIDENCE** | STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 |
-| SD-F-03 | ≥2 timeout failures in window | **PENDING EVIDENCE** | STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 |
+| SD-F-01 | Endpoint URL is staging hostname; endpoint **active** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) |
+| SD-F-02 | Delivery failures show timeout | **PENDING EVIDENCE** | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` — **PENDING CAPTURE** |
+| SD-F-03 | ≥2 timeout failures in window | **PENDING EVIDENCE** | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` — **PENDING CAPTURE** |
 | SD-F-04 | Event types associated with failures | **PENDING EVIDENCE** | STRIPE-WH-DASHBOARD-EVENT-LIST-001 |
 | SD-F-05 | Error class = timeout (not 401) | **NOT PROVEN** | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 |
 | SD-F-06 | Production endpoint affected | **NOT PROVEN** | N/A — out of scope |
+| SD-F-07 | `charge.refunded` delivery **Recovered** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) |
+| SD-F-08 | Recovered delivery returned **HTTP 200** | **EVIDENCE FILED (redacted)** | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) |
+
+**Note:** SD-F-07/08 show partial recovery for one event type; **full webhook health NOT globally proven**; `checkout.session.expired` timeout root cause **NOT confirmed**.
 
 ---
 
@@ -91,10 +95,12 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 
 | Item | Status |
 |------|--------|
-| Dashboard review executed | **PENDING EVIDENCE** |
-| Artifacts filed in repo | **PENDING CAPTURE** |
+| Dashboard review executed | **PARTIAL EVIDENCE FILED** (3 redacted PNGs) |
+| Artifacts filed in repo | **4 PNGs FILED** (3 Stripe + 1 Vercel cross-ref) |
+| Missing captures | **2 PENDING CAPTURE** (mixed-status; checkout.session.expired timeout) |
 | Root cause from Dashboard alone | **NOT CONFIRMED** |
 | Webhook fix | **NOT FIXED** |
+| Resend / replay (repo task) | **NOT EXECUTED** |
 
 ---
 
@@ -114,15 +120,16 @@ Define **read-only** Stripe Dashboard evidence to capture for staging webhook ti
 
 | Verdict | Value |
 |---------|-------|
-| **Report type** | **Scaffold — READ-ONLY ONLY** |
-| **Stripe dashboard evidence** | **PENDING CAPTURE** |
+| **Report type** | **Read-only review — partial evidence filed** |
+| **Stripe dashboard evidence** | **3 redacted PNGs FILED** (2026-05-22); **2 PENDING CAPTURE** |
 | **Staging webhook health** | **FAILED / PENDING INVESTIGATION** |
+| **Full webhook health** | **NOT globally proven** |
 | **Production webhook health** | **NOT PROVEN** |
 | **Webhook fix** | **NOT EXECUTED** |
-| **Dashboard mutation** | **NOT EXECUTED** |
+| **Dashboard mutation (repo task)** | **NOT EXECUTED** |
 
-**Next action:** Payments Owner placeholder — capture redacted PNGs per §5; update manifest rows.
+**Next action:** File missing mixed-status and `checkout.session.expired` timeout PNGs; complete SD-F-02…05 evidence.
 
 ---
 
-*Stripe Dashboard Report · PENDING EVIDENCE · no mutation*
+*Stripe Dashboard Report · 3 redacted PNGs filed · root cause NOT confirmed*
