@@ -5,7 +5,20 @@
 **Endpoint:** `https://zora-walat-api-staging.vercel.app/webhooks/stripe`
 **Parent docs:** [Evidence addendum](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) · [Investigation checklist](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md)
 
-**Policy:** Evidence **scaffold only**. No captured dashboard PNGs or logs in repo until human operator files them with redaction.
+**Policy:** Redacted PNG dashboard captures **filed 2026-05-22**. Root cause **NOT confirmed**. No fix claimed.
+
+---
+
+## Filed captures (2026-05-22)
+
+| PNG (redacted) | Summary |
+|----------------|---------|
+| [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Test/sandbox endpoint active for staging URL |
+| [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | `charge.refunded` delivery **Recovered** |
+| [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Recovered delivery **HTTP 200** |
+| [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Vercel logs: **no matches** for `"/webhooks/stripe"` in selected timeline |
+
+**Still PENDING CAPTURE:** `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` · `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`
 
 ---
 
@@ -32,10 +45,12 @@ Provide a **sanitized, read-only** evidence capture structure for investigating 
 | Item | Status |
 |------|--------|
 | **Scaffold** | **CREATED** |
-| **Stripe dashboard captures** | **PENDING CAPTURE** |
-| **Vercel log captures** | **PENDING CAPTURE** |
+| **Redacted PNG captures** | **4 FILED** (2026-05-22) |
+| **Missing captures** | **2 PENDING CAPTURE** (mixed-status list; checkout.session.expired timeout) |
 | **Root cause** | **NOT CONFIRMED** |
 | **Webhook fix** | **NOT EXECUTED** |
+| **Resend / replay (repo task)** | **NOT EXECUTED** |
+| **Dashboard mutation (repo task)** | **NOT EXECUTED** |
 
 ---
 
@@ -100,6 +115,10 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 | [STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md](./STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md) | Stripe read-only report |
 | [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | Vercel read-only report |
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | Hypothesis template |
+| [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Filed capture (redacted) |
+| [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | Filed capture (redacted) |
+| [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Filed capture (redacted) |
+| [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Filed capture (redacted) |
 
 ---
 
@@ -107,25 +126,23 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 
 | Verdict | Value |
 |---------|-------|
-| **Read-only investigation scaffold** | **CREATED** |
-| **Actual Stripe dashboard evidence** | **PENDING CAPTURE** |
-| **Actual Vercel logs evidence** | **PENDING CAPTURE** |
-| **Staging webhook health** | **FAILED / PENDING INVESTIGATION** |
+| **Redacted dashboard evidence** | **4 PNGs FILED** (2026-05-22) |
+| **Staging webhook health** | **FAILED / PENDING INVESTIGATION** (timeout root cause **NOT confirmed**) |
+| **Full webhook health** | **NOT globally proven** |
 | **Production webhook health** | **NOT PROVEN** |
 | **Webhook root cause** | **NOT CONFIRMED** |
-| **Production / real-money** | **NO-GO** |
+| **Production / real-money / pilot** | **NO-GO** |
 | **Self-healing apply** | **GATED / NOT ENABLED** |
 
 ---
 
 ## Next safe actions
 
-1. Human operator: read-only Stripe Dashboard review per [dashboard report](./STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md).
-2. Human operator: read-only Vercel logs per [Vercel report](./VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md).
-3. File redacted artifacts; update manifest rows from **PENDING CAPTURE** → **EVIDENCE FILED**.
-4. Complete root-cause template — **no hypothesis confirmed** without evidence.
-5. Any fix → Track H + explicit approval — **not** this scaffold.
+1. File missing captures: `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` · `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`.
+2. Widen Vercel log window or capture invocation rows for VC-02…04.
+3. Complete root-cause template — **no hypothesis confirmed** without evidence.
+4. Any fix → Track H + explicit approval — **not** this evidence pack.
 
 ---
 
-*Evidence folder · scaffold only · no fake proof*
+*Evidence folder · 4 redacted PNGs filed · not production-ready*

@@ -1,7 +1,7 @@
 # Webhook Timeout Root Cause Review Template
 
 **Date:** 2026-05-22
-**Status:** **Template — NOT CONFIRMED** — complete only after evidence filed
+**Status:** **Template — NOT CONFIRMED** — partial redacted evidence filed 2026-05-22; root cause **NOT confirmed**
 **Manifest:** [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md)
 
 **Policy:** **No hypothesis confirmed** until linked artifacts exist. Fix requires Track H approval.
@@ -25,6 +25,22 @@ Structured review template for staging webhook **timeout** root cause — hypoth
 | Stripe disable-risk (UTC) | 2026-05-28 21:10:08 |
 | Webhook fix | **NOT EXECUTED** |
 | Production impact | **NOT PROVEN** |
+| Redacted dashboard captures | **4 PNGs FILED** (2026-05-22) |
+| Missing captures | **2 PENDING CAPTURE** (mixed-status; checkout.session.expired timeout) |
+| Resend / replay (repo task) | **NOT EXECUTED** |
+
+---
+
+## 2a. Filed evidence summary (2026-05-22)
+
+| Capture | What it shows | What it does NOT prove |
+|---------|---------------|------------------------|
+| Endpoint overview PNG | Staging endpoint **active** | Prod; global health |
+| Recovered charge.refunded PNG | Delivery **Recovered** | checkout.session.expired timeout root cause |
+| Success charge.refunded 200 PNG | **HTTP 200** after recovery | All event types healthy |
+| Vercel no-match logs PNG | **No log rows** for webhook search in selected timeline | Handler invoked; timeout duration |
+
+**Rule:** `checkout.session.expired` timeout root cause remains **NOT CONFIRMED**.
 
 ---
 
@@ -52,9 +68,9 @@ Structured review template for staging webhook **timeout** root cause — hypoth
 | H-05 | Signature verification failure causing retry pattern | **NOT CONFIRMED** | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 | **NOT PROVEN** (timeout ≠ 401) |
 | H-06 | Staging deployment unavailable or sleeping | **NOT CONFIRMED** | VERCEL-STAGING-ROUTE-HEALTH-001 | **PENDING EVIDENCE** |
 | H-07 | Network/hosting rate or availability issue | **NOT CONFIRMED** | VC + Stripe delivery logs | **PENDING EVIDENCE** |
-| H-08 | Logging insufficient to classify | **NOT CONFIRMED** | Absence of VC-F-01 after search | **PENDING EVIDENCE** |
+| H-08 | Logging insufficient to classify | **NOT CONFIRMED** | VC-F-07 no-match PNG filed; no invocation rows | **PARTIAL EVIDENCE** — supports gap, not root cause |
 
-**Rule:** Set **Confirmed?** to **YES** only with artifact link — none yet.
+**Rule:** Set **Confirmed?** to **YES** only with artifact link — **none confirmed**.
 
 ---
 
@@ -161,7 +177,8 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 | Verdict | Value |
 |---------|-------|
 | **Root cause** | **NOT CONFIRMED** |
-| **Template completion** | **PENDING EVIDENCE** |
+| **Template completion** | **PARTIAL EVIDENCE FILED** — timeout PNGs **PENDING CAPTURE** |
+| **Full webhook health** | **NOT globally proven** |
 | **Staging webhook** | **FAILED / PENDING INVESTIGATION** |
 | **Webhook fix** | **NOT EXECUTED** |
 | **Production / real-money** | **NO-GO** |
@@ -170,7 +187,7 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 
 ## 15. Next safe actions
 
-1. File Stripe + Vercel read-only artifacts per manifest.
+1. File remaining Stripe PNGs: mixed-status deliveries; `checkout.session.expired` timeout failure.
 2. Update hypothesis rows with **NOT CONFIRMED** or **CONFIRMED** + artifact link only.
 3. Complete WEBHOOK-TIMEOUT-ROOT-CAUSE-NOTES-001.
 4. Escalate before 2026-05-28 21:10:08 UTC disable-risk if delivery still failing.
@@ -178,4 +195,4 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 
 ---
 
-*Root Cause Template · no hypothesis confirmed · not production-ready*
+*Root Cause Template · partial evidence filed · no hypothesis confirmed*

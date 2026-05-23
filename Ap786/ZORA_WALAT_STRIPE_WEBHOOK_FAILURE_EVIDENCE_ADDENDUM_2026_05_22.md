@@ -38,7 +38,7 @@
 | **Stripe account ID** | `REDACTED_STRIPE_ACCOUNT_ID` |
 | **Email message ID** | `REDACTED_STRIPE_EMAIL_MESSAGE_ID` |
 | **Filing date (Ap786)** | 2026-05-22 |
-| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — **scaffold CREATED**; captures **PENDING** — see [folder README](./evidence/stripe-webhook-failure-2026-05-22/README.md) |
+| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — **4 redacted PNGs FILED** (2026-05-22); **2 PENDING CAPTURE** — see [folder README](./evidence/stripe-webhook-failure-2026-05-22/README.md) |
 
 This addendum records **sanitized facts** from the email. It does **not** include raw email headers, dashboard exports, or request/event IDs unless separately filed and redacted.
 
@@ -257,8 +257,8 @@ This addendum records **sanitized facts** from the email. It does **not** includ
 
 | ID | Evidence | Status |
 |----|----------|--------|
-| WH-EV-01 | Redacted Stripe Dashboard delivery log (test mode) | **PENDING EVIDENCE** |
-| WH-EV-02 | Redacted Vercel function logs (timeout window) | **PENDING EVIDENCE** |
+| WH-EV-01 | Redacted Stripe Dashboard delivery log (test mode) | **PARTIAL EVIDENCE FILED** — endpoint + charge.refunded recovery; timeout/mixed-status **PENDING CAPTURE** |
+| WH-EV-02 | Redacted Vercel function logs (timeout window) | **PARTIAL EVIDENCE FILED** — no-match search PNG; invocation/timeout rows **NOT PROVEN** |
 | WH-EV-03 | Handler duration / fast-ack pattern review (docs) | **PENDING REVIEW** |
 | WH-EV-04 | Post-change Stripe test delivery success (if fix applied later) | **NOT EXECUTED** |
 | WH-EV-05 | Idempotency check under retry (staging) | **PENDING EVIDENCE** |

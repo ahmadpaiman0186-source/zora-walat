@@ -4,7 +4,22 @@
 **Folder:** `Ap786/evidence/stripe-webhook-failure-2026-05-22/`
 **Incident:** Staging webhook timeouts — [addendum](../../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md)
 
-**Policy:** All rows **PENDING CAPTURE** or **PENDING EVIDENCE** until a redacted file exists in this folder. No fake COMPLETE.
+**Policy:** Redacted PNG captures filed 2026-05-22. **No** fake COMPLETE for missing artifacts or root cause.
+
+---
+
+## Filed redacted captures (2026-05-22)
+
+| File | Stripe mode | Capture date | Status | What it proves | What it does NOT prove |
+|------|-------------|--------------|--------|----------------|------------------------|
+| [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Test / sandbox | 2026-05-22 | **EVIDENCE FILED (redacted)** | Staging endpoint configured and active for `https://zora-walat-api-staging.vercel.app/webhooks/stripe` | Prod endpoint; fix; global health |
+| [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | Test / sandbox | 2026-05-22 | **EVIDENCE FILED (redacted)** | `charge.refunded` delivery **Recovered** after prior failures | All event types; timeout root cause |
+| [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Test / sandbox | 2026-05-22 | **EVIDENCE FILED (redacted)** | Recovered delivery returned **HTTP 200** | Full webhook health; prod |
+| [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Staging | 2026-05-22 | **EVIDENCE FILED (redacted)** | Logs search `"/webhooks/stripe"` → **no matching logs** in selected timeline | Handler invoked; timeout duration; deploy SHA |
+
+**Missing from repo (PENDING CAPTURE):**
+- `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png`
+- `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`
 
 ---
 
@@ -13,11 +28,11 @@
 | Artifact ID | Evidence type | Source system | Required screenshot/file | Redaction required | Current status | What it proves | What it does NOT prove | Required reviewer | Next action |
 |-------------|---------------|---------------|--------------------------|-------------------|----------------|----------------|------------------------|-------------------|-------------|
 | STRIPE-WH-EMAIL-REDacted-001 | Email summary | Stripe notification | Redacted email excerpt or operator attestation `.md` | Account ID, message ID | **PENDING CAPTURE** | Test-mode delivery failures reported | Root cause; prod impact | Payments Owner | Copy sanitized facts from addendum only |
-| STRIPE-WH-DASHBOARD-ENDPOINT-READONLY-001 | Dashboard | Stripe (test mode) | PNG: Webhooks → endpoint URL visible | Secrets, account ID | **PENDING CAPTURE** | Endpoint registered to staging URL | Handler performance; fix | Payments Owner | Read-only screenshot |
-| STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 | Dashboard | Stripe (test mode) | PNG: delivery log ≥ failure window | Event IDs optional redact | **PENDING CAPTURE** | Timeout failures occurred | Vercel-side cause | Payments Owner | Filter from 2026-05-19 21:10 UTC |
+| STRIPE-WH-DASHBOARD-ENDPOINT-READONLY-001 | Dashboard | Stripe (test mode) | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Account ID, webhook ID in URL | **EVIDENCE FILED (redacted)** | Endpoint registered to staging URL | Handler performance; fix; prod | Payments Owner | Capture missing mixed-status / timeout PNGs |
+| STRIPE-WH-DASHBOARD-DELIVERY-ATTEMPTS-001 | Dashboard | Stripe (test mode) | PNG: delivery log ≥ failure window | Event IDs optional redact | **PENDING CAPTURE** | Timeout failures occurred | Vercel-side cause | Payments Owner | File `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` |
 | STRIPE-WH-DASHBOARD-EVENT-LIST-001 | Dashboard | Stripe (test mode) | PNG or CSV export (event types only) | Event IDs, payloads | **PENDING CAPTURE** | Event types during failures | Business outcome | Payments Owner | Types/enums only |
 | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 | Dashboard | Stripe (test mode) | PNG: error summary / response column | No response bodies with secrets | **PENDING CAPTURE** | Failure class (timeout) | HTTP status from origin if absent | Payments Owner | Capture error column |
-| VERCEL-STAGING-FUNCTION-LOGS-001 | Logs | Vercel | PDF/PNG: `/webhooks/stripe` invocations | Request IDs, env, PII | **PENDING CAPTURE** | Function ran / duration / timeout | Stripe-side retry policy | Engineering Owner | Window ±2h around first failure |
+| VERCEL-STAGING-FUNCTION-LOGS-001 | Logs | Vercel | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Request IDs, env, PII | **PARTIAL EVIDENCE FILED (redacted)** | No log rows for webhook search in selected window | Function ran; timeout proof | Engineering Owner | Widen window or capture invocations |
 | VERCEL-STAGING-DEPLOYMENT-STATE-001 | Deploy | Vercel | PNG: deployment list + SHA at failure time | Tokens | **PENDING CAPTURE** | Deploy version during incident | Code defect without review | SRE / Operations Owner | Match SHA to failure UTC |
 | VERCEL-STAGING-ROUTE-HEALTH-001 | Health | Vercel / synthetic | PNG or note: health/ready checks | N/A | **PENDING CAPTURE** | Platform reachable | Webhook handler logic | SRE / Operations Owner | Optional synthetic note |
 | WEBHOOK-TIMEOUT-ROOT-CAUSE-NOTES-001 | Analysis | Ap786 | Completed [template](./WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | No secrets | **PENDING EVIDENCE** | Evidence-backed conclusions | Fix validation | Engineering Owner | After SD/VC captures |
@@ -31,9 +46,10 @@
 
 | Status | Count |
 |--------|-------|
-| **PENDING CAPTURE** | 8 |
+| **EVIDENCE FILED (redacted PNG)** | 4 |
+| **PARTIAL EVIDENCE FILED** | 1 (Vercel no-match — not invocation proof) |
+| **PENDING CAPTURE** | 2 named missing + 5 manifest rows |
 | **PENDING EVIDENCE** | 4 |
-| **EVIDENCE FILED** | 0 |
 
 ---
 
@@ -46,4 +62,4 @@
 
 ---
 
-*Manifest · all captures PENDING · not production-ready*
+*Manifest · 4 redacted PNGs filed 2026-05-22 · root cause NOT confirmed · not production-ready*
