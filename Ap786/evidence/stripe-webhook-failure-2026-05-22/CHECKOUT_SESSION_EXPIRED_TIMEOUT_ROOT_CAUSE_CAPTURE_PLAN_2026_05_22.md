@@ -37,9 +37,9 @@ Correlate **one failed Stripe delivery attempt** for `checkout.session.expired` 
 
 | # | Requirement | Target filename | Status | Redaction |
 |---|-------------|-----------------|--------|-----------|
-| **RC-01** | Failed **`checkout.session.expired`** delivery **detail** panel (endpoint, event type, delivery status, response/error summary visible) | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | **PENDING CAPTURE** | Event ID → `REDACTED_STRIPE_EVENT_ID`; account ID → `REDACTED_STRIPE_ACCOUNT_ID`; no signing secret; no payload JSON |
-| **RC-02** | **Error insight** / timeout detail | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | **PENDING CAPTURE** | Same as RC-01 |
-| **RC-03** | Mixed-status / failed list (`checkout.session.expired` rows) | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | **PENDING CAPTURE** | Event IDs redacted |
+| **RC-01** | Failed **`checkout.session.expired`** delivery detail | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | **EVIDENCE FILED (redacted)** | Event ID redacted |
+| **RC-02** | **Error insight** / timeout detail | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | **EVIDENCE FILED (redacted)** | Event ID redacted |
+| **RC-03** | Failed deliveries list | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | **EVIDENCE FILED (redacted)** | Event IDs redacted |
 
 ### 3.1 Required fields to record from RC-01 (operator notes or redacted overlay)
 
@@ -73,9 +73,9 @@ After RC-01 attempt timestamp is known, set Vercel log window:
 |---|-------------|-----------------|--------|
 | **RC-04** | Log search results for **exact window** aligned to RC-01 attempt | `VERCEL-STAGING-LOGS-WINDOW-MATCH-CHECKOUT-EXPIRED-001.png` | **PENDING CAPTURE** |
 | **RC-05** | Search variants composite | `VERCEL-STAGING-LOGS-SEARCH-VARIANTS-CHECKOUT-EXPIRED-001.png` | **PENDING CAPTURE** |
-| **RC-06** | Vercel Observability Plus / **30-day retention** limitation | `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | **PENDING CAPTURE** |
+| **RC-06** | Vercel Observability Plus / **30-day retention** limitation | `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | **EVIDENCE FILED (redacted)** |
 
-**Ingest note (2026-05-22):** [Telegram attestation](./TELEGRAM_SOURCE_INGESTION_ATTESTATION_2026_05_22.md) — RC-01…03 and RC-06 **not found** in `Telegram Desktop` batch; [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png) **filed** (current-window no-match only).
+**Ingest note (2026-05-22 pass B):** Telegram batch `18-31-37` filed RC-01…03 and RC-06. RC-04/05 **BLOCKED** by retention.
 
 ### 4.1 Vercel search variants (all within RC-04 window)
 
@@ -105,7 +105,7 @@ After RC-01…RC-05 filed, assign **one primary classification** (can be **INCON
 | **CL-D** | **Signature / env issue** | Non-timeout error if visible | 401/403 or verification log line | **H4** |
 | **CL-E** | **Inconclusive** — log retention/window gap | Timeout on Stripe | No rows despite widened window | **H6** |
 
-**Current classification:** **NOT ASSIGNED** — required captures **PENDING CAPTURE**.
+**Current classification:** **CL-E plausible** — RC-06 filed; RC-04/05 **BLOCKED** by retention; **NOT ASSIGNED** as confirmed root cause.
 
 ---
 
@@ -118,7 +118,7 @@ After RC-01…RC-05 filed, assign **one primary classification** (can be **INCON
 | **H3** | Webhook handler **blocked before ack** (slow sync work) | **NOT CONFIRMED** | CL-B + log lines showing long handler phase (redacted) | Fast 2xx in logs; CL-A | **PENDING EVIDENCE** |
 | **H4** | **Signature verification** or **env** misconfiguration | **NOT CONFIRMED** | CL-D + RC-02 error insight ≠ pure timeout | RC-02 shows timeout only; no 401 in Vercel | **NOT PROVEN** |
 | **H5** | **`checkout.session.expired`** handler path slow or failing | **NOT CONFIRMED** | CL-B/C + event type in logs; RC-01 scoped to this type | Other event types timeout equally; CL-A | **PENDING EVIDENCE** |
-| **H6** | **Vercel log retention / window limitation** (false negative) | **NOT CONFIRMED** | RC-06 retention PNG; CL-E; current no-match filed | Invocation in May 19 window | **PENDING EVIDENCE** |
+| **H6** | **Vercel log retention / window limitation** (false negative) | **NOT CONFIRMED** | RC-06 retention PNG; CL-E; current no-match filed | Invocation in May 19 window | **PARTIAL EVIDENCE** — supports H6; not root cause |
 
 **Rule:** Set **Confirmed?** to **YES** for at most **one** primary hypothesis only when §8 exit criteria met. Until then: **NOT CONFIRMED** for all.
 
@@ -141,8 +141,8 @@ All must be satisfied **before** any doc row states root cause **CONFIRMED**:
 
 | # | Criterion | Status |
 |---|-----------|--------|
-| **EC-01** | **RC-01** and **RC-02** filed (redacted PNG) | **PENDING CAPTURE** |
-| **EC-02** | **RC-04** filed with window **explicitly aligned** to RC-01 attempt timestamp | **PENDING CAPTURE** |
+| **EC-01** | **RC-01** and **RC-02** filed (redacted PNG) | **MET** |
+| **EC-02** | **RC-04** filed with window **explicitly aligned** to RC-01 attempt timestamp | **BLOCKED / INCONCLUSIVE** — retention |
 | **EC-03** | **RC-05** or equivalent shows **all five** search variants (VC-SV-01…05) | **PENDING CAPTURE** |
 | **EC-04** | Primary classification **CL-A…E** assigned with artifact links | **NOT ASSIGNED** |
 | **EC-05** | Exactly **one** hypothesis **H1…H6** marked **CONFIRMED** with linked evidence; others **NOT CONFIRMED** or **DISPROVEN** | **NOT MET** |
@@ -172,11 +172,11 @@ All must be satisfied **before** any doc row states root cause **CONFIRMED**:
 
 | Artifact | Type | Status |
 |----------|------|--------|
-| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | Stripe delivery detail | **PENDING CAPTURE** |
-| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | Stripe error insight | **PENDING CAPTURE** |
-| `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | Stripe failed deliveries list | **PENDING CAPTURE** |
-| `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | Vercel retention limit | **PENDING CAPTURE** |
-| `VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png` | Vercel current no-match | **EVIDENCE FILED (redacted)** |
+| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | Stripe delivery detail | **EVIDENCE FILED (redacted)** |
+| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | Stripe error insight | **EVIDENCE FILED (redacted)** |
+| `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | Stripe failed deliveries list | **EVIDENCE FILED (redacted)** |
+| `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | Vercel retention limit | **EVIDENCE FILED (redacted)** |
+| `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-002.png` | Vercel retention (alternate) | **EVIDENCE FILED (redacted)** |
 | `VERCEL-STAGING-LOGS-WINDOW-MATCH-CHECKOUT-EXPIRED-001.png` | Vercel window-aligned logs | **PENDING CAPTURE** |
 | `VERCEL-STAGING-LOGS-SEARCH-VARIANTS-CHECKOUT-EXPIRED-001.png` | Vercel search variants | **PENDING CAPTURE** |
 

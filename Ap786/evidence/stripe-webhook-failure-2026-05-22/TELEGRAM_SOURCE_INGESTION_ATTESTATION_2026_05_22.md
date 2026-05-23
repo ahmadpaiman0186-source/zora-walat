@@ -12,57 +12,49 @@
 | Check | Result |
 |-------|--------|
 | Branch | `evidence/checkout-expired-root-cause-captures-2026-05-22` |
-| Working tree before ingest | **Clean** |
 | Image extensions scanned | `.png`, `.jpg`, `.jpeg`, `.webp` |
 
 ---
 
-## 2. Source inventory (newest first)
+## 2. Ingest pass A — batch `16-40-34` / `16-42-47` (9 unique images)
 
-18 files found; **9 unique** images (duplicate batches `16-40-34` / `16-42-47`, identical MD5 hashes).
+| Source | Maps to |
+|--------|---------|
+| Endpoint / charge.refunded recovery / broad Vercel no-match | PR #48 artifacts (already filed) |
+| `checkout.session.expired` **failure** captures | **Not present** in batch |
 
-| Source file | Visual content (operator review) | Maps to target artifact |
-|-------------|----------------------------------|-------------------------|
-| `photo_1_*` | Stripe webhook **event selection** (charge.refunded, charge.dispute) | **No match** |
-| `photo_2_*` | Stripe **Edit destination** — staging endpoint URL | Already filed as ENDPOINT-OVERVIEW-001 |
-| `photo_3_*`, `photo_4_*` | Stripe **event checkboxes** incl. `checkout.session.expired` enabled | **No match** (config, not delivery failures) |
-| `photo_5_*`, `photo_7_*` | `charge.refunded` **Recovered** delivery | Already filed (PR #48) |
-| `photo_6_*` | `charge.refunded` **HTTP 200** response | Already filed (PR #48) |
-| `photo_8_*`, `photo_9_*` | Vercel logs **no match** for `"/webhooks/stripe"` (Last 30 min) | `VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png` |
-
-**Not found in source (required for RC-01…03, retention):**
-
-| Target artifact | Status |
-|-----------------|--------|
-| `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | **PENDING CAPTURE** |
-| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | **PENDING CAPTURE** |
-| `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | **PENDING CAPTURE** |
-| `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | **PENDING CAPTURE** |
-
-**Rule:** No `photo_*.jpg` copied into Ap786. No fabricated PNGs.
+Filed: [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png)
 
 ---
 
-## 3. Filed from this ingest pass
+## 3. Ingest pass B — batch `18-31-37` (6 images)
 
-| File | Source | Status |
-|------|--------|--------|
-| [VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png](./VERCEL-STAGING-LOGS-WEBHOOK-STRIPE-NO-MATCH-CURRENT-001.png) | `photo_9_2026-05-22_16-42-47.jpg` | **EVIDENCE FILED (redacted)** |
+| Source file | Visual content | Target artifact | Status |
+|-------------|----------------|-----------------|--------|
+| `photo_1_2026-05-22_18-31-37.jpg` | Error insight — “A Checkout Session expired”; timed out troubleshooting link | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-ERROR-INSIGHT-001.png` | **EVIDENCE FILED (redacted)** |
+| `photo_2_2026-05-22_18-31-37.jpg` | Event deliveries list — `checkout.session.expired` **Failed** (May 19 2026; incl. 2:10:08 PM) + detail sidebar | `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-CHECKOUT-EXPIRED-FAILED-LIST-001.png` | **EVIDENCE FILED (redacted)** |
+| `photo_2_2026-05-22_18-31-37.jpg` | Same capture — delivery detail panel for failed `checkout.session.expired` | `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png` | **EVIDENCE FILED (redacted)** |
+| `photo_3_2026-05-22_18-31-37.jpg` | Vercel timeline dropdown — Observability Plus / >24h retention | `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-002.png` | **EVIDENCE FILED (redacted)** |
+| `photo_4_2026-05-22_18-31-37.jpg` | Vercel modal — “Unlock **30 days** of retention with Observability Plus” | `VERCEL-STAGING-LOGS-RETENTION-LIMITATION-001.png` | **EVIDENCE FILED (redacted)** |
+| `photo_5_2026-05-22_18-31-37.jpg` | Vercel no-match (duplicate of prior) | — | **Skipped** (already filed) |
+| `photo_6_2026-05-22_18-31-37.jpg` | `charge.refunded` recovered (out of scope) | — | **Skipped** |
+
+**Rule:** No `photo_*.jpg` in Ap786. No `.tmp.png` leftovers.
 
 ---
 
-## 4. Conservative verdict (this pass)
+## 4. Conservative verdict (after pass B)
 
 | Item | Verdict |
 |------|---------|
-| Stripe failed `checkout.session.expired` timeout evidence | **PENDING CAPTURE** — not in Telegram batch |
-| Stripe error insight timeout evidence | **PENDING CAPTURE** — not in Telegram batch |
-| Vercel Observability Plus / 30-day retention limitation | **PENDING CAPTURE** — not in Telegram batch |
-| Vercel historical log correlation (May 19 window) | **BLOCKED / INCONCLUSIVE** — retention + no window-aligned logs |
+| Stripe failed `checkout.session.expired` timeout evidence | **EVIDENCE FILED (redacted)** |
+| Stripe error insight timeout evidence | **EVIDENCE FILED (redacted)** |
+| Vercel Observability Plus / 30-day retention limitation | **EVIDENCE FILED (redacted)** |
+| Vercel historical log correlation (May 19 window) | **BLOCKED / INCONCLUSIVE** — retention limit; no window-aligned invocation logs |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT EXECUTED** |
 | Production / real-money / pilot | **NO-GO** |
 
 ---
 
-*Attestation · source reviewed · no fake Stripe failure PNGs*
+*Attestation · pass B filed 4 target PNGs · root cause NOT confirmed*

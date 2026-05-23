@@ -29,7 +29,7 @@
 | [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | **Vercel report** — no-match log PNG filed |
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | **Root cause template** — **NOT CONFIRMED** |
 
-**Verdict:** Telegram **reviewed** · Stripe timeout/error-insight PNGs **PENDING** · Vercel correlation **INCONCLUSIVE** · root cause **NOT confirmed** · **NO-GO**.
+**Verdict:** **9 PNGs FILED** · Stripe timeout/error-insight **FILED** · Vercel May 19 correlation **INCONCLUSIVE** · root cause **NOT confirmed** · **NO-GO**.
 
 ---
 
