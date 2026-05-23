@@ -3,8 +3,9 @@
 **Date:** 2026-05-22
 **Incident:** Staging test-mode webhook timeouts — see [EVIDENCE_ADDENDUM](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md)
 **Endpoint:** `https://zora-walat-api-staging.vercel.app/webhooks/stripe`
+**Capture plan:** [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md)
 
-**Policy:** **Read-only** investigation unless explicit approval for Track H changes. **Do not** mark fix **COMPLETE**.
+**Policy:** **Read-only** investigation unless explicit approval for Track H changes. **Do not** mark fix **COMPLETE** or root cause **CONFIRMED** without capture plan §8 exit criteria.
 
 ---
 
@@ -41,8 +42,9 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 | Row | Evidence | Mode | Status |
 |-----|----------|------|--------|
 | SD-01 | Webhook endpoint list screenshot (URL visible, secrets redacted) | Test | **EVIDENCE FILED (redacted)** — [ENDPOINT-OVERVIEW-001.png](./evidence/stripe-webhook-failure-2026-05-22/STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) |
-| SD-02 | Delivery log for failure window (2026-05-19 UTC+) | Test | **PENDING EVIDENCE** — mixed-status PNG **PENDING CAPTURE** |
-| SD-03 | Failure reason column = timeout (redacted export) | Test | **PENDING EVIDENCE** — checkout.session.expired timeout PNG **PENDING CAPTURE** |
+| SD-02 | Delivery log for failure window (2026-05-19 UTC+) | Test | **PENDING EVIDENCE** — RC-03 mixed-status PNG **PENDING CAPTURE** |
+| SD-03 | Failed `checkout.session.expired` delivery detail + timeout/error insight | Test | **PENDING EVIDENCE** — RC-01 + RC-02 **PENDING CAPTURE** |
+| SD-03a | Attempt timestamp (UTC), event type, delivery status, event ID (redacted) recorded | Test | **PENDING EVIDENCE** — per capture plan §3.1 |
 | SD-04 | Event types associated with failures (enum only) | Test | **PENDING EVIDENCE** |
 | SD-05 | Retry behavior note (no event IDs in git) | Test | **PENDING EVIDENCE** |
 | SD-06 | Disable-risk deadline confirmation | Test | **READ-ONLY ONLY** — per addendum |
@@ -55,7 +57,9 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 
 | Row | Evidence | Status |
 |-----|----------|--------|
-| VC-01 | Function invocations for `/webhooks/stripe` around 2026-05-19 21:10 UTC | **NOT PROVEN** — filed search shows **no matching logs** in selected timeline |
+| VC-01 | Function invocations for `/webhooks/stripe` around Stripe attempt time | **NOT PROVEN** — broad search filed; window-aligned RC-04 **PENDING CAPTURE** |
+| VC-01a | Log search variants: `/webhooks/stripe`, POST, `checkout.session.expired`, `stripe`, status/error filters | **PENDING EVIDENCE** — RC-05 / VC-SV-01…05 **PENDING CAPTURE** |
+| VC-01b | Classify: no request vs timed out vs route/function failed | **NOT ASSIGNED** — CL-A…E per capture plan §5 |
 | VC-02 | Duration / timeout indicators (no PII) | **PENDING EVIDENCE** |
 | VC-03 | Cold start pattern note | **NOT PROVEN** |
 | VC-04 | 5xx vs timeout classification | **PENDING EVIDENCE** |
@@ -75,6 +79,8 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 ---
 
 ## 7. Timeout root-cause checklist
+
+**Note:** Rows below use **generic** RC-* IDs. For **`checkout.session.expired`** correlated Stripe/Vercel capture requirements (RC-01…RC-05, H1…H6, CL-A…E, exit criteria), use [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md).
 
 | Row | Hypothesis | Verification | Status |
 |-----|------------|--------------|--------|
@@ -172,13 +178,14 @@ Safe, approval-gated checklist to determine root cause of Stripe staging webhook
 
 ## 16. Exit criteria
 
-Investigation may move from **PENDING INVESTIGATION** to **ROOT CAUSE DOCUMENTED (staging)** only when:
+Investigation may move from **PENDING INVESTIGATION** to **ROOT CAUSE DOCUMENTED (staging)** only when [capture plan §8](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) exit criteria (EC-01…EC-07) are met, including:
 
-1. SD-01…SD-03 and VC-01…VC-02 filed (redacted).
-2. RC-* rows have evidence-backed conclusion (not guess).
-3. STRIPE-WH-001 blocker updated with exit note.
-4. Fix implementation (if any) tracked separately — **NOT** part of investigation exit.
-5. Prod certification (STRIPE-WH-008) remains **NOT PROVEN**.
+1. RC-01…RC-05 filed (redacted) with Vercel window aligned to Stripe attempt time.
+2. CL-A…E assigned; exactly one H1…H6 **CONFIRMED** with artifact links.
+3. SD-01…SD-03a and VC-01…VC-01b satisfied per checklist §4–§5.
+4. STRIPE-WH-001 blocker updated with exit note.
+5. Fix implementation (if any) tracked separately — **NOT** part of investigation exit.
+6. Prod certification (STRIPE-WH-008) remains **NOT PROVEN**.
 
 **Fix complete:** **NOT EXECUTED** — do not check COMPLETE on fix rows.
 
