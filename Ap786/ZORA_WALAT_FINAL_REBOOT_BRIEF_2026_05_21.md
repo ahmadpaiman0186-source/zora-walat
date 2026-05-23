@@ -63,6 +63,13 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | Root cause | **NOT CONFIRMED** — Vercel May 19 logs **BLOCKED / INCONCLUSIVE** |
 | Remediation | [Plan pack](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) **PLAN ONLY** — fix **NOT EXECUTED** |
 
+### Post–PR #51 (2026-05-23)
+
+| Item | Status |
+|------|--------|
+| PR **#51** | Merged — remediation + fast ACK design + idempotency + replay + observability + pilot gate **FILED** |
+| Implementation approval | [Gate pack](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING** — branch **NOT CREATED** |
+
 ---
 
 ## 4. What is proven
@@ -93,6 +100,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | Credential rotation execute | **BLOCKED** |
 | WCAG / full manual a11y | **NOT PROVEN** |
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
+| Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
 
 ---
 

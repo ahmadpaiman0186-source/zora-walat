@@ -3,6 +3,7 @@
 **Date:** 2026-05-23
 **Status:** **DESIGN ONLY** — not implemented
 **Parent:** [CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md)
+**Approval gate:** [IMPLEMENTATION_APPROVAL_GATE](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) — **PENDING**
 **Evidence:** PR **#50** · root cause **NOT CONFIRMED** · fix **NOT EXECUTED**
 
 ---
@@ -186,6 +187,7 @@ Cross-ref: [MONEY_PATH_ZERO_DUPLICATE_NO_PAY_NO_SERVICE_AUDIT](./MONEY_PATH_ZERO
 | Item | Status |
 |------|--------|
 | Design | **FILED** |
+| Implementation approval | **PENDING** |
 | Implementation | **NOT EXECUTED** |
 | Root cause | **NOT CONFIRMED** |
 | Production / pilot | **NO-GO** |

@@ -5,7 +5,7 @@
 **Gate 1 execution:** [ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md](./ZORA_WALAT_GATE1_BLOCKER_TO_OWNER_MATRIX_2026_05_22.md)
 **Gate 3 observability:** [ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md](./ZORA_WALAT_GATE3_PRODUCTION_OBSERVABILITY_EVIDENCE_CAPTURE_2026_05_22.md)
 **Gate 4 security:** [ZORA_WALAT_GATE4_SECURITY_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_GATE4_SECURITY_BLOCKER_REGISTER_2026_05_22.md)
-**Stripe webhook failure:** [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) · [read-only evidence scaffold](./evidence/stripe-webhook-failure-2026-05-22/README.md) · [remediation plan 2026-05-23](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) (**PLAN ONLY**)
+**Stripe webhook failure:** [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) · [read-only evidence scaffold](./evidence/stripe-webhook-failure-2026-05-22/README.md) · [remediation plan 2026-05-23](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) (**PLAN ONLY**) · [implementation approval gate 2026-05-23](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) (**PENDING**)
 **Default verdict:** **NO-GO** until critical blockers **closed**
 
 ---
@@ -114,7 +114,7 @@ See master table BL-M01 … BL-M04.
 | BL-C04 | **BLOCKED** | _Payments owner_ |
 | BL-H02 | **PENDING** | _Payments owner_ |
 | BL-H04 | **PARTIAL** | _Payments + engineering_ |
-| STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; fix **NOT EXECUTED** |
+| STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; [implementation approval](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING**; fix **NOT EXECUTED** |
 
 ---
 
