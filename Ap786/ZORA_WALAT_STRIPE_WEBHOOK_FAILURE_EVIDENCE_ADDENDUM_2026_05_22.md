@@ -38,7 +38,7 @@
 | **Stripe account ID** | `REDACTED_STRIPE_ACCOUNT_ID` |
 | **Email message ID** | `REDACTED_STRIPE_EMAIL_MESSAGE_ID` |
 | **Filing date (Ap786)** | 2026-05-22 |
-| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — **4 redacted PNGs FILED** (2026-05-22); **2 PENDING CAPTURE** — see [folder README](./evidence/stripe-webhook-failure-2026-05-22/README.md) |
+| **Proposed evidence store** | `Ap786/evidence/stripe-webhook-failure-2026-05-22/` — **4 redacted PNGs FILED** (2026-05-22); [checkout.session.expired capture plan](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) **CREATED**; RC-01…05 **PENDING CAPTURE** |
 
 This addendum records **sanitized facts** from the email. It does **not** include raw email headers, dashboard exports, or request/event IDs unless separately filed and redacted.
 
@@ -245,7 +245,7 @@ This addendum records **sanitized facts** from the email. It does **not** includ
 
 ## 19. Safe investigation path
 
-1. Follow [INVESTIGATION_CHECKLIST](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md) — **read-only** Stripe Dashboard + Vercel logs.
+1. Follow [INVESTIGATION_CHECKLIST](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md) and [checkout.session.expired capture plan](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) — **read-only** Stripe Dashboard + Vercel logs.
 2. File redacted artifacts under `Ap786/evidence/stripe-webhook-failure-2026-05-22/`.
 3. Update [BLOCKER_REGISTER](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_BLOCKER_REGISTER_2026_05_22.md) rows on evidence only.
 4. Any code/deploy fix → **Track H** with explicit user approval — **not** this addendum.
@@ -257,8 +257,9 @@ This addendum records **sanitized facts** from the email. It does **not** includ
 
 | ID | Evidence | Status |
 |----|----------|--------|
-| WH-EV-01 | Redacted Stripe Dashboard delivery log (test mode) | **PARTIAL EVIDENCE FILED** — endpoint + charge.refunded recovery; timeout/mixed-status **PENDING CAPTURE** |
-| WH-EV-02 | Redacted Vercel function logs (timeout window) | **PARTIAL EVIDENCE FILED** — no-match search PNG; invocation/timeout rows **NOT PROVEN** |
+| WH-EV-01 | Redacted Stripe Dashboard delivery log (test mode) | **PARTIAL EVIDENCE FILED** — endpoint + charge.refunded recovery; RC-01/02/03 **PENDING CAPTURE** per [capture plan](./evidence/stripe-webhook-failure-2026-05-22/CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) |
+| WH-EV-02 | Redacted Vercel function logs (timeout window) | **PARTIAL EVIDENCE FILED** — broad no-match PNG; RC-04/05 window-aligned **PENDING CAPTURE** |
+| WH-EV-06 | checkout.session.expired timeout root cause (Stripe + Vercel correlated) | **PENDING EVIDENCE** — capture plan RC-01…05; root cause **NOT CONFIRMED** |
 | WH-EV-03 | Handler duration / fast-ack pattern review (docs) | **PENDING REVIEW** |
 | WH-EV-04 | Post-change Stripe test delivery success (if fix applied later) | **NOT EXECUTED** |
 | WH-EV-05 | Idempotency check under retry (staging) | **PENDING EVIDENCE** |

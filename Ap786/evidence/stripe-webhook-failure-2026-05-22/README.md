@@ -5,7 +5,7 @@
 **Endpoint:** `https://zora-walat-api-staging.vercel.app/webhooks/stripe`
 **Parent docs:** [Evidence addendum](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) · [Investigation checklist](../ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_INVESTIGATION_CHECKLIST_2026_05_22.md)
 
-**Policy:** Redacted PNG dashboard captures **filed 2026-05-22**. Root cause **NOT confirmed**. No fix claimed.
+**Policy:** Redacted PNG dashboard captures **filed 2026-05-22**. Root cause **NOT confirmed**. [checkout.session.expired capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) **CREATED** (read-only). No fix claimed.
 
 ---
 
@@ -18,7 +18,7 @@
 | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Recovered delivery **HTTP 200** |
 | [VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png](./VERCEL-STAGING-LOGS-NO-MATCH-WEBHOOK-STRIPE-001.png) | Vercel logs: **no matches** for `"/webhooks/stripe"` in selected timeline |
 
-**Still PENDING CAPTURE:** `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` · `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`
+**Still PENDING CAPTURE (RC-01…RC-05):** see [capture plan §10](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md).
 
 ---
 
@@ -46,8 +46,9 @@ Provide a **sanitized, read-only** evidence capture structure for investigating 
 |------|--------|
 | **Scaffold** | **CREATED** |
 | **Redacted PNG captures** | **4 FILED** (2026-05-22) |
-| **Missing captures** | **2 PENDING CAPTURE** (mixed-status list; checkout.session.expired timeout) |
-| **Root cause** | **NOT CONFIRMED** |
+| **Missing captures** | **5 PENDING CAPTURE** (RC-01…RC-05 per capture plan) |
+| **Root-cause capture plan** | **CREATED** — [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) |
+| **checkout.session.expired timeout root cause** | **NOT CONFIRMED** — 5 target PNGs **PENDING CAPTURE** |
 | **Webhook fix** | **NOT EXECUTED** |
 | **Resend / replay (repo task)** | **NOT EXECUTED** |
 | **Dashboard mutation (repo task)** | **NOT EXECUTED** |
@@ -115,6 +116,7 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 | [STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md](./STRIPE_DASHBOARD_READONLY_REVIEW_REPORT_2026_05_22.md) | Stripe read-only report |
 | [VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md](./VERCEL_LOGS_READONLY_REVIEW_REPORT_2026_05_22.md) | Vercel read-only report |
 | [WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md](./WEBHOOK_TIMEOUT_ROOT_CAUSE_REVIEW_TEMPLATE_2026_05_22.md) | Hypothesis template |
+| [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) | **Root-cause capture plan** — RC-01…05; H1…H6; exit criteria |
 | [STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png](./STRIPE-WH-DASHBOARD-ENDPOINT-OVERVIEW-001.png) | Filed capture (redacted) |
 | [STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png](./STRIPE-WH-DELIVERY-RECOVERED-CHARGE-REFUNDED-001.png) | Filed capture (redacted) |
 | [STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png](./STRIPE-WH-DELIVERY-SUCCESS-CHARGE-REFUNDED-200-001.png) | Filed capture (redacted) |
@@ -138,11 +140,11 @@ Store filed binaries in this folder; update [manifest](./STRIPE_VERCEL_READONLY_
 
 ## Next safe actions
 
-1. File missing captures: `STRIPE-WH-DASHBOARD-EVENT-DELIVERIES-MIXED-STATUS-001.png` · `STRIPE-WH-DELIVERY-FAILED-CHECKOUT-SESSION-EXPIRED-TIMEOUT-001.png`.
-2. Widen Vercel log window or capture invocation rows for VC-02…04.
-3. Complete root-cause template — **no hypothesis confirmed** without evidence.
+1. Execute [checkout.session.expired root-cause capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) — RC-01…RC-05 (**PENDING CAPTURE**).
+2. Align Vercel log window to Stripe attempt timestamp from RC-01; run search variants VC-SV-01…05.
+3. Assign classification CL-A…E and update hypothesis matrix — **NOT CONFIRMED** until §8 exit criteria met.
 4. Any fix → Track H + explicit approval — **not** this evidence pack.
 
 ---
 
-*Evidence folder · 4 redacted PNGs filed · not production-ready*
+*Evidence folder · capture plan CREATED · root cause NOT confirmed · not production-ready*

@@ -3,8 +3,9 @@
 **Date:** 2026-05-22
 **Status:** **Template — NOT CONFIRMED** — partial redacted evidence filed 2026-05-22; root cause **NOT confirmed**
 **Manifest:** [STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md](./STRIPE_VERCEL_READONLY_EVIDENCE_MANIFEST_2026_05_22.md)
+**Capture plan:** [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md)
 
-**Policy:** **No hypothesis confirmed** until linked artifacts exist. Fix requires Track H approval.
+**Policy:** **No hypothesis confirmed** until [capture plan §8](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) exit criteria met. Fix requires Track H approval.
 
 ---
 
@@ -57,20 +58,37 @@ Structured review template for staging webhook **timeout** root cause — hypoth
 
 ---
 
-## 4. Root-cause hypothesis table
+## 4. Root-cause hypothesis table (legacy H-01…H-08)
 
 | Hypothesis ID | Hypothesis | Confirmed? | Evidence required | Status |
 |---------------|------------|------------|-------------------|--------|
-| H-01 | Function cold start or platform timeout | **NOT CONFIRMED** | VERCEL-STAGING-FUNCTION-LOGS-001 | **PENDING EVIDENCE** |
-| H-02 | Handler waiting on slow downstream work | **NOT CONFIRMED** | VC logs + trace review (Track H) | **PENDING EVIDENCE** |
+| H-01 | Function cold start or platform timeout | **NOT CONFIRMED** | VERCEL-STAGING-FUNCTION-LOGS-001; maps to **H2** in capture plan | **PENDING EVIDENCE** |
+| H-02 | Handler waiting on slow downstream work | **NOT CONFIRMED** | VC logs + trace review (Track H); maps to **H3** | **PENDING EVIDENCE** |
 | H-03 | Missing fast 2xx acknowledgement | **NOT CONFIRMED** | WEBHOOK-FAST-ACK-REQUIREMENT-REVIEW-001 | **PENDING EVIDENCE** |
-| H-04 | Incorrect route/config/runtime | **NOT CONFIRMED** | VERCEL-STAGING-DEPLOYMENT-STATE-001 | **PENDING EVIDENCE** |
-| H-05 | Signature verification failure causing retry pattern | **NOT CONFIRMED** | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001 | **NOT PROVEN** (timeout ≠ 401) |
+| H-04 | Incorrect route/config/runtime | **NOT CONFIRMED** | VERCEL-STAGING-DEPLOYMENT-STATE-001; maps to **H4** | **PENDING EVIDENCE** |
+| H-05 | Signature verification failure causing retry pattern | **NOT CONFIRMED** | STRIPE-WH-DASHBOARD-ERROR-SUMMARY-001; maps to **H4** | **NOT PROVEN** (timeout ≠ 401) |
 | H-06 | Staging deployment unavailable or sleeping | **NOT CONFIRMED** | VERCEL-STAGING-ROUTE-HEALTH-001 | **PENDING EVIDENCE** |
 | H-07 | Network/hosting rate or availability issue | **NOT CONFIRMED** | VC + Stripe delivery logs | **PENDING EVIDENCE** |
-| H-08 | Logging insufficient to classify | **NOT CONFIRMED** | VC-F-07 no-match PNG filed; no invocation rows | **PARTIAL EVIDENCE** — supports gap, not root cause |
+| H-08 | Logging insufficient to classify | **NOT CONFIRMED** | VC-F-07 no-match PNG filed; RC-04/05 **PENDING** | **PARTIAL EVIDENCE** |
 
-**Rule:** Set **Confirmed?** to **YES** only with artifact link — **none confirmed**.
+---
+
+## 4a. checkout.session.expired hypothesis matrix (H1…H6)
+
+Authoritative checklist: [CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) §6.
+
+| ID | Hypothesis | Confirmed? | Status |
+|----|------------|------------|--------|
+| **H1** | Vercel route not invoked / no matching log | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H2** | Function cold start or platform timeout | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H3** | Webhook handler blocked before ack | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H4** | Signature verification / env issue | **NOT CONFIRMED** | **NOT PROVEN** |
+| **H5** | `checkout.session.expired` handler path slow/failing | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+| **H6** | Vercel log retention / window limitation | **NOT CONFIRMED** | **PENDING EVIDENCE** |
+
+**Classification (CL-A…E):** **NOT ASSIGNED** — see capture plan §5.
+
+**Rule:** Set **Confirmed?** to **YES** only per capture plan §8 — **none confirmed**.
 
 ---
 
@@ -177,7 +195,7 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 | Verdict | Value |
 |---------|-------|
 | **Root cause** | **NOT CONFIRMED** |
-| **Template completion** | **PARTIAL EVIDENCE FILED** — timeout PNGs **PENDING CAPTURE** |
+| **Template completion** | **CAPTURE PLAN CREATED** — RC-01…05 **PENDING CAPTURE** |
 | **Full webhook health** | **NOT globally proven** |
 | **Staging webhook** | **FAILED / PENDING INVESTIGATION** |
 | **Webhook fix** | **NOT EXECUTED** |
@@ -187,12 +205,12 @@ Artifact: **WEBHOOK-NO-PAY-NO-SERVICE-REVIEW-001**
 
 ## 15. Next safe actions
 
-1. File remaining Stripe PNGs: mixed-status deliveries; `checkout.session.expired` timeout failure.
-2. Update hypothesis rows with **NOT CONFIRMED** or **CONFIRMED** + artifact link only.
+1. Execute [checkout.session.expired capture plan](./CHECKOUT_SESSION_EXPIRED_TIMEOUT_ROOT_CAUSE_CAPTURE_PLAN_2026_05_22.md) RC-01…RC-05.
+2. Update H1…H6 and CL-A…E only after artifacts filed.
 3. Complete WEBHOOK-TIMEOUT-ROOT-CAUSE-NOTES-001.
 4. Escalate before 2026-05-28 21:10:08 UTC disable-risk if delivery still failing.
 5. Defer any fix to Track H with explicit user approval.
 
 ---
 
-*Root Cause Template · partial evidence filed · no hypothesis confirmed*
+*Root Cause Template · capture plan linked · no hypothesis confirmed*
