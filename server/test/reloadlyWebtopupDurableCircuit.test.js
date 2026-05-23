@@ -11,12 +11,6 @@ describe('reloadlyWebtopupDurableCircuit (DB)', { skip: !hasDb }, () => {
   let circuit;
 
   before(async () => {
-    process.env.WEBTOPUP_RELOADLY_CIRCUIT_FAILURE_THRESHOLD = '3';
-    process.env.WEBTOPUP_RELOADLY_CIRCUIT_WINDOW_MS = '600000';
-    process.env.WEBTOPUP_RELOADLY_CIRCUIT_COOLDOWN_MS = '300';
-    process.env.WEBTOPUP_RELOADLY_CIRCUIT_HALF_OPEN_MAX_PROBES = '2';
-    process.env.WEBTOPUP_RELOADLY_DURABLE_CIRCUIT_ENABLED = 'true';
-
     const db = await import('../src/db.js');
     prisma = db.prisma;
     circuit = await import('../src/services/reliability/reloadlyWebtopupDurableCircuit.js');
@@ -26,23 +20,31 @@ describe('reloadlyWebtopupDurableCircuit (DB)', { skip: !hasDb }, () => {
     await circuit.resetReloadlyWebtopupDurableCircuitForTests();
   });
 
-  it('repeated failures open the breaker', async () => {
-    for (let i = 0; i < 3; i += 1) {
+  after(async () => {
+    await circuit.resetReloadlyWebtopupDurableCircuitForTests();
+  });
+
+  /** Uses frozen `env` threshold (see webtopConfig); `process.env` in `before()` is not re-read after prior test files import `env`. */
+  async function tripReloadlyWebtopupBreaker() {
+    const { failureThreshold } = circuit.getReloadlyWebtopupDurableCircuitConfig();
+    for (let i = 0; i < failureThreshold; i += 1) {
       await circuit.recordReloadlyWebtopupProviderOutcome({
         success: false,
         log: undefined,
         traceId: `f${i}`,
       });
     }
+  }
+
+  it('repeated failures open the breaker', async () => {
+    await tripReloadlyWebtopupBreaker();
     const snap = await circuit.getReloadlyWebtopupDurableCircuitAdminSnapshot();
     assert.equal(snap.state, 'open');
     assert.ok(snap.cooldownUntil);
   });
 
   it('open breaker blocks outbound attempts until half-open', async () => {
-    for (let i = 0; i < 3; i += 1) {
-      await circuit.recordReloadlyWebtopupProviderOutcome({ success: false, log: undefined, traceId: 'x' });
-    }
+    await tripReloadlyWebtopupBreaker();
     const g1 = await circuit.checkAllowReloadlyWebtopupCall({ log: undefined, traceId: 't' });
     assert.equal(g1.allowed, false);
     assert.equal(g1.state, 'open');
@@ -60,9 +62,7 @@ describe('reloadlyWebtopupDurableCircuit (DB)', { skip: !hasDb }, () => {
   });
 
   it('successful half-open probe closes the breaker', async () => {
-    for (let i = 0; i < 3; i += 1) {
-      await circuit.recordReloadlyWebtopupProviderOutcome({ success: false, log: undefined, traceId: 'x' });
-    }
+    await tripReloadlyWebtopupBreaker();
     await prisma.webtopupProviderCircuitState.update({
       where: { providerId: circuit.RELOADLY_WEBTOPUP_PROVIDER_ID },
       data: { cooldownUntil: new Date(Date.now() - 1000) },
@@ -82,9 +82,7 @@ describe('reloadlyWebtopupDurableCircuit (DB)', { skip: !hasDb }, () => {
     const prevFb = process.env.WEBTOPUP_FALLBACK_PROVIDER;
     process.env.WEBTOPUP_FALLBACK_PROVIDER = '';
     try {
-      for (let i = 0; i < 3; i += 1) {
-        await circuit.recordReloadlyWebtopupProviderOutcome({ success: false, log: undefined, traceId: 'x' });
-      }
+      await tripReloadlyWebtopupBreaker();
       resetSharedCircuitBreakersForTests();
 
       let calls = 0;
@@ -124,9 +122,7 @@ describe('reloadlyWebtopupDurableCircuit (DB)', { skip: !hasDb }, () => {
   });
 
   it('failed half-open probe reopens the breaker', async () => {
-    for (let i = 0; i < 3; i += 1) {
-      await circuit.recordReloadlyWebtopupProviderOutcome({ success: false, log: undefined, traceId: 'x' });
-    }
+    await tripReloadlyWebtopupBreaker();
     await prisma.webtopupProviderCircuitState.update({
       where: { providerId: circuit.RELOADLY_WEBTOPUP_PROVIDER_ID },
       data: { cooldownUntil: new Date(Date.now() - 1000) },
