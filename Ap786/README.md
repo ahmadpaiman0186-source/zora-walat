@@ -128,6 +128,23 @@
 
 ---
 
+## Start here — STR-02 Vercel Read-Only Routing Diagnostics (2026-05-24)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md) | **Master Vercel diagnostics** — read-only dashboard |
+| [ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md) | Root Directory / framework — VRC-D01/D02 |
+| [ZORA_WALAT_STR02_VERCEL_DEPLOYMENT_OUTPUT_EVIDENCE_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_DEPLOYMENT_OUTPUT_EVIDENCE_CHECKLIST_2026_05_24.md) | Deploy SHA / build / functions — VRC-D03…D05 |
+| [ZORA_WALAT_STR02_VERCEL_DOMAIN_MAPPING_EVIDENCE_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_DOMAIN_MAPPING_EVIDENCE_CHECKLIST_2026_05_24.md) | Domain alias — VRC-D06 |
+| [ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md) | Diagnostic verdict — update post-capture |
+| [evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/README.md) | Evidence folder + [manifest](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/EVIDENCE_MANIFEST.md) |
+
+**Screenshot IDs:** VRC-D01…D07 — **PENDING CAPTURE** (007 cross-ref VRC-01/02 filed in replay folder)
+
+**Verdict:** Vercel project diagnostics **PENDING CAPTURE** · root cause **NOT CONFIRMED** · fix **NOT IMPLEMENTED** · prod/pilot **NO-GO**.
+
+---
+
 ## Start here — Stripe Webhook Failure Evidence (2026-05-22)
 
 | Document | Contents |

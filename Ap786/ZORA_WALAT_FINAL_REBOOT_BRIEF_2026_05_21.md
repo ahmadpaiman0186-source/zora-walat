@@ -86,7 +86,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | G-02 sandbox webhook destination | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
 | STR-01 pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
 | PR **#66** | STR-02 resend evidence **FILED** — **404 ERR / Not Found** |
-| STR-02 404 investigation | **FILED** — [404 root-cause pack](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) |
+| PR **#67** | STR-02 404 investigation pack **MERGED** |
+| STR-02 Vercel read-only diagnostics | **SCAFFOLD FILED** — [Vercel diagnostics](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md); captures **PENDING** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT YET** |

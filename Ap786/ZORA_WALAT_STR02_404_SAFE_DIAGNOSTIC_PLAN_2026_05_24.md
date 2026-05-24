@@ -48,16 +48,22 @@
 
 ### Phase 3 — Vercel project / deployment (read-only dashboard)
 
-| Step | Check | Discriminates |
-|------|-------|---------------|
-| 3.1 | Project name = `zora-walat-api-staging` | H7 |
-| 3.2 | Root Directory = `server` (not repo root) | H2 |
-| 3.3 | Active deployment SHA vs DEP-01 / STR-02 window | H10 |
-| 3.4 | Deployment build output includes `api/index.mjs` | H4 |
-| 3.5 | Domain `zora-walat-api-staging.vercel.app` → this project | H7 |
-| 3.6 | No accidental link to Next.js root project | H2 |
+**Detailed checklists:** [Vercel read-only diagnostics pack](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md) · [Project root checklist](./ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md) · [Deployment output checklist](./ZORA_WALAT_STR02_VERCEL_DEPLOYMENT_OUTPUT_EVIDENCE_CHECKLIST_2026_05_24.md) · [Domain checklist](./ZORA_WALAT_STR02_VERCEL_DOMAIN_MAPPING_EVIDENCE_CHECKLIST_2026_05_24.md)
 
-**No deploy. No env var changes.**
+**Evidence folder:** [str02-vercel-readonly-routing-diagnostics-2026-05-24/](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/) — VRC-D01…D07 **PENDING CAPTURE**
+
+| Step | Check | Discriminates | Evidence ID |
+|------|-------|---------------|-------------|
+| 3.1 | Project name = `zora-walat-api-staging` | H7 | VRC-D01 |
+| 3.2 | Root Directory = `server` (not repo root) | H2 | VRC-D01 |
+| 3.3 | Framework / build settings | H2, H3 | VRC-D02 |
+| 3.4 | Active deployment SHA vs DEP-01 / STR-02 window | H10 | VRC-D03 |
+| 3.5 | Deployment build output includes `api/index.mjs` | H4 | VRC-D04 |
+| 3.6 | Functions / routes list | H1, H4 | VRC-D05 |
+| 3.7 | Domain `zora-walat-api-staging.vercel.app` → this project | H7 | VRC-D06 |
+| 3.8 | No accidental link to Next.js root project | H2 | VRC-D01/D02 |
+
+**No deploy. No env var changes. No settings edit.**
 
 ---
 
@@ -65,7 +71,7 @@
 
 | Step | Search | Window |
 |------|--------|--------|
-| 4.1 | `"/webhooks/stripe"` | ±30 min STR-02 Resend (~May 24, 2026 2:09 PM) |
+| 4.1 | `"/webhooks/stripe"` | ±30 min STR-02 Resend (~May 24, 2026 2:09 PM) | VRC-D07 |
 | 4.2 | `stripe` | Same window |
 | 4.3 | Edge / request logs (if available) | Same window |
 | 4.4 | `[startup] phase=request_start route=` patterns | Same window |
@@ -113,6 +119,7 @@ Requires separate implementation approval. Diagnostics in this pack **do not** a
 |------|--------|
 | Diagnostic plan | **FILED** |
 | Diagnostics executed (Phases 1 static) | **PARTIAL** — repo inventory complete |
+| Phase 3 Vercel dashboard pack | **SCAFFOLD FILED** — VRC-D01…D07 **PENDING CAPTURE** |
 | Phases 3–4 (Vercel live read-only) | **PENDING OPERATOR** |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
