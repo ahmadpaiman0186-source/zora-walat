@@ -1,11 +1,11 @@
 # G-02 — STR-02 Evidence Capture Matrix
 
-**Date:** 2026-05-24
+**Date:** 2026-05-24 (updated)
 **Gate:** G-02 · STR-02
 **Folder:** [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
 **Parent:** [execution gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) · [runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md)
 
-**Policy:** Capture specifications for **future** STR-02 execution. **No fabricated PNGs.** All STR-02 / LOG captures default **NOT CAPTURED** until operator files post-Resend.
+**Policy:** STR-02 **executed once** — result **404 ERR**. LOG-01…LOG-04 **NOT CORRELATED**. VRC-01/VRC-02 no-match captures filed.
 
 ---
 
@@ -21,82 +21,67 @@
 
 ---
 
-## 2. STR-02 capture matrix (pending execution)
+## 2. STR-02 capture matrix (executed — FAILED)
 
-| ID | Filename | Source | When to capture | Redaction | Status | Proves | Does not prove |
-|----|----------|--------|-----------------|-----------|--------|--------|----------------|
-| **STR-02A** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png` | Stripe Sandboxes → Events → STR-01 event → delivery detail | **Before** Resend click; **Resend visible, not clicked** | URL bar; event ID → black bar / `REDACTED_EVT_*` | **NOT CAPTURED** | Operator confirmed correct event + endpoint pre-click | Replay success |
-| **STR-02B** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-HTTP200-002.png` | Same — delivery detail after Resend | **After** single Resend; HTTP **200** visible | Same as STR-02A | **NOT CAPTURED** | Post-replay delivery **200** to staging | Fix proven; prod health |
+| ID | Filename | Source | When captured | Redaction | Status | Proves | Does not prove |
+|----|----------|--------|---------------|-----------|--------|--------|----------------|
+| **STR-02A** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png` | Stripe Sandboxes → STR-01 event → delivery detail | **Before** Resend | URL + event ID redacted | **CAPTURED / PRE-RESEND CONFIRMATION** | Correct event + staging endpoint pre-click | Replay success |
+| **STR-02B** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-404-002.png` | Delivery detail after **one** Resend | May 24, 2026 ~2:09 PM | Same | **EXECUTED ONCE / FAILED** | **404 ERR / Not Found** — HTTP **200 NOT ACHIEVED** | Fix proven |
+| **STR-02C** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-ATTEMPT-LIST-003.png` | Delivery attempt list | Post-Resend | Same | **CAPTURED / POST-RESEND FAILURE EVIDENCE** | 404 + prior 3× timeout | Root cause |
 
-**Legacy alias:** STR-02B may also be referenced as `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` in older checklists — **prefer STR-02B filename** for new captures.
+**Note:** Planned `…POST-RESEND-HTTP200-002.png` **not captured** — 200 not achieved. Actual artifact: `…POST-RESEND-404-002.png`.
 
----
-
-## 3. Vercel log capture matrix (pending execution)
-
-Window: **±15 minutes** from Resend timestamp **T1**.
-
-| ID | Filename | Log focus (search) | Operator description | Status | Proves | Does not prove |
-|----|----------|-------------------|----------------------|--------|--------|----------------|
-| **LOG-01** | `VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png` | `webhook_received` or request-received equivalent | **Request received** | **NOT CAPTURED** | Staging received webhook | Handler success |
-| **LOG-02** | `VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png` | `signature_verified` or equivalent | **Signature verification** | **NOT CAPTURED** | Signature verified | Business logic correct |
-| **LOG-03** | `VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png` | `event_persisted`, `duplicate_event_blocked`, or idempotency markers | **Idempotency / duplicate protection** | **NOT CAPTURED** | Persist or duplicate-block path visible | No duplicate risk in prod |
-| **LOG-04** | `VERCEL-STAGING-LOG-ACK-RETURNED-001.png` | `ack_returned` or final success path | **Final handler result** | **NOT CAPTURED** | Handler completed / ack returned | End-to-end money path |
-
-**Project:** `zora-walat-api-staging` only. **No** production logs.
+**Approval phrase issued:** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY` (chat).
 
 ---
 
-## 4. Correlation requirements
+## 3. Vercel log capture matrix
 
-| Rule | Detail |
+| ID | Filename | Log focus (search) | Status | Result |
+|----|----------|-------------------|--------|--------|
+| **LOG-01** | `VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png` | Request received | **NOT CORRELATED / NOT CAPTURED** | — |
+| **LOG-02** | `VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png` | Signature verification | **NOT CORRELATED / NOT CAPTURED** | — |
+| **LOG-03** | `VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png` | Idempotency / duplicate protection | **NOT CORRELATED / NOT CAPTURED** | — |
+| **LOG-04** | `VERCEL-STAGING-LOG-ACK-RETURNED-001.png` | Final handler result | **NOT CORRELATED / NOT CAPTURED** | — |
+| **VRC-01** | `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-WEBHOOK-STRIPE-004.png` | Search `"/webhooks/stripe"` — last 30 min | **CAPTURED / NO MATCH** | No runtime logs found |
+| **VRC-02** | `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-STRIPE-005.png` | Search `stripe` — last 30 min | **CAPTURED / NO MATCH** | No runtime logs found |
+
+---
+
+## 4. Correlation outcome
+
+| Rule | Result |
 |------|--------|
-| Time | LOG-01…LOG-04 must fall within ±15 min of STR-02B Resend (T1) |
-| Event | Same `checkout.session.expired` as STR-01 |
-| Endpoint | `https://zora-walat-api-staging.vercel.app/webhooks/stripe` |
-| Mode | Sandbox / test-mode only |
-| Review | Human reviewer must correlate STR-02B timestamp with log window before any PASS |
+| STR-02 Resend executed | **YES — once** |
+| HTTP 200 | **NO** — **404 ERR** |
+| LOG-01…LOG-04 within ±15 min of T1 | **NOT CORRELATED / NOT CAPTURED** |
+| Vercel runtime logs | **NO MATCHING LOGS FOUND** |
+| Staging replay PASS | **NO** |
 
 ---
 
-## 5. Acceptance threshold
+## 5. Acceptance threshold (actual outcome)
 
-| Outcome | Minimum artifacts | Verdict |
-|---------|-------------------|---------|
-| **Sufficient for staging replay review** | STR-02A + STR-02B (HTTP 200) + LOG-01…LOG-04 correlated | Review **PENDING** — not auto PASS |
-| **Insufficient** | STR-02B only | **INCONCLUSIVE** |
-| **Insufficient** | STR-02B 200 but missing LOG-01…LOG-04 | **INCONCLUSIVE** |
-| **Failure** | Non-200 or timeout after Resend | **FAIL / INCONCLUSIVE** — fix **NOT YET** |
-
-See also [evidence acceptance criteria](./ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md).
+| Outcome | Artifacts filed | Verdict |
+|---------|-----------------|---------|
+| **Failure (actual)** | STR-02A + STR-02B (404) + STR-02C + VRC-01/02; LOG missing | **FAILED / INCONCLUSIVE** — fix **NOT YET** |
+| **Required for PASS** | STR-02B HTTP **200** + LOG-01…LOG-04 correlated | **NOT MET** |
 
 ---
 
-## 6. Dependency chain
-
-```text
-STR-01 (filed, PR #64)
-    → APPROVE STR-02 phrase issued
-        → STR-02A (pre-resend confirmation)
-            → Single Resend
-                → STR-02B (HTTP 200)
-                    → LOG-01 → LOG-02 → LOG-03 → LOG-04
-                        → manifest + conservative verdict update (human review)
-```
-
----
-
-## 7. Verdict (default)
+## 6. Verdict
 
 | Item | Status |
 |------|--------|
-| STR-02A / STR-02B | **NOT CAPTURED** |
-| LOG-01…LOG-04 | **NOT CAPTURED** |
-| STR-02 execution | **NOT EXECUTED** |
+| STR-02A / STR-02B / STR-02C | **FILED** — STR-02B **FAILED (404)** |
+| LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
+| VRC-01 / VRC-02 | **CAPTURED / NO MATCH** |
+| STR-02 execution | **EXECUTED ONCE / FAILED** |
+| G-02 staging replay | **FAILED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
 | Production / real-money / pilot | **NO-GO** |
 | Self-healing apply | **GATED / NOT ENABLED** |
 
 ---
 
-*STR-02 evidence capture matrix · no fabricated captures · Resend not executed*
+*STR-02 evidence matrix · STR-02 ingested 2026-05-24 · 404 result · no second Resend*

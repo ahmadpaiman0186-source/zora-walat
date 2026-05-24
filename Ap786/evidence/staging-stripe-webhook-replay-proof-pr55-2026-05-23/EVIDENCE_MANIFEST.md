@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Merge SHA (main):** `c521b0f` · feature `abb9531` · staging deploy **`0cac02e`** (PR #56 descendant, includes PR #55)
 **Mode:** Stripe **test / sandbox only** · Vercel **staging only**
-**Last ingestion:** STR-01 (pre-replay baseline) from Telegram Desktop UWP — see [§6 Pass D](#pass-d--str-01-pre-replay-baseline-telegram-desktop-uwp-2026-05-24)
+**Last ingestion:** STR-02 (sandbox resend — **404 FAILED**) from Telegram Desktop UWP — see [§6 Pass E](#pass-e--str-02-sandbox-resend-execution-telegram-desktop-uwp-2026-05-24)
 
 **Policy:** No fabricated screenshots. No **PASS** without filed PNG and operator review.
 
@@ -42,30 +42,34 @@
 
 ---
 
-## 3. Stripe test-mode replay proof (pre-replay baseline filed; replay not executed)
+## 3. Stripe test-mode replay proof (STR-02 executed once — FAILED)
 
 | Evidence ID | Filename | Source | Capture instructions | Redaction | Status | Proves | Does not prove |
 |-------------|----------|--------|----------------------|-----------|--------|--------|----------------|
-| **STR-01** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png) | Stripe **Sandboxes** → Workbench → **Events** → `checkout.session.expired` | **Before** any Resend/replay: event detail; **Failed** delivery tab; staging endpoint visible; **Resend not clicked** | URL bar + event ID blocks black-barred | **CAPTURED / PRE-REPLAY BASELINE** | May 19, 2026 `checkout.session.expired` with failed delivery to staging URL **before replay** | Replay success; fix proven |
-| **STR-01A** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png) | Same event — **Deliveries to webhook endpoints** → **Failed** | Failed delivery row to `zora-walat-api-staging…`; **Resend not clicked** | Same as STR-01 | **CAPTURED / PRE-REPLAY BASELINE** | Delivery **failed** to staging endpoint pre-replay | HTTP 200 on replay |
-| **STR-01B** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png) | Same event — delivery attempt detail | **3 attempts** — all **Timed out** (May 19, 2026); **Resend not clicked** | URL bar black-barred | **CAPTURED / PRE-REPLAY BASELINE** | Delivery failed with **timeout attempts** before replay | Root cause confirmed; fix proven |
-| **STR-02** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png) | Same path — delivery detail | **After** replay: HTTP **200** | Event IDs → `REDACTED_EVT_*` | **NOT EXECUTED / NOT CAPTURED** | — | — |
+| **STR-01** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png) | Stripe **Sandboxes** → **Events** → `checkout.session.expired` | Pre-replay baseline | URL bar + event ID redacted | **CAPTURED / PRE-REPLAY BASELINE** | May 19 failed delivery before replay | Replay success |
+| **STR-01A** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png) | Same — **Failed** tab | Pre-replay failed row | Same | **CAPTURED / PRE-REPLAY BASELINE** | Failed delivery pre-replay | HTTP 200 |
+| **STR-01B** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png) | Delivery attempts | 3× **Timed out** (May 19) | URL bar redacted | **CAPTURED / PRE-REPLAY BASELINE** | Timeout attempts before replay | Fix proven |
+| **STR-02A** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png) | Same STR-01 event — delivery detail | **Before** Resend; **Resend visible**; sandbox banner; staging endpoint | URL + event ID redacted | **CAPTURED / PRE-RESEND CONFIRMATION** | Operator confirmed target event + endpoint pre-click | Replay success |
+| **STR-02B** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-404-002.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-404-002.png) | Delivery detail after **one** Resend | **404 ERR / Not Found** — May 24, 2026 ~2:09 PM; **Retried manually** | Same | **EXECUTED ONCE / FAILED** | Post-Resend **404** — HTTP **200 NOT ACHIEVED** | Fix proven |
+| **STR-02C** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-ATTEMPT-LIST-003.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-ATTEMPT-LIST-003.png) | Delivery attempt list | **404** manual attempt + prior **3× Timed out** (May 19) | Same | **CAPTURED / POST-RESEND FAILURE EVIDENCE** | Full attempt history including failed resend | Root cause |
 
-**STR-01 note:** Delivery failed with timeout attempts **before replay**. **Resend not clicked**; **replay not executed**. Exact Telegram source `…FAILED-DELIVERY-002.jpg` **not found** in UWP — STR-01A PNG derived from misnamed `…TIMEOUT-ATTEMPTS-001.jpg` (Failed tab on event detail). See [§6 Pass D](#pass-d--str-01-pre-replay-baseline-telegram-desktop-uwp-2026-05-24).
+**STR-02 execution note:** Approval phrase `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY` issued in chat. Operator executed **exactly one** sandbox Resend on same `checkout.session.expired` event. Result **404 ERR / Not Found** — **not HTTP 200**. **No second Resend** authorized or executed during evidence registration.
 
-**STR-02 / LOG block reason:** Replay **not executed** — STR-02 and LOG-01…LOG-04 **NOT CAPTURED**.
+**Legacy alias:** `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` — **NOT CAPTURED** (200 not achieved).
 
 ---
 
-## 4. Vercel lifecycle log proof (blocked)
+## 4. Vercel lifecycle log proof (NOT CORRELATED)
 
 | Evidence ID | Filename | Log event (search) | Capture instructions | Redaction | Status | Proves | Does not prove |
 |-------------|----------|-------------------|----------------------|-----------|--------|--------|----------------|
-| **LOG-01** | [VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png](./VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png) | `webhook_received` | ±15 min of STR-02 attempt | No secrets | **BLOCKED** (no replay) | — | — |
-| **LOG-02** | [VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png](./VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png) | `signature_verified` | Same window | Same | **BLOCKED** (no replay) | — | — |
-| **LOG-03** | [VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png](./VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png) | `event_persisted` | Same window | Same | **BLOCKED** (no replay) | — | — |
-| **LOG-04** | [VERCEL-STAGING-LOG-ACK-RETURNED-001.png](./VERCEL-STAGING-LOG-ACK-RETURNED-001.png) | `ack_returned` | Same window | Same | **BLOCKED** (no replay) | — | — |
-| **LOG-05** | [VERCEL-STAGING-LOG-DUPLICATE-BLOCKED-001.png](./VERCEL-STAGING-LOG-DUPLICATE-BLOCKED-001.png) | `duplicate_event_blocked` | If duplicate replay tested | Same | **BLOCKED** (no replay) | — | — |
+| **LOG-01** | [VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png](./VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png) | `webhook_received` | ±15 min of STR-02 Resend (~May 24, 2026 2:09 PM) | No secrets | **NOT CORRELATED / NOT CAPTURED** | — | Handler ran |
+| **LOG-02** | [VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png](./VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png) | `signature_verified` | Same window | Same | **NOT CORRELATED / NOT CAPTURED** | — | — |
+| **LOG-03** | [VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png](./VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png) | Idempotency / persist | Same window | Same | **NOT CORRELATED / NOT CAPTURED** | — | — |
+| **LOG-04** | [VERCEL-STAGING-LOG-ACK-RETURNED-001.png](./VERCEL-STAGING-LOG-ACK-RETURNED-001.png) | Final handler / ack | Same window | Same | **NOT CORRELATED / NOT CAPTURED** | — | — |
+| **LOG-05** | [VERCEL-STAGING-LOG-DUPLICATE-BLOCKED-001.png](./VERCEL-STAGING-LOG-DUPLICATE-BLOCKED-001.png) | `duplicate_event_blocked` | Optional | Same | **NOT CAPTURED / N/A** | — | — |
+| **VRC-01** | [VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-WEBHOOK-STRIPE-004.png](./VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-WEBHOOK-STRIPE-004.png) | Vercel → `zora-walat-api-staging` → Logs → search `"/webhooks/stripe"` | Last 30 min window post-Resend | URL bar redacted | **CAPTURED / NO MATCH** | **No matching runtime logs** for `/webhooks/stripe` | Request never reached app |
+| **VRC-02** | [VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-STRIPE-005.png](./VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-STRIPE-005.png) | Same — search `stripe` | Same window | URL bar redacted | **CAPTURED / NO MATCH** | **No matching runtime logs** for `stripe` | Absence of all stripe logs |
 
 ---
 
@@ -82,12 +86,14 @@
 | M-03e | DEST-01A / DEST-01B filed | **CAPTURED / REVIEW PENDING** |
 | M-04 | STR-01 filed (pre-replay baseline) | **CAPTURED / PRE-REPLAY BASELINE** |
 | M-04b | STR-01A / STR-01B filed | **CAPTURED / PRE-REPLAY BASELINE** |
-| M-05 | STR-02 filed | **NOT EXECUTED / NOT CAPTURED** |
-| M-06 | LOG-01…LOG-04 filed (correlated window) | **NOT CAPTURED** (no replay) |
-| M-07 | LOG-05 filed or N/A documented | **BLOCKED** (no replay) |
+| M-05 | STR-02 filed (post-resend) | **EXECUTED ONCE / FAILED** — 404 ERR |
+| M-05b | STR-02A / STR-02C filed | **CAPTURED** |
+| M-06 | LOG-01…LOG-04 filed (correlated window) | **NOT CORRELATED / NOT CAPTURED** |
+| M-06b | VRC-01 / VRC-02 (no-match log search) | **CAPTURED / NO MATCH** |
+| M-07 | LOG-05 filed or N/A documented | **N/A** (not executed) |
 | M-08 | [FINAL_CONSERVATIVE_VERDICT.md](./FINAL_CONSERVATIVE_VERDICT.md) updated | **UPDATED** |
 
-**Overall manifest:** **INCOMPLETE** · STR-01 pre-replay baseline **CAPTURED** · G-02 staging replay **BLOCKED / INCONCLUSIVE** (STR-02 / LOG not captured)
+**Overall manifest:** **INCOMPLETE** · STR-02 **EXECUTED ONCE / FAILED (404)** · LOG-01…LOG-04 **NOT CORRELATED** · G-02 staging replay **FAILED / INCONCLUSIVE**
 
 ---
 
@@ -149,6 +155,32 @@
 | Stripe / Vercel API calls | **NO** |
 | Fix proven claim | **NO** |
 
+### Pass E — STR-02 sandbox resend execution (Telegram Desktop UWP, 2026-05-24)
+
+**Approval phrase (chat):** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`
+
+**Source folder:** `...\TelegramMessengerLLP.TelegramDesktop_*\LocalCache\Roaming\Telegram Desktop UWP\`
+
+| Source file | Classification | Target artifact | Status |
+|-------------|----------------|-----------------|--------|
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.jpg` | Sandboxes → STR-01 event — delivery detail; **Resend visible**; staging endpoint; sandbox banner | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png` | **CAPTURED / PRE-RESEND CONFIRMATION** |
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-404-002.jpg` | After **one** Resend — **404 ERR / Not Found**; May 24, 2026 ~2:09 PM; **Retried manually** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-404-002.png` | **EXECUTED ONCE / FAILED** |
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-ATTEMPT-LIST-003.jpg` | Attempt list — **404** + prior **3× Timed out** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-ATTEMPT-LIST-003.png` | **CAPTURED / POST-RESEND FAILURE EVIDENCE** |
+| `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-WEBHOOK-STRIPE-004.jpg` | Vercel `zora-walat-api-staging` Logs — search `"/webhooks/stripe"` — **No logs found** | `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-WEBHOOK-STRIPE-004.png` | **CAPTURED / NO MATCH** |
+| `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-STRIPE-005.jpg` | Same — search `stripe` — **No logs found** | `VERCEL-STAGING-STR02-NO-RUNTIME-LOGS-STRIPE-005.png` | **CAPTURED / NO MATCH** |
+
+| Attestation | Result |
+|-------------|--------|
+| Resend executed | **YES — exactly once** |
+| HTTP 200 achieved | **NO** — **404 ERR / Not Found** |
+| Second Resend during registration | **NO** |
+| LOG-01…LOG-04 lifecycle captures | **NOT CORRELATED / NOT CAPTURED** |
+| Vercel runtime log correlation | **NO MATCHING LOGS FOUND** |
+| Send test events | **NO** |
+| Stripe / Vercel API calls (Agent) | **NO** |
+| DB / payment / order mutation | **NO** |
+| Fix proven claim | **NO** |
+
 ---
 
-*Manifest · STR-01 ingested 2026-05-24 · G-02 replay BLOCKED / INCONCLUSIVE · no replay executed*
+*Manifest · STR-02 ingested 2026-05-24 · G-02 replay FAILED / INCONCLUSIVE · fix NOT YET*

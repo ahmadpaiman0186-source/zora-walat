@@ -1,7 +1,7 @@
 # Zora-Walat — Staging Stripe Webhook Replay Proof (PR #55)
 
 **Date:** 2026-05-24 (updated)
-**Status:** **STR-01 PRE-REPLAY BASELINE FILED** · G-02 replay **BLOCKED / INCONCLUSIVE** · fix **NOT YET PROVEN**
+**Status:** **STR-02 EXECUTED ONCE / FAILED (404)** · G-02 replay **FAILED / INCONCLUSIVE** · fix **NOT YET PROVEN**
 **Gate:** G-02 · staging-only evidence registration
 **Merge:** PR #55 → `main` @ `c521b0f` · staging deploy **`main` @ `0cac02e`** (DEP-01)
 
@@ -9,7 +9,7 @@
 
 ## 1. Purpose
 
-Index for operator-driven **staging** validation of Track H (PR #55). **Deployment + blockers + destination + STR-01 pre-replay baseline captured; post-replay proof still blocked.**
+Index for operator-driven **staging** validation of Track H (PR #55). **STR-01 baseline + STR-02 one Resend filed; result 404 ERR; Vercel logs no match; LOG-01…LOG-04 not correlated.**
 
 ---
 
@@ -22,12 +22,15 @@ Index for operator-driven **staging** validation of Track H (PR #55). **Deployme
 | DEP-01 — Vercel staging deploy | **CAPTURED / REVIEW PENDING** |
 | BLK-01 — No webhook destination (create flow) | **CAPTURED / BLOCKER EVIDENCE** (historical) |
 | BLK-02 — No `checkout.session.expired` deliveries | **CAPTURED / BLOCKER EVIDENCE** |
-| DEST-01 — Existing active sandbox destination | **CAPTURED / REVIEW PENDING** — **no new destination created** |
+| DEST-01 — Existing active sandbox destination | **CAPTURED / REVIEW PENDING** |
 | DEST-01A / DEST-01B — Details + masked signing secret | **CAPTURED / REVIEW PENDING** |
-| STR-01 — Pre-replay baseline (`checkout.session.expired`; failed + timeout) | **CAPTURED / PRE-REPLAY BASELINE** — **Resend not clicked** |
-| STR-01A / STR-01B — Failed delivery + timeout attempts | **CAPTURED / PRE-REPLAY BASELINE** |
-| STR-02, LOG-01…04 | **NOT EXECUTED / NOT CAPTURED** |
-| LOG-05 (optional duplicate) | **OPTIONAL / BLOCKED** |
+| STR-01 / STR-01A / STR-01B — Pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
+| STR-02A — Pre-resend confirmation | **CAPTURED** |
+| STR-02B — Post-resend result | **EXECUTED ONCE / FAILED** — **404 ERR / Not Found** |
+| STR-02C — Attempt list | **CAPTURED** |
+| VRC-01 / VRC-02 — Vercel no-match log search | **CAPTURED / NO MATCH** |
+| LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
+| LOG-05 (optional duplicate) | **N/A** |
 
 Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md)
 
@@ -38,7 +41,9 @@ Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MAT
 | Item | Status |
 |------|--------|
 | G-02 sandbox webhook destination setup | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
-| G-02 staging replay | **BLOCKED / INCONCLUSIVE** — STR-02 / LOG not captured |
+| STR-02 Resend | **EXECUTED ONCE / FAILED** — HTTP 200 **NOT ACHIEVED** |
+| Vercel log correlation | **NO MATCHING RUNTIME LOGS FOUND** |
+| G-02 staging replay | **FAILED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
 | Production launch | **NO-GO** |
 | Real money | **NO-GO** |
@@ -49,9 +54,10 @@ Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MAT
 
 ## 4. Next operator actions
 
-1. Execute gated replay per runbook → **STR-02** → **LOG-01…LOG-04** (replay **not executed** yet).
-2. **Do not** send test events, click **Resend**, or create a new destination unless separately approved.
+1. **Do not** click Resend again without new approval.
+2. Investigate **404 Not Found** at staging webhook path — separate read-only / fix scope.
+3. **Do not** claim fix proven until HTTP 200 + LOG-01…LOG-04 correlated.
 
 ---
 
-*PR #55 staging replay index · STR-01 ingested 2026-05-24 · no replay executed · no Resend clicked*
+*PR #55 staging replay index · STR-02 ingested 2026-05-24 · one Resend · 404 result · no second Resend*
