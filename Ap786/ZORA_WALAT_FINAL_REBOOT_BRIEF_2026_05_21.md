@@ -70,7 +70,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | PR **#51** | Merged — remediation + fast ACK design + idempotency + replay + observability + pilot gate **FILED** |
 | Implementation approval | [Gate pack](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING** — branch **NOT CREATED** |
 
-### Post–PR #55 / G-02 (2026-05-23)
+### Post–PR #55 / G-02 (2026-05-23 / 2026-05-24)
 
 | Item | Status |
 |------|--------|
@@ -79,11 +79,13 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | PR **#59** | G-02 unblock approval pack **MERGED** |
 | PR **#60** | G-02 approval routing pack **MERGED** |
 | PR **#61** | G-02 approver review + dry-run rehearsal pack **MERGED** |
+| PR **#63** | Existing active sandbox webhook destination **CAPTURED** (DEST-01) |
+| PR **#64** | STR-01 pre-replay timeout baseline **CAPTURED** |
 | G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** — [dry-run](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) |
-| G-02 approver review | **PENDING REVIEW / NOT APPROVED** — [review packet](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) |
-| G-02 approval decision | **PENDING / NOT APPROVED** — [routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) |
+| G-02 sandbox webhook destination | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
+| STR-01 pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
+| STR-02 resend / replay | **NOT EXECUTED / APPROVAL GATED** — [STR-02 gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) |
 | G-02 staging replay | **BLOCKED / INCONCLUSIVE** — [evidence index](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) |
-| G-02 sandbox webhook destination | **APPROVAL REQUIRED / NOT EXECUTED** — [unblock pack](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) |
 | Fix proven | **NOT YET** |
 
 ---
@@ -117,7 +119,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | WCAG / full manual a11y | **NOT PROVEN** |
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 | Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
-| G-02 staging webhook replay (PR #55) | **BLOCKED / INCONCLUSIVE** — dry-run **FILED / EXECUTION NOT AUTHORIZED**; [rehearsal pack](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) |
+| G-02 staging webhook replay (PR #55) | **BLOCKED / INCONCLUSIVE** — STR-01 **CAPTURED**; STR-02 **NOT EXECUTED**; [STR-02 gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) |
 | G-02 fix proven | **NOT YET** |
 
 ---

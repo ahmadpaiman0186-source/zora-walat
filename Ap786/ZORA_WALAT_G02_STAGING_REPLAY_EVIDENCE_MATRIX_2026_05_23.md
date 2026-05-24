@@ -3,7 +3,7 @@
 **Date:** 2026-05-24 (updated)
 **Gate:** G-02
 **Folder:** [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
-**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [CAPTURE_MAP](./ZORA_WALAT_G02_SCREENSHOT_CAPTURE_MAP_2026_05_23.md)
+**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [CAPTURE_MAP](./ZORA_WALAT_G02_SCREENSHOT_CAPTURE_MAP_2026_05_23.md) · [STR-02 gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md)
 
 ---
 
@@ -20,7 +20,8 @@
 | **STR-01** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png` | **CAPTURED / PRE-REPLAY BASELINE** | Pre-replay event detail; failed delivery visible |
 | **STR-01A** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png` | **CAPTURED / PRE-REPLAY BASELINE** | Failed delivery row (pre-replay) |
 | **STR-01B** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png` | **CAPTURED / PRE-REPLAY BASELINE** | **3× Timed out** before replay |
-| **STR-02** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` | **NOT EXECUTED / NOT CAPTURED** | Post-replay HTTP 200 |
+| **STR-02** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-POST-RESEND-HTTP200-002.png` | **NOT EXECUTED / NOT CAPTURED** | Post-replay HTTP 200 |
+| **STR-02A** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-STR02-PRE-RESEND-CONFIRMATION-001.png` | **NOT CAPTURED** | Pre-Resend confirmation |
 | **LOG-01** | `VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png` | **NOT CAPTURED** | `webhook_received` |
 | **LOG-02** | `VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png` | **NOT CAPTURED** | `signature_verified` |
 | **LOG-03** | `VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png` | **NOT CAPTURED** | `event_persisted` |
@@ -32,13 +33,13 @@
 ## 2. Dependency chain
 
 ```text
-APPROVAL (decision record)
-    → DEST-01 (destination create)
-        → STR-01 (event + pre-replay)
-            → STR-02 (replay 200)
+APPROVAL (STR-02 phrase: APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY)
+    → STR-02A (pre-resend confirmation)
+        → Single Resend
+            → STR-02B (replay HTTP 200)
                 → LOG-01…LOG-04 (Vercel correlation)
                     → LOG-05 (optional duplicate)
-                        → conservative verdict update
+                        → conservative verdict update (human review)
 ```
 
 ---
@@ -62,6 +63,7 @@ APPROVAL (decision record)
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
 | STR-01 pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
+| STR-02 resend / replay | **NOT EXECUTED / APPROVAL GATED** — [STR-02 gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
 | Production launch | **NO-GO** |
