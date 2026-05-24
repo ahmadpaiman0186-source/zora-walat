@@ -13,7 +13,9 @@
 
 | ID | Filename | Source | When to capture | Status |
 |----|----------|--------|-----------------|--------|
-| **DEST-01** | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-CREATED-001.png` | Stripe Sandboxes → Webhooks → destination detail | After approved destination create; staging URL visible | **NOT CAPTURED / BLOCKED** |
+| **DEST-01** | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png` | Stripe Sandboxes → Webhooks → `zora-walat-api-staging` **Active** | Existing destination; **no new destination created** | **CAPTURED / REVIEW PENDING** |
+| **DEST-01A** | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png` | Destination overview | Corroboration; signing secret masked | **CAPTURED / REVIEW PENDING** |
+| **DEST-01B** | `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png` | Destination details — **7 events** | Signing secret hidden only | **CAPTURED / REVIEW PENDING** |
 | **STR-01** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png` | Stripe → destination → Event deliveries | **Before** any Resend; pre-replay baseline | **NOT CAPTURED / BLOCKED** |
 | **STR-02** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` | Same — delivery detail | **After** single Resend; HTTP **200** visible | **NOT CAPTURED / BLOCKED** |
 | **LOG-01** | `VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png` | Vercel → `zora-walat-api-staging` → Logs | Search `webhook_received`; ±15 min of STR-02 | **NOT CAPTURED / BLOCKED** |
@@ -59,7 +61,8 @@ Minimum correlated proof: [evidence acceptance criteria](./ZORA_WALAT_G02_EVIDEN
 | Item | Status |
 |------|--------|
 | G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
-| Future captures DEST-01…LOG-05 | **NOT CAPTURED / BLOCKED** |
+| DEST-01 (active-existing) | **CAPTURED / REVIEW PENDING** |
+| Future captures STR-01…LOG-05 | **NOT CAPTURED / BLOCKED** |
 | G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |

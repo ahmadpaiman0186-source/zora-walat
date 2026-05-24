@@ -23,8 +23,9 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | Scaffold | **CREATED** |
 | PR #55 merged to `main` | **CONFIRMED** |
 | Staging deployment proof (DEP-01) | **CAPTURED / REVIEW PENDING** |
-| Sandbox: no webhook destination (BLK-01) | **CAPTURED / BLOCKER EVIDENCE** |
+| Sandbox: no webhook destination (BLK-01) | **CAPTURED / BLOCKER EVIDENCE** (historical) |
 | Sandbox: no expired event deliveries (BLK-02) | **CAPTURED / BLOCKER EVIDENCE** |
+| Sandbox: existing active destination (DEST-01) | **CAPTURED / REVIEW PENDING** — **no new destination created** |
 | Stripe replay proof (STR-01, STR-02) | **BLOCKED / NOT CAPTURED** |
 | Vercel lifecycle logs (LOG-01…04) | **BLOCKED** (no replay) |
 | **G-02 staging replay overall** | **BLOCKED / INCONCLUSIVE** |
@@ -40,6 +41,9 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | [VERCEL-STAGING-DEPLOYMENT-PR55-COMMIT-001.png](./VERCEL-STAGING-DEPLOYMENT-PR55-COMMIT-001.png) | `zora-walat-api-staging` Deployments — **Ready**, **main**, **`0cac02e`** |
 | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png) | Workbench **Webhooks** → **Create an event destination** — no existing staging destination |
 | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png) | Sandboxes Events — `checkout.session.expired` — **No event deliveries found** |
+| [STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png) | Webhooks — `zora-walat-api-staging` — **Active**; staging endpoint |
+| [STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png) | Destination overview — **Active**; secret masked |
+| [STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png](./STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png) | **7 events**; signing secret hidden |
 
 ---
 
@@ -49,9 +53,11 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 |-------------|--------|
 | Pass A — `Downloads\Telegram Desktop` batch `15-51-42` | DEP-01 + BLK-02 filed |
 | Pass B — Telegram Desktop UWP `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.jpg` | BLK-01 filed |
-| Canonical PNG filenames in Ap786 | **YES** (3 captures) |
+| Pass C — Telegram Desktop UWP `ACTIVE-EXISTING-001` / `DETAILS-002` / `SIGNING-SECRET-MASKED-003` | DEST-01 filed |
+| Canonical PNG filenames in Ap786 | **YES** (6 captures) |
 | Raw source `.jpg` / `photo_*` in Ap786 | **NO** |
-| Webhook destination created (**Continue** clicked) | **NO** |
+| New webhook destination created | **NO** — existing **Active** destination only |
+| Send test events executed | **NO** |
 | Replay / Stripe / Vercel mutation | **NO** |
 | Fix proven / production-ready claim | **NO** |
 

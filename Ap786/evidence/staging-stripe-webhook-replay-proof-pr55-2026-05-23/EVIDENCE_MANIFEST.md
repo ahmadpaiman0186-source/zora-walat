@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Merge SHA (main):** `c521b0f` · feature `abb9531` · staging deploy **`0cac02e`** (PR #56 descendant, includes PR #55)
 **Mode:** Stripe **test / sandbox only** · Vercel **staging only**
-**Last ingestion:** BLK-01 from Telegram Desktop UWP — see [§6](#6-telegram-source-ingestion-attestation)
+**Last ingestion:** DEST-01 (existing active destination) from Telegram Desktop UWP — see [§6](#6-telegram-source-ingestion-attestation)
 
 **Policy:** No fabricated screenshots. No **PASS** without filed PNG and operator review.
 
@@ -30,11 +30,15 @@
 
 ---
 
-## 2b. Sandbox destination proof (pending approval)
+## 2b. Sandbox destination proof (existing active — no new destination created)
 
 | Evidence ID | Filename | Source | Capture instructions | Redaction | Status | Proves | Does not prove |
 |-------------|----------|--------|----------------------|-----------|--------|--------|----------------|
-| **DEST-01** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-CREATED-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-CREATED-001.png) | Stripe Dashboard → **Sandboxes** → Workbench → **Webhooks** | After [G-02 approval](../../ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md): destination created for `https://zora-walat-api-staging.vercel.app/webhooks/stripe`; test-mode only | Account ID → `REDACTED_STRIPE_ACCOUNT_ID` | **PENDING APPROVAL / NOT CAPTURED** | Sandbox destination registered to staging URL | Replay success; fix proven |
+| **DEST-01** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png) | Stripe **Sandboxes** → Workbench → **Webhooks** → `zora-walat-api-staging` | Existing destination **Active**; endpoint `https://zora-walat-api-staging.vercel.app/webhooks/stripe`; sandbox banner visible; **no new destination created** | URL account token → black bar; destination ID redacted | **CAPTURED / REVIEW PENDING** | Existing sandbox webhook destination **found active** at staging URL | Replay success; fix proven |
+| **DEST-01A** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png) | Same destination — **Overview** / performance panel | Confirms **Active** status and staging endpoint; signing secret **masked only** | URL bar + signing secret block redacted | **CAPTURED / REVIEW PENDING** | Destination detail corroboration | Signing secret value |
+| **DEST-01B** | [STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png](./STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png) | Same destination — **Destination details** | **Listening to: 7 events**; API version visible; signing secret **hidden/masked** — not revealed | URL bar + signing secret section redacted | **CAPTURED / REVIEW PENDING** | Event subscription count + masked secret posture | Secret value; replay proof |
+
+**Note:** Operator dashboard review after approval phrase `APPROVE G-02 SANDBOX WEBHOOK DESTINATION SETUP ONLY` found destination **already exists** — **Continue / Add destination / Edit destination not clicked**; **Send test events not executed**; **replay not executed**.
 
 ---
 
@@ -45,7 +49,7 @@
 | **STR-01** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png) | Stripe Dashboard → Webhooks → staging endpoint → Event deliveries | **Before** replay: target `checkout.session.expired` delivery row | Event IDs → `REDACTED_EVT_*` | **BLOCKED / NOT CAPTURED** | — | — |
 | **STR-02** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png) | Same path — delivery detail | **After** replay: HTTP **200** | Same as STR-01 | **BLOCKED / NOT CAPTURED** | — | — |
 
-**Block reason:** BLK-01 shows **no existing sandbox webhook destination**; BLK-02 shows **No event deliveries found** for `checkout.session.expired`.
+**Block reason:** BLK-02 and missing STR-01/STR-02/LOG captures — **DEST-01 filed** (existing active destination); **replay not executed**.
 
 ---
 
@@ -70,7 +74,8 @@
 | M-03 | BLK-02 filed (no event deliveries blocker) | **CAPTURED / BLOCKER EVIDENCE** |
 | M-03b | G-02 approval pack filed | **FILED** — [unblock pack](../../ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) |
 | M-03c | G-02 decision record APPROVED | **PENDING / NOT APPROVED** |
-| M-03d | DEST-01 filed | **PENDING APPROVAL / NOT CAPTURED** |
+| M-03d | DEST-01 filed (existing active destination) | **CAPTURED / REVIEW PENDING** |
+| M-03e | DEST-01A / DEST-01B filed | **CAPTURED / REVIEW PENDING** |
 | M-04 | STR-01 filed | **BLOCKED / NOT CAPTURED** |
 | M-05 | STR-02 filed | **BLOCKED / NOT CAPTURED** |
 | M-06 | LOG-01…LOG-04 filed (correlated window) | **BLOCKED** (no replay) |
@@ -106,8 +111,20 @@
 | Raw `photo_*` / source `.jpg` stored in Ap786 | **NO** (PNG only) |
 | Stripe / Vercel replay or mutation executed | **NO** |
 | Stripe webhook destination added (**Continue** not clicked) | **NO** |
+| New destination created during this review | **NO** — existing active destination only |
+| Send test events executed | **NO** |
 | Production / live-money / fix-proven claim | **NO** |
+
+### Pass C — existing active destination (Telegram Desktop UWP, 2026-05-24)
+
+**Source folder:** `...\TelegramMessengerLLP.TelegramDesktop_*\LocalCache\Roaming\Telegram Desktop UWP\`
+
+| Source file | Classification | Target artifact | Status |
+|-------------|----------------|-----------------|--------|
+| `STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.jpg` | Sandboxes → Workbench → **Webhooks** → `zora-walat-api-staging` — **Active**; staging endpoint URL visible | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png` | **CAPTURED / REVIEW PENDING** |
+| `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.jpg` | Destination **Overview** — **Active**; performance chart; signing secret masked | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png` | **CAPTURED / REVIEW PENDING** |
+| `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.jpg` | **Destination details** — **Listening to: 7 events**; signing secret hidden | `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png` | **CAPTURED / REVIEW PENDING** |
 
 ---
 
-*Manifest · BLK-01 ingested 2026-05-23 · G-02 BLOCKED / INCONCLUSIVE · no replay executed*
+*Manifest · DEST-01 ingested 2026-05-24 · G-02 replay BLOCKED / INCONCLUSIVE · no replay executed*
