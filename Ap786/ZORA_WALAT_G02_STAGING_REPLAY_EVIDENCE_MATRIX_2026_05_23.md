@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Gate:** G-02
 **Folder:** [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
-**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md)
+**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [CAPTURE_MAP](./ZORA_WALAT_G02_SCREENSHOT_CAPTURE_MAP_2026_05_23.md)
 
 ---
 
@@ -53,6 +53,9 @@ APPROVAL (decision record)
 
 | Item | Status |
 |------|--------|
+| G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
+| G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
+| G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
