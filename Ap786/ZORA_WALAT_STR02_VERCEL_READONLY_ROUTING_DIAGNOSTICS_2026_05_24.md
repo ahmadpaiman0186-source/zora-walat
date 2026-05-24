@@ -9,15 +9,18 @@
 
 ---
 
-## 1. Current state (post PR #67)
+## 1. Current state (post PR #68)
 
 | Item | Status |
 |------|--------|
-| `main` | Clean and synced after PR #67 |
+| `main` | Clean and synced after PR #68 |
 | PR #66 | STR-02 executed once — **404 ERR / Not Found** |
 | PR #67 | STR-02 404 routing/root-cause investigation pack **FILED** |
+| PR #68 | STR-02 Vercel read-only diagnostics scaffold **MERGED** |
 | Vercel runtime logs (STR-02 window) | **NO MATCH** for `/webhooks/stripe` or `stripe` (VRC-01, VRC-02) |
-| Vercel project diagnostics (this pack) | **SCAFFOLD FILED** — captures **PENDING** |
+| Vercel project settings (VRC-D01, VRC-D02) | **CAPTURED** — Root Directory = **`./`** |
+| Vercel supporting build settings (D02A…D02D) | **CAPTURED** |
+| Deployment / domain / logs (VRC-D03…D07) | **PENDING CAPTURE** |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Production / real-money / pilot | **NO-GO** |
@@ -53,7 +56,7 @@
 
 | Phase | Checklist | Evidence IDs |
 |-------|-----------|--------------|
-| 1 — Project root | [Project root evidence checklist](./ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md) | VRC-D01, VRC-D02 |
+| 1 — Project root | [Project root evidence checklist](./ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md) | VRC-D01, VRC-D02, **D02A…D02D** |
 | 2 — Deployment | [Deployment output checklist](./ZORA_WALAT_STR02_VERCEL_DEPLOYMENT_OUTPUT_EVIDENCE_CHECKLIST_2026_05_24.md) | VRC-D03, VRC-D04, VRC-D05 |
 | 3 — Domain | [Domain mapping checklist](./ZORA_WALAT_STR02_VERCEL_DOMAIN_MAPPING_EVIDENCE_CHECKLIST_2026_05_24.md) | VRC-D06 |
 | 4 — Logs | Logs search (no correlation) | VRC-D07 (+ VRC-01/02 cross-ref) |
@@ -73,7 +76,9 @@
 
 **Diagnostic question:** Does `zora-walat-api-staging` show Root Directory = **`server`** (VRC-D01)?
 
-**If root = empty or `/`:** H2/H3 **more plausible** — deployed app may not expose `POST /webhooks/stripe`.
+**Captured (2026-05-24):** Root Directory = **`./`** (repo root) — **not** `server`.
+
+**If root = empty or `/` or `./`:** H2/H3 **more plausible** — deployed app may not expose `POST /webhooks/stripe`. **Strengthens** monorepo-root routing mismatch hypothesis; root cause **NOT CONFIRMED** until deploy output (VRC-D03…D05) reviewed.
 
 ---
 
@@ -88,9 +93,9 @@ Repo root (vercel.json: nextjs)
 | Configuration | Expected webhook exposure |
 |---------------|---------------------------|
 | Root Directory = **`server`** | Catch-all → `api/index.mjs` → **should** handle `/webhooks/stripe` |
-| Root Directory = **empty (repo root)** | Next.js app — **may not** expose `/webhooks/stripe` → **404 plausible** |
+| Root Directory = **empty (repo root)** / **`./`** | Next.js app — **may not** expose `/webhooks/stripe` → **404 plausible** |
 
-**Status:** **NOT CONFIRMED** until VRC-D01/D02 filed.
+**Status:** VRC-D01 **CAPTURED** — Root Directory = **`./`**. H2 **STRENGTHENED / NOT CONFIRMED** (await VRC-D03…D05).
 
 ---
 
@@ -135,12 +140,12 @@ Repo root (vercel.json: nextjs)
 
 | # | Required evidence | Status |
 |---|-------------------|--------|
-| E-01 | VRC-D01 — Root Directory = `server` or not | **PENDING** |
-| E-02 | VRC-D02 — Framework / build not Next.js for API project | **PENDING** |
+| E-01 | VRC-D01 — Root Directory = `server` or not | **CAPTURED** — Root Directory = **`./`** (not `server`) |
+| E-02 | VRC-D02 — Framework / build not Next.js for API project | **PARTIAL** — Build and Deployment page captured; framework preset detail **PENDING** dedicated frame |
 | E-03 | VRC-D03 — Deploy SHA + branch at STR-02 window | **PENDING** |
 | E-04 | VRC-D04/D05 — `api/index.mjs` in build / functions list | **PENDING** |
 | E-05 | VRC-D06 — Domain → this project | **PENDING** |
-| E-06 | Hypothesis matrix updated with **CONFIRMED / REJECTED** | **PENDING** |
+| E-06 | Hypothesis matrix updated with **CONFIRMED / REJECTED** | **PARTIAL** — H2 strengthened only |
 | E-07 | Human review — root cause statement | **PENDING** |
 
 **Rule:** **No code fix** until E-01…E-07 satisfied and separate implementation approval issued.
@@ -167,7 +172,8 @@ Repo root (vercel.json: nextjs)
 | HTTP 200 | **NOT ACHIEVED** |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | Vercel runtime correlation | **NOT FOUND** |
-| Vercel project diagnostics captures | **PENDING CAPTURE** |
+| Vercel project settings captures | **CAPTURED** (VRC-D01, VRC-D02, D02A…D02D) |
+| Deployment / domain / log captures | **PENDING** (VRC-D03…D07) |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
@@ -176,4 +182,4 @@ Repo root (vercel.json: nextjs)
 
 ---
 
-*Vercel read-only diagnostics · docs/evidence only · no deploy · captures PENDING*
+*Vercel read-only diagnostics · D01/D02 CAPTURED · D03–D07 PENDING · no deploy*

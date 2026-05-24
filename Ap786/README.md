@@ -139,9 +139,11 @@
 | [ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md) | Diagnostic verdict — update post-capture |
 | [evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/README.md) | Evidence folder + [manifest](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/EVIDENCE_MANIFEST.md) |
 
-**Screenshot IDs:** VRC-D01…D07 — **PENDING CAPTURE** (007 cross-ref VRC-01/02 filed in replay folder)
+**Screenshot IDs:** VRC-D01, VRC-D02, D02A…D02D — **CAPTURED** · VRC-D03…D07 — **PENDING CAPTURE**
 
-**Verdict:** Vercel project diagnostics **PENDING CAPTURE** · root cause **NOT CONFIRMED** · fix **NOT IMPLEMENTED** · prod/pilot **NO-GO**.
+**Key finding:** Root Directory = **`./`** (not `server`) — **strengthens H2** · root cause **NOT CONFIRMED**
+
+**Verdict:** Vercel project settings **CAPTURED** · deployment/domain/logs **PENDING** · fix **NOT IMPLEMENTED** · prod/pilot **NO-GO**.
 
 ---
 

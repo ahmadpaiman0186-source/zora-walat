@@ -18,17 +18,48 @@ Register **read-only** Vercel diagnostic evidence to discriminate routing hypoth
 
 | Item | Status |
 |------|--------|
-| Diagnostic pack scaffold | **CREATED** |
-| Vercel project settings captures (VRC-D01…D02) | **PENDING CAPTURE** |
+| Diagnostic pack scaffold | **CREATED** (PR #68) |
+| Vercel project settings (VRC-D01, VRC-D02) | **CAPTURED** |
+| Supporting build settings (VRC-D02A…D02D) | **CAPTURED** |
 | Deployment source / output / functions (VRC-D03…D05) | **PENDING CAPTURE** |
 | Domain alias mapping (VRC-D06) | **PENDING CAPTURE** |
-| Runtime log no-correlation (VRC-D07) | **PENDING CAPTURE** (see cross-ref VRC-01/02) |
+| Runtime log no-correlation (VRC-D07) | **PENDING CAPTURE** (cross-ref VRC-01/02) |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
 | Production / real-money / pilot | **NO-GO** |
 
 Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
+
+---
+
+## Key captured values (2026-05-24)
+
+| Setting | Observed value |
+|---------|----------------|
+| Root Directory | **`./`** (repo root — **not** `server`) |
+| Node.js Version | **24.x** |
+| Ignored Build Step | **Automatic** |
+| On-demand Concurrent Builds | **Disabled** (queued, one at a time) |
+| Build Machine | **Team Default (None)** |
+| Deployment Checks | **No checks configured** |
+| Rolling Releases | **Disabled** |
+| Prioritize Production Builds | **Enabled** |
+
+**Diagnostic note:** Root Directory = `./` **strengthens** monorepo-root routing mismatch hypothesis (**H2**). Root cause **NOT CONFIRMED**.
+
+---
+
+## Filed screenshots
+
+| File | Evidence ID |
+|------|-------------|
+| [VERCEL-STAGING-PROJECT-SETTINGS-GENERAL-ROOT-DIRECTORY-001.png](./VERCEL-STAGING-PROJECT-SETTINGS-GENERAL-ROOT-DIRECTORY-001.png) | VRC-D01 |
+| [VERCEL-STAGING-PROJECT-SETTINGS-FRAMEWORK-BUILD-002.png](./VERCEL-STAGING-PROJECT-SETTINGS-FRAMEWORK-BUILD-002.png) | VRC-D02 |
+| [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-NODE-IGNORED-BUILD-002A.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-NODE-IGNORED-BUILD-002A.png) | VRC-D02A |
+| [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png) | VRC-D02B |
+| [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png) | VRC-D02C |
+| [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png) | VRC-D02D |
 
 ---
 
@@ -59,4 +90,4 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ---
 
-*STR-02 Vercel read-only diagnostics · evidence scaffold · captures PENDING*
+*STR-02 Vercel read-only diagnostics · D01/D02 CAPTURED · D03–D07 PENDING*
