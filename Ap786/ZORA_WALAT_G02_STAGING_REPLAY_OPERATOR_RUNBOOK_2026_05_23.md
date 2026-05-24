@@ -1,10 +1,12 @@
 # G-02 — Staging Replay Operator Runbook
 
-**Date:** 2026-05-23
+**Date:** 2026-05-24 (updated)
 **Gate:** G-02 · **NOT EXECUTED**
-**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [ALLOWED_ACTIONS](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md) · [DRY_RUN](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md)
+**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [ALLOWED_ACTIONS](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md) · [DRY_RUN](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) · [STR-02 gate](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) · [STR-02 runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md)
 
-**Policy:** Future operator execution only. **Do not run** until decision record **APPROVED**. Rehearse on paper via [dry-run](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) first.
+**Policy:** Future operator execution only. **Do not run** until STR-02 approval phrase issued. STR-01 baseline **filed** (PR #64). STR-02 Resend **NOT EXECUTED**.
+
+**Current state:** DEST-01 and STR-01 **CAPTURED**. For Resend/replay, use [STR-02 operator runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md) after phrase `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`.
 
 ---
 
@@ -123,11 +125,12 @@ Window: ±15 minutes from Phase 5 timestamp.
 | Item | Status |
 |------|--------|
 | G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
-| Runbook execution | **NOT EXECUTED** |
-| G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
+| DEST-01 / STR-01 | **CAPTURED** (PR #63 / #64) |
+| STR-02 Resend / replay | **NOT EXECUTED / APPROVAL GATED** — [STR-02 runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md) |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
+| Production / real-money / pilot | **NO-GO** |
 
 ---
 
-*Operator runbook · future execution · no steps authorized until approval*
+*Operator runbook · STR-02 gate filed 2026-05-24 · no Resend executed*

@@ -88,9 +88,26 @@
 | [ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md](./ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md) | Sufficient vs insufficient evidence |
 | [ZORA_WALAT_G02_NO_GO_RECONFIRMATION_2026_05_23.md](./ZORA_WALAT_G02_NO_GO_RECONFIRMATION_2026_05_23.md) | Launch gates reconfirmed **NO-GO** |
 | [ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) | PR #55 staging replay index |
-| [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02 filed |
+| [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02, DEST-01, STR-01 filed |
 
-**Verdict:** G-02 execution dry-run **FILED / EXECUTION NOT AUTHORIZED** · approver review **PENDING REVIEW / NOT APPROVED** · approval decision **PENDING / NOT APPROVED** · sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+**Verdict:** G-02 execution dry-run **FILED / EXECUTION NOT AUTHORIZED** · STR-01 **CAPTURED / PRE-REPLAY BASELINE** (PR #64) · STR-02 **NOT EXECUTED / APPROVAL GATED** · LOG-01…LOG-04 **NOT CAPTURED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+
+---
+
+## Start here — G-02 STR-02 Resend / Replay Execution Gate (2026-05-24)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md](./ZORA_WALAT_G02_STR02_RESEND_REPLAY_EXECUTION_GATE_2026_05_24.md) | **STR-02 gate** — approval phrase; prerequisites; **NOT EXECUTED** |
+| [ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md) | Phased Resend runbook — **NOT EXECUTED** |
+| [ZORA_WALAT_G02_STR02_APPROVAL_CHECKLIST_2026_05_24.md](./ZORA_WALAT_G02_STR02_APPROVAL_CHECKLIST_2026_05_24.md) | Pre-Resend checklist — all boxes default unchecked |
+| [ZORA_WALAT_G02_STR02_ABORT_AND_ROLLBACK_PLAN_2026_05_24.md](./ZORA_WALAT_G02_STR02_ABORT_AND_ROLLBACK_PLAN_2026_05_24.md) | Abort triggers + safe stop — plan only |
+| [ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md](./ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md) | STR-02A/B + LOG-01…LOG-04 capture spec |
+| [ZORA_WALAT_G02_STR02_RISK_REGISTER_2026_05_24.md](./ZORA_WALAT_G02_STR02_RISK_REGISTER_2026_05_24.md) | STR-02 risks — all **OPEN** |
+
+**Required approval phrase (future execution):** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`
+
+**Verdict:** STR-02 **NOT EXECUTED** · Resend **NOT CLICKED** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO**.
 
 ---
 
