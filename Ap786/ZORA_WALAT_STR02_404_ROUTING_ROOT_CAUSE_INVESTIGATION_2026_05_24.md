@@ -12,11 +12,10 @@
 
 | Item | Status |
 |------|--------|
-| `main` | Clean and synced after PR #66 |
-| PR #63 | Existing active sandbox webhook destination (DEST-01) |
-| PR #64 | STR-01 pre-replay timeout baseline |
-| PR #65 | STR-02 resend/replay execution gate |
+| `main` | Clean and synced after PR #67 |
 | PR #66 | STR-02 resend evidence (404 + Vercel no-match) |
+| PR #67 | STR-02 404 routing/root-cause investigation pack **FILED** |
+| Vercel read-only diagnostics pack | **SCAFFOLD FILED** — VRC-D01…D07 **PENDING CAPTURE** |
 | STR-02 Resend | **EXECUTED ONCE** — sandbox/test-mode only |
 | STR-02 result | **404 ERR / Not Found** |
 | HTTP 200 | **NOT ACHIEVED** |
@@ -53,6 +52,9 @@
 | [Safe diagnostic plan](./ZORA_WALAT_STR02_404_SAFE_DIAGNOSTIC_PLAN_2026_05_24.md) | Read-only checks — no mutation |
 | [Fix option matrix](./ZORA_WALAT_STR02_404_FIX_OPTION_MATRIX_2026_05_24.md) | Options — **NOT IMPLEMENTED** |
 | [NO-GO reconfirmation](./ZORA_WALAT_STR02_404_NO_GO_RECONFIRMATION_2026_05_24.md) | Launch gates |
+| [Vercel read-only diagnostics](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md) | Dashboard evidence pack — captures **PENDING** |
+
+**Evidence folder:** [str02-vercel-readonly-routing-diagnostics-2026-05-24/](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/README.md)
 
 ---
 
