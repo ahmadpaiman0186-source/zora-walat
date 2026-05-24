@@ -23,8 +23,8 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | Scaffold | **CREATED** |
 | PR #55 merged to `main` | **CONFIRMED** |
 | Staging deployment proof (DEP-01) | **CAPTURED / REVIEW PENDING** |
+| Sandbox: no webhook destination (BLK-01) | **CAPTURED / BLOCKER EVIDENCE** |
 | Sandbox: no expired event deliveries (BLK-02) | **CAPTURED / BLOCKER EVIDENCE** |
-| Sandbox: webhook destination (BLK-01) | **NOT CAPTURED** (not in Telegram batch) |
 | Stripe replay proof (STR-01, STR-02) | **BLOCKED / NOT CAPTURED** |
 | Vercel lifecycle logs (LOG-01…04) | **BLOCKED** (no replay) |
 | **G-02 staging replay overall** | **BLOCKED / INCONCLUSIVE** |
@@ -38,9 +38,8 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | PNG | Summary |
 |-----|---------|
 | [VERCEL-STAGING-DEPLOYMENT-PR55-COMMIT-001.png](./VERCEL-STAGING-DEPLOYMENT-PR55-COMMIT-001.png) | `zora-walat-api-staging` Deployments — **Ready**, **main**, **`0cac02e`** |
+| [STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png) | Workbench **Webhooks** → **Create an event destination** — no existing staging destination |
 | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png) | Sandboxes Events — `checkout.session.expired` — **No event deliveries found** |
-
-**Pending:** `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png`
 
 ---
 
@@ -48,10 +47,11 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 
 | Attestation | Result |
 |-------------|--------|
-| Source | `C:\Users\ahmad\Downloads\Telegram Desktop` batch `15-51-42` |
-| Files reviewed | 2 (`photo_1`, `photo_2`) |
-| Canonical PNG filenames filed | **YES** (2 of 3 expected) |
-| Raw `photo_*` in Ap786 | **NO** |
+| Pass A — `Downloads\Telegram Desktop` batch `15-51-42` | DEP-01 + BLK-02 filed |
+| Pass B — Telegram Desktop UWP `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.jpg` | BLK-01 filed |
+| Canonical PNG filenames in Ap786 | **YES** (3 captures) |
+| Raw source `.jpg` / `photo_*` in Ap786 | **NO** |
+| Webhook destination created (**Continue** clicked) | **NO** |
 | Replay / Stripe / Vercel mutation | **NO** |
 | Fix proven / production-ready claim | **NO** |
 
@@ -84,4 +84,4 @@ Details: [EVIDENCE_MANIFEST.md §6](./EVIDENCE_MANIFEST.md#6-telegram-source-ing
 
 ---
 
-*PR #55 staging replay evidence · Telegram ingestion 2026-05-23 · no replay executed*
+*PR #55 staging replay evidence · BLK-01 ingested 2026-05-23 · no replay executed*

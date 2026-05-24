@@ -1,7 +1,7 @@
 # Zora-Walat — Staging Stripe Webhook Replay Proof (PR #55)
 
 **Date:** 2026-05-23
-**Status:** **PARTIAL CAPTURE** · G-02 **BLOCKED / INCONCLUSIVE** · fix **NOT YET PROVEN**
+**Status:** **BLOCKER EVIDENCE FILED** · G-02 **BLOCKED / INCONCLUSIVE** · fix **NOT YET PROVEN**
 **Gate:** G-02 · staging-only evidence registration
 **Merge:** PR #55 → `main` @ `c521b0f` · staging deploy **`main` @ `0cac02e`** (DEP-01)
 
@@ -9,7 +9,7 @@
 
 ## 1. Purpose
 
-Index for operator-driven **staging** validation of Track H (PR #55). **Deployment proof captured; replay proof blocked** pending sandbox webhook/event substrate.
+Index for operator-driven **staging** validation of Track H (PR #55). **Deployment + both sandbox blockers captured; replay still blocked.**
 
 ---
 
@@ -20,8 +20,8 @@ Index for operator-driven **staging** validation of Track H (PR #55). **Deployme
 | Capture | Status |
 |---------|--------|
 | DEP-01 — Vercel staging deploy | **CAPTURED / REVIEW PENDING** |
+| BLK-01 — No webhook destination (create flow) | **CAPTURED / BLOCKER EVIDENCE** |
 | BLK-02 — No `checkout.session.expired` deliveries | **CAPTURED / BLOCKER EVIDENCE** |
-| BLK-01 — Webhook destination not found | **NOT CAPTURED** |
 | STR-01, STR-02, LOG-01…04 | **BLOCKED** |
 
 ---
@@ -40,10 +40,10 @@ Index for operator-driven **staging** validation of Track H (PR #55). **Deployme
 
 ## 4. Next operator actions
 
-1. Capture **BLK-01** (Sandboxes → Webhooks).
-2. Unblock replay substrate (webhook destination + deliverable expired event).
-3. Execute gated replay per checklists — **not Agent**.
+1. Add sandbox webhook destination → staging URL (ticket approval; **not Agent**).
+2. Obtain deliverable **`checkout.session.expired`** test-mode event.
+3. Execute gated replay → STR-01 / STR-02 / LOG-01…LOG-04.
 
 ---
 
-*PR #55 staging replay index · Telegram ingestion 2026-05-23 · no replay executed*
+*PR #55 staging replay index · BLK-01 ingested 2026-05-23 · no replay executed*
