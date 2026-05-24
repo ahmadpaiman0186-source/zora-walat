@@ -115,7 +115,7 @@ See master table BL-M01 … BL-M04.
 | BL-H02 | **PENDING** | _Payments owner_ |
 | BL-H04 | **PARTIAL** | _Payments + engineering_ |
 | STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; [implementation approval](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING**; fix **NOT EXECUTED** |
-| **G-02-WH-STG** | **BLOCKED / INCONCLUSIVE** | _Payments + engineering_ — BLK-01/BLK-02 filed; [unblock pack](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) + [routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) on `main` (PR #59); approval **PENDING / NOT APPROVED**; destination **NOT EXECUTED**; fix **NOT YET** |
+| **G-02-WH-STG** | **BLOCKED / INCONCLUSIVE** | _Payments + engineering_ — BLK-01/BLK-02 filed; [approver review](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) **PENDING REVIEW / NOT APPROVED**; approval **PENDING / NOT APPROVED**; destination **NOT EXECUTED**; fix **NOT YET** |
 
 ---
 
