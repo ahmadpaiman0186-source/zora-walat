@@ -8,7 +8,7 @@
 
 ## 1. Executive summary
 
-PR #55 is **merged to `main`** and **staging deployment from `main` is captured** (DEP-01). **G-02 staging replay proof is BLOCKED / INCONCLUSIVE:** Stripe sandbox Events search shows **No event deliveries found** for `checkout.session.expired` (BLK-02), and the staging webhook destination screenshot (BLK-01) was **not** in the operator Telegram batch. **No replay was executed.** Fix is **NOT YET PROVEN**.
+PR #55 is **merged to `main`** and **staging deployment from `main` is captured** (DEP-01). **Both sandbox blockers are now filed:** no webhook destination (BLK-01) and no `checkout.session.expired` event deliveries (BLK-02). **G-02 staging replay remains BLOCKED / INCONCLUSIVE** — no replay substrate. **No replay was executed.** Fix is **NOT YET PROVEN**.
 
 ---
 
@@ -17,7 +17,7 @@ PR #55 is **merged to `main`** and **staging deployment from `main` is captured*
 | Area | Required artifacts | Status |
 |------|-------------------|--------|
 | Staging deployment | DEP-01 | **CAPTURED / REVIEW PENDING** |
-| Sandbox blockers | BLK-01, BLK-02 | BLK-01 **NOT CAPTURED** · BLK-02 **CAPTURED / BLOCKER EVIDENCE** |
+| Sandbox blockers | BLK-01, BLK-02 | **CAPTURED / BLOCKER EVIDENCE** (both) |
 | Stripe test-mode replay | STR-01, STR-02 | **BLOCKED / NOT CAPTURED** |
 | Vercel lifecycle logs | LOG-01 … LOG-04 | **BLOCKED** (no replay) |
 | Duplicate idempotency (optional) | LOG-05 | **BLOCKED** (no replay) |
@@ -31,8 +31,8 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 | Verdict item | Status | Notes |
 |--------------|--------|-------|
-| **G-02 staging replay** | **BLOCKED / INCONCLUSIVE** | No deliverable expired event; webhook destination not attested |
-| **Fix proven (staging)** | **NOT YET** | Deploy captured ≠ replay / lifecycle proof |
+| **G-02 staging replay** | **BLOCKED / INCONCLUSIVE** | Blockers documented; no destination + no deliverable events |
+| **Fix proven (staging)** | **NOT YET** | Blocker evidence ≠ replay / lifecycle proof |
 | **Fix proven (production)** | **NOT YET** | Out of scope |
 | **Root cause (May 19 timeout)** | **NOT CONFIRMED** | Prior failure evidence separate |
 | **Production launch** | **NO-GO** | Unchanged |
@@ -47,6 +47,7 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 | Item | Status |
 |------|--------|
 | `zora-walat-api-staging` deployed from **`main`**, **Ready**, commit **`0cac02e`** | **CAPTURED / REVIEW PENDING** (DEP-01) |
+| Sandbox Workbench → Webhooks → **Create an event destination** (no existing staging destination) | **CAPTURED / BLOCKER EVIDENCE** (BLK-01) |
 | Sandbox Events: `checkout.session.expired` → **No event deliveries found** | **CAPTURED / BLOCKER EVIDENCE** (BLK-02) |
 | PR #55 code on `main` | **CONFIRMED** (git) |
 | CI / unit tests green | **OPERATOR ATTESTED** — not replay proof |
@@ -59,7 +60,7 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 |-------|--------|
 | Staging webhook accepts `checkout.session.expired` with HTTP 200 | **NOT PROVEN** |
 | Vercel lifecycle log sequence on replay | **BLOCKED** |
-| Sandbox webhook endpoint registered to staging URL | **NOT CAPTURED** (BLK-01) |
+| Sandbox webhook destination registered to staging URL | **NOT ESTABLISHED** (create flow shown; not completed) |
 | Fix proven in staging | **NOT YET** |
 | Production webhook health | **NOT PROVEN** |
 
@@ -79,10 +80,9 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ## 7. Next unblock actions (operator)
 
-1. File **BLK-01** — Sandboxes → **Webhooks** tab showing staging destination status (read-only).
-2. Resolve replay substrate: create or locate sandbox with `checkout.session.expired` deliveries **or** document correct sandbox/webhook endpoint per Gate 4 approval.
-3. If endpoint missing → add staging webhook destination (**operator dashboard only**, not Agent) with ticket approval.
-4. After deliverable event exists → STR-01 → replay → STR-02 → LOG-01…LOG-04.
+1. With Gate 4 / G-02 ticket approval, **add** sandbox webhook destination → `https://zora-walat-api-staging.vercel.app/webhooks/stripe` (**operator dashboard only** — not Agent).
+2. Generate or locate a deliverable **`checkout.session.expired`** test-mode event.
+3. After substrate exists → STR-01 → gated replay → STR-02 → LOG-01…LOG-04.
 
 ---
 
@@ -94,4 +94,4 @@ No production-ready or fix-complete claim is authorized.
 
 ---
 
-*Conservative verdict · updated after Telegram ingestion 2026-05-23 · no replay executed*
+*Conservative verdict · BLK-01 ingested 2026-05-23 · no replay executed*

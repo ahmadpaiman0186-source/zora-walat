@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Merge SHA (main):** `c521b0f` · feature `abb9531` · staging deploy **`0cac02e`** (PR #56 descendant, includes PR #55)
 **Mode:** Stripe **test / sandbox only** · Vercel **staging only**
-**Last ingestion:** Telegram Desktop batch `2026-05-23_15-51-42` — see [§6](#6-telegram-source-ingestion-attestation)
+**Last ingestion:** BLK-01 from Telegram Desktop UWP — see [§6](#6-telegram-source-ingestion-attestation)
 
 **Policy:** No fabricated screenshots. No **PASS** without filed PNG and operator review.
 
@@ -21,12 +21,12 @@
 
 | Evidence ID | Filename | Source | Capture instructions | Redaction | Status | Proves | Does not prove |
 |-------------|----------|--------|----------------------|-----------|--------|--------|----------------|
-| **BLK-01** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png) | Stripe Dashboard → **Sandboxes** → **Webhooks** | Show sandbox webhooks list with **no** `zora-walat-api-staging` destination visible (read-only) | Account ID in URL redacted | **NOT CAPTURED** | — | — |
+| **BLK-01** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png) | Stripe Dashboard → **Sandboxes** → Workbench → **Webhooks** → **Create an event destination** | Operator routed to create-destination flow; **no** existing `zora-walat-api-staging` destination visible; **Continue** not clicked | Account ID in URL → `REDACTED_STRIPE_ACCOUNT_ID` | **CAPTURED / BLOCKER EVIDENCE** | Sandbox has no registered staging webhook destination | Destination created; replay success |
 | **BLK-02** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png) | Stripe Dashboard → **Sandboxes** → Workbench → **Events** | Search `checkout.session.expired` → **No event deliveries found** | Account ID in URL → `REDACTED_STRIPE_ACCOUNT_ID` | **CAPTURED / BLOCKER EVIDENCE** | No replayable expired delivery in current sandbox Events view | Fix proven; prior May 19 failures absent |
 
-**BLK-01 note:** Expected in operator batch but **absent** from Telegram `15-51-42` (2 images only). Operator must file before webhook destination blocker can be attested.
+**BLK-01 note:** Operator opened Workbench → Webhooks and was routed to **Create an event destination** / **Configure your event destination** — read-only capture; **no destination created**.
 
-**BLK-02 implication:** STR-01 / STR-02 replay proof **BLOCKED** until a deliverable `checkout.session.expired` event exists (or operator documents alternate sandbox with deliveries).
+**BLK-02 implication:** STR-01 / STR-02 replay proof **BLOCKED** until staging webhook destination exists **and** a deliverable `checkout.session.expired` event exists.
 
 ---
 
@@ -37,7 +37,7 @@
 | **STR-01** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png) | Stripe Dashboard → Webhooks → staging endpoint → Event deliveries | **Before** replay: target `checkout.session.expired` delivery row | Event IDs → `REDACTED_EVT_*` | **BLOCKED / NOT CAPTURED** | — | — |
 | **STR-02** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png) | Same path — delivery detail | **After** replay: HTTP **200** | Same as STR-01 | **BLOCKED / NOT CAPTURED** | — | — |
 
-**Block reason:** BLK-02 shows **No event deliveries found** for `checkout.session.expired`; staging webhook destination not attested (BLK-01 missing).
+**Block reason:** BLK-01 shows **no existing sandbox webhook destination**; BLK-02 shows **No event deliveries found** for `checkout.session.expired`.
 
 ---
 
@@ -58,7 +58,7 @@
 | # | Criterion | Status |
 |---|-----------|--------|
 | M-01 | DEP-01 filed | **CAPTURED / REVIEW PENDING** |
-| M-02 | BLK-01 filed (webhook destination blocker) | **NOT CAPTURED** |
+| M-02 | BLK-01 filed (webhook destination blocker) | **CAPTURED / BLOCKER EVIDENCE** |
 | M-03 | BLK-02 filed (no event deliveries blocker) | **CAPTURED / BLOCKER EVIDENCE** |
 | M-04 | STR-01 filed | **BLOCKED / NOT CAPTURED** |
 | M-05 | STR-02 filed | **BLOCKED / NOT CAPTURED** |
@@ -72,25 +72,31 @@
 
 ## 6. Telegram source ingestion attestation
 
-**Date:** 2026-05-23
-**Source:** `C:\Users\ahmad\Downloads\Telegram Desktop`
-**Batch reviewed:** `photo_1_2026-05-23_15-51-42.jpg`, `photo_2_2026-05-23_15-51-42.jpg` (2 files)
+### Pass A — batch `2026-05-23_15-51-42` (`Downloads\Telegram Desktop`)
 
 | Source file | Classification | Target artifact | Status |
 |-------------|----------------|-----------------|--------|
 | `photo_1_2026-05-23_15-51-42.jpg` | Vercel `zora-walat-api-staging` Deployments — **Ready**, **main**, **`0cac02e`** | `VERCEL-STAGING-DEPLOYMENT-PR55-COMMIT-001.png` | **CAPTURED / REVIEW PENDING** |
 | `photo_2_2026-05-23_15-51-42.jpg` | Stripe Sandboxes → Workbench **Events** — `checkout.session.expired` — **No event deliveries found** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-001.png` | **CAPTURED / BLOCKER EVIDENCE** (URL bar redacted) |
-| — | Stripe Sandboxes → **Webhooks** — no staging destination | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png` | **NOT IN BATCH** — not filed |
+
+### Pass B — BLK-01 (Telegram Desktop UWP)
+
+**Date:** 2026-05-23
+**Source:** `...\TelegramMessengerLLP.TelegramDesktop_*\LocalCache\Roaming\Telegram Desktop UWP\STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.jpg`
+
+| Source file | Classification | Target artifact | Status |
+|-------------|----------------|-----------------|--------|
+| `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.jpg` | Sandboxes → Workbench → **Webhooks** → **Create an event destination** — **Configure your event destination**; no existing staging destination | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.png` | **CAPTURED / BLOCKER EVIDENCE** (URL bar redacted) |
 
 | Attestation | Result |
 |-------------|--------|
-| Telegram Desktop source reviewed | **YES** |
-| Screenshots filed under canonical evidence filenames | **YES** (2 of 3 expected) |
-| Raw `photo_*` names stored in Ap786 | **NO** |
+| Telegram Desktop / UWP source reviewed | **YES** |
+| Screenshots filed under canonical evidence filenames | **YES** (3 of 3 blocker/deploy captures) |
+| Raw `photo_*` / source `.jpg` stored in Ap786 | **NO** (PNG only) |
 | Stripe / Vercel replay or mutation executed | **NO** |
-| Stripe webhook destination added | **NO** |
+| Stripe webhook destination added (**Continue** not clicked) | **NO** |
 | Production / live-money / fix-proven claim | **NO** |
 
 ---
 
-*Manifest · ingestion 2026-05-23 · G-02 BLOCKED / INCONCLUSIVE · no replay executed*
+*Manifest · BLK-01 ingested 2026-05-23 · G-02 BLOCKED / INCONCLUSIVE · no replay executed*
