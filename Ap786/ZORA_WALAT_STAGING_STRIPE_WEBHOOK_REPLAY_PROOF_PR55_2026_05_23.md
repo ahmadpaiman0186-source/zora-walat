@@ -29,6 +29,7 @@ Index for operator-driven **staging** validation of Track H (PR #55). **STR-01 b
 | STR-02B — Post-resend result | **EXECUTED ONCE / FAILED** — **404 ERR / Not Found** |
 | STR-02C — Attempt list | **CAPTURED** |
 | VRC-01 / VRC-02 — Vercel no-match log search | **CAPTURED / NO MATCH** |
+| STR-02 404 investigation pack | **FILED** — [404 root-cause investigation](../../ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | LOG-05 (optional duplicate) | **N/A** |
 
@@ -54,10 +55,11 @@ Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MAT
 
 ## 4. Next operator actions
 
-1. **Do not** click Resend again without new approval.
-2. Investigate **404 Not Found** at staging webhook path — separate read-only / fix scope.
-3. **Do not** claim fix proven until HTTP 200 + LOG-01…LOG-04 correlated.
+1. Complete read-only Vercel diagnostics per [404 safe diagnostic plan](./ZORA_WALAT_STR02_404_SAFE_DIAGNOSTIC_PLAN_2026_05_24.md).
+2. **Do not** click Resend again without new approval.
+3. If fix needed → branch `fix/str02-404-webhook-routing-staging-2026-05-24` (separate approval — **not created**).
+4. **Do not** claim fix proven until root cause confirmed and successful replay + logs.
 
 ---
 
-*PR #55 staging replay index · STR-02 ingested 2026-05-24 · one Resend · 404 result · no second Resend*
+*PR #55 staging replay index · STR-02 404 investigation filed 2026-05-24 · root cause NOT CONFIRMED*

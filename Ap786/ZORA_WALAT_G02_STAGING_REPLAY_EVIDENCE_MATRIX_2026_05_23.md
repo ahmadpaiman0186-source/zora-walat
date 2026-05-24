@@ -67,6 +67,7 @@ APPROVAL (STR-02 phrase: APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY)
 | G-02 sandbox webhook destination setup | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
 | STR-01 pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
 | STR-02 resend / replay | **EXECUTED ONCE / FAILED** — 404 ERR |
+| STR-02 404 investigation | **FILED** — root cause **NOT CONFIRMED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
 | Production launch | **NO-GO** |

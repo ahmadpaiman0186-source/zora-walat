@@ -40,7 +40,8 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 | **Vercel log correlation** | **NO MATCHING RUNTIME LOGS FOUND** | VRC-01, VRC-02 filed |
 | **Fix proven (staging)** | **NOT YET** | 404 + no log correlation ≠ fix |
 | **Fix proven (production)** | **NOT YET** | Out of scope |
-| **Root cause (May 19 timeout → May 24 404)** | **NOT CONFIRMED** | Failure mode changed; investigation required |
+| **Root cause (404 routing)** | **NOT CONFIRMED** — [investigation pack](../../ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) **FILED** |
+| **Fix implemented** | **NOT IMPLEMENTED** |
 | **Production launch** | **NO-GO** | Unchanged |
 | **Real money** | **NO-GO** | Unchanged |
 | **Controlled pilot** | **NO-GO** | Unchanged |
@@ -91,15 +92,16 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ## 7. Next operator actions
 
-1. **Do not** click Resend again without new approval.
-2. Investigate **404 Not Found** at staging URL (routing, deploy, path, Vercel project) — **read-only / separate approval scope**.
-3. **Do not** claim fix proven until successful replay + log correlation.
+1. Complete read-only diagnostics per [404 safe diagnostic plan](../../ZORA_WALAT_STR02_404_SAFE_DIAGNOSTIC_PLAN_2026_05_24.md).
+2. **Do not** click Resend again without new approval.
+3. If fix needed → `fix/str02-404-webhook-routing-staging-2026-05-24` (separate approval — **not created**).
+4. **Do not** claim fix proven until root cause confirmed and successful replay + logs.
 
 ---
 
 ## 8. Final statement
 
-**G-02 destination setup: SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING · STR-01: CAPTURED · STR-02: EXECUTED ONCE / FAILED (404 ERR) · HTTP 200: NOT ACHIEVED · LOG-01…LOG-04: NOT CORRELATED · Vercel logs: NO MATCH · G-02 staging replay: FAILED / INCONCLUSIVE · Fix proven: NOT YET · Production / real-money / pilot: NO-GO · Self-healing apply: GATED / NOT ENABLED.**
+**G-02 destination setup: SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING · STR-01: CAPTURED · STR-02: EXECUTED ONCE / FAILED (404 ERR) · HTTP 200: NOT ACHIEVED · LOG-01…LOG-04: NOT CORRELATED · Root cause: NOT CONFIRMED · Fix: NOT IMPLEMENTED · G-02 staging replay: FAILED / INCONCLUSIVE · Production / real-money / pilot: NO-GO · Self-healing apply: GATED / NOT ENABLED.**
 
 No production-ready or fix-complete claim is authorized.
 

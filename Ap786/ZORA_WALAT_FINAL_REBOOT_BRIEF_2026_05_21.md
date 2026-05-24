@@ -85,7 +85,9 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** — [dry-run](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) |
 | G-02 sandbox webhook destination | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
 | STR-01 pre-replay baseline | **CAPTURED / PRE-REPLAY BASELINE** |
-| STR-02 resend / replay | **EXECUTED ONCE / FAILED** — **404 ERR / Not Found** — [evidence index](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) |
+| PR **#66** | STR-02 resend evidence **FILED** — **404 ERR / Not Found** |
+| STR-02 404 investigation | **FILED** — [404 root-cause pack](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) |
+| Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT YET** |
 
@@ -120,7 +122,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | WCAG / full manual a11y | **NOT PROVEN** |
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 | Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
-| G-02 staging webhook replay (PR #55) | **FAILED / INCONCLUSIVE** — STR-02 **404**; LOG **NOT CORRELATED**; [STR-02 evidence](./ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md) |
+| G-02 staging webhook replay (PR #55) | **FAILED / INCONCLUSIVE** — STR-02 **404**; [404 investigation](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md); root cause **NOT CONFIRMED** |
 | G-02 fix proven | **NOT YET** |
 
 ---
