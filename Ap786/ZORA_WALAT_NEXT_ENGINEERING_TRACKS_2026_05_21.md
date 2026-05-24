@@ -163,7 +163,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | Env changes | G-09 |
 | DB writes / migrations | G-07 |
 | Stripe refunds | G-03 / G-11 |
-| Webhook replays | G-02 |
+| Webhook replays | G-02 · [unblock pack](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) **APPROVAL REQUIRED / NOT EXECUTED** |
 | Webhook remediation (fast ACK / async) | Track H + [remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) + [implementation approval gate](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) |
 | Wallet credits | Human + payments |
 | Service fulfillment | Human + payments |

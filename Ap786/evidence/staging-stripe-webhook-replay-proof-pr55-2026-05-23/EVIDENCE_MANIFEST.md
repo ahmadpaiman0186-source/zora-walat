@@ -26,7 +26,15 @@
 
 **BLK-01 note:** Operator opened Workbench → Webhooks and was routed to **Create an event destination** / **Configure your event destination** — read-only capture; **no destination created**.
 
-**BLK-02 implication:** STR-01 / STR-02 replay proof **BLOCKED** until staging webhook destination exists **and** a deliverable `checkout.session.expired` event exists.
+**BLK-02 implication:** STR-01 / STR-02 replay proof **BLOCKED** until staging webhook destination exists **and** a deliverable `checkout.session.expired` event exists. Unblock pack: [G-02 approval](../../ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) — **APPROVAL REQUIRED / NOT EXECUTED**.
+
+---
+
+## 2b. Sandbox destination proof (pending approval)
+
+| Evidence ID | Filename | Source | Capture instructions | Redaction | Status | Proves | Does not prove |
+|-------------|----------|--------|----------------------|-----------|--------|--------|----------------|
+| **DEST-01** | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-CREATED-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-CREATED-001.png) | Stripe Dashboard → **Sandboxes** → Workbench → **Webhooks** | After [G-02 approval](../../ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md): destination created for `https://zora-walat-api-staging.vercel.app/webhooks/stripe`; test-mode only | Account ID → `REDACTED_STRIPE_ACCOUNT_ID` | **PENDING APPROVAL / NOT CAPTURED** | Sandbox destination registered to staging URL | Replay success; fix proven |
 
 ---
 
@@ -60,6 +68,9 @@
 | M-01 | DEP-01 filed | **CAPTURED / REVIEW PENDING** |
 | M-02 | BLK-01 filed (webhook destination blocker) | **CAPTURED / BLOCKER EVIDENCE** |
 | M-03 | BLK-02 filed (no event deliveries blocker) | **CAPTURED / BLOCKER EVIDENCE** |
+| M-03b | G-02 approval pack filed | **FILED** — [unblock pack](../../ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) |
+| M-03c | G-02 decision record APPROVED | **PENDING / NOT APPROVED** |
+| M-03d | DEST-01 filed | **PENDING APPROVAL / NOT CAPTURED** |
 | M-04 | STR-01 filed | **BLOCKED / NOT CAPTURED** |
 | M-05 | STR-02 filed | **BLOCKED / NOT CAPTURED** |
 | M-06 | LOG-01…LOG-04 filed (correlated window) | **BLOCKED** (no replay) |

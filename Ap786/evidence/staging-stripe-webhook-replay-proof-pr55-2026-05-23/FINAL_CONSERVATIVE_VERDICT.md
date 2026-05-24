@@ -2,6 +2,7 @@
 
 **Date:** 2026-05-23
 **Gate:** G-02 · operator captures ingested · replay **NOT EXECUTED**
+**Unblock pack:** [G-02 approval](../../ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · destination setup **APPROVAL REQUIRED / NOT EXECUTED**
 **Merge:** PR #55 @ `c521b0f` · staging deploy **`0cac02e`** on `main` (DEP-01 captured, review pending)
 
 ---
@@ -18,6 +19,7 @@ PR #55 is **merged to `main`** and **staging deployment from `main` is captured*
 |------|-------------------|--------|
 | Staging deployment | DEP-01 | **CAPTURED / REVIEW PENDING** |
 | Sandbox blockers | BLK-01, BLK-02 | **CAPTURED / BLOCKER EVIDENCE** (both) |
+| Sandbox destination (post-approval) | DEST-01 | **PENDING APPROVAL / NOT CAPTURED** |
 | Stripe test-mode replay | STR-01, STR-02 | **BLOCKED / NOT CAPTURED** |
 | Vercel lifecycle logs | LOG-01 … LOG-04 | **BLOCKED** (no replay) |
 | Duplicate idempotency (optional) | LOG-05 | **BLOCKED** (no replay) |
@@ -31,6 +33,7 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 | Verdict item | Status | Notes |
 |--------------|--------|-------|
+| **G-02 sandbox webhook destination setup** | **APPROVAL REQUIRED / NOT EXECUTED** | [Unblock pack](../../ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) filed; no destination created |
 | **G-02 staging replay** | **BLOCKED / INCONCLUSIVE** | Blockers documented; no destination + no deliverable events |
 | **Fix proven (staging)** | **NOT YET** | Blocker evidence ≠ replay / lifecycle proof |
 | **Fix proven (production)** | **NOT YET** | Out of scope |
@@ -38,7 +41,7 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 | **Production launch** | **NO-GO** | Unchanged |
 | **Real money** | **NO-GO** | Unchanged |
 | **Controlled pilot** | **NO-GO** | Unchanged |
-| **Self-healing apply** | **NOT ENABLED** | Unchanged |
+| **Self-healing apply** | **GATED / NOT ENABLED** | Unchanged |
 
 ---
 
@@ -80,15 +83,16 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ## 7. Next unblock actions (operator)
 
-1. With Gate 4 / G-02 ticket approval, **add** sandbox webhook destination → `https://zora-walat-api-staging.vercel.app/webhooks/stripe` (**operator dashboard only** — not Agent).
-2. Generate or locate a deliverable **`checkout.session.expired`** test-mode event.
-3. After substrate exists → STR-01 → gated replay → STR-02 → LOG-01…LOG-04.
+1. File [G-02 decision record](../../ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) **APPROVED** (Gate 4 / G-02 ticket).
+2. Follow [operator runbook](../../ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md) — **add** sandbox webhook destination → `https://zora-walat-api-staging.vercel.app/webhooks/stripe` (**operator dashboard only** — not Agent; capture DEST-01).
+3. Generate or locate a deliverable **`checkout.session.expired`** test-mode event.
+4. After substrate exists → STR-01 → gated replay → STR-02 → LOG-01…LOG-04.
 
 ---
 
 ## 8. Final statement
 
-**G-02 staging replay: BLOCKED / INCONCLUSIVE · Fix proven: NOT YET · Production / real-money / pilot: NO-GO.**
+**G-02 staging replay: BLOCKED / INCONCLUSIVE · G-02 sandbox webhook destination setup: APPROVAL REQUIRED / NOT EXECUTED · Fix proven: NOT YET · Production / real-money / pilot: NO-GO · Self-healing apply: GATED / NOT ENABLED.**
 
 No production-ready or fix-complete claim is authorized.
 
