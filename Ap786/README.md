@@ -90,7 +90,7 @@
 | [ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) | PR #55 staging replay index |
 | [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02, DEST-01, STR-01 filed |
 
-**Verdict:** G-02 execution dry-run **FILED / EXECUTION NOT AUTHORIZED** · STR-01 **CAPTURED / PRE-REPLAY BASELINE** (PR #64) · STR-02 **NOT EXECUTED / APPROVAL GATED** · LOG-01…LOG-04 **NOT CAPTURED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+**Verdict:** G-02 execution dry-run **FILED / EXECUTION NOT AUTHORIZED** · STR-01 **CAPTURED** · STR-02 **EXECUTED ONCE / FAILED (404)** · 404 investigation **FILED** · root cause **NOT CONFIRMED** · fix **NOT IMPLEMENTED** · staging replay **FAILED / INCONCLUSIVE** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
 
 ---
 
@@ -107,7 +107,24 @@
 
 **Required approval phrase (future execution):** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`
 
-**Verdict:** STR-02 **NOT EXECUTED** · Resend **NOT CLICKED** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO**.
+**Verdict:** STR-02 **EXECUTED ONCE / FAILED (404)** · LOG-01…LOG-04 **NOT CORRELATED** · staging replay **FAILED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+
+---
+
+## Start here — STR-02 404 Routing Root-Cause Investigation (2026-05-24)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) | **Master investigation** — 404 + no Vercel log correlation |
+| [ZORA_WALAT_STR02_404_ENDPOINT_MAPPING_AUDIT_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_404_ENDPOINT_MAPPING_AUDIT_PLAN_2026_05_24.md) | Static route inventory + path audit |
+| [ZORA_WALAT_STR02_404_VERCEL_ROUTING_HYPOTHESIS_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_HYPOTHESIS_MATRIX_2026_05_24.md) | H1…H10 — all **OPEN** |
+| [ZORA_WALAT_STR02_404_SAFE_DIAGNOSTIC_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_404_SAFE_DIAGNOSTIC_PLAN_2026_05_24.md) | Read-only diagnostics — no Resend/deploy |
+| [ZORA_WALAT_STR02_404_FIX_OPTION_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_404_FIX_OPTION_MATRIX_2026_05_24.md) | Fix options — **NOT IMPLEMENTED** |
+| [ZORA_WALAT_STR02_404_NO_GO_RECONFIRMATION_2026_05_24.md](./ZORA_WALAT_STR02_404_NO_GO_RECONFIRMATION_2026_05_24.md) | Prod / pilot **NO-GO** reconfirmed |
+
+**Future fix branch (name only — not created):** `fix/str02-404-webhook-routing-staging-2026-05-24`
+
+**Verdict:** Root cause **NOT CONFIRMED** · Fix **NOT IMPLEMENTED** · HTTP 200 **NOT ACHIEVED** · staging replay **FAILED / INCONCLUSIVE**.
 
 ---
 

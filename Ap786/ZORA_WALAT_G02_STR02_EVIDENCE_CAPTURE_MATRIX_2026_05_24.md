@@ -76,6 +76,9 @@
 | STR-02A / STR-02B / STR-02C | **FILED** — STR-02B **FAILED (404)** |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | VRC-01 / VRC-02 | **CAPTURED / NO MATCH** |
+| STR-02 404 investigation | **FILED** — [root-cause pack](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md) |
+| Root cause | **NOT CONFIRMED** |
+| Fix | **NOT IMPLEMENTED** |
 | STR-02 execution | **EXECUTED ONCE / FAILED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
@@ -84,4 +87,4 @@
 
 ---
 
-*STR-02 evidence matrix · STR-02 ingested 2026-05-24 · 404 result · no second Resend*
+*STR-02 evidence matrix · 404 investigation filed 2026-05-24 · root cause NOT CONFIRMED*
