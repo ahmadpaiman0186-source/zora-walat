@@ -62,6 +62,23 @@
 
 ---
 
+## Start here — G-02 Staging Webhook Unblock Approval (2026-05-23)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) | **Unblock approval** — BLK-01/BLK-02 filed; destination **NOT EXECUTED** |
+| [ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md) | Operator-only allowed actions after approval |
+| [ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md](./ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md) | Phased future replay runbook — **NOT EXECUTED** |
+| [ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md) | Evidence IDs DEP-01…LOG-05 + DEST-01 |
+| [ZORA_WALAT_G02_STAGING_REPLAY_ROLLBACK_ABORT_PLAN_2026_05_23.md](./ZORA_WALAT_G02_STAGING_REPLAY_ROLLBACK_ABORT_PLAN_2026_05_23.md) | Abort / sandbox destination removal — plan only |
+| [ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md](./ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) | Decision record — default **PENDING / NOT APPROVED** |
+| [ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) | PR #55 staging replay index |
+| [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02 filed |
+
+**Verdict:** G-02 sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+
+---
+
 ## Start here — Stripe Webhook Failure Evidence (2026-05-22)
 
 | Document | Contents |
