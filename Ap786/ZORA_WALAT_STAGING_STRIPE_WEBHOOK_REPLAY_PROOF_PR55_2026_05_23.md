@@ -1,16 +1,15 @@
 # Zora-Walat — Staging Stripe Webhook Replay Proof (PR #55)
 
-**Date:** 2026-05-23
-**Status:** **BLOCKER EVIDENCE FILED** · G-02 **BLOCKED / INCONCLUSIVE** · fix **NOT YET PROVEN**
+**Date:** 2026-05-24 (updated)
+**Status:** **DESTINATION EVIDENCE FILED** · G-02 replay **BLOCKED / INCONCLUSIVE** · fix **NOT YET PROVEN**
 **Gate:** G-02 · staging-only evidence registration
 **Merge:** PR #55 → `main` @ `c521b0f` · staging deploy **`main` @ `0cac02e`** (DEP-01)
-**Unblock pack:** [G-02 approval pack](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · **APPROVAL REQUIRED / NOT EXECUTED**
 
 ---
 
 ## 1. Purpose
 
-Index for operator-driven **staging** validation of Track H (PR #55). **Deployment + both sandbox blockers captured; replay still blocked.** Unblock requires filed [decision record](./ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) before any dashboard action.
+Index for operator-driven **staging** validation of Track H (PR #55). **Deployment + blockers + existing active sandbox destination captured; replay still blocked.**
 
 ---
 
@@ -21,9 +20,10 @@ Index for operator-driven **staging** validation of Track H (PR #55). **Deployme
 | Capture | Status |
 |---------|--------|
 | DEP-01 — Vercel staging deploy | **CAPTURED / REVIEW PENDING** |
-| BLK-01 — No webhook destination (create flow) | **CAPTURED / BLOCKER EVIDENCE** |
+| BLK-01 — No webhook destination (create flow) | **CAPTURED / BLOCKER EVIDENCE** (historical) |
 | BLK-02 — No `checkout.session.expired` deliveries | **CAPTURED / BLOCKER EVIDENCE** |
-| DEST-01 — Sandbox destination created (post-approval) | **PENDING APPROVAL / NOT CAPTURED** |
+| DEST-01 — Existing active sandbox destination | **CAPTURED / REVIEW PENDING** — **no new destination created** |
+| DEST-01A / DEST-01B — Details + masked signing secret | **CAPTURED / REVIEW PENDING** |
 | STR-01, STR-02, LOG-01…04 | **BLOCKED** |
 | LOG-05 (optional duplicate) | **OPTIONAL / BLOCKED** |
 
@@ -35,7 +35,7 @@ Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MAT
 
 | Item | Status |
 |------|--------|
-| G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
+| G-02 sandbox webhook destination setup | **SATISFIED BY EXISTING ACTIVE DESTINATION / REVIEW PENDING** |
 | G-02 staging replay | **BLOCKED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
 | Production launch | **NO-GO** |
@@ -45,13 +45,12 @@ Full matrix: [G-02 evidence matrix](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MAT
 
 ---
 
-## 4. Next operator actions (after approval only)
+## 4. Next operator actions
 
-1. File [G-02 decision record](./ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) **APPROVED**.
-2. Follow [operator runbook](./ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md) — add sandbox webhook destination → staging URL (**operator dashboard only**; capture DEST-01).
-3. Obtain deliverable **`checkout.session.expired`** test-mode event.
-4. Execute gated replay → STR-01 / STR-02 / LOG-01…LOG-04 per [allowed actions](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md).
+1. Capture **STR-01** baseline before any gated replay.
+2. Execute gated replay per runbook → **STR-02** → **LOG-01…LOG-04** (replay **not executed** yet).
+3. **Do not** send test events or create a new destination unless separately approved.
 
 ---
 
-*PR #55 staging replay index · G-02 unblock pack 2026-05-23 · no replay executed*
+*PR #55 staging replay index · DEST-01 ingested 2026-05-24 · no replay executed*
