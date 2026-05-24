@@ -3,6 +3,7 @@
 **Date:** 2026-05-23
 **Gate:** **G-02** · staging sandbox/test-mode only
 **Status:** **APPROVAL REQUIRED / NOT EXECUTED**
+**Merged:** PR #59 — unblock pack on `main` · **Routing:** [decision routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md)
 **Parent evidence:** [STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) · [evidence folder](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
 
 **Policy:** Documentation only. No dashboard actions, deploy, replay, env mutation, or money-path changes without filed approval.
@@ -45,6 +46,8 @@ This pack defines **approval requirements** before any operator may create a **S
 | # | Requirement | Status |
 |---|-------------|--------|
 | A-01 | [G-02 decision record](./ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) signed **APPROVED** | **PENDING / NOT APPROVED** |
+| A-01b | [Routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) reviewed | **PENDING** |
+| A-01c | Explicit phrase per [execution gate](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) | **NOT ISSUED** |
 | A-02 | Ticket / change window ID recorded (not in git) | **REQUIRED** |
 | A-03 | [Allowed actions](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md) reviewed | **PENDING** |
 | A-04 | [Operator runbook](./ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md) acknowledged | **PENDING** |
@@ -92,6 +95,11 @@ This pack defines **approval requirements** before any operator may create a **S
 | [EVIDENCE_MATRIX](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md) | All evidence IDs + status |
 | [ROLLBACK_ABORT](./ZORA_WALAT_G02_STAGING_REPLAY_ROLLBACK_ABORT_PLAN_2026_05_23.md) | Stop / rollback |
 | [DECISION_RECORD](./ZORA_WALAT_G02_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_23.md) | Approval gate form |
+| [ROUTING_PACKET](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) | Approver routing — PR #59 |
+| [PRE_EXEC_CHECKLIST](./ZORA_WALAT_G02_PRE_EXECUTION_READINESS_CHECKLIST_2026_05_23.md) | Operator pre-flight |
+| [ACTION_BOUNDARY](./ZORA_WALAT_G02_OPERATOR_DASHBOARD_ACTION_BOUNDARY_2026_05_23.md) | Dashboard vs Agent |
+| [APPROVAL_TICKET](./ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md) | Change ticket template |
+| [EXECUTION_GATE](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) | Explicit approval phrase |
 
 ---
 
@@ -99,6 +107,7 @@ This pack defines **approval requirements** before any operator may create a **S
 
 | Item | Status |
 |------|--------|
+| **G-02 approval decision** | **PENDING / NOT APPROVED** |
 | **G-02 sandbox webhook destination setup** | **APPROVAL REQUIRED / NOT EXECUTED** |
 | **Staging replay** | **BLOCKED / INCONCLUSIVE** |
 | **Fix proven** | **NOT YET** |

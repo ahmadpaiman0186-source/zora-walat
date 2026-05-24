@@ -3,6 +3,7 @@
 **Date:** 2026-05-23
 **Gate:** G-02 · Staging sandbox webhook destination + gated replay
 **Default:** **PENDING / NOT APPROVED**
+**Routing:** [ROUTING_PACKET](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) · **Execution gate:** [POST_APPROVAL_EXECUTION_GATE](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md)
 
 ---
 
@@ -20,6 +21,7 @@
 | **Stripe mode confirmation** | **Sandbox / test-mode only** — _PENDING operator attestation_ |
 | **Forbidden-action acknowledgement** | Approver confirms: no live mode, no production endpoint, no real money, no Agent dashboard actions, no env commit, no DB/payment mutation — _PENDING_ |
 | **Approval result** | **PENDING** _(select one: APPROVED / DENIED / DEFERRED)_ |
+| **Explicit approval phrase issued** | _PENDING_ — required: `APPROVE G-02 SANDBOX WEBHOOK DESTINATION SETUP ONLY` per [execution gate](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) |
 
 ---
 
@@ -32,6 +34,11 @@
 | [OPERATOR_RUNBOOK](./ZORA_WALAT_G02_STAGING_REPLAY_OPERATOR_RUNBOOK_2026_05_23.md) | **PENDING REVIEW** |
 | [EVIDENCE_MATRIX](./ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md) | **PENDING REVIEW** |
 | [ROLLBACK_ABORT](./ZORA_WALAT_G02_STAGING_REPLAY_ROLLBACK_ABORT_PLAN_2026_05_23.md) | **PENDING REVIEW** |
+| [ROUTING_PACKET](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) | **PENDING REVIEW** |
+| [PRE_EXEC_CHECKLIST](./ZORA_WALAT_G02_PRE_EXECUTION_READINESS_CHECKLIST_2026_05_23.md) | **PENDING REVIEW** |
+| [ACTION_BOUNDARY](./ZORA_WALAT_G02_OPERATOR_DASHBOARD_ACTION_BOUNDARY_2026_05_23.md) | **PENDING REVIEW** |
+| [APPROVAL_TICKET](./ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md) | **PENDING REVIEW** |
+| [EXECUTION_GATE](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) | **PENDING REVIEW** |
 
 ---
 
@@ -58,6 +65,7 @@
 
 | Item | Status |
 |------|--------|
+| G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
 | Fix proven | **NOT YET** |
