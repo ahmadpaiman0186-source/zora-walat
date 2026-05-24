@@ -3,7 +3,7 @@
 **Date:** 2026-05-23
 **Merge SHA (main):** `c521b0f` · feature `abb9531` · staging deploy **`0cac02e`** (PR #56 descendant, includes PR #55)
 **Mode:** Stripe **test / sandbox only** · Vercel **staging only**
-**Last ingestion:** DEST-01 (existing active destination) from Telegram Desktop UWP — see [§6](#6-telegram-source-ingestion-attestation)
+**Last ingestion:** STR-01 (pre-replay baseline) from Telegram Desktop UWP — see [§6 Pass D](#pass-d--str-01-pre-replay-baseline-telegram-desktop-uwp-2026-05-24)
 
 **Policy:** No fabricated screenshots. No **PASS** without filed PNG and operator review.
 
@@ -42,14 +42,18 @@
 
 ---
 
-## 3. Stripe test-mode replay proof (blocked)
+## 3. Stripe test-mode replay proof (pre-replay baseline filed; replay not executed)
 
 | Evidence ID | Filename | Source | Capture instructions | Redaction | Status | Proves | Does not prove |
 |-------------|----------|--------|----------------------|-----------|--------|--------|----------------|
-| **STR-01** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png) | Stripe Dashboard → Webhooks → staging endpoint → Event deliveries | **Before** replay: target `checkout.session.expired` delivery row | Event IDs → `REDACTED_EVT_*` | **BLOCKED / NOT CAPTURED** | — | — |
-| **STR-02** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png) | Same path — delivery detail | **After** replay: HTTP **200** | Same as STR-01 | **BLOCKED / NOT CAPTURED** | — | — |
+| **STR-01** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png) | Stripe **Sandboxes** → Workbench → **Events** → `checkout.session.expired` | **Before** any Resend/replay: event detail; **Failed** delivery tab; staging endpoint visible; **Resend not clicked** | URL bar + event ID blocks black-barred | **CAPTURED / PRE-REPLAY BASELINE** | May 19, 2026 `checkout.session.expired` with failed delivery to staging URL **before replay** | Replay success; fix proven |
+| **STR-01A** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png) | Same event — **Deliveries to webhook endpoints** → **Failed** | Failed delivery row to `zora-walat-api-staging…`; **Resend not clicked** | Same as STR-01 | **CAPTURED / PRE-REPLAY BASELINE** | Delivery **failed** to staging endpoint pre-replay | HTTP 200 on replay |
+| **STR-01B** | [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png) | Same event — delivery attempt detail | **3 attempts** — all **Timed out** (May 19, 2026); **Resend not clicked** | URL bar black-barred | **CAPTURED / PRE-REPLAY BASELINE** | Delivery failed with **timeout attempts** before replay | Root cause confirmed; fix proven |
+| **STR-02** | [STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png](./STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png) | Same path — delivery detail | **After** replay: HTTP **200** | Event IDs → `REDACTED_EVT_*` | **NOT EXECUTED / NOT CAPTURED** | — | — |
 
-**Block reason:** BLK-02 and missing STR-01/STR-02/LOG captures — **DEST-01 filed** (existing active destination); **replay not executed**.
+**STR-01 note:** Delivery failed with timeout attempts **before replay**. **Resend not clicked**; **replay not executed**. Exact Telegram source `…FAILED-DELIVERY-002.jpg` **not found** in UWP — STR-01A PNG derived from misnamed `…TIMEOUT-ATTEMPTS-001.jpg` (Failed tab on event detail). See [§6 Pass D](#pass-d--str-01-pre-replay-baseline-telegram-desktop-uwp-2026-05-24).
+
+**STR-02 / LOG block reason:** Replay **not executed** — STR-02 and LOG-01…LOG-04 **NOT CAPTURED**.
 
 ---
 
@@ -76,13 +80,14 @@
 | M-03c | G-02 decision record APPROVED | **PENDING / NOT APPROVED** |
 | M-03d | DEST-01 filed (existing active destination) | **CAPTURED / REVIEW PENDING** |
 | M-03e | DEST-01A / DEST-01B filed | **CAPTURED / REVIEW PENDING** |
-| M-04 | STR-01 filed | **BLOCKED / NOT CAPTURED** |
-| M-05 | STR-02 filed | **BLOCKED / NOT CAPTURED** |
-| M-06 | LOG-01…LOG-04 filed (correlated window) | **BLOCKED** (no replay) |
+| M-04 | STR-01 filed (pre-replay baseline) | **CAPTURED / PRE-REPLAY BASELINE** |
+| M-04b | STR-01A / STR-01B filed | **CAPTURED / PRE-REPLAY BASELINE** |
+| M-05 | STR-02 filed | **NOT EXECUTED / NOT CAPTURED** |
+| M-06 | LOG-01…LOG-04 filed (correlated window) | **NOT CAPTURED** (no replay) |
 | M-07 | LOG-05 filed or N/A documented | **BLOCKED** (no replay) |
 | M-08 | [FINAL_CONSERVATIVE_VERDICT.md](./FINAL_CONSERVATIVE_VERDICT.md) updated | **UPDATED** |
 
-**Overall manifest:** **INCOMPLETE** · G-02 staging replay **BLOCKED / INCONCLUSIVE**
+**Overall manifest:** **INCOMPLETE** · STR-01 pre-replay baseline **CAPTURED** · G-02 staging replay **BLOCKED / INCONCLUSIVE** (STR-02 / LOG not captured)
 
 ---
 
@@ -125,6 +130,25 @@
 | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.jpg` | Destination **Overview** — **Active**; performance chart; signing secret masked | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png` | **CAPTURED / REVIEW PENDING** |
 | `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.jpg` | **Destination details** — **Listening to: 7 events**; signing secret hidden | `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png` | **CAPTURED / REVIEW PENDING** |
 
+### Pass D — STR-01 pre-replay baseline (Telegram Desktop UWP, 2026-05-24)
+
+**Source folder:** `...\TelegramMessengerLLP.TelegramDesktop_*\LocalCache\Roaming\Telegram Desktop UWP\`
+
+| Source file | Classification | Target artifact | Status |
+|-------------|----------------|-----------------|--------|
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.jpg` | **NOT FOUND** at exact name | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png` | **INGESTED via misnamed source** (see next row) |
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-001.jpg` | Sandboxes → **Events** → `checkout.session.expired` — event detail; **Failed** delivery tab; staging endpoint; **Resend visible, not clicked** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png` + `…FAILED-DELIVERY-002.png` | **CAPTURED / PRE-REPLAY BASELINE** (URL + event ID redacted) |
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.jpg` | **NOT FOUND** in UWP or Downloads | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png` | **DERIVED from misnamed 001** — Failed tab content |
+| `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.jpg` | Delivery attempts — **3× Timed out** (May 19, 2026); staging endpoint; **Resend not clicked** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png` | **CAPTURED / PRE-REPLAY BASELINE** (URL bar redacted) |
+
+| Attestation | Result |
+|-------------|--------|
+| Resend clicked | **NO** |
+| Replay executed | **NO** |
+| Send test events executed | **NO** |
+| Stripe / Vercel API calls | **NO** |
+| Fix proven claim | **NO** |
+
 ---
 
-*Manifest · DEST-01 ingested 2026-05-24 · G-02 replay BLOCKED / INCONCLUSIVE · no replay executed*
+*Manifest · STR-01 ingested 2026-05-24 · G-02 replay BLOCKED / INCONCLUSIVE · no replay executed*

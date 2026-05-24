@@ -1,6 +1,6 @@
 # G-02 — Screenshot Capture Map
 
-**Date:** 2026-05-23
+**Date:** 2026-05-24 (updated)
 **Gate:** G-02
 **Folder:** [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md)
 **Parent:** [DRY_RUN_REHEARSAL](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md)
@@ -16,8 +16,10 @@
 | **DEST-01** | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png` | Stripe Sandboxes → Webhooks → `zora-walat-api-staging` **Active** | Existing destination; **no new destination created** | **CAPTURED / REVIEW PENDING** |
 | **DEST-01A** | `STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png` | Destination overview | Corroboration; signing secret masked | **CAPTURED / REVIEW PENDING** |
 | **DEST-01B** | `STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png` | Destination details — **7 events** | Signing secret hidden only | **CAPTURED / REVIEW PENDING** |
-| **STR-01** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-BEFORE-001.png` | Stripe → destination → Event deliveries | **Before** any Resend; pre-replay baseline | **NOT CAPTURED / BLOCKED** |
-| **STR-02** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` | Same — delivery detail | **After** single Resend; HTTP **200** visible | **NOT CAPTURED / BLOCKED** |
+| **STR-01** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png` | Stripe Sandboxes → Events → `checkout.session.expired` | **Before** any Resend; event detail + Failed tab | **CAPTURED / PRE-REPLAY BASELINE** |
+| **STR-01A** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png` | Same event — Failed delivery row | Pre-replay failed delivery to staging URL | **CAPTURED / PRE-REPLAY BASELINE** |
+| **STR-01B** | `STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png` | Same event — delivery attempts | **3× Timed out** (May 19, 2026) | **CAPTURED / PRE-REPLAY BASELINE** |
+| **STR-02** | `STRIPE-TEST-CHECKOUT-EXPIRED-REPLAY-AFTER-200-001.png` | Same — delivery detail | **After** single Resend; HTTP **200** visible | **NOT EXECUTED / NOT CAPTURED** |
 | **LOG-01** | `VERCEL-STAGING-LOG-WEBHOOK-RECEIVED-001.png` | Vercel → `zora-walat-api-staging` → Logs | Search `webhook_received`; ±15 min of STR-02 | **NOT CAPTURED / BLOCKED** |
 | **LOG-02** | `VERCEL-STAGING-LOG-SIGNATURE-VERIFIED-001.png` | Same | Search `signature_verified`; same window | **NOT CAPTURED / BLOCKED** |
 | **LOG-03** | `VERCEL-STAGING-LOG-EVENT-PERSISTED-001.png` | Same | Search `event_persisted`; same window | **NOT CAPTURED / BLOCKED** |
@@ -62,7 +64,8 @@ Minimum correlated proof: [evidence acceptance criteria](./ZORA_WALAT_G02_EVIDEN
 |------|--------|
 | G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
 | DEST-01 (active-existing) | **CAPTURED / REVIEW PENDING** |
-| Future captures STR-01…LOG-05 | **NOT CAPTURED / BLOCKED** |
+| STR-01 / STR-01A / STR-01B (pre-replay) | **CAPTURED / PRE-REPLAY BASELINE** |
+| STR-02 / LOG-01…LOG-05 | **NOT EXECUTED / NOT CAPTURED** |
 | G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
@@ -70,4 +73,4 @@ Minimum correlated proof: [evidence acceptance criteria](./ZORA_WALAT_G02_EVIDEN
 
 ---
 
-*Capture map · redaction rules · dry-run planning only*
+*Capture map · STR-01 ingested 2026-05-24 · no Resend clicked · no replay executed*
