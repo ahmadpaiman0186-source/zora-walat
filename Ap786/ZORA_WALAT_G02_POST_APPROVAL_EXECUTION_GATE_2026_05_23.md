@@ -18,7 +18,7 @@ State exact prerequisites required before G-02 sandbox webhook destination setup
 
 | # | Prerequisite | Status |
 |---|--------------|--------|
-| P-01 | `main` synced; PR #55–#60 merged | **VERIFY OPERATOR** |
+| P-01 | `main` synced; PR #55–#61 merged | **VERIFY OPERATOR** |
 | P-02 | DEP-01, BLK-01, BLK-02 evidence on `main` | **FILED** |
 | P-03 | [Pre-execution checklist](./ZORA_WALAT_G02_PRE_EXECUTION_READINESS_CHECKLIST_2026_05_23.md) completed by operator | **PENDING** |
 | P-04 | [Approval ticket](./ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md) filed with change window | **PENDING** |
@@ -30,6 +30,7 @@ State exact prerequisites required before G-02 sandbox webhook destination setup
 | P-10 | **Explicit approval phrase issued** (see §3) | **NOT ISSUED** |
 | P-11 | [Approver review packet](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) reviewed | **PENDING REVIEW / NOT APPROVED** |
 | P-12 | [Risk boundary review](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) acknowledged | **NOT ACCEPTED / PENDING APPROVAL** |
+| P-13 | [Dry-run rehearsal](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) reviewed (paper only) | **FILED / NOT EXECUTED** |
 
 **Note:** “شروع کن” (start) is **not** the approval phrase. See [execution not authorized notice](./ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md).
 
@@ -79,6 +80,7 @@ Update [evidence manifest](./evidence/staging-stripe-webhook-replay-proof-pr55-2
 
 | Item | Status |
 |------|--------|
+| G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
 | G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |

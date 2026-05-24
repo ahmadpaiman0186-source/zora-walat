@@ -2,9 +2,9 @@
 
 **Date:** 2026-05-23
 **Gate:** G-02 · **NOT EXECUTED**
-**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [ALLOWED_ACTIONS](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md)
+**Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) · [ALLOWED_ACTIONS](./ZORA_WALAT_G02_STRIPE_SANDBOX_WEBHOOK_DESTINATION_ALLOWED_ACTIONS_2026_05_23.md) · [DRY_RUN](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md)
 
-**Policy:** Future operator execution only. **Do not run** until decision record **APPROVED**.
+**Policy:** Future operator execution only. **Do not run** until decision record **APPROVED**. Rehearse on paper via [dry-run](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) first.
 
 ---
 
@@ -122,6 +122,7 @@ Window: ±15 minutes from Phase 5 timestamp.
 
 | Item | Status |
 |------|--------|
+| G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
 | Runbook execution | **NOT EXECUTED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |

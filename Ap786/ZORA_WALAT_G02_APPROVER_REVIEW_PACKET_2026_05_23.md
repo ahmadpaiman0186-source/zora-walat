@@ -3,7 +3,8 @@
 **Date:** 2026-05-23
 **Gate:** G-02 · Stripe sandbox/test-mode staging webhook destination
 **Status:** **PENDING REVIEW / NOT APPROVED**
-**Merged:** PR #60 — G-02 approval routing pack on `main`
+**Merged:** PR #60 — approver review on `main` · PR #61 — dry-run rehearsal pack on `main`
+**Dry-run:** [EXECUTION_DRY_RUN_REHEARSAL](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) — **FILED / EXECUTION NOT AUTHORIZED**
 **Parent:** [ROUTING_PACKET](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md)
 
 **Policy:** Review packet only. **This document does not authorize execution.** No approval is granted herein.
@@ -99,6 +100,9 @@ Record decision in [decision record template](./ZORA_WALAT_G02_APPROVAL_DECISION
 | [RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) | Risk register for approver |
 | [APPROVER_DECISION_SUMMARY](./ZORA_WALAT_G02_APPROVER_DECISION_SUMMARY_2026_05_23.md) | One-page decision summary |
 | [EXECUTION_NOT_AUTHORIZED_NOTICE](./ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md) | Unauthorized execution notice |
+| [DRY_RUN_REHEARSAL](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) | Paper-only operator rehearsal |
+| [EVIDENCE_ACCEPTANCE_CRITERIA](./ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md) | Future evidence sufficiency rules |
+| [NO_GO_RECONFIRMATION](./ZORA_WALAT_G02_NO_GO_RECONFIRMATION_2026_05_23.md) | Launch gates unchanged |
 
 ---
 
@@ -112,6 +116,7 @@ Record decision in [decision record template](./ZORA_WALAT_G02_APPROVAL_DECISION
 
 | Item | Status |
 |------|--------|
+| G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
 | G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |

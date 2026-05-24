@@ -81,10 +81,16 @@
 | [ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) | Risk register — **NOT ACCEPTED / PENDING APPROVAL** |
 | [ZORA_WALAT_G02_APPROVER_DECISION_SUMMARY_2026_05_23.md](./ZORA_WALAT_G02_APPROVER_DECISION_SUMMARY_2026_05_23.md) | One-page approver decision summary |
 | [ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md](./ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md) | Execution **NOT AUTHORIZED** — “شروع کن” insufficient |
+| [ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) | **Dry-run rehearsal** — paper only; PR #61 |
+| [ZORA_WALAT_G02_SANDBOX_MODE_VERIFICATION_CHECKLIST_2026_05_23.md](./ZORA_WALAT_G02_SANDBOX_MODE_VERIFICATION_CHECKLIST_2026_05_23.md) | Sandbox mode checks — all unchecked |
+| [ZORA_WALAT_G02_SCREENSHOT_CAPTURE_MAP_2026_05_23.md](./ZORA_WALAT_G02_SCREENSHOT_CAPTURE_MAP_2026_05_23.md) | DEST-01…LOG-05 capture + redaction map |
+| [ZORA_WALAT_G02_OPERATOR_MISTAKE_PREVENTION_MATRIX_2026_05_23.md](./ZORA_WALAT_G02_OPERATOR_MISTAKE_PREVENTION_MATRIX_2026_05_23.md) | Mistake → mitigation → abort |
+| [ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md](./ZORA_WALAT_G02_EVIDENCE_ACCEPTANCE_CRITERIA_2026_05_23.md) | Sufficient vs insufficient evidence |
+| [ZORA_WALAT_G02_NO_GO_RECONFIRMATION_2026_05_23.md](./ZORA_WALAT_G02_NO_GO_RECONFIRMATION_2026_05_23.md) | Launch gates reconfirmed **NO-GO** |
 | [ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) | PR #55 staging replay index |
 | [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02 filed |
 
-**Verdict:** G-02 approver review **PENDING REVIEW / NOT APPROVED** · approval decision **PENDING / NOT APPROVED** · sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+**Verdict:** G-02 execution dry-run **FILED / EXECUTION NOT AUTHORIZED** · approver review **PENDING REVIEW / NOT APPROVED** · approval decision **PENDING / NOT APPROVED** · sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
 
 ---
 

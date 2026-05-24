@@ -15,7 +15,7 @@
 | What is being requested? | Stripe **sandbox** webhook destination → staging URL only |
 | What is blocked? | BLK-01 (no destination) + BLK-02 (no expired deliveries) + no approval |
 | What is the proposed endpoint? | `https://zora-walat-api-staging.vercel.app/webhooks/stripe` |
-| Is execution authorized now? | **NO** |
+| Is execution authorized now? | **NO** — dry-run **FILED / EXECUTION NOT AUTHORIZED** |
 | Default decision | **PENDING / NOT APPROVED** |
 
 ---
@@ -48,6 +48,7 @@ APPROVE G-02 SANDBOX WEBHOOK DESTINATION SETUP ONLY
 | C-05 | Staging endpoint confirmed (exact URL above) | **DOCUMENTED** |
 | C-06 | Explicit approval phrase issued | **NOT ISSUED** |
 | C-07 | [Risk review](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) acknowledged | **NOT ACCEPTED / PENDING APPROVAL** |
+| C-08 | [Dry-run rehearsal](./ZORA_WALAT_G02_EXECUTION_DRY_RUN_REHEARSAL_2026_05_23.md) reviewed (paper only) | **FILED / NOT EXECUTED** |
 
 **All conditions required.** Missing any → execution **blocked**.
 
@@ -67,6 +68,7 @@ APPROVE G-02 SANDBOX WEBHOOK DESTINATION SETUP ONLY
 
 | Item | Status |
 |------|--------|
+| G-02 execution dry-run | **FILED / EXECUTION NOT AUTHORIZED** |
 | G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
