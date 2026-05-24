@@ -26,15 +26,16 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | Sandbox: no webhook destination (BLK-01) | **CAPTURED / BLOCKER EVIDENCE** (historical) |
 | Sandbox: no expired event deliveries (BLK-02) | **CAPTURED / BLOCKER EVIDENCE** |
 | Sandbox: existing active destination (DEST-01) | **CAPTURED / REVIEW PENDING** — **no new destination created** |
-| Stripe replay proof (STR-01, STR-02) | **BLOCKED / NOT CAPTURED** |
-| Vercel lifecycle logs (LOG-01…04) | **BLOCKED** (no replay) |
+| Stripe pre-replay baseline (STR-01) | **CAPTURED / PRE-REPLAY BASELINE** — delivery failed with timeout attempts before replay |
+| Stripe post-replay proof (STR-02) | **NOT EXECUTED / NOT CAPTURED** |
+| Vercel lifecycle logs (LOG-01…04) | **NOT CAPTURED** (no replay) |
 | **G-02 staging replay overall** | **BLOCKED / INCONCLUSIVE** |
 | Fix proven in staging | **NOT YET** |
 | Production / real-money / pilot | **NO-GO** |
 
 ---
 
-## Filed captures (2026-05-23)
+## Filed captures (2026-05-23 / 2026-05-24)
 
 | PNG | Summary |
 |-----|---------|
@@ -44,18 +45,23 @@ Register **evidence** and **operator checklists** for PR #55 staging validation 
 | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-ACTIVE-EXISTING-001.png) | Webhooks — `zora-walat-api-staging` — **Active**; staging endpoint |
 | [STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png](./STRIPE-SANDBOX-WEBHOOK-DESTINATION-DETAILS-002.png) | Destination overview — **Active**; secret masked |
 | [STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png](./STRIPE-SANDBOX-WEBHOOK-SIGNING-SECRET-MASKED-003.png) | **7 events**; signing secret hidden |
+| [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-EVENT-DETAIL-001.png) | `checkout.session.expired` — event detail; **Failed** delivery; **Resend not clicked** |
+| [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-FAILED-DELIVERY-002.png) | Failed delivery row to staging endpoint (pre-replay) |
+| [STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png](./STRIPE-SANDBOX-CHECKOUT-EXPIRED-PRE-REPLAY-TIMEOUT-ATTEMPTS-003.png) | **3× Timed out** (May 19, 2026); pre-replay baseline |
 
 ---
 
-## Telegram ingestion attestation (2026-05-23)
+## Telegram ingestion attestation
 
 | Attestation | Result |
 |-------------|--------|
 | Pass A — `Downloads\Telegram Desktop` batch `15-51-42` | DEP-01 + BLK-02 filed |
 | Pass B — Telegram Desktop UWP `STRIPE-SANDBOX-WEBHOOK-DESTINATION-NOT-FOUND-001.jpg` | BLK-01 filed |
 | Pass C — Telegram Desktop UWP `ACTIVE-EXISTING-001` / `DETAILS-002` / `SIGNING-SECRET-MASKED-003` | DEST-01 filed |
-| Canonical PNG filenames in Ap786 | **YES** (6 captures) |
+| Pass D — Telegram Desktop UWP STR-01 pre-replay (`TIMEOUT-ATTEMPTS-001` misnamed + `TIMEOUT-ATTEMPTS-003`) | STR-01 / STR-01A / STR-01B filed |
+| Canonical PNG filenames in Ap786 | **YES** (9 captures) |
 | Raw source `.jpg` / `photo_*` in Ap786 | **NO** |
+| Resend clicked | **NO** |
 | New webhook destination created | **NO** — existing **Active** destination only |
 | Send test events executed | **NO** |
 | Replay / Stripe / Vercel mutation | **NO** |
@@ -90,4 +96,4 @@ Details: [EVIDENCE_MANIFEST.md §6](./EVIDENCE_MANIFEST.md#6-telegram-source-ing
 
 ---
 
-*PR #55 staging replay evidence · BLK-01 ingested 2026-05-23 · no replay executed*
+*PR #55 staging replay evidence · STR-01 ingested 2026-05-24 · no replay executed · no Resend clicked*
