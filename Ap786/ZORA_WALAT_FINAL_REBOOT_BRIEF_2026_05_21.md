@@ -77,6 +77,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | PR **#55** | Merged — Track H fast ACK / async webhook code on `main` |
 | PR **#56–#58** | Staging replay scaffold + BLK-01/BLK-02 blocker evidence **FILED** |
 | PR **#59** | G-02 unblock approval pack **MERGED** |
+| PR **#60** | G-02 approval routing pack **MERGED** |
+| G-02 approver review | **PENDING REVIEW / NOT APPROVED** — [review packet](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) |
 | G-02 approval decision | **PENDING / NOT APPROVED** — [routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) |
 | G-02 staging replay | **BLOCKED / INCONCLUSIVE** — [evidence index](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) |
 | G-02 sandbox webhook destination | **APPROVAL REQUIRED / NOT EXECUTED** — [unblock pack](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md) |
@@ -113,7 +115,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | WCAG / full manual a11y | **NOT PROVEN** |
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 | Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
-| G-02 staging webhook replay (PR #55) | **BLOCKED / INCONCLUSIVE** — BLK-01/BLK-02 filed; approval **PENDING / NOT APPROVED**; [routing packet](./ZORA_WALAT_G02_APPROVAL_DECISION_ROUTING_PACKET_2026_05_23.md) |
+| G-02 staging webhook replay (PR #55) | **BLOCKED / INCONCLUSIVE** — approver review **PENDING REVIEW / NOT APPROVED**; [review packet](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) |
 | G-02 fix proven | **NOT YET** |
 
 ---

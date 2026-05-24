@@ -3,7 +3,8 @@
 **Date:** 2026-05-23
 **Gate:** G-02 · Stripe sandbox/test-mode staging webhook destination
 **Status:** **APPROVAL PENDING / NOT EXECUTED**
-**Merged:** PR #59 — G-02 unblock approval pack on `main`
+**Merged:** PR #59 — G-02 unblock approval pack on `main` · PR #60 — routing pack on `main`
+**Review:** [APPROVER_REVIEW_PACKET](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) — **PENDING REVIEW / NOT APPROVED**
 **Parent:** [UNBLOCK_APPROVAL](./ZORA_WALAT_G02_STAGING_WEBHOOK_DESTINATION_UNBLOCK_APPROVAL_2026_05_23.md)
 
 **Policy:** Documentation only. No dashboard actions, API calls, deploy, env mutation, or approval granted in this document.
@@ -26,6 +27,8 @@ This routing packet prepares the **human approval path** for a future operator-o
 | PR #56 staging replay scaffold on `main` | **MERGED** |
 | PR #57 / #58 blocker evidence (BLK-01, BLK-02) on `main` | **MERGED / FILED** |
 | PR #59 G-02 unblock approval pack on `main` | **MERGED** |
+| PR #60 G-02 approval routing pack on `main` | **MERGED** |
+| G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |
@@ -112,6 +115,9 @@ Post-execution (not pre-req for destination create approval routing): DEST-01, S
 | [OPERATOR_DASHBOARD_ACTION_BOUNDARY](./ZORA_WALAT_G02_OPERATOR_DASHBOARD_ACTION_BOUNDARY_2026_05_23.md) | Human vs Agent boundaries |
 | [APPROVAL_TICKET_TEMPLATE](./ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md) | Change ticket form |
 | [POST_APPROVAL_EXECUTION_GATE](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) | Explicit approval phrase gate |
+| [APPROVER_REVIEW_PACKET](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) | Approver evidence + decision options |
+| [RISK_BOUNDARY_REVIEW](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) | Risk register — NOT ACCEPTED |
+| [EXECUTION_NOT_AUTHORIZED](./ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md) | “شروع کن” insufficient |
 
 ---
 
@@ -119,6 +125,7 @@ Post-execution (not pre-req for destination create approval routing): DEST-01, S
 
 | Item | Status |
 |------|--------|
+| G-02 approver review | **PENDING REVIEW / NOT APPROVED** |
 | G-02 approval decision | **PENDING / NOT APPROVED** |
 | G-02 sandbox webhook destination setup | **APPROVAL REQUIRED / NOT EXECUTED** |
 | Staging replay | **BLOCKED / INCONCLUSIVE** |

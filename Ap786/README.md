@@ -77,10 +77,14 @@
 | [ZORA_WALAT_G02_OPERATOR_DASHBOARD_ACTION_BOUNDARY_2026_05_23.md](./ZORA_WALAT_G02_OPERATOR_DASHBOARD_ACTION_BOUNDARY_2026_05_23.md) | Operator vs Agent dashboard boundaries |
 | [ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md](./ZORA_WALAT_G02_APPROVAL_TICKET_TEMPLATE_2026_05_23.md) | Change ticket template — **PENDING / NOT APPROVED** |
 | [ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md](./ZORA_WALAT_G02_POST_APPROVAL_EXECUTION_GATE_2026_05_23.md) | Explicit approval phrase gate — **NOT ISSUED** |
+| [ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md](./ZORA_WALAT_G02_APPROVER_REVIEW_PACKET_2026_05_23.md) | **Approver review** — evidence + decision options; PR #60 |
+| [ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md](./ZORA_WALAT_G02_RISK_ACCEPTANCE_AND_BOUNDARY_REVIEW_2026_05_23.md) | Risk register — **NOT ACCEPTED / PENDING APPROVAL** |
+| [ZORA_WALAT_G02_APPROVER_DECISION_SUMMARY_2026_05_23.md](./ZORA_WALAT_G02_APPROVER_DECISION_SUMMARY_2026_05_23.md) | One-page approver decision summary |
+| [ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md](./ZORA_WALAT_G02_EXECUTION_NOT_AUTHORIZED_NOTICE_2026_05_23.md) | Execution **NOT AUTHORIZED** — “شروع کن” insufficient |
 | [ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md](./ZORA_WALAT_STAGING_STRIPE_WEBHOOK_REPLAY_PROOF_PR55_2026_05_23.md) | PR #55 staging replay index |
 | [evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/](./evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/README.md) | Evidence folder — DEP-01, BLK-01, BLK-02 filed |
 
-**Verdict:** G-02 approval decision **PENDING / NOT APPROVED** · sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
+**Verdict:** G-02 approver review **PENDING REVIEW / NOT APPROVED** · approval decision **PENDING / NOT APPROVED** · sandbox webhook destination setup **APPROVAL REQUIRED / NOT EXECUTED** · staging replay **BLOCKED / INCONCLUSIVE** · fix proven **NOT YET** · prod/real-money/pilot **NO-GO** · self-healing apply **GATED / NOT ENABLED**.
 
 ---
 
