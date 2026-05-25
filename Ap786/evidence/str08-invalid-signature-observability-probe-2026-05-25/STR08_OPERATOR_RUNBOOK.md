@@ -1,7 +1,7 @@
 # STR-08 Operator Runbook
 
 **Date:** 2026-05-25
-**Status:** **EXECUTED ONCE / DO NOT REPEAT WITHOUT NEW APPROVAL**
+**Status:** **EXECUTED ONCE / MARKER CAPTURES INGESTED / DO NOT REPEAT WITHOUT NEW APPROVAL**
 
 ---
 
@@ -65,15 +65,16 @@ After the single POST, document:
 | Probe count | Exactly one |
 | Retry | Not executed |
 | Stripe resend/replay/test event | Not executed |
+| Vercel marker captures | Ingested; no logs found for all four required filters |
 
-Operator Vercel log captures remain pending unless actual screenshots or exports are supplied.
+Operator Vercel log captures were supplied and ingested for the four required marker searches. Each screenshot shows no logs found for the selected filter.
 
 ---
 
 ## Conservative Interpretation
 
-Controlled rejection may prove route-entry/signature-failure observability if Vercel logs show the expected markers. It does not prove Stripe payment processing, full webhook processing, or production readiness.
+Controlled rejection was captured by HTTP status, but the ingested Vercel screenshots did not show the expected markers. STR-08 therefore remains **NOT FOUND / INCONCLUSIVE** for runtime marker correlation and does not prove Stripe payment processing, full webhook processing, or production readiness.
 
 ---
 
-*Runbook - one approved invalid-signature POST executed*
+*Runbook - one approved invalid-signature POST executed; no retry authorized*

@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-25
 **Approval phrase:** `APPROVE STR-08 STAGING INVALID-SIGNATURE OBSERVABILITY PROBE ONLY`
-**Status:** **PROBE EXECUTED ONCE / LOG CAPTURE PENDING**
+**Status:** **PROBE EXECUTED ONCE / VERCEL MARKER CORRELATION NOT FOUND**
 
 ---
 
@@ -47,13 +47,24 @@ This must not be interpreted as:
 | Probe timestamp | `2026-05-25T21:07:23.278Z` |
 | HTTP status | `400` |
 | Body summary | Empty response body |
-| Vercel marker search | **PENDING OPERATOR CAPTURE** |
+| Vercel marker search | **CAPTURED AS NOT FOUND / NO LOGS FOUND** |
 | Retry | **NOT EXECUTED** |
 | Stripe event/replay | **NOT EXECUTED** |
 
 ---
 
-## 5. Conservative Verdict
+## 5. Vercel Marker Capture Result
+
+| Marker | Screenshot | Result |
+|--------|------------|--------|
+| `ZW_STRIPE_WEBHOOK_OBSERVABILITY` | `STR08-VERCEL-LOG-ZW-OBSERVABILITY-004.png` | **NOT FOUND / NO LOGS FOUND** |
+| `route_entry` | `STR08-VERCEL-LOG-ROUTE-ENTRY-005.png` | **NOT FOUND / NO LOGS FOUND** |
+| `signature_verification_failed` | `STR08-VERCEL-LOG-SIGNATURE-FAILED-006.png` | **NOT FOUND / NO LOGS FOUND** |
+| `response_sent` | `STR08-VERCEL-LOG-RESPONSE-SENT-007.png` | **NOT FOUND / NO LOGS FOUND** |
+
+---
+
+## 6. Conservative Verdict
 
 | Item | Status |
 |------|--------|
@@ -61,11 +72,11 @@ This must not be interpreted as:
 | Stripe resend/replay/test event | **NOT EXECUTED** |
 | Payment processing proof | **NOT PROVEN** |
 | Full webhook processing proof | **NOT PROVEN** |
-| STR-06 observability runtime visibility | **PENDING OPERATOR LOG CAPTURE** |
+| STR-06 observability runtime visibility | **NOT FOUND / INCONCLUSIVE** |
 | Fix | **NOT FULLY PROVEN** |
 | Production / real-money / controlled pilot | **NO-GO** |
 | Self-healing apply | **GATED / NOT ENABLED** |
 
 ---
 
-*STR-08 probe doc updated after the approved one-time POST*
+*STR-08 probe doc updated after ingesting Vercel no-log marker captures*

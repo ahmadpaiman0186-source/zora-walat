@@ -1,7 +1,7 @@
 # STR-08 Probe Results And Log Correlation
 
 **Date:** 2026-05-25
-**Status:** **PROBE EXECUTED ONCE / LOG CAPTURE PENDING**
+**Status:** **PROBE EXECUTED ONCE / VERCEL MARKER CORRELATION NOT FOUND**
 
 ---
 
@@ -25,11 +25,11 @@
 
 | Marker | Finding |
 |--------|---------|
-| `ZW_STRIPE_WEBHOOK_OBSERVABILITY` | **PENDING OPERATOR CAPTURE** |
-| `route_entry` | **PENDING OPERATOR CAPTURE** |
-| `signature_verification_failed` | **PENDING OPERATOR CAPTURE** |
-| `response_sent` | **PENDING OPERATOR CAPTURE** |
-| Event ID appears | **PENDING OPERATOR CAPTURE** |
+| `ZW_STRIPE_WEBHOOK_OBSERVABILITY` | **CAPTURED AS NOT FOUND / NO LOGS FOUND** - `STR08-VERCEL-LOG-ZW-OBSERVABILITY-004.png` |
+| `route_entry` | **CAPTURED AS NOT FOUND / NO LOGS FOUND** - `STR08-VERCEL-LOG-ROUTE-ENTRY-005.png` |
+| `signature_verification_failed` | **CAPTURED AS NOT FOUND / NO LOGS FOUND** - `STR08-VERCEL-LOG-SIGNATURE-FAILED-006.png` |
+| `response_sent` | **CAPTURED AS NOT FOUND / NO LOGS FOUND** - `STR08-VERCEL-LOG-RESPONSE-SENT-007.png` |
+| Event ID appears | **NOT FOUND / INCONCLUSIVE** |
 
 ---
 
@@ -41,9 +41,10 @@
 | Stripe event/replay used | **NO** |
 | Payment/order/wallet mutation proven | **NO** |
 | Full webhook processing proof | **NOT PROVEN** |
+| Vercel marker correlation | **NOT FOUND / INCONCLUSIVE** |
 | Fix | **NOT FULLY PROVEN** |
 | Production / real-money / controlled pilot | **NO-GO** |
 
 ---
 
-*Results doc updated after the one approved probe; Vercel marker evidence remains pending*
+*Results doc updated after ingesting Vercel marker captures; marker correlation remains not found/inconclusive*
