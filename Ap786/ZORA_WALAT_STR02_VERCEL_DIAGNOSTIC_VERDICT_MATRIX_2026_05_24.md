@@ -57,6 +57,7 @@
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | Vercel runtime correlation | **NOT FOUND** |
 | Vercel diagnostics (D01–D07B) | **CAPTURED** |
+| Routing fix implementation approval | **NOT ISSUED** — [gate](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
@@ -71,7 +72,7 @@
 
 | Role | Root cause confirmed? | Fix authorized? |
 |------|----------------------|-----------------|
-| Engineering | **NO** | **NO** |
+| Engineering | **NO** | **NO** (implementation phrase **NOT ISSUED**) |
 | SRE / On-call | **NO** | **NO** |
 | Payments Owner | **NO** | **NO** |
 

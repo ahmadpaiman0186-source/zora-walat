@@ -88,7 +88,9 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | PR **#66** | STR-02 resend evidence **FILED** — **404 ERR / Not Found** |
 | PR **#67** | STR-02 404 investigation pack **MERGED** |
 | PR **#68** | STR-02 Vercel read-only diagnostics scaffold **MERGED** |
-| STR-02 Vercel diagnostics | **ALL CAPTURED** — Root Directory=`./`; **`/webhooks/stripe` missing** on deploy **Fa18u4Nr**; root cause **NOT CONFIRMED** |
+| STR-02 Vercel diagnostics | **ALL CAPTURED** — `/webhooks/stripe` **missing** on deploy |
+| STR-02 routing fix approval gate | **FILED** — phrase **NOT ISSUED**; fix **NOT IMPLEMENTED** |
+| Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT YET** |
 
