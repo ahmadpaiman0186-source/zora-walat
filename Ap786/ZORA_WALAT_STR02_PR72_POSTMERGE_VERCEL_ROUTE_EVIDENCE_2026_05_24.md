@@ -18,6 +18,7 @@
 | Implementation branch | `fix/str02-404-webhook-routing-staging-2026-05-24` |
 | Manual deploy/redeploy | **NOT AUTHORIZED** |
 | Stripe resend/replay/test event | **NOT AUTHORIZED / NOT EXECUTED** |
+| Local screenshot ingestion | **8 PNGs INGESTED** from `C:\Users\ahmad\Downloads\PR72` |
 | Fix proven | **NOT YET** |
 
 ---
@@ -42,13 +43,15 @@
 
 | Evidence ID | Required Evidence | Status |
 |-------------|-------------------|--------|
-| PR72-D01 | Latest Vercel deployment source/commit after PR #72 | **PENDING CAPTURE** |
-| PR72-D02 | Deployment build output proving root build completed after PR #72 | **PENDING CAPTURE** |
-| PR72-D03 | Deployment resources/functions showing whether `/api/webhooks/stripe` exists | **PENDING CAPTURE** |
-| PR72-D04 | Route/rewrite evidence showing `/webhooks/stripe` routing if visible | **PENDING CAPTURE** |
-| PR72-D05 | Domain mapping for `zora-walat-api-staging.vercel.app` | **PENDING CAPTURE** |
-| PR72-D06 | Logs search for `/webhooks/stripe` without sending requests | **PENDING CAPTURE** |
-| PR72-D07 | Logs search for `stripe` without sending requests | **PENDING CAPTURE** |
+| PR72-D01 | Latest Vercel deployment source/commit after PR #72 | **CAPTURED** - `main` `d274a82` / PR #74 |
+| PR72-D02 | Deployment overview source/commit and current production deployment | **CAPTURED** - production/current deployment |
+| PR72-D03 | Deployment build output proving root build started for `main` `d274a82` | **CAPTURED** |
+| PR72-D04 | Deployment build output middle | **MISSING / NOT PROVIDED** |
+| PR72-D05 | Deployment resources/functions showing whether `/api/webhooks/stripe` exists | **CAPTURED** - `/api/webhooks/stripe` visible |
+| PR72-D06 | Logs search for `/webhooks/stripe` without sending requests | **CAPTURED** - no logs found |
+| PR72-D07 | Logs search for `stripe` without sending requests | **CAPTURED** - no logs found |
+| PR72-D08 | Domain mapping for `zora-walat-api-staging.vercel.app` | **CAPTURED** - valid configuration / production |
+| PR72-S01 | Supplemental deployment-list screenshot | **CAPTURED** - `VERCEL-PR72-LATEST-DEPLOYMENT-SOURCE-COMMIT-004.png` |
 
 ---
 
@@ -57,7 +60,7 @@
 | If observed | Record as | Do not claim |
 |-------------|-----------|--------------|
 | `/api/webhooks/stripe` in Functions/Resources | **PARTIAL DEPLOYMENT EVIDENCE** | Fix proven |
-| `/webhooks/stripe` rewrite visible | **ROUTE CONFIG EVIDENCE** | HTTP 200 |
+| `main` `d274a82` / PR #74 deployment source | **DEPLOYMENT SOURCE EVIDENCE** | HTTP 200 |
 | No logs for webhook searches | **NO REQUEST OBSERVED / NO RUNTIME CORRELATION** | Failure |
 | HTTP 200 from approved resend/probe | **HTTP 200 EVIDENCE** | Production-ready |
 
@@ -69,7 +72,7 @@
 |------|--------|
 | Implementation merged | **YES** |
 | Static route bridge verification | **PASS** |
-| Deployed Vercel route surface | **PENDING** |
+| Deployed Vercel route surface | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |
@@ -78,4 +81,4 @@
 
 ---
 
-*PR72 post-merge evidence gate - route surface pending - no resend*
+*PR72 post-merge evidence gate - route surface partially captured - no resend*

@@ -52,9 +52,9 @@ Output:
 |------|--------|
 | Implementation merged | **YES** |
 | Static route bridge verification | **PASS** |
-| Ingestion report | **PENDING_CAPTURE** |
-| Screenshots ingested | **0** |
-| Deployed Vercel route surface | **PENDING** |
+| Ingestion report | **PARTIAL_INGESTED** |
+| Screenshots ingested | **8** |
+| Deployed Vercel route surface | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |

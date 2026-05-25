@@ -41,7 +41,7 @@
 
 **Without E-07:** Do **not** proceed to STR-02 Resend.
 
-**Current post-merge evidence gate:** [PR72 post-merge Vercel route evidence](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) registers PR72-D01...PR72-D07 as **PENDING CAPTURE**. No request/probe is authorized by that gate.
+**Current post-merge evidence gate:** [PR72 post-merge Vercel route evidence](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) now records **partial deployment evidence captured**: current `main` `d274a82` / PR #74 deployment, `/api/webhooks/stripe` visible in Resources, domain valid production, and no `/webhooks/stripe` / `stripe` logs found. HTTP 200 remains **NOT ACHIEVED**. No request/probe is authorized by that gate.
 
 ---
 
