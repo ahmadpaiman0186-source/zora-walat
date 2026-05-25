@@ -35,6 +35,10 @@ jobs:
       - name: Secrets scan (tracked sources)
         run: npm run secrets:scan
 
+      - name: STR-02 route regression guard (static)
+        working-directory: .
+        run: npm run verify:str02-route
+
       - name: zw-doctor summary (strict, no operator, no staging)
         run: npm run zw:doctor -- summary --strict --no-operator --no-staging
 
@@ -63,6 +67,7 @@ jobs:
             echo "## Super-System Guard"
             echo ""
             echo "- secrets:scan on tracked files"
+            echo "- STR-02 static route regression guard"
             echo "- zw-doctor summary --strict --no-operator --no-staging"
             echo "- zw-doctor incidents --strict --ci-static"
             echo "- zw-doctor intelligence --ci-static (read-only)"

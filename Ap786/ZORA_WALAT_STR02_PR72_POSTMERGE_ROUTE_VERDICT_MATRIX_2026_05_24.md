@@ -12,6 +12,7 @@
 | Dimension | Evidence | Current Verdict |
 |-----------|----------|-----------------|
 | Implementation merged | PR #72, commits `2059e46` / `4b57499` | **YES** |
+| Static route bridge verification | `npm run verify:str02-route` | **PASS** |
 | Latest deployment source | PR72-D01 | **PENDING CAPTURE** |
 | Root build completed | PR72-D02 | **PENDING CAPTURE** |
 | `/api/webhooks/stripe` function exists | PR72-D03 | **PENDING CAPTURE** |
@@ -41,7 +42,8 @@
 |------|--------|
 | STR-02 original result | **404 ERR / Not Found** |
 | Implementation merged | **YES** |
-| Deployed route surface | **PENDING CAPTURE** |
+| Static route bridge verification | **PASS** |
+| Deployed Vercel route surface | **PENDING** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |

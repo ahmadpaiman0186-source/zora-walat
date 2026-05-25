@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "reportType": "STR02_ROOT_VERCEL_ROUTE_VERIFIER",
+  "status": "PASS",
+  "implementationMerged": true,
+  "staticRouteBridgeVerification": "PASS",
+  "deployedVercelRouteSurface": "PENDING",
+  "http200": "NOT_ACHIEVED",
+  "stripeResendAfterFix": "NOT_AUTHORIZED_NOT_EXECUTED",
+  "fixProven": "NOT_YET",
+  "productionRealMoneyPilot": "NO_GO",
+  "selfHealingApply": "GATED_NOT_ENABLED",
+  "repoRoot": "C:\\Users\\ahmad\\zora_walat",
+  "checkedFiles": {
+    "rootVercel": "vercel.json",
+    "rootBridge": "api/webhooks/stripe.mjs",
+    "slimHandler": "server/api/slimStripeWebhookHandler.mjs",
+    "packageJson": "package.json"
+  },
+  "checks": [
+    {
+      "id": "root_vercel_json_exists",
+      "passed": true,
+      "message": "root vercel.json exists",
+      "details": {}
+    },
+    {
+      "id": "root_vercel_json_parse",
+      "passed": true,
+      "message": "root vercel.json parses as JSON",
+      "details": {}
+    },
+    {
+      "id": "webhook_rewrite_declared",
+      "passed": true,
+      "message": "root rewrite maps /webhooks/stripe to /api/webhooks/stripe",
+      "details": {
+        "expected": {
+          "source": "/webhooks/stripe",
+          "destination": "/api/webhooks/stripe"
+        }
+      }
+    },
+    {
+      "id": "frontend_rewrites_not_catchall",
+      "passed": true,
+      "message": "root vercel.json does not add broad catch-all rewrites over frontend routes",
+      "details": {}
+    },
+    {
+      "id": "server_dependencies_installed_in_root_build",
+      "passed": true,
+      "message": "root install command installs server dependencies required by webhook bridge",
+      "details": {}
+    },
+    {
+      "id": "root_webhook_bridge_exists",
+      "passed": true,
+      "message": "api/webhooks/stripe.mjs exists",
+      "details": {}
+    },
+    {
+      "id": "slim_stripe_handler_exists",
+      "passed": true,
+      "message": "server/api/slimStripeWebhookHandler.mjs exists",
+      "details": {}
+    },
+    {
+      "id": "bridge_reuses_slim_handler",
+      "passed": true,
+      "message": "root bridge imports/reuses existing slim Stripe webhook handler",
+      "details": {}
+    },
+    {
+      "id": "bridge_normalizes_to_webhook_path",
+      "passed": true,
+      "message": "root bridge preserves /webhooks/stripe before slim handler handoff",
+      "details": {}
+    },
+    {
+      "id": "unsupported_methods_fail_closed",
+      "passed": true,
+      "message": "bridge rejects unsupported methods with POST-only fail-closed behavior",
+      "details": {}
+    },
+    {
+      "id": "no_secret_literals_in_bridge",
+      "passed": true,
+      "message": "bridge has no obvious secret literals",
+      "details": {
+        "hits": []
+      }
+    },
+    {
+      "id": "no_direct_money_mutation_in_bridge",
+      "passed": true,
+      "message": "bridge does not directly import DB/payment mutation code",
+      "details": {
+        "hits": []
+      }
+    },
+    {
+      "id": "bridge_does_not_change_env_names",
+      "passed": true,
+      "message": "bridge does not introduce or rename env variables",
+      "details": {}
+    },
+    {
+      "id": "frontend_routes_preserved",
+      "passed": true,
+      "message": "existing frontend route files remain present",
+      "details": {
+        "required": [
+          "app/page.tsx",
+          "app/history/page.tsx",
+          "app/success/page.tsx",
+          "app/cancel/page.tsx"
+        ],
+        "missing": []
+      }
+    },
+    {
+      "id": "root_npm_script_registered",
+      "passed": true,
+      "message": "root npm script verify:str02-route is registered",
+      "details": {}
+    }
+  ]
+}

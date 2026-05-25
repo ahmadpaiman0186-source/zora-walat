@@ -11,6 +11,7 @@
 
 | Gate | Requirement | Status |
 |------|-------------|--------|
+| G-PR72-00 | Local static route verifier confirms bridge/rewrite still present | **PASS** |
 | G-PR72-01 | Latest Vercel deployment points to PR #72 merge/implementation | **PENDING CAPTURE** |
 | G-PR72-02 | Build output confirms root build completed after PR #72 | **PENDING CAPTURE** |
 | G-PR72-03 | Functions/Resources show `/api/webhooks/stripe` or equivalent | **PENDING CAPTURE** |
@@ -61,10 +62,14 @@ No resend is authorized by this PR72 evidence gate.
 | Item | Status |
 |------|--------|
 | PR72 route evidence gate | **DEFINED** |
+| Static route bridge verification | **PASS** |
+| Deployed Vercel route surface | **PENDING** |
 | Evidence complete | **NO** |
 | HTTP 200 | **NOT ACHIEVED** |
+| Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |
 | Production / real-money / pilot | **NO-GO** |
+| Self-healing apply | **GATED / NOT ENABLED** |
 
 ---
 

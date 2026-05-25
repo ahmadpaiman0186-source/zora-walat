@@ -19,7 +19,7 @@
 | **PR72-D03** | `VERCEL-PR72-DEPLOYMENT-FUNCTIONS-ROUTES-003.png` | Vercel Resources / Functions / Routes | **PENDING CAPTURE** | Whether `/api/webhooks/stripe` exists on deployed surface |
 | **PR72-D04** | `VERCEL-PR72-ROUTE-REWRITE-WEBHOOK-STRIPE-004.png` | Vercel route/rewrite view if available | **PENDING CAPTURE** | Whether `/webhooks/stripe` rewrite is visible |
 | **PR72-D05** | `VERCEL-PR72-DOMAIN-MAPPING-005.png` | Vercel domains / aliases | **PENDING CAPTURE** | `zora-walat-api-staging.vercel.app` maps to latest deployment |
-| **PR72-D06** | `VERCEL-PR72-LOGS-NO-MANUAL-WEBHOOK-REQUEST-006.png` | Vercel logs read-only search | **PENDING CAPTURE** | `/webhooks/stripe` search after PR #72 deployment, no manual request sent |
+| **PR72-D06** | `VERCEL-PR72-LOGS-WEBHOOK-STRIPE-SEARCH-006.png` | Vercel logs read-only search | **PENDING CAPTURE** | `/webhooks/stripe` search after PR #72 deployment, no manual request sent |
 | **PR72-D07** | `VERCEL-PR72-LOGS-STRIPE-SEARCH-007.png` | Vercel logs read-only search | **PENDING CAPTURE** | `stripe` search after PR #72 deployment, no manual request sent |
 
 ---
@@ -31,6 +31,7 @@
 | Operator screenshots found locally | **NO** |
 | Files ingested in this commit | **NONE** |
 | Pending screenshots | **PR72-D01...PR72-D07** |
+| Automation result | `STR02_EVIDENCE_INGESTION_REPORT.json` **PENDING_CAPTURE** |
 | Redaction requirement | Redact URL/account identifiers; preserve project, commit, route, domain, status |
 
 ---

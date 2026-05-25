@@ -71,6 +71,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **Stripe webhook failure (2026-05-22)** | [ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAILURE_EVIDENCE_ADDENDUM_2026_05_22.md) — staging **FAILED / PENDING INVESTIGATION**; fix **NOT EXECUTED** |
 | **Checkout expired remediation (2026-05-23)** | [ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) — **PLAN ONLY**; PR #50 evidence **FILED**; root cause **NOT CONFIRMED** |
 | **Fast ACK implementation approval (2026-05-23)** | [ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) — **APPROVAL PENDING**; branch **NOT CREATED**; code **NOT STARTED** |
+| **STR-02 route intelligence (2026-05-24)** | [ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md](./ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md) — static route bridge verification **PASS**; deployed route surface **PENDING**; HTTP 200 **NOT ACHIEVED** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |

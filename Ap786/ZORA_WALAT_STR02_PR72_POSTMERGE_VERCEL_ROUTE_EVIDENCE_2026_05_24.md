@@ -30,6 +30,9 @@
 | Root rewrite | `/webhooks/stripe` -> `/api/webhooks/stripe` merged |
 | Root install command | server dependency install added |
 | Bridge tests | `server/test/rootVercelWebhookBridge.test.js` merged |
+| Static route verifier | `npm run verify:str02-route` **PASS** |
+| CI route regression guard | Super-System Guard integration **ADDED** |
+| Self-repair dry-run | Apply **GATED / NOT ENABLED** |
 
 **Important:** Merged code is not deployed proof. Route surface evidence must come from read-only Vercel deployment screenshots.
 
@@ -65,7 +68,8 @@
 | Item | Status |
 |------|--------|
 | Implementation merged | **YES** |
-| Deployed route surface | **PENDING CAPTURE** |
+| Static route bridge verification | **PASS** |
+| Deployed Vercel route surface | **PENDING** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |

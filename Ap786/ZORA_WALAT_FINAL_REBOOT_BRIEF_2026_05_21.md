@@ -91,6 +91,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-02 Vercel diagnostics | **ALL CAPTURED** — `/webhooks/stripe` **missing** on deploy |
 | PR **#72** | STR-02 root webhook route bridge **MERGED** |
 | STR-02 PR72 route evidence | **PENDING CAPTURE** — no deploy/replay by Agent; fix **NOT PROVEN** |
+| STR-02 route intelligence pack | **FILED** — static verifier **PASS**, CI guard added, ingestion **PENDING_CAPTURE**, self-repair apply **GATED / NOT ENABLED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT YET** |
@@ -127,6 +128,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 | Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
 | G-02 staging webhook replay (PR #55) | **FAILED / INCONCLUSIVE** — STR-02 **404**; [404 investigation](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md); root cause **NOT CONFIRMED** |
+| STR-02 deployed route surface after PR #72 | **PENDING** — static verifier **PASS**, but screenshots/HTTP 200 absent |
 | G-02 fix proven | **NOT YET** |
 
 ---

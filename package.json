@@ -18,6 +18,7 @@
     "aes:report": "node scripts/aes-report.mjs",
     "local:smart-start": "node scripts/aes-start-local.mjs",
     "test:aes": "node --test scripts/aes-guards.test.mjs",
+    "verify:str02-route": "node server/scripts/verify-str02-root-vercel-route.mjs",
     "smoke:stripe-pe": "node scripts/stripe-payment-element-smoke.mjs",
     "verify:flutter-checkout": "node scripts/flutter-web-checkout-live.mjs"
   },
