@@ -219,6 +219,12 @@ STR08_EVIDENCE_FOLDER 2026-05-25: evidence/str08-invalid-signature-observability
 STR09_STRIPE_WEBHOOK_DELIVERY_RESUMED_EMAIL 2026-05-25: ZORA_WALAT_STR09_STRIPE_WEBHOOK_DELIVERY_RESUMED_EMAIL_2026_05_25.md — Stripe email evidence captured; test-mode webhook delivery trouble and resumed notifications documented for staging /webhooks/stripe; app-side processing NOT PROVEN.
 STR09_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR09_RISK_REGISTER_2026_05_25.md — overclaim controls for Stripe-side email evidence; production/live/real-money readiness NOT PROVEN.
 STR09_EVIDENCE_FOLDER 2026-05-25: evidence/str09-stripe-webhook-delivery-resumed-email-2026-05-25/README.md — STR09-001 PDF copied; manifest and conservative verdict filed.
+STR10_WEBHOOK_PROCESSING_PROOF_GAP_DECISION_GATE 2026-05-25: ZORA_WALAT_STR10_WEBHOOK_PROCESSING_PROOF_GAP_DECISION_GATE_2026_05_25.md — governance gate filed for remaining webhook processing proof gap; no implementation/deploy/probe/replay authorized.
+STR10_CURRENT_EVIDENCE_RECONCILIATION 2026-05-25: ZORA_WALAT_STR10_CURRENT_EVIDENCE_RECONCILIATION_2026_05_25.md — reconciles STR-08 HTTP 400/no-log captures and STR-09 Stripe-side delivery resumption; app-side proof remains missing.
+STR10_PROCESSING_PROOF_OPTIONS_MATRIX 2026-05-25: ZORA_WALAT_STR10_PROCESSING_PROOF_OPTIONS_MATRIX_2026_05_25.md — options A-E compared; durable non-money audit evidence identified as preferred gated path.
+STR10_MINIMAL_SAFE_NEXT_ACTION_PLAN 2026-05-25: ZORA_WALAT_STR10_MINIMAL_SAFE_NEXT_ACTION_PLAN_2026_05_25.md — plan-only next action; explicit approval required before implementation/deploy/probe/replay/DB migration.
+STR10_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR10_RISK_REGISTER_2026_05_25.md — governance risks for overclaiming, unsafe replay, secret logging, and bundled approvals.
+STR10_APPROVAL_DECISION_RECORD_TEMPLATE 2026-05-25: ZORA_WALAT_STR10_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_25.md — default-deny approval template; no decision recorded.
 G02_STR02_EVIDENCE_MATRIX 2026-05-24: ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md — STR-02A/B/C 404 FAILED; 404 investigation FILED; LOG NOT CORRELATED.
 G02_STR02_RISK_REGISTER 2026-05-24: ZORA_WALAT_G02_STR02_RISK_REGISTER_2026_05_24.md — 12 risks OPEN; NOT ACCEPTED.
 G02_STAGING_REPLAY_EVIDENCE_MATRIX 2026-05-23: ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md — STR-02 EXECUTED ONCE/FAILED; LOG NOT CORRELATED; replay FAILED/INCONCLUSIVE.

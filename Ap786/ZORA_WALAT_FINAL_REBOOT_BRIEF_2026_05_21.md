@@ -100,9 +100,10 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-07 post-merge observability deployment readiness | **SCAFFOLD FILED / PENDING CAPTURE** — STR06 merge/deployment/log-search evidence pending; no probe, replay, or deploy executed |
 | STR-08 invalid-signature observability probe | **EXECUTED ONCE / HTTP 400 / MARKERS NOT FOUND** — synthetic invalid-signature POST to staging `/webhooks/stripe`; no Stripe replay/test event; Vercel marker screenshots ingested as **NOT FOUND / NO LOGS FOUND** |
 | STR-09 Stripe webhook resumed email | **STRIPE-SIDE TEST-MODE RESUMPTION EVIDENCE CAPTURED** — Stripe email says successful delivery occurred and event notifications resumed for staging `/webhooks/stripe`; app-side processing **NOT PROVEN** |
+| STR-10 webhook processing proof decision gate | **FILED / NO ACTION EXECUTED** — options A-E compared; durable non-money audit evidence recommended as next gated engineering path |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **NOT FULLY PROVEN** — STR-09 is Stripe-side email evidence only; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** and full webhook/app processing proof remains pending |
+| Fix proven | **NOT FULLY PROVEN** — STR-10 recommends a gated audit-evidence path but does not execute it; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** and full webhook/app processing proof remains pending |
 
 ---
 
