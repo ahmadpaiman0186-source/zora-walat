@@ -183,10 +183,11 @@
 | [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) | Sandbox `checkout.expired` resend proof - **BLOCKED / NO ELIGIBLE EVENT DELIVERY** |
 | [ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md) | Operator checklist - sandbox/filter captured, no eligible delivery |
 | [ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md) | Sandbox resend verdict matrix |
+| [evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/](./evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/README.md) | STR-03 controlled sandbox webhook proof scaffold - **PENDING OPERATOR ACTION** |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · exactly one resend executed **NO** · HTTP 2xx Stripe processing **NOT ACHIEVED** · fix **NOT FULLY PROVEN**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **PENDING OPERATOR ACTION** · HTTP 2xx Stripe processing **NOT ACHIEVED YET** · fix **NOT FULLY PROVEN**.
 
 ---
 
