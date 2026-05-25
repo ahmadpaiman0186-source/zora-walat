@@ -12,11 +12,13 @@
 | Dimension | Evidence | Verdict |
 |-----------|----------|---------|
 | Approval phrase received | `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY` | **YES** |
-| Operator checklist complete | Checklist rows remain not confirmed | **NO** |
-| Stripe mode | Not inspected/confirmed by Agent | **NOT CONFIRMED** |
-| Event type | Not inspected/confirmed by Agent | **NOT CONFIRMED** |
-| Endpoint | Not confirmed in Stripe Dashboard | **NOT CONFIRMED** |
-| Resend execution | No resend clicked | **NOT EXECUTED** |
+| Operator checklist complete | Resend-blocker screenshots ingested | **BLOCKED** |
+| Stripe mode | `STRIPE-SANDBOX-MODE-CONFIRMED-001.png` | **TEST / SANDBOX CAPTURED** |
+| Event type filter | `checkout.session.expired` filter visible in screenshots | **CAPTURED** |
+| Date range checked | Date filter checked with no deliveries | **CAPTURED** |
+| Eligible event delivery | No event deliveries found | **NONE FOUND** |
+| Endpoint | No delivery row available to confirm endpoint | **NOT CONFIRMED / NO DELIVERY AVAILABLE** |
+| Resend execution | No eligible delivery available; no resend clicked | **NOT EXECUTED** |
 | Stripe delivery HTTP status | No delivery evidence | **NOT CAPTURED** |
 | HTTP 2xx Stripe processing | No resend proof | **NOT ACHIEVED** |
 | Vercel runtime logs | No post-resend logs | **NOT CAPTURED** |
@@ -40,8 +42,9 @@
 
 | Item | Status |
 |------|--------|
-| Sandbox/test-mode only | **INTENDED / NOT EXECUTED** |
+| Sandbox/test-mode only | **CAPTURED** |
 | Exactly one checkout.expired resend | **NO** |
+| Resend proof | **BLOCKED / NO ELIGIBLE CHECKOUT.EXPIRED EVENT DELIVERY FOUND** |
 | HTTP 2xx Stripe processing | **NOT ACHIEVED** |
 | Stripe event processing | **NOT PROVEN** |
 | Fix | **NOT FULLY PROVEN** |
@@ -50,4 +53,4 @@
 
 ---
 
-*Verdict matrix - resend not executed because operator conditions are not confirmed*
+*Verdict matrix - resend blocked because no eligible checkout.expired delivery was found*

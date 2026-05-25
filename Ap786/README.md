@@ -180,13 +180,13 @@
 | [ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md) | Dry-run-only repair recommendation report |
 | [ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md) | Post-fix invalid-signature HTTP proof - route reachability **PROVEN PARTIAL** |
 | [ZORA_WALAT_STR02_POSTFIX_HTTP_PROOF_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_HTTP_PROOF_VERDICT_MATRIX_2026_05_24.md) | HTTP proof verdict matrix |
-| [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) | Sandbox `checkout.expired` resend proof - **NOT EXECUTED** |
-| [ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md) | Operator checklist - **NOT READY FOR SINGLE RESEND** |
+| [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) | Sandbox `checkout.expired` resend proof - **BLOCKED / NO ELIGIBLE EVENT DELIVERY** |
+| [ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md) | Operator checklist - sandbox/filter captured, no eligible delivery |
 | [ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md) | Sandbox resend verdict matrix |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **NOT EXECUTED** · HTTP 2xx Stripe processing **NOT ACHIEVED** · fix **NOT FULLY PROVEN**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · exactly one resend executed **NO** · HTTP 2xx Stripe processing **NOT ACHIEVED** · fix **NOT FULLY PROVEN**.
 
 ---
 

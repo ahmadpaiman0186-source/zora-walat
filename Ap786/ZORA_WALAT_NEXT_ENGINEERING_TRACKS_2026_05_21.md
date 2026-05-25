@@ -73,7 +73,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **Fast ACK implementation approval (2026-05-23)** | [ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) — **APPROVAL PENDING**; branch **NOT CREATED**; code **NOT STARTED** |
 | **STR-02 route intelligence (2026-05-24)** | [ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md](./ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md) — static route bridge verification **PASS**; deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; HTTP 200 **NOT ACHIEVED** |
 | **STR-02 post-fix HTTP proof (2026-05-24)** | [ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md) — invalid-signature route reachability **PROVEN PARTIAL**; Stripe processing **NOT PROVEN** |
-| **STR-02 sandbox resend proof (2026-05-24)** | [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) — approval received but operator conditions **NOT CONFIRMED**; resend **NOT EXECUTED** |
+| **STR-02 sandbox resend proof (2026-05-24)** | [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) — sandbox + `checkout.session.expired` filter captured; no event deliveries found; resend **NOT EXECUTED** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
@@ -166,7 +166,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | Env changes | G-09 |
 | DB writes / migrations | G-07 |
 | Stripe refunds | G-03 / G-11 |
-| Webhook replays | G-02 · STR-02 **404 FAILED**; PR #72 route bridge **MERGED**; PR72 Vercel route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature route reachability **PROVEN PARTIAL**; checkout.expired resend proof **NOT EXECUTED** until operator checklist confirmed |
+| Webhook replays | G-02 · STR-02 **404 FAILED**; PR #72 route bridge **MERGED**; PR72 Vercel route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature route reachability **PROVEN PARTIAL**; checkout.expired resend proof **BLOCKED** because no eligible event delivery was found |
 | Webhook remediation (fast ACK / async) | Track H + [remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) + [implementation approval gate](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) |
 | Wallet credits | Human + payments |
 | Service fulfillment | Human + payments |

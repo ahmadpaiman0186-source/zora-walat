@@ -115,7 +115,7 @@ See master table BL-M01 … BL-M04.
 | BL-H02 | **PENDING** | _Payments owner_ |
 | BL-H04 | **PARTIAL** | _Payments + engineering_ |
 | STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; [implementation approval](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING**; fix **NOT EXECUTED** |
-| **G-02-WH-STG** | **PARTIAL / NOT FULLY PROVEN** | _Payments + engineering_ — STR-02 original result **404**; PR #72 bridge **MERGED**; static route verifier **PASS**; PR72 deployed route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature `/webhooks/stripe` HTTP proof returned `400` (**route reachability PROVEN PARTIAL**); checkout.expired resend approval received but operator conditions **NOT CONFIRMED** and resend **NOT EXECUTED**; Stripe event processing **NOT PROVEN**; production/real-money **NO-GO** |
+| **G-02-WH-STG** | **PARTIAL / NOT FULLY PROVEN** | _Payments + engineering_ — STR-02 original result **404**; PR #72 bridge **MERGED**; static route verifier **PASS**; PR72 deployed route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature `/webhooks/stripe` HTTP proof returned `400` (**route reachability PROVEN PARTIAL**); sandbox `checkout.session.expired` filter/date range captured but **no event deliveries found**, so resend **NOT EXECUTED**; Stripe event processing **NOT PROVEN**; production/real-money **NO-GO** |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-24
 **Approval phrase received:** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`
-**Status:** **NOT READY - OPERATOR CONDITIONS NOT CONFIRMED**
+**Status:** **BLOCKED - NO ELIGIBLE CHECKOUT.EXPIRED EVENT DELIVERY FOUND**
 
 ---
 
@@ -10,13 +10,13 @@
 
 | # | Check | Status |
 |---|-------|--------|
-| 1 | Stripe Dashboard is in TEST MODE / sandbox only | **NOT CONFIRMED** |
-| 2 | Selected event is an existing event | **NOT CONFIRMED** |
-| 3 | Selected event type is exactly `checkout.expired` | **NOT CONFIRMED** |
-| 4 | Destination endpoint is `https://zora-walat-api-staging.vercel.app/webhooks/stripe` | **NOT CONFIRMED** |
-| 5 | Resend count for this proof window is zero before click | **NOT CONFIRMED** |
-| 6 | Operator understands exactly one resend is allowed | **NOT CONFIRMED** |
-| 7 | No live mode, bulk replay, arbitrary test event, or new payment is involved | **NOT CONFIRMED** |
+| 1 | Stripe Dashboard is in TEST MODE / sandbox only | **CAPTURED** |
+| 2 | `checkout.session.expired` search/filter is applied | **CAPTURED** |
+| 3 | Date range checked | **CAPTURED** |
+| 4 | Result shows no event deliveries found | **CAPTURED** |
+| 5 | Eligible event delivery exists for resend | **NO** |
+| 6 | Exactly one resend is allowed | **ACKNOWLEDGED IN APPROVAL** |
+| 7 | No live mode, bulk replay, arbitrary test event, or new payment is involved | **CAPTURED / NO ACTION TAKEN** |
 
 ---
 
@@ -32,6 +32,7 @@ Stop immediately if any condition is true:
 | Stripe suggests multiple events / bulk retry / broad replay | **STOP** |
 | A resend was already clicked for this proof | **STOP** |
 | Any settings/env/deploy action is required | **STOP** |
+| No eligible `checkout.session.expired` event delivery is found | **STOP** |
 
 ---
 
@@ -46,7 +47,7 @@ READY FOR SINGLE RESEND
 Current state:
 
 ```text
-NOT READY FOR SINGLE RESEND
+BLOCKED - NO ELIGIBLE CHECKOUT.EXPIRED EVENT DELIVERY FOUND
 ```
 
 ---
@@ -71,4 +72,4 @@ This checklist does not authorize production readiness, real-money readiness, co
 
 ---
 
-*Operator checklist - not ready until dashboard conditions are confirmed*
+*Operator checklist - blocked because no eligible checkout.expired delivery was found*

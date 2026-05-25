@@ -4,7 +4,7 @@
 **Approval phrase received:** `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY`
 **Evidence folder:** [str02-sandbox-checkout-expired-resend-proof-2026-05-24](./evidence/str02-sandbox-checkout-expired-resend-proof-2026-05-24/README.md)
 
-**Execution status:** **NOT EXECUTED**
+**Execution status:** **BLOCKED / NO ELIGIBLE CHECKOUT.EXPIRED EVENT DELIVERY FOUND**
 
 ---
 
@@ -40,18 +40,34 @@
 
 | Required condition | Status |
 |--------------------|--------|
-| Stripe Dashboard TEST/sandbox mode confirmed | **NOT CONFIRMED** |
-| Existing event type exactly `checkout.expired` confirmed | **NOT CONFIRMED** |
-| Endpoint URL confirmed as approved staging webhook URL | **NOT CONFIRMED** |
+| Stripe Dashboard TEST/sandbox mode confirmed | **CAPTURED** |
+| `checkout.session.expired` event type filter applied | **CAPTURED** |
+| Date range checked | **CAPTURED** |
+| No eligible `checkout.session.expired` delivery available | **CAPTURED** |
+| Endpoint URL confirmed as approved staging webhook URL | **NOT CONFIRMED / NO DELIVERY AVAILABLE** |
 | Exactly one resend executed | **NO** |
 | Stripe delivery HTTP status | **NOT CAPTURED** |
 | Vercel runtime log correlation | **NOT CAPTURED** |
 
-**Decision:** Stop before resend. The approval phrase was received, but the operator dashboard conditions were not confirmed in this session, so no Stripe resend was performed.
+**Updated evidence:** Five operator screenshots from `C:\Users\ahmad\Downloads\STR02-RESEND` were ingested. They show Stripe TEST/sandbox context, `checkout.session.expired` filtering, date range checked, and **No event deliveries found**.
+
+**Decision:** Stop before resend. No eligible sandbox `checkout.session.expired` event delivery was available for resend, so no Stripe resend was performed.
 
 ---
 
-## 4. Required Future Evidence If Resend Proceeds
+## 4. Ingested Resend-Blocker Screenshots
+
+| Evidence ID | Filename | Captures |
+|-------------|----------|----------|
+| STR02-RB-01 | `STRIPE-SANDBOX-MODE-CONFIRMED-001.png` | Stripe sandbox/test mode context |
+| STR02-RB-02 | `STRIPE-CHECKOUT-EXPIRED-EVENT-TYPE-FILTER-002.png` | Event type filter workflow |
+| STR02-RB-03 | `STRIPE-CHECKOUT-EXPIRED-NO-EVENT-DELIVERIES-003.png` | No event deliveries found |
+| STR02-RB-04 | `STRIPE-CHECKOUT-EXPIRED-DATE-RANGE-NO-DELIVERIES-004.png` | Date range checked with no deliveries |
+| STR02-RB-05 | `STRIPE-WORKBENCH-SANDBOX-CONTEXT-005.png` | Workbench sandbox context and no deliveries |
+
+---
+
+## 5. Required Future Evidence If Resend Proceeds
 
 | Evidence | Required |
 |----------|----------|
@@ -64,11 +80,12 @@
 
 ---
 
-## 5. Current Verdict
+## 6. Current Verdict
 
 | Item | Status |
 |------|--------|
-| Sandbox checkout.expired resend proof | **NOT EXECUTED** |
+| Sandbox checkout.expired resend proof | **BLOCKED / NO ELIGIBLE CHECKOUT.EXPIRED EVENT DELIVERY FOUND** |
+| Exactly one resend executed | **NO** |
 | HTTP 2xx Stripe processing | **NOT ACHIEVED** |
 | Stripe event delivery | **NOT PROVEN** |
 | Fix | **NOT FULLY PROVEN** |
@@ -79,10 +96,10 @@
 
 ---
 
-## 6. Next Required Step
+## 7. Next Required Step
 
-Complete the operator checklist and only then perform exactly one sandbox `checkout.expired` resend. Any second resend, broad replay, arbitrary Stripe test event, live-mode action, settings/env edit, deploy/redeploy, or manual data mutation requires stopping and separate approval.
+An eligible existing sandbox `checkout.session.expired` event delivery must be available before a resend can be performed. Any second resend, broad replay, arbitrary Stripe test event, live-mode action, settings/env edit, deploy/redeploy, or manual data mutation requires stopping and separate approval.
 
 ---
 
-*Sandbox resend proof - not executed - awaiting confirmed operator checklist*
+*Sandbox resend proof - blocked by no eligible checkout.expired event delivery*
