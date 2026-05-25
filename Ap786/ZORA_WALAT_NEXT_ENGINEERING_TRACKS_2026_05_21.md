@@ -75,6 +75,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **STR-02 post-fix HTTP proof (2026-05-24)** | [ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md) — invalid-signature route reachability **PROVEN PARTIAL**; Stripe processing **NOT PROVEN** |
 | **STR-02 sandbox resend proof (2026-05-24)** | [ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_CHECKOUT_EXPIRED_RESEND_PROOF_2026_05_24.md) — sandbox + `checkout.session.expired` filter captured; no event deliveries found; resend **NOT EXECUTED** |
 | **STR-03 controlled sandbox proof (2026-05-25)** | [evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/README.md](./evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/README.md) — screenshots ingested; Stripe-side trigger/delivery proof **PARTIAL PROOF CAPTURED**; Vercel runtime correlation **NOT FOUND / INCONCLUSIVE**; fix **PARTIAL / NOT FULLY PROVEN** |
+| **STR-04 runtime correlation gap (2026-05-25)** | [ZORA_WALAT_STR04_VERCEL_RUNTIME_CORRELATION_GAP_INVESTIGATION_2026_05_25.md](./ZORA_WALAT_STR04_VERCEL_RUNTIME_CORRELATION_GAP_INVESTIGATION_2026_05_25.md) — investigation pack filed; future read-only Vercel log capture and static route/logging review required; root cause **NOT CLAIMED** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
@@ -167,7 +168,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | Env changes | G-09 |
 | DB writes / migrations | G-07 |
 | Stripe refunds | G-03 / G-11 |
-| Webhook replays | G-02 · STR-02 **404 FAILED**; PR #72 route bridge **MERGED**; PR72 Vercel route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature route reachability **PROVEN PARTIAL**; STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** with Vercel runtime correlation **NOT FOUND** |
+| Webhook replays | G-02 · STR-02 **404 FAILED**; PR #72 route bridge **MERGED**; PR72 Vercel route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED**; invalid-signature route reachability **PROVEN PARTIAL**; STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** with Vercel runtime correlation **NOT FOUND**; STR-04 correlation gap investigation **FILED / READ-ONLY ONLY** |
 | Webhook remediation (fast ACK / async) | Track H + [remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) + [implementation approval gate](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) |
 | Wallet credits | Human + payments |
 | Service fulfillment | Human + payments |
