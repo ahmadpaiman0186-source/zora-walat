@@ -25,7 +25,7 @@ This folder does **not** prove the fix. It only records read-only dashboard evid
 | PR72-D03 | `VERCEL-PR72-DEPLOYMENT-FUNCTIONS-ROUTES-003.png` | **PENDING CAPTURE** |
 | PR72-D04 | `VERCEL-PR72-ROUTE-REWRITE-WEBHOOK-STRIPE-004.png` | **PENDING CAPTURE** |
 | PR72-D05 | `VERCEL-PR72-DOMAIN-MAPPING-005.png` | **PENDING CAPTURE** |
-| PR72-D06 | `VERCEL-PR72-LOGS-NO-MANUAL-WEBHOOK-REQUEST-006.png` | **PENDING CAPTURE** |
+| PR72-D06 | `VERCEL-PR72-LOGS-WEBHOOK-STRIPE-SEARCH-006.png` | **PENDING CAPTURE** |
 | PR72-D07 | `VERCEL-PR72-LOGS-STRIPE-SEARCH-007.png` | **PENDING CAPTURE** |
 
 ---
@@ -46,7 +46,8 @@ This folder does **not** prove the fix. It only records read-only dashboard evid
 | Item | Status |
 |------|--------|
 | Implementation merged | **YES** - PR #72 |
-| Deployed route surface | **PENDING CAPTURE** |
+| Static route bridge verification | **PASS** |
+| Deployed Vercel route surface | **PENDING** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |

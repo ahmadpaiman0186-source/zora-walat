@@ -174,10 +174,14 @@
 | [ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md) | Route-surface verdict matrix |
 | [ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md) | Next evidence required before resend/proof |
 | [evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/](./evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/README.md) | Evidence folder + manifest |
+| [ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md](./ZORA_WALAT_SUPER_SYSTEM_ROUTE_INTELLIGENCE_PACK_2026_05_24.md) | Static verifier + CI guard + dry-run repair pack |
+| [ZORA_WALAT_STR02_SUPER_SYSTEM_ROUTE_VERIFIER_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SUPER_SYSTEM_ROUTE_VERIFIER_REPORT_2026_05_24.md) | Static route bridge verifier - **PASS** |
+| [ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md](./ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md) | Local screenshot ingestion runbook |
+| [ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md) | Dry-run-only repair recommendation report |
 
 **Evidence IDs:** PR72-D01...PR72-D07 - **PENDING CAPTURE**
 
-**Verdict:** Implementation merged **YES** · deployed route surface **PENDING** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PENDING** · HTTP 200 **NOT ACHIEVED** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
 
 ---
 

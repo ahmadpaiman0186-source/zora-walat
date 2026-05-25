@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "reportType": "STR02_PR72_EVIDENCE_INGESTION",
+  "status": "PENDING_CAPTURE",
+  "searchedRoots": [
+    "C:\\Users\\ahmad\\Downloads",
+    "C:\\Users\\ahmad\\Downloads\\Telegram Desktop"
+  ],
+  "imagesConsidered": 52,
+  "results": [
+    {
+      "id": "PR72-D01",
+      "file": "VERCEL-PR72-LATEST-DEPLOYMENT-SOURCE-COMMIT-001.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D02",
+      "file": "VERCEL-PR72-BUILD-OUTPUT-002.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D03",
+      "file": "VERCEL-PR72-DEPLOYMENT-FUNCTIONS-ROUTES-003.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D04",
+      "file": "VERCEL-PR72-ROUTE-REWRITE-WEBHOOK-STRIPE-004.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D05",
+      "file": "VERCEL-PR72-DOMAIN-MAPPING-005.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D06",
+      "file": "VERCEL-PR72-LOGS-WEBHOOK-STRIPE-SEARCH-006.png",
+      "status": "PENDING_CAPTURE"
+    },
+    {
+      "id": "PR72-D07",
+      "file": "VERCEL-PR72-LOGS-STRIPE-SEARCH-007.png",
+      "status": "PENDING_CAPTURE"
+    }
+  ]
+}
