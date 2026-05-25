@@ -41,6 +41,8 @@
 
 **Without E-07:** Do **not** proceed to STR-02 Resend.
 
+**Current post-merge evidence gate:** [PR72 post-merge Vercel route evidence](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) registers PR72-D01...PR72-D07 as **PENDING CAPTURE**. No request/probe is authorized by that gate.
+
 ---
 
 ## 4. STR-02 replay evidence (separate Resend approval required)
@@ -70,9 +72,9 @@
 
 | Artifact | Location |
 |----------|----------|
-| Post-deploy screenshots | `Ap786/evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/` (new IDs) or sibling folder |
+| Post-PR72 route screenshots | `Ap786/evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/` |
 | STR-02 replay | `Ap786/evidence/staging-stripe-webhook-replay-proof-pr55-2026-05-23/` |
-| Manifest update | [EVIDENCE_MANIFEST](./evidence/str02-vercel-readonly-routing-diagnostics-2026-05-24/EVIDENCE_MANIFEST.md) |
+| Manifest update | [PR72 EVIDENCE_MANIFEST](./evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/EVIDENCE_MANIFEST.md) |
 
 ---
 

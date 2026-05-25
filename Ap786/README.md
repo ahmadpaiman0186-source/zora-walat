@@ -151,18 +151,33 @@
 
 | Document | Contents |
 |----------|----------|
-| [ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) | **Implementation gate** — phrase required; **NOT ISSUED** |
-| [ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md) | Options A–D — evaluate only |
+| [ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) | **Implementation gate** - phrase received for PR #72 implementation only |
+| [ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md) | Option B implemented locally and merged in PR #72 |
 | [ZORA_WALAT_STR02_ROUTING_FIX_RISK_REGISTER_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_RISK_REGISTER_2026_05_24.md) | Risks — all **OPEN** |
 | [ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md) | Rollback — defined only |
 | [ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md) | Post-implementation tests — no fake pass |
 | [ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_CHECKLIST_2026_05_24.md) | Pre-implementation checklist — unchecked |
 
-**Required approval phrase (implementation only):** `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY`
+**Implementation approval phrase:** `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY` - received for PR #72 implementation only
 
-**Implementation branch (not created):** `fix/str02-404-webhook-routing-staging-2026-05-24`
+**Implementation branch:** `fix/str02-404-webhook-routing-staging-2026-05-24` - merged via PR #72
 
-**Verdict:** Fix **NOT IMPLEMENTED** · approval **NOT ISSUED** · root cause **NOT CONFIRMED** · prod/pilot **NO-GO**.
+**Verdict:** PR #72 implementation **MERGED** · deployed route evidence **PENDING** · HTTP 200 **NOT ACHIEVED** · fix **NOT PROVEN** · prod/pilot **NO-GO**.
+
+---
+
+## Start Here - STR-02 PR72 Post-Merge Vercel Route Evidence (2026-05-24)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) | **Post-merge evidence gate** - PR72-D01...D07 |
+| [ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md) | Route-surface verdict matrix |
+| [ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md) | Next evidence required before resend/proof |
+| [evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/](./evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/README.md) | Evidence folder + manifest |
+
+**Evidence IDs:** PR72-D01...PR72-D07 - **PENDING CAPTURE**
+
+**Verdict:** Implementation merged **YES** · deployed route surface **PENDING** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
 
 ---
 

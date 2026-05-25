@@ -89,7 +89,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | PR **#67** | STR-02 404 investigation pack **MERGED** |
 | PR **#68** | STR-02 Vercel read-only diagnostics scaffold **MERGED** |
 | STR-02 Vercel diagnostics | **ALL CAPTURED** — `/webhooks/stripe` **missing** on deploy |
-| STR-02 routing fix implementation | **LOCAL BRIDGE IMPLEMENTED FOR REVIEW** — no deploy; no replay; fix **NOT PROVEN** |
+| PR **#72** | STR-02 root webhook route bridge **MERGED** |
+| STR-02 PR72 route evidence | **PENDING CAPTURE** — no deploy/replay by Agent; fix **NOT PROVEN** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT YET** |
