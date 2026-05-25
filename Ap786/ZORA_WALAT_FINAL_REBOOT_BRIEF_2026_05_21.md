@@ -96,9 +96,10 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-02 sandbox checkout.expired resend proof | **BLOCKED / NO ELIGIBLE EVENT DELIVERY** — sandbox and `checkout.session.expired` filter captured; no event deliveries found; no resend clicked |
 | STR-03 controlled sandbox checkout.session.expired proof | **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** — sandbox-only evidence captured; Stripe-side trigger/delivery proof **PARTIAL PROOF CAPTURED**; Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** |
 | STR-04 Vercel runtime correlation gap investigation | **FILED / ROOT CAUSE NOT CLAIMED** — investigates why Stripe-side HTTP `200 OK` exists while Vercel runtime correlation remains **NOT FOUND / INCONCLUSIVE** |
+| STR-05 route/logging source review | **FILED / SOURCE REVIEW ONLY** — route surfaces and logging coverage reviewed; event lifecycle logs use redacted event ID suffixes; root cause **NOT CONFIRMED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **PARTIAL / NOT FULLY PROVEN** — STR-03 captured Stripe-side proof, and STR-04 now tracks the unresolved Vercel runtime correlation gap before any production or money-path claim |
+| Fix proven | **PARTIAL / NOT FULLY PROVEN** — STR-03 captured Stripe-side proof; STR-04/STR-05 track unresolved Vercel runtime correlation and observability gaps before any production or money-path claim |
 
 ---
 

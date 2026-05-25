@@ -202,6 +202,12 @@ STR04_READONLY_VERCEL_LOG_CAPTURE_PLAN 2026-05-25: ZORA_WALAT_STR04_READONLY_VER
 STR04_ROUTE_LOGGING_SOURCE_REVIEW_PLAN 2026-05-25: ZORA_WALAT_STR04_ROUTE_AND_LOGGING_SOURCE_REVIEW_PLAN_2026_05_25.md — future static route/logging source review plan; no implementation edits authorized.
 STR04_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR04_RISK_REGISTER_2026_05_25.md — open risks for overclaiming Stripe 200, wrong Vercel context, hidden logs, missing instrumentation, and unauthorized mutation.
 STR04_DECISION_RECORD_TEMPLATE 2026-05-25: ZORA_WALAT_STR04_DECISION_RECORD_TEMPLATE_2026_05_25.md — template for future human decision after read-only evidence; no decision recorded.
+STR05_ROUTE_LOGGING_SOURCE_REVIEW 2026-05-25: ZORA_WALAT_STR05_ROUTE_LOGGING_SOURCE_REVIEW_2026_05_25.md — read-only source review filed; root/server webhook route surfaces mapped; lifecycle logging reviewed; root cause NOT CONFIRMED; fix PARTIAL/NOT FULLY PROVEN.
+STR05_WEBHOOK_ROUTE_MAP 2026-05-25: ZORA_WALAT_STR05_WEBHOOK_ROUTE_MAP_2026_05_25.md — maps root Vercel rewrite /webhooks/stripe -> /api/webhooks/stripe, root bridge, server API entry, and Express /webhooks/stripe mount.
+STR05_LOGGING_COVERAGE_GAP_FINDINGS 2026-05-25: ZORA_WALAT_STR05_LOGGING_COVERAGE_GAP_FINDINGS_2026_05_25.md — source finding: lifecycle logs use stripeEventIdSuffix instead of full evt_ id; Vercel runtime correlation still NOT FOUND/INCONCLUSIVE.
+STR05_MINIMAL_OBSERVABILITY_FIX_PLAN 2026-05-25: ZORA_WALAT_STR05_MINIMAL_OBSERVABILITY_FIX_PLAN_2026_05_25.md — gated candidate only for route-entry, event id/type, idempotency, ACK, and checkout.session.expired lifecycle logs; implementation NOT APPROVED.
+STR05_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR05_RISK_REGISTER_2026_05_25.md — open risks for overclaiming Stripe 200, wrong log search terms, unauthorized behavior change, and secret exposure.
+STR05_DECISION_RECORD_TEMPLATE 2026-05-25: ZORA_WALAT_STR05_DECISION_RECORD_TEMPLATE_2026_05_25.md — template for future human decision; no decision recorded.
 G02_STR02_EVIDENCE_MATRIX 2026-05-24: ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md — STR-02A/B/C 404 FAILED; 404 investigation FILED; LOG NOT CORRELATED.
 G02_STR02_RISK_REGISTER 2026-05-24: ZORA_WALAT_G02_STR02_RISK_REGISTER_2026_05_24.md — 12 risks OPEN; NOT ACCEPTED.
 G02_STAGING_REPLAY_EVIDENCE_MATRIX 2026-05-23: ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md — STR-02 EXECUTED ONCE/FAILED; LOG NOT CORRELATED; replay FAILED/INCONCLUSIVE.
