@@ -3,7 +3,7 @@
 **Date:** 2026-05-24
 **Project:** `zora-walat-api-staging` (staging only)
 **Mode:** Read-only dashboard review · **no deploy · no settings mutation**
-**Capture window:** ~2026-05-24 4:32–4:40 PM (operator manual dashboard review)
+**Capture windows:** ~16:39–16:40 PM (project settings) · ~17:46–17:49 PM (deployment/domain/logs)
 
 **Policy:** No fabricated screenshots. Filed from Telegram UWP operator captures.
 
@@ -13,43 +13,44 @@
 
 | Evidence ID | Filename | Source (Vercel Dashboard) | Status | Key values recorded |
 |-------------|----------|---------------------------|--------|---------------------|
-| **VRC-D01** | `VERCEL-STAGING-PROJECT-SETTINGS-GENERAL-ROOT-DIRECTORY-001.png` | Settings → **Build and Deployment** → Root Directory | **CAPTURED** | Project **`zora-walat-api-staging`**; **Root Directory = `./`**; Include files outside root **Enabled**; Skip deployments when no root changes **Disabled** |
-| **VRC-D02** | `VERCEL-STAGING-PROJECT-SETTINGS-FRAMEWORK-BUILD-002.png` | Settings → **Build and Deployment** (page overview) | **CAPTURED** | **Build Settings** / **Framework Settings** entry; **Build and Deployment** breadcrumb; same page context as D01 |
-| **VRC-D02A** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-NODE-IGNORED-BUILD-002A.png` | Build and Deployment → Ignored Build Step + Node.js | **CAPTURED** (supporting) | **Ignored Build Step = Automatic**; **Node.js Version = 24.x** |
-| **VRC-D02B** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png` | Build and Deployment → On-Demand Concurrent Builds | **CAPTURED** (supporting) | **Disable on-demand concurrent builds** — queued, max one at a time |
-| **VRC-D02C** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png` | Build and Deployment → Build Machine + Deployment Checks | **CAPTURED** (supporting) | **Build Machine = Team Default (None)**; **Deployment Checks = No checks configured** |
-| **VRC-D02D** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png` | Build and Deployment → Rolling Releases | **CAPTURED** (supporting) | **Rolling Releases = Disabled**; **Prioritize Production Builds = Enabled** |
-| **VRC-D03** | `VERCEL-STAGING-LATEST-DEPLOYMENT-SOURCE-COMMIT-003.png` | Deployments → latest deploy | **PENDING CAPTURE** | — |
-| **VRC-D04** | `VERCEL-STAGING-LATEST-DEPLOYMENT-BUILD-OUTPUT-004.png` | Deployment → Build output | **PENDING CAPTURE** | — |
-| **VRC-D05** | `VERCEL-STAGING-LATEST-DEPLOYMENT-FUNCTIONS-ROUTES-005.png` | Deployment → Functions / Routes | **PENDING CAPTURE** | — |
-| **VRC-D06** | `VERCEL-STAGING-DOMAINS-ALIAS-MAPPING-006.png` | Settings → Domains | **PENDING CAPTURE** | — |
-| **VRC-D07** | `VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007.png` | Logs → no webhook match | **PENDING CAPTURE** | Cross-ref VRC-01/02 filed |
+| **VRC-D01** | `VERCEL-STAGING-PROJECT-SETTINGS-GENERAL-ROOT-DIRECTORY-001.png` | Settings → **Build and Deployment** → Root Directory | **CAPTURED** | **`zora-walat-api-staging`**; **Root Directory = `./`** |
+| **VRC-D02** | `VERCEL-STAGING-PROJECT-SETTINGS-FRAMEWORK-BUILD-002.png` | Settings → **Build and Deployment** (overview) | **CAPTURED** | Build Settings / Framework Settings entry (prior capture retained) |
+| **VRC-D02A** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-NODE-IGNORED-BUILD-002A.png` | Ignored Build Step + Node.js | **CAPTURED** (supporting) | **Automatic**; **Node.js 24.x** |
+| **VRC-D02B** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png` | On-Demand Concurrent Builds | **CAPTURED** (supporting) | Disabled — one at a time |
+| **VRC-D02C** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png` | Build Machine + Deployment Checks | **CAPTURED** (supporting) | Team Default (None); no checks |
+| **VRC-D02D** | `VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png` | Rolling Releases | **CAPTURED** (supporting) | Rolling disabled; prioritize prod enabled |
+| **VRC-D03** | `VERCEL-STAGING-LATEST-DEPLOYMENT-SOURCE-COMMIT-003.png` | Deployment **Fa18u4Nr** → Details | **CAPTURED** | **Ready / Latest**; **Production / Current**; **main**; **bc5dec9**; **PR #69** |
+| **VRC-D04** | `VERCEL-STAGING-LATEST-DEPLOYMENT-BUILD-OUTPUT-004.png` | Deployment **Fa18u4Nr** → Build Logs | **CAPTURED** | **main** / **bc5dec9** / **PR #69**; **Vercel CLI 54.4.1**; **Washington, D.C. (iad1)**; **1 warning** |
+| **VRC-D05** | `VERCEL-STAGING-LATEST-DEPLOYMENT-FUNCTIONS-ROUTES-005.png` | Deployment **Fa18u4Nr** → Resources / Functions | **CAPTURED** | Functions: `/_not-found`, `/cancel`, `/history`, `/index`, `/success` — **`/webhooks/stripe` NOT SHOWN** |
+| **VRC-D06** | `VERCEL-STAGING-DOMAINS-ALIAS-MAPPING-006.png` | Project **Overview** → Production Deployment domains | **CAPTURED** | **`zora-walat-api-staging.vercel.app`** listed; **Ready** production deployment; **main** / **bc5dec9** |
+| **VRC-D07** | `VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007.png` | Deployment **Fa18u4Nr** → Logs | **CAPTURED** | Search **`"/webhooks/stripe"`** → **No logs found** |
+| **VRC-D07B** | `VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007B.png` | Same → Logs | **CAPTURED** | Search **`stripe`** → **No logs found** |
 
 ---
 
-## 2. Ingestion record
+## 2. Ingestion record (final captures — 2026-05-24 ~17:46–17:49)
 
 | Field | Value |
 |-------|-------|
-| Source paths searched | Downloads, Pictures, Desktop, Telegram UWP, Telegram Desktop |
-| Source files ingested | 5 distinct PNGs from Telegram UWP (2026-05-24 ~16:39–16:40) |
-| Output files filed | 6 PNGs (D02 shares page context with D01 source frame) |
-| Redaction applied | Browser URL bar black-bar redaction (team slug / account identifier) |
-| Evidence-critical values preserved | Project name, Root Directory `./`, framework/build/node settings |
+| Source | Telegram UWP (6 new PNGs + D02 preserved from prior ingest) |
+| D02 handling | Prior `FRAMEWORK-BUILD-002.png` retained (Build and Deployment overview); not overwritten by duplicate Node.js frame |
+| D04 source file | Operator file `VERCEL-STAGING-DOMAINS-ALIAS-MAPPING-005.png` (build logs content; renamed on filing) |
+| Redaction | URL bar black-bar on D03–D07B (team slug) |
+| Evidence-critical values preserved | Project, deployment **Fa18u4Nr**, commit **bc5dec9**, domain, functions list, missing `/webhooks/stripe`, no-log results |
 
 ---
 
-## 3. Diagnostic read (D01/D02 — not root-cause confirmation)
+## 3. Diagnostic read (not root-cause confirmation)
 
 | Observation | Implication |
 |-------------|-------------|
-| **Root Directory = `./`** (repo root, not `server`) | **Strengthens** monorepo-root vs `server/` routing mismatch hypothesis (**H2**) |
-| Repo root `vercel.json` = Next.js | Deploy from `./` may **not** expose `POST /webhooks/stripe` |
-| Intended API layout under `server/` | Mismatch between intended deploy root and configured root |
-| Node.js **24.x** | Build/runtime version recorded; does **not** explain 404 alone |
-| Ignored Build Step **Automatic** | Build skip policy recorded; not routing root cause |
+| **Root Directory = `./`** (prior D01) | **Strengthens H2** — monorepo root vs intended `server/` API |
+| **Deployed functions lack `/webhooks/stripe`** (D05) | **Strengthens H4** — route not on deployed surface; consistent with STR-02 **404** |
+| **No runtime logs** for `/webhooks/stripe` or `stripe` (D07/D07B) | **Consistent with H9** — edge/static 404 or no handler invocation |
+| **Domain `zora-walat-api-staging.vercel.app` on project** (D06) | Host points to this project; does **not** prove route exists |
+| Deploy **main** @ **bc5dec9** (PR #69) Ready (D03/D04) | Active deploy lineage recorded; does **not** alone confirm root cause |
 
-**Conservative rule:** Root cause remains **NOT CONFIRMED** until VRC-D03…D07 filed and hypothesis matrix updated.
+**Conservative rule:** Root cause **NOT CONFIRMED**. Fix **NOT IMPLEMENTED**. Staging replay **FAILED / INCONCLUSIVE**.
 
 ---
 
@@ -68,15 +69,16 @@
 |---|-----------|--------|
 | M-V01 | VRC-D01 filed | **CAPTURED** |
 | M-V02 | VRC-D02 filed | **CAPTURED** |
-| M-V02A | VRC-D02A…D02D filed (supporting) | **CAPTURED** |
-| M-V03 | VRC-D03 filed | **PENDING CAPTURE** |
-| M-V04 | VRC-D04 filed | **PENDING CAPTURE** |
-| M-V05 | VRC-D05 filed | **PENDING CAPTURE** |
-| M-V06 | VRC-D06 filed | **PENDING CAPTURE** |
-| M-V07 | VRC-D07 filed | **PENDING CAPTURE** |
-| M-V08 | [Diagnostic verdict matrix](../../ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md) updated post-capture | **PARTIAL** (D01/D02 only) |
+| M-V02A | VRC-D02A…D02D filed | **CAPTURED** |
+| M-V03 | VRC-D03 filed | **CAPTURED** |
+| M-V04 | VRC-D04 filed | **CAPTURED** |
+| M-V05 | VRC-D05 filed | **CAPTURED** |
+| M-V06 | VRC-D06 filed | **CAPTURED** |
+| M-V07 | VRC-D07 filed | **CAPTURED** |
+| M-V07B | VRC-D07B filed | **CAPTURED** |
+| M-V08 | [Diagnostic verdict matrix](../../ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md) updated | **UPDATED** (partial — root cause still **NOT CONFIRMED**) |
 
-**Overall manifest:** **PARTIAL** · project settings **CAPTURED** · deployment/domain/logs **PENDING** · root cause **NOT CONFIRMED**
+**Overall manifest:** **COMPLETE** (all planned IDs filed) · root cause **NOT CONFIRMED**
 
 ---
 
@@ -93,4 +95,4 @@
 
 ---
 
-*Manifest · STR-02 Vercel read-only diagnostics · D01/D02 CAPTURED · D03–D07 PENDING · no deploy*
+*Manifest · STR-02 Vercel read-only diagnostics · all VRC-D01–D07B CAPTURED · root cause NOT CONFIRMED*

@@ -3,7 +3,7 @@
 **Date:** 2026-05-24
 **Parent:** [Vercel read-only diagnostics](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md) · [404 hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_HYPOTHESIS_MATRIX_2026_05_24.md)
 
-**Policy:** Verdicts default **NOT CONFIRMED** until full VRC-D01…D07 review complete.
+**Policy:** Root cause **NOT CONFIRMED** until human sign-off after full evidence review. **No fix claim.**
 
 ---
 
@@ -16,56 +16,39 @@
 | HTTP 200 | **NOT ACHIEVED** |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | VRC-01 / VRC-02 (prior) | **NO MATCH** |
+| VRC-D07 / D07B | **NO MATCH** |
 
 ---
 
-## 2. Diagnostic dimension matrix
+## 2. Diagnostic dimension matrix (post full capture)
 
-| Dimension | Question | Evidence | Pre-capture verdict | Post-capture (2026-05-24) |
-|-----------|----------|----------|---------------------|---------------------------|
-| **Project root** | Root Directory = `server`? | VRC-D01, VRC-D02 | **NOT CONFIRMED** | **NO** — Root Directory = **`./`** |
-| **Monorepo vs server** | Next.js root deploy? | VRC-D01, VRC-D02 | **OPEN / PLAUSIBLE (H2)** | **STRENGTHENED / NOT CONFIRMED** |
-| **Deploy lineage** | `main` + PR #55+ SHA at STR-02? | VRC-D03 | **NOT CONFIRMED** | _pending_ |
-| **Build output** | `api/index.mjs` in deploy? | VRC-D04 | **NOT CONFIRMED** | _pending_ |
-| **Functions / routes** | Catch-all to API entry? | VRC-D05 | **NOT CONFIRMED** | _pending_ |
-| **Domain mapping** | Host → API project? | VRC-D06 | **NOT CONFIRMED** | _pending_ |
-| **Runtime logs** | Any `/webhooks/stripe` log? | VRC-D07, VRC-01/02 | **NOT FOUND** | **NOT FOUND** |
-| **Route exposure** | POST `/webhooks/stripe` plausible? | D01–D05 combined | **NOT CONFIRMED** | **LOW PLAUSIBILITY** (root `./` vs `server/`) |
-| **Edge 404 without logs** | H9 consistent? | VRC-01/02 + STR-02B | **PLAUSIBLE / NOT CONFIRMED** | **PLAUSIBLE / NOT CONFIRMED** |
-
----
-
-## 3. Hypothesis update gate (link to H1…H10)
-
-| ID | Update rule | Post D01/D02 status |
-|----|-------------|---------------------|
-| H1 | **REJECT** only if VRC-D05 shows explicit `/webhooks/stripe` route **and** logs prove handler ran | **OPEN** |
-| H2 | **CONFIRM** if VRC-D01 shows repo root + Next.js framework | **STRENGTHENED** — root = **`./`**; framework preset **not fully captured** → **NOT CONFIRMED** |
-| H3 | **CONFIRM** if VRC-D05 shows missing catch-all / wrong rewrites | **OPEN** — await D05 |
-| H4 | **CONFIRM** if VRC-D04/D05 missing `api/index.mjs` | **OPEN** — await D04/D05 |
-| H7 | **REJECT** if VRC-D06 shows domain on wrong project | **OPEN** — await D06 |
-| H9 | **CONFIRM** if 404 + no logs + edge/static routing indicators | **PLAUSIBLE / NOT CONFIRMED** |
-| H10 | **CONFIRM** if VRC-D03 SHA predates webhook route or wrong branch | **OPEN** — await D03 |
-
-Full definitions: [404 hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_HYPOTHESIS_MATRIX_2026_05_24.md)
+| Dimension | Evidence | Verdict |
+|-----------|----------|---------|
+| **Project root** | D01: Root Directory = **`./`** | **OBSERVED** — not `server` |
+| **Monorepo vs server** | D01 + D05 (Next-style routes) | **STRENGTHENED / NOT CONFIRMED** (H2) |
+| **Deploy lineage** | D03/D04: **Fa18u4Nr**, **main**, **bc5dec9**, PR **#69** | **CAPTURED** |
+| **Build output** | D04: build logs, CLI 54.4.1, 1 warning | **CAPTURED** |
+| **Functions / routes** | D05: **no `/webhooks/stripe`** | **STRENGTHENED / NOT CONFIRMED** (H4) |
+| **Domain mapping** | D06: `zora-walat-api-staging.vercel.app` on project | **CAPTURED** — host OK |
+| **Runtime logs** | D07/D07B + VRC-01/02 | **NOT FOUND** |
+| **Route exposure** | D01 + D05 combined | **LOW** — webhook not on deploy surface |
+| **Edge 404 without logs** | 404 + no logs + missing route | **PLAUSIBLE / NOT CONFIRMED** (H9) |
 
 ---
 
-## 4. Captured build settings (supporting — not root-cause proof)
+## 3. Hypothesis update (partial — not final sign-off)
 
-| Setting | Value | Routing impact |
-|---------|-------|----------------|
-| Node.js Version | **24.x** | Recorded; does not explain 404 alone |
-| Ignored Build Step | **Automatic** | Recorded |
-| On-demand Concurrent Builds | **Disabled** (one at a time) | Recorded |
-| Build Machine | **Team Default (None)** | Recorded |
-| Deployment Checks | **No checks configured** | Recorded |
-| Rolling Releases | **Disabled** | Recorded |
-| Prioritize Production Builds | **Enabled** | Recorded |
+| ID | Status | Basis |
+|----|--------|-------|
+| H2 | **STRENGTHENED / NOT CONFIRMED** | Root Directory = **`./`**; deploy shows Next-style pages |
+| H4 | **STRENGTHENED / NOT CONFIRMED** | **`/webhooks/stripe` missing** from Functions list |
+| H7 | **PARTIALLY SUPPORTED** | Domain on correct project (D06) |
+| H9 | **PLAUSIBLE / NOT CONFIRMED** | 404 + no logs |
+| H1, H3, H10 | **OPEN** | Await human review / optional follow-up |
 
 ---
 
-## 5. Overall verdict table
+## 4. Overall verdict table
 
 | Verdict item | Status |
 |--------------|--------|
@@ -73,8 +56,7 @@ Full definitions: [404 hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_
 | HTTP 200 | **NOT ACHIEVED** |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
 | Vercel runtime correlation | **NOT FOUND** |
-| Vercel project settings | **CAPTURED** (VRC-D01, D02, D02A…D02D) |
-| Vercel deployment/domain/logs | **PENDING** (VRC-D03…D07) |
+| Vercel diagnostics (D01–D07B) | **CAPTURED** |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
@@ -85,7 +67,7 @@ Full definitions: [404 hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_
 
 ---
 
-## 6. Sign-off (default)
+## 5. Sign-off (default)
 
 | Role | Root cause confirmed? | Fix authorized? |
 |------|----------------------|-----------------|
@@ -95,4 +77,4 @@ Full definitions: [404 hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_ROUTING_
 
 ---
 
-*Diagnostic verdict matrix · D01/D02 partial update · root cause NOT CONFIRMED*
+*Diagnostic verdict matrix · all captures filed · H2/H4 strengthened · root cause NOT CONFIRMED*
