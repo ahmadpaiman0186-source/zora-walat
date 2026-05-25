@@ -184,10 +184,16 @@
 | [ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_OPERATOR_CHECKLIST_2026_05_24.md) | Operator checklist - sandbox/filter captured, no eligible delivery |
 | [ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_SANDBOX_RESEND_VERDICT_MATRIX_2026_05_24.md) | Sandbox resend verdict matrix |
 | [evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/](./evidence/str03-controlled-sandbox-checkout-expired-proof-2026-05-25/README.md) | STR-03 controlled sandbox webhook proof - **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** |
+| [ZORA_WALAT_STR04_VERCEL_RUNTIME_CORRELATION_GAP_INVESTIGATION_2026_05_25.md](./ZORA_WALAT_STR04_VERCEL_RUNTIME_CORRELATION_GAP_INVESTIGATION_2026_05_25.md) | STR-04 Vercel runtime correlation gap investigation - **FILED / ROOT CAUSE NOT CLAIMED** |
+| [ZORA_WALAT_STR04_OBSERVABILITY_GAP_HYPOTHESIS_MATRIX_2026_05_25.md](./ZORA_WALAT_STR04_OBSERVABILITY_GAP_HYPOTHESIS_MATRIX_2026_05_25.md) | H1-H8 observability gap hypotheses - **OPEN** |
+| [ZORA_WALAT_STR04_READONLY_VERCEL_LOG_CAPTURE_PLAN_2026_05_25.md](./ZORA_WALAT_STR04_READONLY_VERCEL_LOG_CAPTURE_PLAN_2026_05_25.md) | Future read-only Vercel log capture checklist - **DO NOT CAPTURE NOW** |
+| [ZORA_WALAT_STR04_ROUTE_AND_LOGGING_SOURCE_REVIEW_PLAN_2026_05_25.md](./ZORA_WALAT_STR04_ROUTE_AND_LOGGING_SOURCE_REVIEW_PLAN_2026_05_25.md) | Future static route/logging source review plan |
+| [ZORA_WALAT_STR04_RISK_REGISTER_2026_05_25.md](./ZORA_WALAT_STR04_RISK_REGISTER_2026_05_25.md) | STR-04 risk register - overclaim and observability risks **OPEN** |
+| [ZORA_WALAT_STR04_DECISION_RECORD_TEMPLATE_2026_05_25.md](./ZORA_WALAT_STR04_DECISION_RECORD_TEMPLATE_2026_05_25.md) | STR-04 decision template - **NO DECISION RECORDED** |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **PARTIAL / NOT FULLY PROVEN** · prod/real-money/pilot **NO-GO**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **PARTIAL / NOT FULLY PROVEN** · prod/real-money/pilot **NO-GO**.
 
 ---
 
