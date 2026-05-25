@@ -20,15 +20,17 @@
 
 ## 2. Capture checklist
 
-| # | Check | Vercel path | Evidence | Status |
-|---|-------|-------------|----------|--------|
-| D-01 | Domains page open for correct project | Settings → Domains | VRC-D06 | ☐ **PENDING** |
-| D-02 | `zora-walat-api-staging.vercel.app` listed | Same | VRC-D06 | ☐ **PENDING** |
-| D-03 | Domain status **Valid** / **Active** | Same | VRC-D06 | ☐ **PENDING** |
-| D-04 | Production vs Preview assignment visible | Same | VRC-D06 | ☐ **PENDING** |
-| D-05 | No duplicate domain on wrong project (visual check) | Team projects list if needed | Operator note | ☐ **PENDING** |
-| D-06 | Domain matches DEST-01 / STR-02 endpoint host | Cross-ref evidence | STR-02A | ☐ **FILED** (Stripe) |
-| D-07 | No domain settings changed | Attestation | Manifest | ☐ **PENDING** |
+| # | Check | Evidence | Status |
+|---|-------|----------|--------|
+| D-01 | Correct project context | VRC-D06 | ☑ **CAPTURED** — `zora-walat-api-staging` |
+| D-02 | `zora-walat-api-staging.vercel.app` listed | VRC-D06 | ☑ **CAPTURED** |
+| D-03 | Production deployment **Ready** | VRC-D06 | ☑ **CAPTURED** |
+| D-04 | Production assignment visible | VRC-D06 | ☑ **CAPTURED** (Overview → Production Deployment) |
+| D-05 | Settings → Domains “Valid Configuration” row | VRC-D06 | ☐ **NOT IN FRAME** — capture is Overview domains row |
+| D-06 | Domain matches DEST-01 / STR-02 endpoint host | Cross-ref | ☑ **FILED** (Stripe) |
+| D-07 | No domain settings changed | Manifest §6 | ☑ **YES** |
+
+**Note:** VRC-D06 filed from **Project Overview → Production Deployment** domains panel (operator filename `DOMAINS-ALIAS-MAPPING-006`). Host mapping to this project is **observed**; standalone Settings → Domains “Valid Configuration” text was **not** in the captured frame.
 
 ---
 
@@ -36,20 +38,21 @@
 
 | Observation | Hypothesis |
 |-------------|------------|
-| Domain on API project | H7 **partially supported** |
-| Domain on Next/root project | H2 **more plausible** |
-| Domain on old deployment | H10 **open** |
+| Domain on **`zora-walat-api-staging`** project | H7 **partially supported** — host not mis-pointed to unrelated project |
+| Webhook path missing on deploy (D05) | H4 / H2 — 404 still plausible despite correct host |
+| Domain on old deployment | H10 **open** — deploy **bc5dec9** recorded |
 
 ---
 
-## 4. Verdict (default)
+## 4. Verdict
 
 | Item | Status |
 |------|--------|
-| VRC-D06 | **PENDING CAPTURE** |
-| Domain mapping confirmed | **NOT CONFIRMED** |
+| VRC-D06 | **CAPTURED** |
+| Domain mapping to project | **OBSERVED** |
+| Webhook route reachable | **NOT CONFIRMED** |
 | Root cause | **NOT CONFIRMED** |
 
 ---
 
-*Domain mapping checklist · read-only · no domain mutation*
+*Domain mapping checklist · D06 CAPTURED · host OK · route missing on deploy*

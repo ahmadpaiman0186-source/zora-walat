@@ -8,22 +8,14 @@
 
 ---
 
-## Purpose
-
-Register **read-only** Vercel diagnostic evidence to discriminate routing hypotheses for STR-02 **404 ERR / Not Found** with **no runtime log correlation**.
-
----
-
 ## Evidence status (summary)
 
 | Item | Status |
 |------|--------|
-| Diagnostic pack scaffold | **CREATED** (PR #68) |
-| Vercel project settings (VRC-D01, VRC-D02) | **CAPTURED** |
-| Supporting build settings (VRC-D02A…D02D) | **CAPTURED** |
-| Deployment source / output / functions (VRC-D03…D05) | **PENDING CAPTURE** |
-| Domain alias mapping (VRC-D06) | **PENDING CAPTURE** |
-| Runtime log no-correlation (VRC-D07) | **PENDING CAPTURE** (cross-ref VRC-01/02) |
+| Vercel project settings (VRC-D01, D02, D02A…D02D) | **CAPTURED** |
+| Deployment source / build / functions (VRC-D03…D05) | **CAPTURED** |
+| Domain mapping (VRC-D06) | **CAPTURED** |
+| Runtime log no-correlation (VRC-D07, D07B) | **CAPTURED** |
 | Root cause | **NOT CONFIRMED** |
 | Fix | **NOT IMPLEMENTED** |
 | Staging replay | **FAILED / INCONCLUSIVE** |
@@ -33,24 +25,19 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ---
 
-## Key captured values (2026-05-24)
+## Critical findings (diagnostic — not root-cause proof)
 
-| Setting | Observed value |
-|---------|----------------|
-| Root Directory | **`./`** (repo root — **not** `server`) |
-| Node.js Version | **24.x** |
-| Ignored Build Step | **Automatic** |
-| On-demand Concurrent Builds | **Disabled** (queued, one at a time) |
-| Build Machine | **Team Default (None)** |
-| Deployment Checks | **No checks configured** |
-| Rolling Releases | **Disabled** |
-| Prioritize Production Builds | **Enabled** |
-
-**Diagnostic note:** Root Directory = `./` **strengthens** monorepo-root routing mismatch hypothesis (**H2**). Root cause **NOT CONFIRMED**.
+| Finding | Evidence |
+|---------|----------|
+| Root Directory = **`./`** (not `server`) | VRC-D01 — **strengthens H2** |
+| Active deploy **Fa18u4Nr** — **main** @ **bc5dec9** (PR #69) Ready | VRC-D03, D04 |
+| **`/webhooks/stripe` missing** from deployment Functions list | VRC-D05 — **strengthens H4** |
+| **`zora-walat-api-staging.vercel.app`** on production deployment | VRC-D06 |
+| No logs for **`"/webhooks/stripe"`** or **`stripe`** | VRC-D07, D07B |
 
 ---
 
-## Filed screenshots
+## Filed screenshots (12 PNGs)
 
 | File | Evidence ID |
 |------|-------------|
@@ -60,19 +47,12 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 | [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-CONCURRENT-BUILDS-002B.png) | VRC-D02B |
 | [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-MACHINE-CHECKS-002C.png) | VRC-D02C |
 | [VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png](./VERCEL-STAGING-PROJECT-SETTINGS-BUILD-ROLLING-RELEASES-002D.png) | VRC-D02D |
-
----
-
-## Document map
-
-| Doc | Role |
-|-----|------|
-| [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md) | Screenshot IDs + status |
-| [Read-only diagnostics](../../ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md) | Master diagnostic pack |
-| [Project root checklist](../../ZORA_WALAT_STR02_VERCEL_PROJECT_ROOT_EVIDENCE_CHECKLIST_2026_05_24.md) | Root Directory / framework |
-| [Domain mapping checklist](../../ZORA_WALAT_STR02_VERCEL_DOMAIN_MAPPING_EVIDENCE_CHECKLIST_2026_05_24.md) | Alias / domain |
-| [Deployment output checklist](../../ZORA_WALAT_STR02_VERCEL_DEPLOYMENT_OUTPUT_EVIDENCE_CHECKLIST_2026_05_24.md) | Build output / functions |
-| [Diagnostic verdict matrix](../../ZORA_WALAT_STR02_VERCEL_DIAGNOSTIC_VERDICT_MATRIX_2026_05_24.md) | Hypothesis scoring |
+| [VERCEL-STAGING-LATEST-DEPLOYMENT-SOURCE-COMMIT-003.png](./VERCEL-STAGING-LATEST-DEPLOYMENT-SOURCE-COMMIT-003.png) | VRC-D03 |
+| [VERCEL-STAGING-LATEST-DEPLOYMENT-BUILD-OUTPUT-004.png](./VERCEL-STAGING-LATEST-DEPLOYMENT-BUILD-OUTPUT-004.png) | VRC-D04 |
+| [VERCEL-STAGING-LATEST-DEPLOYMENT-FUNCTIONS-ROUTES-005.png](./VERCEL-STAGING-LATEST-DEPLOYMENT-FUNCTIONS-ROUTES-005.png) | VRC-D05 |
+| [VERCEL-STAGING-DOMAINS-ALIAS-MAPPING-006.png](./VERCEL-STAGING-DOMAINS-ALIAS-MAPPING-006.png) | VRC-D06 |
+| [VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007.png](./VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007.png) | VRC-D07 |
+| [VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007B.png](./VERCEL-STAGING-LOGS-NO-WEBHOOK-RUNTIME-CORRELATION-007B.png) | VRC-D07B |
 
 ---
 
@@ -90,4 +70,4 @@ Full manifest: [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md)
 
 ---
 
-*STR-02 Vercel read-only diagnostics · D01/D02 CAPTURED · D03–D07 PENDING*
+*STR-02 Vercel read-only diagnostics · all captures filed · root cause NOT CONFIRMED*
