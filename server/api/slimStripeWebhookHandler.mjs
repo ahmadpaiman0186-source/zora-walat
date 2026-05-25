@@ -24,6 +24,10 @@ import {
   isHostedCheckoutSessionExpiredEvent,
   slimProcessCheckoutSessionExpiredWebhook,
 } from './slimStripeWebhookCheckoutExpired.mjs';
+import {
+  logStripeWebhookObservability,
+  webhookPathFromRequest,
+} from './stripeWebhookObservability.mjs';
 import { logStripeWebhookLifecycle } from '../src/lib/stripeWebhookLifecycleLog.js';
 
 /** Match `express.raw({ limit: '256kb' })` on `/webhooks/stripe` in app.js */
@@ -85,6 +89,23 @@ export function stripeEventSlimUnmatchedFastAck(event) {
 function signingSecretLooksConfigured(raw) {
   const s = String(raw ?? '').trim();
   return s.startsWith('whsec_') && s.length >= 20;
+}
+
+/**
+ * @param {import('stripe').Stripe.Event | undefined} event
+ */
+function stripeEventLogFields(event) {
+  return {
+    event_id: typeof event?.id === 'string' ? event.id : undefined,
+    event_type: typeof event?.type === 'string' ? event.type : undefined,
+  };
+}
+
+/**
+ * @param {number} startedAt
+ */
+function elapsedMs(startedAt) {
+  return Date.now() - startedAt;
 }
 
 /**
@@ -160,6 +181,10 @@ export function createStripeWebhookReplayStream(originalReq, bodyBuf) {
  * @returns {Promise<void>}
  */
 export async function handleSlimStripeWebhookPost(req, res, getHandler) {
+  const startedAt = Date.now();
+  const method = typeof req?.method === 'string' ? req.method : 'UNKNOWN';
+  const path = webhookPathFromRequest(req);
+  logStripeWebhookObservability('route_entry', { method, path });
   logWebhookSlimBreadcrumb('webhook_slim_entry');
   logStripeWebhookLifecycle('webhook_received', { path: 'slim' });
 
@@ -169,6 +194,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
 
   const secretRaw = process.env.STRIPE_WEBHOOK_SECRET;
   if (!signingSecretLooksConfigured(secretRaw)) {
+    logStripeWebhookObservability(
+      'response_sent',
+      {
+        status_code: 503,
+        duration_ms: elapsedMs(startedAt),
+        reason: 'signing_secret_not_configured',
+      },
+      'warn',
+    );
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
@@ -184,6 +218,11 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
   const sig = req.headers['stripe-signature'];
   if (!sig || typeof sig !== 'string') {
     logWebhookSlimBreadcrumb('webhook_signature_missing');
+    logStripeWebhookObservability(
+      'signature_verification_failed',
+      { reason: 'missing_header' },
+      'warn',
+    );
     logStripeWebhookLifecycle('signature_verified', {
       success: false,
       reason: 'missing_header',
@@ -192,6 +231,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
       await readBoundedWebhookBody(req, WEBHOOK_RAW_BODY_LIMIT_BYTES);
     } catch (e) {
       if (e && typeof e === 'object' && e.code === 'WEBHOOK_BODY_TOO_LARGE') {
+        logStripeWebhookObservability(
+          'response_sent',
+          {
+            status_code: 413,
+            duration_ms: elapsedMs(startedAt),
+            reason: 'body_too_large',
+          },
+          'warn',
+        );
         res.statusCode = 413;
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
@@ -204,6 +252,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
       }
       throw e;
     }
+    logStripeWebhookObservability(
+      'response_sent',
+      {
+        status_code: 400,
+        duration_ms: elapsedMs(startedAt),
+        reason: 'missing_signature',
+      },
+      'warn',
+    );
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
@@ -220,6 +277,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     rawBody = await readBoundedWebhookBody(req, WEBHOOK_RAW_BODY_LIMIT_BYTES);
   } catch (e) {
     if (e && typeof e === 'object' && e.code === 'WEBHOOK_BODY_TOO_LARGE') {
+      logStripeWebhookObservability(
+        'response_sent',
+        {
+          status_code: 413,
+          duration_ms: elapsedMs(startedAt),
+          reason: 'body_too_large',
+        },
+        'warn',
+      );
       res.statusCode = 413;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
@@ -238,10 +304,24 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     event = Stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch {
     logWebhookSlimBreadcrumb('webhook_signature_invalid');
+    logStripeWebhookObservability(
+      'signature_verification_failed',
+      { reason: 'construct_event_failed' },
+      'warn',
+    );
     logStripeWebhookLifecycle('signature_verified', {
       success: false,
       reason: 'construct_event_failed',
     });
+    logStripeWebhookObservability(
+      'response_sent',
+      {
+        status_code: 400,
+        duration_ms: elapsedMs(startedAt),
+        reason: 'invalid_signature',
+      },
+      'warn',
+    );
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
@@ -254,6 +334,7 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
   }
 
   logWebhookSlimBreadcrumb('webhook_signature_verified_handoff');
+  logStripeWebhookObservability('signature_verified', stripeEventLogFields(event));
   logStripeWebhookLifecycle('signature_verified', {
     success: true,
     stripeEventType: event.type,
@@ -275,10 +356,21 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
+      logStripeWebhookObservability('idempotency_decision', {
+        ...stripeEventLogFields(event),
+        decision: result.status,
+        result: result.stateTransition,
+      });
       logStripeWebhookLifecycle('ack_returned', {
         stripeEventType: event.type,
         path: 'slim_checkout_session_completed',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      logStripeWebhookObservability('response_sent', {
+        ...stripeEventLogFields(event),
+        status_code: 200,
+        duration_ms: elapsedMs(startedAt),
+        result: result.status,
       });
       res.end(
         JSON.stringify({
@@ -307,6 +399,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_completed_error_ack',
       });
+      logStripeWebhookObservability(
+        'response_sent',
+        {
+          ...stripeEventLogFields(event),
+          status_code: 200,
+          duration_ms: elapsedMs(startedAt),
+          reason: 'slim_checkout_session_completed_error_ack',
+        },
+        'warn',
+      );
       res.end(JSON.stringify({ received: true, path: 'slim_checkout_session_completed_error_ack' }));
     }
     return;
@@ -314,6 +416,7 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
 
   if (isHostedCheckoutSessionExpiredEvent(event)) {
     const t0 = Date.now();
+    logStripeWebhookObservability('checkout_session_expired_received', stripeEventLogFields(event));
     try {
       const processor =
         typeof globalThis.__zwSlimWebhookCheckoutSessionExpiredImpl === 'function'
@@ -323,10 +426,21 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
+      logStripeWebhookObservability('idempotency_decision', {
+        ...stripeEventLogFields(event),
+        decision: result.status,
+        result: result.stateTransition,
+      });
       logStripeWebhookLifecycle('ack_returned', {
         stripeEventType: event.type,
         path: 'slim_checkout_session_expired',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      logStripeWebhookObservability('response_sent', {
+        ...stripeEventLogFields(event),
+        status_code: 200,
+        duration_ms: elapsedMs(startedAt),
+        result: result.status,
       });
       res.end(
         JSON.stringify({
@@ -355,6 +469,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_expired_error_ack',
       });
+      logStripeWebhookObservability(
+        'response_sent',
+        {
+          ...stripeEventLogFields(event),
+          status_code: 200,
+          duration_ms: elapsedMs(startedAt),
+          reason: 'slim_checkout_session_expired_error_ack',
+        },
+        'warn',
+      );
       res.end(JSON.stringify({ received: true, path: 'slim_checkout_session_expired_error_ack' }));
     }
     return;
@@ -367,10 +491,21 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.setHeader('Cache-Control', 'no-store');
+      logStripeWebhookObservability('idempotency_decision', {
+        ...stripeEventLogFields(event),
+        decision: result.status,
+        result: result.stateTransition,
+      });
       logStripeWebhookLifecycle('ack_returned', {
         stripeEventType: event.type,
         path: 'slim_charge_refunded',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      logStripeWebhookObservability('response_sent', {
+        ...stripeEventLogFields(event),
+        status_code: 200,
+        duration_ms: elapsedMs(startedAt),
+        result: result.status,
       });
       res.end(
         JSON.stringify({
@@ -399,6 +534,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_charge_refunded_error_ack',
       });
+      logStripeWebhookObservability(
+        'response_sent',
+        {
+          ...stripeEventLogFields(event),
+          status_code: 200,
+          duration_ms: elapsedMs(startedAt),
+          reason: 'slim_charge_refunded_error_ack',
+        },
+        'warn',
+      );
       res.end(JSON.stringify({ received: true, path: 'slim_charge_refunded_error_ack' }));
     }
     return;
@@ -421,9 +566,20 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
+    logStripeWebhookObservability('idempotency_decision', {
+      ...stripeEventLogFields(event),
+      decision: 'ignored',
+      result: 'unmatched_fast_ack',
+    });
     logStripeWebhookLifecycle('ack_returned', {
       stripeEventType: event.type,
       path: 'slim_unmatched_fast_ack',
+    });
+    logStripeWebhookObservability('response_sent', {
+      ...stripeEventLogFields(event),
+      status_code: 200,
+      duration_ms: elapsedMs(startedAt),
+      result: 'unmatched_event',
     });
     res.end(
       JSON.stringify({
@@ -446,4 +602,10 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
   if (out && typeof out.then === 'function') {
     await out;
   }
+  logStripeWebhookObservability('response_sent', {
+    ...stripeEventLogFields(event),
+    status_code: res.statusCode,
+    duration_ms: elapsedMs(startedAt),
+    result: 'express_replay',
+  });
 }

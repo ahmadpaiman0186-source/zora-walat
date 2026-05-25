@@ -97,9 +97,10 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-03 controlled sandbox checkout.session.expired proof | **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** — sandbox-only evidence captured; Stripe-side trigger/delivery proof **PARTIAL PROOF CAPTURED**; Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** |
 | STR-04 Vercel runtime correlation gap investigation | **FILED / ROOT CAUSE NOT CLAIMED** — investigates why Stripe-side HTTP `200 OK` exists while Vercel runtime correlation remains **NOT FOUND / INCONCLUSIVE** |
 | STR-05 route/logging source review | **FILED / SOURCE REVIEW ONLY** — route surfaces and logging coverage reviewed; event lifecycle logs use redacted event ID suffixes; root cause **NOT CONFIRMED** |
+| STR-06 minimal webhook observability | **LOCAL MINIMAL OBSERVABILITY IMPLEMENTED** — adds searchable `ZW_STRIPE_WEBHOOK_OBSERVABILITY` markers; deploy/redeploy and Stripe replay **NOT EXECUTED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **PARTIAL / NOT FULLY PROVEN** — STR-03 captured Stripe-side proof; STR-04/STR-05 track unresolved Vercel runtime correlation and observability gaps before any production or money-path claim |
+| Fix proven | **NOT FULLY PROVEN UNTIL STAGING RUNTIME EVIDENCE IS CAPTURED** — STR-06 is local observability only; Vercel runtime proof after STR-06 is **NOT CAPTURED YET** |
 
 ---
 

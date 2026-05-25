@@ -196,10 +196,13 @@
 | [ZORA_WALAT_STR05_MINIMAL_OBSERVABILITY_FIX_PLAN_2026_05_25.md](./ZORA_WALAT_STR05_MINIMAL_OBSERVABILITY_FIX_PLAN_2026_05_25.md) | Gated future observability candidate - **NOT APPROVED** |
 | [ZORA_WALAT_STR05_RISK_REGISTER_2026_05_25.md](./ZORA_WALAT_STR05_RISK_REGISTER_2026_05_25.md) | STR-05 risk register - all risks **OPEN** |
 | [ZORA_WALAT_STR05_DECISION_RECORD_TEMPLATE_2026_05_25.md](./ZORA_WALAT_STR05_DECISION_RECORD_TEMPLATE_2026_05_25.md) | STR-05 decision template - **NO DECISION RECORDED** |
+| [ZORA_WALAT_STR06_MINIMAL_WEBHOOK_OBSERVABILITY_IMPLEMENTATION_2026_05_25.md](./ZORA_WALAT_STR06_MINIMAL_WEBHOOK_OBSERVABILITY_IMPLEMENTATION_2026_05_25.md) | STR-06 minimal webhook observability - **LOCAL IMPLEMENTATION ONLY** |
+| [ZORA_WALAT_STR06_TEST_AND_VALIDATION_REPORT_2026_05_25.md](./ZORA_WALAT_STR06_TEST_AND_VALIDATION_REPORT_2026_05_25.md) | STR-06 local test and validation report |
+| [ZORA_WALAT_STR06_ROLLBACK_PLAN_2026_05_25.md](./ZORA_WALAT_STR06_ROLLBACK_PLAN_2026_05_25.md) | STR-06 rollback plan - **DEFINED / NOT EXECUTED** |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **PARTIAL / NOT FULLY PROVEN** · prod/real-money/pilot **NO-GO**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · STR-06 minimal observability **LOCAL IMPLEMENTATION ONLY** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · Vercel runtime proof after STR-06 **NOT CAPTURED YET** · full processing proof **NOT FULLY PROVEN** · fix **NOT FULLY PROVEN UNTIL STAGING RUNTIME EVIDENCE IS CAPTURED** · prod/real-money/pilot **NO-GO**.
 
 ---
 
