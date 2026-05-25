@@ -3,7 +3,7 @@
 **Date:** 2026-05-24
 **Parent:** [approval gate](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md)
 
-**Policy:** Requirements for **after future implementation** only. **No test execution** in this pack. **No fake PASS.**
+**Policy:** Local implementation tests may run under the approved implementation phrase. **No deploy. No Stripe replay. No fake PASS.**
 
 ---
 
@@ -11,8 +11,8 @@
 
 | Gate | Status |
 |------|--------|
-| Implementation approval phrase issued | **NOT ISSUED** |
-| Code on `fix/str02-404-webhook-routing-staging-2026-05-24` | **NOT CREATED** |
+| Implementation approval phrase issued | **ISSUED** — implementation-only |
+| Code on `fix/str02-404-webhook-routing-staging-2026-05-24` | **IN PROGRESS / LOCAL ONLY** |
 | Deploy to staging | **NOT AUTHORIZED** (separate gate) |
 | STR-02 Resend | **NOT AUTHORIZED** (separate phrase) |
 
@@ -23,10 +23,11 @@
 | ID | Requirement | Method | Pass criterion | Fake pass forbidden |
 |----|-------------|--------|----------------|---------------------|
 | E-01 | Static route inventory | Grep + read `server/api/index.mjs`, `server/vercel.json`, root `vercel.json` | `/webhooks/stripe` defined in repo API path | **Must show file:line** |
-| E-02 | Local server route check | Start server locally; `curl -X POST` to `/webhooks/stripe` (invalid sig OK for route existence) | **Not 404** from app router (may be 400/401) | **404 = FAIL** |
-| E-03 | CI / Super-System Guard | `npm test` / workflow green on PR | CI pass | **Cannot claim staging PASS** |
+| E-02 | Root bridge handler test | `server/test/rootVercelWebhookBridge.test.js` | POST `/webhooks/stripe` reaches slim handler; missing signature fails closed | **404 = FAIL** |
+| E-03 | CI / Super-System Guard | `npm test` / targeted webhook tests / workflow green on PR | CI pass | **Cannot claim staging PASS** |
 | E-04 | Option D contract | `server/scripts/assert-vercel-api-deploy-root.mjs` or documented equivalent | Script pass or documented exception | N/A |
 | E-05 | Diff scope review | PR files only routing/config/docs per gate | No env/DB/payment files | **Reject** scope creep |
+| E-06 | Frontend route regression | Static test confirms `/`, `/history`, `/success`, `/cancel` files remain | Existing pages preserved | **No checkout UI rewrite** |
 
 ---
 
@@ -34,11 +35,11 @@
 
 | ID | Requirement | Method | Pass criterion |
 |----|-------------|--------|----------------|
-| E-06 | Vercel preview/staging route surface | Dashboard screenshot: Functions/Routes | **`/webhooks/stripe`** or `api/index` visible — **or** documented equivalent |
-| E-07 | Build output | Deployment build log capture | Deploy **Ready**; no fatal build error |
-| E-08 | Domain unchanged | `zora-walat-api-staging.vercel.app` still on project | Match VRC-D06 baseline |
+| E-07 | Vercel preview/staging route surface | Dashboard screenshot: Functions/Routes | **`/webhooks/stripe`** or `api/webhooks/stripe` visible — **or** documented equivalent |
+| E-08 | Build output | Deployment build log capture | Deploy **Ready**; no fatal build error |
+| E-09 | Domain unchanged | `zora-walat-api-staging.vercel.app` still on project | Match VRC-D06 baseline |
 
-**Without E-06:** Do **not** proceed to STR-02 Resend.
+**Without E-07:** Do **not** proceed to STR-02 Resend.
 
 ---
 
@@ -46,10 +47,10 @@
 
 | ID | Requirement | Method | Pass criterion |
 |----|-------------|--------|----------------|
-| E-09 | Sandbox Resend **only** with phrase `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY` | Stripe Dashboard — one resend | Per [STR-02 runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md) |
-| E-10 | HTTP 200 | STR-02B screenshot | **Only if actually observed** — else **FAIL** |
-| E-11 | LOG-01…LOG-04 | Vercel + app logs | **CORRELATED** — else **NOT ACHIEVED** |
-| E-12 | Vercel runtime correlation | Logs search `/webhooks/stripe` | Match in STR-02 window — else **NOT FOUND** |
+| E-10 | Sandbox Resend **only** with phrase `APPROVE STR-02 SANDBOX CHECKOUT.EXPIRED RESEND ONLY` | Stripe Dashboard — one resend | Per [STR-02 runbook](./ZORA_WALAT_G02_STR02_OPERATOR_RUNBOOK_2026_05_24.md) |
+| E-11 | HTTP 200 | STR-02B screenshot | **Only if actually observed** — else **FAIL** |
+| E-12 | LOG-01…LOG-04 | Vercel + app logs | **CORRELATED** — else **NOT ACHIEVED** |
+| E-13 | Vercel runtime correlation | Logs search `/webhooks/stripe` | Match in STR-02 window — else **NOT FOUND** |
 
 ---
 
@@ -82,9 +83,10 @@
 | STR-02 | **404 ERR / Not Found** |
 | HTTP 200 | **NOT ACHIEVED** |
 | LOG-01…LOG-04 | **NOT CORRELATED / NOT CAPTURED** |
-| Test plan | **DEFINED** — **NOT EXECUTED** |
-| Fix | **NOT IMPLEMENTED** |
+| Local test plan | **UPDATED** — execution recorded in PR report |
+| Local routing bridge | **IMPLEMENTED FOR REVIEW** |
+| Deployed fix | **NOT DEPLOYED / NOT PROVEN** |
 
 ---
 
-*Test and evidence plan · future execution only · no fake pass*
+*Test and evidence plan · local tests allowed · deploy/replay separately gated · no fake pass*
