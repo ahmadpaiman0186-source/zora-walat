@@ -3,6 +3,8 @@
 **Date:** 2026-05-24
 **Parent:** [Vercel read-only diagnostics](./ZORA_WALAT_STR02_VERCEL_READONLY_ROUTING_DIAGNOSTICS_2026_05_24.md)
 
+**Note (2026-05-24):** VRC-D01 captured Root Directory = **`./`**. Deployment output evidence (VRC-D03…D05) remains **PENDING** — required to confirm whether `api/index.mjs` is in deployed surface.
+
 **Policy:** Read-only. **No redeploy.**
 
 ---
