@@ -115,7 +115,7 @@ See master table BL-M01 … BL-M04.
 | BL-H02 | **PENDING** | _Payments owner_ |
 | BL-H04 | **PARTIAL** | _Payments + engineering_ |
 | STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; [implementation approval](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING**; fix **NOT EXECUTED** |
-| **G-02-WH-STG** | **FAILED / INCONCLUSIVE** | _Payments + engineering_ — STR-02 **404**; Vercel diagnostics **COMPLETE** — Root Directory=`./`, **`/webhooks/stripe` missing** on deploy; root cause **NOT CONFIRMED** |
+| **G-02-WH-STG** | **FAILED / INCONCLUSIVE** | _Payments + engineering_ — STR-02 **404**; diagnostics **COMPLETE**; [routing fix gate](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) **NOT ISSUED**; root cause **NOT CONFIRMED** |
 
 ---
 

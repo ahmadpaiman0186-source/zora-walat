@@ -147,6 +147,25 @@
 
 ---
 
+## Start here — STR-02 Routing Fix Approval Gate (2026-05-24)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) | **Implementation gate** — phrase required; **NOT ISSUED** |
+| [ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_IMPLEMENTATION_PLAN_2026_05_24.md) | Options A–D — evaluate only |
+| [ZORA_WALAT_STR02_ROUTING_FIX_RISK_REGISTER_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_RISK_REGISTER_2026_05_24.md) | Risks — all **OPEN** |
+| [ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md) | Rollback — defined only |
+| [ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md) | Post-implementation tests — no fake pass |
+| [ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_CHECKLIST_2026_05_24.md](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_CHECKLIST_2026_05_24.md) | Pre-implementation checklist — unchecked |
+
+**Required approval phrase (implementation only):** `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY`
+
+**Implementation branch (not created):** `fix/str02-404-webhook-routing-staging-2026-05-24`
+
+**Verdict:** Fix **NOT IMPLEMENTED** · approval **NOT ISSUED** · root cause **NOT CONFIRMED** · prod/pilot **NO-GO**.
+
+---
+
 ## Start here — Stripe Webhook Failure Evidence (2026-05-22)
 
 | Document | Contents |

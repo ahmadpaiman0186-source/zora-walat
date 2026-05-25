@@ -8,14 +8,16 @@
 
 ---
 
-## 1. Current state (post PR #66)
+## 1. Current state (post PR #70)
 
 | Item | Status |
 |------|--------|
-| `main` | Clean and synced after PR #67 |
+| `main` | Clean and synced after PR #70 |
 | PR #66 | STR-02 resend evidence (404 + Vercel no-match) |
 | PR #67 | STR-02 404 routing/root-cause investigation pack **FILED** |
-| Vercel read-only diagnostics pack | **SCAFFOLD FILED** — VRC-D01…D07 **PENDING CAPTURE** |
+| PR #70 | Vercel read-only diagnostics final captures **MERGED** |
+| Vercel diagnostics | **CAPTURED** — Root Directory **`./`**; **`/webhooks/stripe` missing** on deploy |
+| Routing fix approval gate | **FILED** — [gate pack](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md); phrase **NOT ISSUED** |
 | STR-02 Resend | **EXECUTED ONCE** — sandbox/test-mode only |
 | STR-02 result | **404 ERR / Not Found** |
 | HTTP 200 | **NOT ACHIEVED** |
@@ -101,7 +103,7 @@ Full matrix: [Vercel routing hypothesis matrix](./ZORA_WALAT_STR02_404_VERCEL_RO
 fix/str02-404-webhook-routing-staging-2026-05-24
 ```
 
-Creation requires separate approval. **Not created in this pack.**
+**Approval required:** [Routing fix approval gate](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) — phrase `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY` — **NOT ISSUED**. Branch **NOT CREATED**.
 
 ---
 
