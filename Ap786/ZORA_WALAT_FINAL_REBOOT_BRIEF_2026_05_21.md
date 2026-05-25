@@ -94,10 +94,10 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-02 route intelligence pack | **FILED** — static verifier **PASS**, CI guard added, evidence ingestion updated, self-repair apply **GATED / NOT ENABLED** |
 | STR-02 post-fix HTTP proof | **PROVEN PARTIAL** — invalid-signature POST reached `/webhooks/stripe` and returned HTTP `400`; Stripe event processing **NOT PROVEN** |
 | STR-02 sandbox checkout.expired resend proof | **BLOCKED / NO ELIGIBLE EVENT DELIVERY** — sandbox and `checkout.session.expired` filter captured; no event deliveries found; no resend clicked |
-| STR-03 controlled sandbox checkout.session.expired proof | **PENDING OPERATOR ACTION** — approval received for sandbox-only proof; all required screenshots **PENDING CAPTURE** |
+| STR-03 controlled sandbox checkout.session.expired proof | **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** — sandbox-only evidence captured; Stripe-side trigger/delivery proof **PARTIAL PROOF CAPTURED**; Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **NOT FULLY PROVEN** — STR-03 pending HTTP 2xx + Vercel log correlation |
+| Fix proven | **PARTIAL / NOT FULLY PROVEN** — STR-03 captured Stripe-side proof, but Vercel log receipt, event ID correlation, idempotency/lifecycle, and fast ACK evidence remain **NOT FOUND / INCONCLUSIVE** |
 
 ---
 
@@ -131,8 +131,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | Staging `checkout.session.expired` webhook timeout root cause | **NOT CONFIRMED** (PR #50 evidence **FILED**; remediation **PLAN ONLY**) |
 | Fast ACK implementation approval | **PENDING** (PR #51 remediation **FILED**; code **NOT STARTED**) |
 | G-02 staging webhook replay (PR #55) | **FAILED / INCONCLUSIVE** — STR-02 **404**; [404 investigation](./ZORA_WALAT_STR02_404_ROUTING_ROOT_CAUSE_INVESTIGATION_2026_05_24.md); root cause **NOT CONFIRMED** |
-| STR-02 deployed route surface after PR #72 | **PENDING** — static verifier **PASS**, but screenshots/HTTP 200 absent |
-| G-02 fix proven | **NOT YET** |
+| STR-02 deployed route surface after PR #72 | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** — static verifier **PASS**, PR72 route screenshots filed, invalid-signature reachability captured |
+| G-02 fix proven | **PARTIAL / NOT FULLY PROVEN** — Stripe-side STR-03 proof captured, Vercel runtime correlation absent/inconclusive |
 
 ---
 

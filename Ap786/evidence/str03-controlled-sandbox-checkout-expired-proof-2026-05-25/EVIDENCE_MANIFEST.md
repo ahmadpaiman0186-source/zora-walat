@@ -11,14 +11,14 @@
 
 | Evidence ID | Filename | Purpose | Status |
 |-------------|----------|---------|--------|
-| STR03-001 | `STR03-STRIPE-SANDBOX-MODE-CONFIRMED-001.png` | Prove Stripe dashboard is in sandbox/test mode | **PENDING CAPTURE** |
-| STR03-002 | `STR03-STAGING-WEBHOOK-ENDPOINT-CONFIRMED-002.png` | Prove target endpoint is `https://zora-walat-api-staging.vercel.app/webhooks/stripe` | **PENDING CAPTURE** |
-| STR03-003 | `STR03-CHECKOUT-SESSION-EXPIRED-EVENT-SELECTED-003.png` | Prove event type `checkout.session.expired` is selected | **PENDING CAPTURE** |
-| STR03-004 | `STR03-CHECKOUT-SESSION-EXPIRED-DELIVERY-RESULT-004.png` | Prove Stripe delivery result; success requires HTTP 2xx | **PENDING CAPTURE** |
-| STR03-005 | `STR03-VERCEL-RUNTIME-LOG-WEBHOOK-RECEIVED-005.png` | Prove Vercel received webhook request | **PENDING CAPTURE** |
-| STR03-006 | `STR03-VERCEL-RUNTIME-LOG-EVENT-ID-CORRELATION-006.png` | Prove Stripe event ID correlates with Vercel log | **PENDING CAPTURE** |
-| STR03-007 | `STR03-VERCEL-RUNTIME-LOG-IDEMPOTENCY-LIFECYCLE-007.png` | Prove idempotency/lifecycle logging occurred | **PENDING CAPTURE** |
-| STR03-008 | `STR03-VERCEL-RUNTIME-LOG-FAST-ACK-OBSERVED-008.png` | Prove fast ACK path/lifecycle was observed | **PENDING CAPTURE** |
+| STR03-001 | `STR03-STRIPE-SANDBOX-MODE-CONFIRMED-001.png` | Prove Stripe dashboard is in sandbox/test mode | **CAPTURED** |
+| STR03-002 | `STR03-STAGING-WEBHOOK-ENDPOINT-CONFIRMED-002.png` | Prove target endpoint is `https://zora-walat-api-staging.vercel.app/webhooks/stripe` | **CAPTURED** |
+| STR03-003 | `STR03-CHECKOUT-SESSION-EXPIRED-EVENT-SELECTED-003.png` | Prove event type `checkout.session.expired` trigger/selection | **SUCCEEDED / CAPTURED** |
+| STR03-004 | `STR03-CHECKOUT-SESSION-EXPIRED-DELIVERY-RESULT-004.png` | Prove Stripe delivery result; success requires HTTP 2xx | **HTTP 200 OK CAPTURED** |
+| STR03-005 | `STR03-VERCEL-RUNTIME-LOG-WEBHOOK-RECEIVED-005.png` | Prove Vercel received webhook request | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-006 | `STR03-VERCEL-RUNTIME-LOG-EVENT-ID-CORRELATION-006.png` | Prove Stripe event ID correlates with Vercel log | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-007 | `STR03-VERCEL-RUNTIME-LOG-IDEMPOTENCY-LIFECYCLE-007.png` | Prove idempotency/lifecycle logging occurred | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-008 | `STR03-VERCEL-RUNTIME-LOG-FAST-ACK-OBSERVED-008.png` | Prove fast ACK path/lifecycle was observed | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
 
 ---
 
@@ -27,16 +27,20 @@
 | Item | Status |
 |------|--------|
 | STR-03 approval | **APPROVED FOR SANDBOX ONLY** |
-| STR-03 execution | **PENDING OPERATOR ACTION** |
-| Stripe sandbox/test mode proof | **PENDING CAPTURE** |
-| Endpoint proof | **PENDING CAPTURE** |
-| `checkout.session.expired` selected/proof | **PENDING CAPTURE** |
-| Stripe delivery HTTP result | **PENDING CAPTURE** |
-| Vercel runtime log correlation | **PENDING CAPTURE** |
-| HTTP 2xx Stripe processing | **NOT ACHIEVED YET** |
-| Stripe event processing | **NOT PROVEN YET** |
-| Fix | **NOT FULLY PROVEN** |
+| STR-03 execution | **COMPLETED FOR CONTROLLED SANDBOX EVIDENCE CAPTURE** |
+| Stripe sandbox/test mode proof | **CAPTURED** |
+| Endpoint proof | **CAPTURED** |
+| `checkout.session.expired` trigger/proof | **SUCCEEDED / CAPTURED** |
+| Stripe delivery to staging endpoint | **HTTP 200 OK CAPTURED** |
+| Stripe-side delivery proof | **PARTIAL PROOF CAPTURED** |
+| Vercel visible runtime log `/webhooks/stripe` | **NOT FOUND / INCONCLUSIVE** |
+| Vercel event ID correlation | **NOT FOUND / INCONCLUSIVE** |
+| Vercel idempotency/lifecycle log | **NOT FOUND / INCONCLUSIVE** |
+| Vercel fast ACK log | **NOT FOUND / INCONCLUSIVE** |
+| Full processing proof | **NOT FULLY PROVEN** |
+| Fix | **PARTIAL / NOT FULLY PROVEN** |
 | Production / real-money / controlled pilot | **NO-GO** |
+| Self-healing apply | **GATED / NOT ENABLED** |
 
 ---
 
@@ -55,4 +59,4 @@
 
 ---
 
-*Manifest - all STR-03 screenshots pending capture*
+*Manifest - all eight STR-03 screenshots ingested; Vercel runtime correlation remains not found / inconclusive*

@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-25
 **Approval phrase:** `APPROVE STR-03 CONTROLLED SANDBOX CHECKOUT.EXPIRED WEBHOOK PROOF ONLY`
-**Status:** **PENDING OPERATOR ACTION**
+**Status:** **COMPLETED FOR CONTROLLED SANDBOX EVIDENCE CAPTURE**
 
 **Scope:** Sandbox/test-mode only, target endpoint only:
 
@@ -19,22 +19,37 @@ No live mode, production endpoint, real money, deploy/redeploy, Vercel env/setti
 | Item | Status |
 |------|--------|
 | STR-03 approval | **APPROVED FOR SANDBOX ONLY** |
-| STR-03 execution | **PENDING OPERATOR ACTION** |
-| Stripe sandbox/test mode proof | **PENDING CAPTURE** |
-| Endpoint proof | **PENDING CAPTURE** |
-| `checkout.session.expired` selected/proof | **PENDING CAPTURE** |
-| Stripe delivery HTTP result | **PENDING CAPTURE** |
-| Vercel runtime log correlation | **PENDING CAPTURE** |
-| HTTP 2xx Stripe processing | **NOT ACHIEVED YET** |
-| Stripe event processing | **NOT PROVEN YET** |
-| Fix | **NOT FULLY PROVEN** |
+| STR-03 execution | **COMPLETED FOR CONTROLLED SANDBOX EVIDENCE CAPTURE** |
+| Stripe sandbox/test mode proof | **CAPTURED** |
+| Endpoint proof | **CAPTURED** |
+| `checkout.session.expired` trigger/proof | **SUCCEEDED / CAPTURED** |
+| Stripe delivery to staging endpoint | **HTTP 200 OK CAPTURED** |
+| Stripe-side delivery proof | **PARTIAL PROOF CAPTURED** |
+| Vercel visible runtime log `/webhooks/stripe` | **NOT FOUND / INCONCLUSIVE** |
+| Vercel event ID correlation | **NOT FOUND / INCONCLUSIVE** |
+| Vercel idempotency/lifecycle log | **NOT FOUND / INCONCLUSIVE** |
+| Vercel fast ACK log | **NOT FOUND / INCONCLUSIVE** |
+| Full processing proof | **NOT FULLY PROVEN** |
+| Fix | **PARTIAL / NOT FULLY PROVEN** |
 | Production / real-money / controlled pilot | **NO-GO** |
+| Self-healing apply | **GATED / NOT ENABLED** |
 
 ---
 
-## Required Captures
+## Ingested Captures
 
-See [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md) for all eight required screenshots.
+The following eight operator-provided screenshots were copied from `C:\Users\ahmad\Downloads\STR03` into this evidence folder:
+
+| Evidence ID | Filename | Status |
+|-------------|----------|--------|
+| STR03-001 | `STR03-STRIPE-SANDBOX-MODE-CONFIRMED-001.png` | **CAPTURED** |
+| STR03-002 | `STR03-STAGING-WEBHOOK-ENDPOINT-CONFIRMED-002.png` | **CAPTURED** |
+| STR03-003 | `STR03-CHECKOUT-SESSION-EXPIRED-EVENT-SELECTED-003.png` | **CAPTURED** |
+| STR03-004 | `STR03-CHECKOUT-SESSION-EXPIRED-DELIVERY-RESULT-004.png` | **CAPTURED** |
+| STR03-005 | `STR03-VERCEL-RUNTIME-LOG-WEBHOOK-RECEIVED-005.png` | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-006 | `STR03-VERCEL-RUNTIME-LOG-EVENT-ID-CORRELATION-006.png` | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-007 | `STR03-VERCEL-RUNTIME-LOG-IDEMPOTENCY-LIFECYCLE-007.png` | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
+| STR03-008 | `STR03-VERCEL-RUNTIME-LOG-FAST-ACK-OBSERVED-008.png` | **CAPTURED - NOT FOUND / INCONCLUSIVE** |
 
 ---
 
@@ -42,8 +57,8 @@ See [EVIDENCE_MANIFEST.md](./EVIDENCE_MANIFEST.md) for all eight required screen
 
 STR-03 may only be marked **PASSED** after sandbox mode, correct endpoint, `checkout.session.expired`, HTTP 2xx delivery, matching Vercel receipt, matching event ID, and lifecycle/idempotency/fast ACK evidence are all captured.
 
-Until then: HTTP 2xx Stripe processing is **NOT ACHIEVED YET**, event processing is **NOT PROVEN YET**, and fix is **NOT FULLY PROVEN**.
+Current evidence captures Stripe-side sandbox/trigger/delivery proof, but Vercel runtime log correlation, event ID correlation, idempotency/lifecycle evidence, and fast ACK log evidence are **NOT FOUND / INCONCLUSIVE**. Full processing proof remains **NOT FULLY PROVEN**, and the fix remains **PARTIAL / NOT FULLY PROVEN**.
 
 ---
 
-*STR-03 scaffold - pending operator screenshots - no execution recorded*
+*STR-03 controlled sandbox evidence ingested - Vercel runtime correlation not found - no production/real-money claim*
