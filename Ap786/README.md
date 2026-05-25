@@ -162,7 +162,7 @@
 
 **Implementation branch:** `fix/str02-404-webhook-routing-staging-2026-05-24` - merged via PR #72
 
-**Verdict:** PR #72 implementation **MERGED** · deployed route evidence **PENDING** · HTTP 200 **NOT ACHIEVED** · fix **NOT PROVEN** · prod/pilot **NO-GO**.
+**Verdict:** PR #72 implementation **MERGED** · deployed route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · HTTP 200 **NOT ACHIEVED** · fix **NOT PROVEN** · prod/pilot **NO-GO**.
 
 ---
 
@@ -170,7 +170,7 @@
 
 | Document | Contents |
 |----------|----------|
-| [ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) | **Post-merge evidence gate** - PR72-D01...D07 |
+| [ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) | **Post-merge evidence gate** - PR72-D01...D08 + supplemental |
 | [ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_PR72_POSTMERGE_ROUTE_VERDICT_MATRIX_2026_05_24.md) | Route-surface verdict matrix |
 | [ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md](./ZORA_WALAT_STR02_PR72_NEXT_EVIDENCE_GATE_2026_05_24.md) | Next evidence required before resend/proof |
 | [evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/](./evidence/str02-pr72-postmerge-vercel-route-evidence-2026-05-24/README.md) | Evidence folder + manifest |
@@ -179,9 +179,9 @@
 | [ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md](./ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md) | Local screenshot ingestion runbook |
 | [ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md) | Dry-run-only repair recommendation report |
 
-**Evidence IDs:** PR72-D01...PR72-D07 - **PENDING CAPTURE**
+**Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PENDING** · HTTP 200 **NOT ACHIEVED** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · HTTP 200 **NOT ACHIEVED** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
 
 ---
 

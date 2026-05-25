@@ -1,47 +1,64 @@
 {
   "schemaVersion": 1,
   "reportType": "STR02_PR72_EVIDENCE_INGESTION",
-  "status": "PENDING_CAPTURE",
+  "status": "PARTIAL_INGESTED",
   "searchedRoots": [
-    "C:\\Users\\ahmad\\Downloads",
-    "C:\\Users\\ahmad\\Downloads\\Telegram Desktop"
+    "C:\\Users\\ahmad\\Downloads\\PR72"
   ],
-  "imagesConsidered": 52,
+  "imagesConsidered": 8,
+  "mappedScreenshots": 8,
+  "expectedSlotsCaptured": 7,
+  "expectedSlotsMissing": [
+    "PR72-D04"
+  ],
+  "supplementalScreenshots": [
+    "PR72-S01"
+  ],
   "results": [
     {
       "id": "PR72-D01",
       "file": "VERCEL-PR72-LATEST-DEPLOYMENT-SOURCE-COMMIT-001.png",
-      "status": "PENDING_CAPTURE"
+      "status": "INGESTED"
     },
     {
       "id": "PR72-D02",
-      "file": "VERCEL-PR72-BUILD-OUTPUT-002.png",
-      "status": "PENDING_CAPTURE"
+      "file": "VERCEL-PR72-DEPLOYMENT-OVERVIEW-SOURCE-COMMIT-002.png",
+      "status": "INGESTED"
     },
     {
       "id": "PR72-D03",
-      "file": "VERCEL-PR72-DEPLOYMENT-FUNCTIONS-ROUTES-003.png",
-      "status": "PENDING_CAPTURE"
+      "file": "VERCEL-PR72-BUILD-OUTPUT-003.png",
+      "status": "INGESTED"
     },
     {
       "id": "PR72-D04",
-      "file": "VERCEL-PR72-ROUTE-REWRITE-WEBHOOK-STRIPE-004.png",
-      "status": "PENDING_CAPTURE"
+      "file": "VERCEL-PR72-BUILD-OUTPUT-MIDDLE-004.png",
+      "status": "MISSING_NOT_PROVIDED"
     },
     {
       "id": "PR72-D05",
-      "file": "VERCEL-PR72-DOMAIN-MAPPING-005.png",
-      "status": "PENDING_CAPTURE"
+      "file": "VERCEL-PR72-DEPLOYMENT-FUNCTIONS-ROUTES-005.png",
+      "status": "INGESTED"
     },
     {
       "id": "PR72-D06",
       "file": "VERCEL-PR72-LOGS-WEBHOOK-STRIPE-SEARCH-006.png",
-      "status": "PENDING_CAPTURE"
+      "status": "INGESTED"
     },
     {
       "id": "PR72-D07",
       "file": "VERCEL-PR72-LOGS-STRIPE-SEARCH-007.png",
-      "status": "PENDING_CAPTURE"
+      "status": "INGESTED"
+    },
+    {
+      "id": "PR72-D08",
+      "file": "VERCEL-PR72-DOMAIN-MAPPING-008.png",
+      "status": "INGESTED"
+    },
+    {
+      "id": "PR72-S01",
+      "file": "VERCEL-PR72-LATEST-DEPLOYMENT-SOURCE-COMMIT-004.png",
+      "status": "INGESTED_SUPPLEMENTAL"
     }
   ]
 }

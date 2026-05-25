@@ -12,12 +12,12 @@
 | Gate | Requirement | Status |
 |------|-------------|--------|
 | G-PR72-00 | Local static route verifier confirms bridge/rewrite still present | **PASS** |
-| G-PR72-01 | Latest Vercel deployment points to PR #72 merge/implementation | **PENDING CAPTURE** |
-| G-PR72-02 | Build output confirms root build completed after PR #72 | **PENDING CAPTURE** |
-| G-PR72-03 | Functions/Resources show `/api/webhooks/stripe` or equivalent | **PENDING CAPTURE** |
-| G-PR72-04 | Rewrite/route config shows `/webhooks/stripe` route if Vercel exposes it | **PENDING CAPTURE** |
-| G-PR72-05 | Domain still maps to `zora-walat-api-staging.vercel.app` | **PENDING CAPTURE** |
-| G-PR72-06 | Logs reviewed without sending requests | **PENDING CAPTURE** |
+| G-PR72-01 | Latest Vercel deployment points to current `main` source | **CAPTURED** - `d274a82` / PR #74 |
+| G-PR72-02 | Build output confirms root build for current deployment | **PARTIAL CAPTURED** - build output visible; build-output-middle screenshot missing |
+| G-PR72-03 | Functions/Resources show `/api/webhooks/stripe` or equivalent | **CAPTURED** |
+| G-PR72-04 | Rewrite/route config shows `/webhooks/stripe` route if Vercel exposes it | **NOT VISIBLE / NOT CAPTURED** |
+| G-PR72-05 | Domain still maps to `zora-walat-api-staging.vercel.app` | **CAPTURED** - valid configuration / production |
+| G-PR72-06 | Logs reviewed without sending requests | **CAPTURED** - `/webhooks/stripe` and `stripe` searches show no logs found |
 
 ---
 
@@ -63,7 +63,7 @@ No resend is authorized by this PR72 evidence gate.
 |------|--------|
 | PR72 route evidence gate | **DEFINED** |
 | Static route bridge verification | **PASS** |
-| Deployed Vercel route surface | **PENDING** |
+| Deployed Vercel route surface | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** |
 | Evidence complete | **NO** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |

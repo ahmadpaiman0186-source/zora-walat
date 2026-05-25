@@ -113,7 +113,7 @@ See [rollback plan](./ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md) 
 | Merge commit observed | `2059e46` |
 | Implementation commit observed | `4b57499` |
 | Route-surface evidence pack | [PR72 post-merge Vercel route evidence](./ZORA_WALAT_STR02_PR72_POSTMERGE_VERCEL_ROUTE_EVIDENCE_2026_05_24.md) |
-| Evidence IDs | PR72-D01...PR72-D07 **PENDING CAPTURE** |
+| Evidence IDs | PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **SUPPLEMENTAL CAPTURED** |
 | Deploy/redeploy | **NOT AUTHORIZED** |
 | Stripe resend / HTTP proof | **NOT AUTHORIZED / NOT EXECUTED** |
 
@@ -125,7 +125,7 @@ See [rollback plan](./ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md) 
 |------|--------|
 | Options evaluated | **YES** (A–D) |
 | Local routing bridge | **MERGED IN PR #72** |
-| Staging deployment evidence | **PENDING CAPTURE** |
+| Staging deployment evidence | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** |
 | Fix proven | **NO** |
 | Root cause | **NOT CONFIRMED** |
 | Recommended path | **PR review → separate deploy approval → route evidence → separate resend approval** |

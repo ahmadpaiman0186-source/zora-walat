@@ -115,7 +115,7 @@ See master table BL-M01 … BL-M04.
 | BL-H02 | **PENDING** | _Payments owner_ |
 | BL-H04 | **PARTIAL** | _Payments + engineering_ |
 | STRIPE-WH-001 | **FAILED / PENDING INVESTIGATION** | _Payments + engineering_ — remediation **PLAN FILED**; [implementation approval](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) **PENDING**; fix **NOT EXECUTED** |
-| **G-02-WH-STG** | **FAILED / INCONCLUSIVE** | _Payments + engineering_ — STR-02 **404**; PR #72 bridge **MERGED**; static route verifier **PASS**; PR72 deployed route evidence **PENDING CAPTURE**; resend **NOT AUTHORIZED**; fix **NOT PROVEN** |
+| **G-02-WH-STG** | **FAILED / INCONCLUSIVE** | _Payments + engineering_ — STR-02 **404**; PR #72 bridge **MERGED**; static route verifier **PASS**; PR72 deployed route evidence **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** (`main` `d274a82` / PR #74, `/api/webhooks/stripe` visible, no webhook/stripe logs found); resend **NOT AUTHORIZED**; fix **NOT PROVEN** |
 
 ---
 

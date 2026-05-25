@@ -25,7 +25,7 @@
 | Check | Result |
 |-------|--------|
 | Static route bridge verification | **PASS** |
-| Evidence ingestion | **PENDING_CAPTURE** - no PR72 screenshots ingested |
+| Evidence ingestion | **UPDATED** - 8 local PR72 screenshots ingested; 7/8 expected slots captured plus 1 supplemental |
 | Self-repair dry-run | **NO PATCH RECOMMENDED** - static bridge present |
 | CI integration | **ADDED** to Super-System Guard |
 
@@ -57,7 +57,7 @@ Reports:
 |------|--------|
 | Implementation merged | **YES** |
 | Static route bridge verification | **PASS** |
-| Deployed Vercel route surface | **PENDING** |
+| Deployed Vercel route surface | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** |
 | HTTP 200 | **NOT ACHIEVED** |
 | Stripe resend after fix | **NOT AUTHORIZED / NOT EXECUTED** |
 | Fix proven | **NOT YET** |
