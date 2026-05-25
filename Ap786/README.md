@@ -196,10 +196,14 @@
 | [ZORA_WALAT_STR05_MINIMAL_OBSERVABILITY_FIX_PLAN_2026_05_25.md](./ZORA_WALAT_STR05_MINIMAL_OBSERVABILITY_FIX_PLAN_2026_05_25.md) | Gated future observability candidate - **NOT APPROVED** |
 | [ZORA_WALAT_STR05_RISK_REGISTER_2026_05_25.md](./ZORA_WALAT_STR05_RISK_REGISTER_2026_05_25.md) | STR-05 risk register - all risks **OPEN** |
 | [ZORA_WALAT_STR05_DECISION_RECORD_TEMPLATE_2026_05_25.md](./ZORA_WALAT_STR05_DECISION_RECORD_TEMPLATE_2026_05_25.md) | STR-05 decision template - **NO DECISION RECORDED** |
+| [ZORA_WALAT_STR07_POSTMERGE_OBSERVABILITY_DEPLOYMENT_READINESS_2026_05_25.md](./ZORA_WALAT_STR07_POSTMERGE_OBSERVABILITY_DEPLOYMENT_READINESS_2026_05_25.md) | STR-07 post-merge deployment readiness scaffold - **PENDING CAPTURE** |
+| [ZORA_WALAT_STR07_CAPTURE_MATRIX_2026_05_25.md](./ZORA_WALAT_STR07_CAPTURE_MATRIX_2026_05_25.md) | STR07-001...STR07-008 capture matrix - **ALL PENDING** |
+| [ZORA_WALAT_STR07_RISK_REGISTER_2026_05_25.md](./ZORA_WALAT_STR07_RISK_REGISTER_2026_05_25.md) | STR-07 risks - deployment/probe overclaim controls **OPEN** |
+| [evidence/str07-postmerge-observability-deployment-readiness-2026-05-25/](./evidence/str07-postmerge-observability-deployment-readiness-2026-05-25/README.md) | STR-07 evidence folder + manifest/runbook/verdict |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · Vercel runtime correlation **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **PARTIAL / NOT FULLY PROVEN** · prod/real-money/pilot **NO-GO**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · STR-07 post-merge deployment readiness scaffold **PENDING CAPTURE** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · staging runtime proof after STR-06 **NOT CAPTURED YET** · full processing proof **NOT FULLY PROVEN** · fix **NOT FULLY PROVEN** · prod/real-money/pilot **NO-GO**.
 
 ---
 
