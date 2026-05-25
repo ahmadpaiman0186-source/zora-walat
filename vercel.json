@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install --include=dev",
-  "buildCommand": "npm run build"
+  "installCommand": "npm install --include=dev && npm --prefix server install --include=dev",
+  "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/webhooks/stripe",
+      "destination": "/api/webhooks/stripe"
+    }
+  ]
 }

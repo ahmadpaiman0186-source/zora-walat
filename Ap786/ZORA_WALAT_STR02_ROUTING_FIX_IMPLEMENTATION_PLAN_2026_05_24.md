@@ -3,7 +3,7 @@
 **Date:** 2026-05-24
 **Parent:** [approval gate](./ZORA_WALAT_STR02_ROUTING_FIX_APPROVAL_GATE_2026_05_24.md) · [404 fix option matrix](./ZORA_WALAT_STR02_404_FIX_OPTION_MATRIX_2026_05_24.md)
 
-**Policy:** **Planning only.** No code changes in this pack. No branch created. Safest path recommended **after** approval — not executed here.
+**Policy:** Approval phrase received for local implementation only. **No deploy. No redeploy. No Vercel settings edit. No Stripe replay.**
 
 ---
 
@@ -43,7 +43,7 @@
 | Mechanism | Add root `vercel.json` rewrite/route or API shim forwarding `/webhooks/stripe` → `server/api/index.mjs` (or equivalent) |
 | Pros | May fix route without dashboard Root Directory change in same PR |
 | Cons | Duplication risk; must not break Next.js pages; needs careful review |
-| This pack | **Candidate** for implementation branch **after** approval |
+| This branch | **SELECTED** — root `api/webhooks/stripe.mjs` bridge + exact root rewrite |
 
 ### Option C — Split API project configuration explicitly
 
@@ -69,21 +69,21 @@
 
 ---
 
-## 3. Recommended path (after approval — not executed here)
+## 3. Implementation note (local only — not deployed)
 
-**Precondition:** Human issues `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY`.
+**Approval received:** `APPROVE STR-02 STAGING WEBHOOK ROUTING FIX IMPLEMENTATION ONLY`
 
 | Step | Action | Notes |
 |------|--------|-------|
-| 1 | Confirm static inventory | `server/api/index.mjs`, `server/vercel.json`, root `vercel.json` |
-| 2 | Run Option D guard / contract review | No deploy |
-| 3 | Prefer **minimal Option B** if dashboard change deferred | Smallest diff exposing `POST /webhooks/stripe` on current `./` deploy model |
-| 4 | If Option B insufficient, escalate to **Option A** via **separate** deploy/settings approval | Not bundled in implementation-only phrase |
-| 5 | Local tests per [test plan](./ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md) | No Stripe live calls |
-| 6 | Open PR on `fix/str02-404-webhook-routing-staging-2026-05-24` | Review only |
-| 7 | **Do not** claim fix proven until deploy + gated resend + LOG correlation | Separate gates |
+| 1 | Static inventory confirmed | `server/api/index.mjs` already handles POST `/webhooks/stripe` under `server/` deploy |
+| 2 | Option **B** implemented locally | Root `api/webhooks/stripe.mjs` delegates to existing `server/api/slimStripeWebhookHandler.mjs` |
+| 3 | Root rewrite added | Exact `/webhooks/stripe` → `/api/webhooks/stripe`; frontend routes remain untouched |
+| 4 | Server dependency install added to root Vercel install command | Required so root function can bundle server slim handler dependencies |
+| 5 | Local tests added | See [test/evidence plan](./ZORA_WALAT_STR02_ROUTING_FIX_TEST_AND_EVIDENCE_PLAN_2026_05_24.md) |
+| 6 | PR for review | Allowed by approval phrase |
+| 7 | Deploy / replay / HTTP 200 claim | **NOT AUTHORIZED** in this branch |
 
-**Safest minimal fix (tentative):** Option **B** + Option **D** verification, with Option **A** documented as required follow-up if preview/staging route surface still lacks `/webhooks/stripe` after code-only PR.
+**Implemented files:** root `api/webhooks/stripe.mjs`, root `vercel.json`, and local unit coverage. This is a **local routing exposure fix candidate**, not proof that staging is fixed.
 
 ---
 
@@ -91,8 +91,8 @@
 
 | Item | Status |
 |------|--------|
-| Implement fix in this pack | **NO** |
-| Create implementation branch | **NO** |
+| Implement local routing bridge | **YES** — approved implementation-only scope |
+| Create implementation branch | **YES** — `fix/str02-404-webhook-routing-staging-2026-05-24` |
 | Vercel Root Directory change | **NO** (separate gate) |
 | Deploy / redeploy | **NO** |
 | Stripe Resend | **NO** |
@@ -110,10 +110,12 @@ See [rollback plan](./ZORA_WALAT_STR02_ROUTING_FIX_ROLLBACK_PLAN_2026_05_24.md) 
 | Item | Status |
 |------|--------|
 | Options evaluated | **YES** (A–D) |
-| Fix implemented | **NOT IMPLEMENTED** |
+| Local routing bridge | **IMPLEMENTED FOR REVIEW** |
+| Staging deployment | **NOT DEPLOYED** |
+| Fix proven | **NO** |
 | Root cause | **NOT CONFIRMED** |
-| Recommended path | **Documented** — execution **BLOCKED** until approval phrase |
+| Recommended path | **PR review → separate deploy approval → route evidence → separate resend approval** |
 
 ---
 
-*Implementation plan · evaluate only · safest path after approval · no code in this pack*
+*Implementation plan · local bridge implemented · no deploy · no fix-proven claim*
