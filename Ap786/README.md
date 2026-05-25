@@ -178,10 +178,12 @@
 | [ZORA_WALAT_STR02_SUPER_SYSTEM_ROUTE_VERIFIER_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SUPER_SYSTEM_ROUTE_VERIFIER_REPORT_2026_05_24.md) | Static route bridge verifier - **PASS** |
 | [ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md](./ZORA_WALAT_STR02_EVIDENCE_AUTOMATION_RUNBOOK_2026_05_24.md) | Local screenshot ingestion runbook |
 | [ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md](./ZORA_WALAT_STR02_SELF_REPAIR_DRY_RUN_REPORT_2026_05_24.md) | Dry-run-only repair recommendation report |
+| [ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_SANDBOX_HTTP_PROOF_2026_05_24.md) | Post-fix invalid-signature HTTP proof - route reachability **PROVEN PARTIAL** |
+| [ZORA_WALAT_STR02_POSTFIX_HTTP_PROOF_VERDICT_MATRIX_2026_05_24.md](./ZORA_WALAT_STR02_POSTFIX_HTTP_PROOF_VERDICT_MATRIX_2026_05_24.md) | HTTP proof verdict matrix |
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · HTTP 200 **NOT ACHIEVED** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT PROVEN**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · HTTP 2xx Stripe processing **NOT ACHIEVED** · Stripe resend **NOT AUTHORIZED / NOT EXECUTED** · fix **NOT FULLY PROVEN**.
 
 ---
 
