@@ -93,6 +93,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-02 PR72 route evidence | **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** — `main` `d274a82` / PR #74, `/api/webhooks/stripe` visible, no webhook/stripe logs found; fix **NOT PROVEN** |
 | STR-02 route intelligence pack | **FILED** — static verifier **PASS**, CI guard added, evidence ingestion updated, self-repair apply **GATED / NOT ENABLED** |
 | STR-02 post-fix HTTP proof | **PROVEN PARTIAL** — invalid-signature POST reached `/webhooks/stripe` and returned HTTP `400`; Stripe event processing **NOT PROVEN** |
+| STR-02 sandbox checkout.expired resend proof | **BLOCKED / NO ELIGIBLE EVENT DELIVERY** — sandbox and `checkout.session.expired` filter captured; no event deliveries found; no resend clicked |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT FULLY PROVEN** |
