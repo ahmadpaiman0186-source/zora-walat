@@ -163,7 +163,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | Env changes | G-09 |
 | DB writes / migrations | G-07 |
 | Stripe refunds | G-03 / G-11 |
-| Webhook replays | G-02 · STR-02 **404 FAILED**; local root routing bridge **implemented for review** on `fix/str02-404-webhook-routing-staging-2026-05-24`; deploy + resend still separately gated |
+| Webhook replays | G-02 · STR-02 **404 FAILED**; PR #72 route bridge **MERGED**; PR72 Vercel route evidence **PENDING CAPTURE**; resend still separately gated |
 | Webhook remediation (fast ACK / async) | Track H + [remediation plan](./ZORA_WALAT_CHECKOUT_EXPIRED_TIMEOUT_REMEDIATION_PLAN_2026_05_23.md) + [implementation approval gate](./ZORA_WALAT_STRIPE_WEBHOOK_FAST_ACK_IMPLEMENTATION_APPROVAL_GATE_2026_05_23.md) |
 | Wallet credits | Human + payments |
 | Service fulfillment | Human + payments |
