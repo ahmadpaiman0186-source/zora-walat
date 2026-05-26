@@ -102,9 +102,10 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-09 Stripe webhook resumed email | **STRIPE-SIDE TEST-MODE RESUMPTION EVIDENCE CAPTURED** — Stripe email says successful delivery occurred and event notifications resumed for staging `/webhooks/stripe`; app-side processing **NOT PROVEN** |
 | STR-10 webhook processing proof decision gate | **FILED / NO ACTION EXECUTED** — options A-E compared; durable non-money audit evidence recommended as next gated engineering path |
 | STR-11 durable non-money audit approval pack | **FILED / NO IMPLEMENTATION APPROVED** — future STR-12/13/14 approval gates defined; DB migration, deploy, probe, replay, and production claims excluded |
+| STR-12 durable non-money webhook audit | **LOCAL IMPLEMENTATION ADDED / NOT DEPLOYED** — audit-only metadata module and slim handler integration added; staging runtime proof **NOT CAPTURED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **NOT FULLY PROVEN** — STR-11 is approval planning only; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** and full webhook/app processing proof remains pending |
+| Fix proven | **NOT FULLY PROVEN** — STR-12 is local support only; deploy/probe/replay not executed and staging runtime proof remains pending |
 
 ---
 
