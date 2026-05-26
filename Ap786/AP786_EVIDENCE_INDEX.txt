@@ -225,6 +225,14 @@ STR10_PROCESSING_PROOF_OPTIONS_MATRIX 2026-05-25: ZORA_WALAT_STR10_PROCESSING_PR
 STR10_MINIMAL_SAFE_NEXT_ACTION_PLAN 2026-05-25: ZORA_WALAT_STR10_MINIMAL_SAFE_NEXT_ACTION_PLAN_2026_05_25.md — plan-only next action; explicit approval required before implementation/deploy/probe/replay/DB migration.
 STR10_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR10_RISK_REGISTER_2026_05_25.md — governance risks for overclaiming, unsafe replay, secret logging, and bundled approvals.
 STR10_APPROVAL_DECISION_RECORD_TEMPLATE 2026-05-25: ZORA_WALAT_STR10_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_25.md — default-deny approval template; no decision recorded.
+STR11_DURABLE_NON_MONEY_WEBHOOK_AUDIT_APPROVAL_GATE 2026-05-25: ZORA_WALAT_STR11_DURABLE_NON_MONEY_WEBHOOK_AUDIT_APPROVAL_GATE_2026_05_25.md — approval pack filed for future durable non-money webhook audit; no implementation/migration/deploy/probe approved.
+STR11_ALLOWED_CHANGESET 2026-05-25: ZORA_WALAT_STR11_ALLOWED_CHANGESET_2026_05_25.md — future allowed changeset boundaries; implementation files must be named in STR-12.
+STR11_PROPOSED_AUDIT_EVENT_MODEL 2026-05-25: ZORA_WALAT_STR11_PROPOSED_AUDIT_EVENT_MODEL_2026_05_25.md — proposed redacted audit fields; raw payloads/signatures/secrets/PII forbidden.
+STR11_SECURITY_PRIVACY_AND_DATA_RETENTION_PLAN 2026-05-25: ZORA_WALAT_STR11_SECURITY_PRIVACY_AND_DATA_RETENTION_PLAN_2026_05_25.md — data minimization, redaction, retention, and access plan for future approval.
+STR11_TEST_MATRIX 2026-05-25: ZORA_WALAT_STR11_TEST_MATRIX_2026_05_25.md — future focused tests for audit allowlist, redaction, no-mutation behavior, idempotency, and ACK metadata.
+STR11_ROLLBACK_AND_ABORT_PLAN 2026-05-25: ZORA_WALAT_STR11_ROLLBACK_AND_ABORT_PLAN_2026_05_25.md — future rollback/abort criteria; no runtime rollback required for STR-11 docs.
+STR11_RISK_REGISTER 2026-05-25: ZORA_WALAT_STR11_RISK_REGISTER_2026_05_25.md — approval risks for audit-only implementation, secrets/PII, DB migration, deploy/replay bundling, and overclaiming.
+STR11_APPROVAL_DECISION_RECORD_TEMPLATE 2026-05-25: ZORA_WALAT_STR11_APPROVAL_DECISION_RECORD_TEMPLATE_2026_05_25.md — STR-12/13/14 approval phrases defined; no approval issued.
 G02_STR02_EVIDENCE_MATRIX 2026-05-24: ZORA_WALAT_G02_STR02_EVIDENCE_CAPTURE_MATRIX_2026_05_24.md — STR-02A/B/C 404 FAILED; 404 investigation FILED; LOG NOT CORRELATED.
 G02_STR02_RISK_REGISTER 2026-05-24: ZORA_WALAT_G02_STR02_RISK_REGISTER_2026_05_24.md — 12 risks OPEN; NOT ACCEPTED.
 G02_STAGING_REPLAY_EVIDENCE_MATRIX 2026-05-23: ZORA_WALAT_G02_STAGING_REPLAY_EVIDENCE_MATRIX_2026_05_23.md — STR-02 EXECUTED ONCE/FAILED; LOG NOT CORRELATED; replay FAILED/INCONCLUSIVE.
