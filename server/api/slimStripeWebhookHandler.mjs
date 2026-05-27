@@ -25,9 +25,47 @@ import {
   slimProcessCheckoutSessionExpiredWebhook,
 } from './slimStripeWebhookCheckoutExpired.mjs';
 import { logStripeWebhookLifecycle } from '../src/lib/stripeWebhookLifecycleLog.js';
+import {
+  recordStripeWebhookAudit,
+  stripeAccountModeFromEvent,
+  webhookAuditRouteFromRequest,
+} from './stripeWebhookAudit.mjs';
 
 /** Match `express.raw({ limit: '256kb' })` on `/webhooks/stripe` in app.js */
 export const WEBHOOK_RAW_BODY_LIMIT_BYTES = 256 * 1024;
+
+/**
+ * @param {number} startedAt
+ */
+function elapsedMs(startedAt) {
+  return Date.now() - startedAt;
+}
+
+/**
+ * @param {import('stripe').Stripe.Event | undefined} event
+ */
+function stripeWebhookAuditEventFields(event) {
+  if (!event) return {};
+  return {
+    event_id: typeof event.id === 'string' ? event.id : undefined,
+    event_type: typeof event.type === 'string' ? event.type : undefined,
+    stripe_account_mode: stripeAccountModeFromEvent(event),
+  };
+}
+
+/**
+ * @param {unknown} result
+ */
+function idempotencyStatusFromSlimResult(result) {
+  if (!result || typeof result !== 'object') return 'new';
+  const status = typeof result.status === 'string' ? result.status : '';
+  const transition = typeof result.stateTransition === 'string' ? result.stateTransition : '';
+  if (transition === 'duplicate_shadow_ack') return 'duplicate_shadow_ack';
+  if (transition.startsWith('duplicate_db')) return 'duplicate_db';
+  if (status === 'duplicate_ignored') return 'duplicate';
+  if (status === 'error_ack' || transition.includes('error')) return 'error';
+  return 'new';
+}
 
 /**
  * @param {'webhook_slim_entry' | 'webhook_signature_missing' | 'webhook_signature_invalid' | 'webhook_signature_verified_handoff'} event
@@ -160,6 +198,17 @@ export function createStripeWebhookReplayStream(originalReq, bodyBuf) {
  * @returns {Promise<void>}
  */
 export async function handleSlimStripeWebhookPost(req, res, getHandler) {
+  const startedAt = Date.now();
+  const auditBase = {
+    route: webhookAuditRouteFromRequest(req),
+    received_at: new Date(startedAt).toISOString(),
+  };
+  await recordStripeWebhookAudit({
+    ...auditBase,
+    signature_verification_status: 'not_attempted',
+    idempotency_status: 'not_applicable',
+    handler_stage: 'route_entry',
+  });
   logWebhookSlimBreadcrumb('webhook_slim_entry');
   logStripeWebhookLifecycle('webhook_received', { path: 'slim' });
 
@@ -172,6 +221,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      signature_verification_status: 'not_attempted',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'response_sent',
+      response_status: 503,
+      ack_latency_ms: elapsedMs(startedAt),
+      redacted_error_code: 'signing_secret_not_configured',
+    });
     res.end(
       JSON.stringify(
         clientErrorBody('Service unavailable', API_CONTRACT_CODE.INTERNAL_ERROR),
@@ -195,6 +253,15 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         res.statusCode = 413;
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
+        await recordStripeWebhookAudit({
+          ...auditBase,
+          signature_verification_status: 'missing',
+          idempotency_status: 'not_applicable',
+          handler_stage: 'response_sent',
+          response_status: 413,
+          ack_latency_ms: elapsedMs(startedAt),
+          redacted_error_code: 'webhook_body_too_large',
+        });
         res.end(
           JSON.stringify(
             clientErrorBody('Payload too large', API_CONTRACT_CODE.VALIDATION_ERROR),
@@ -207,6 +274,20 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      signature_verification_status: 'missing',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'signature_verification_failed',
+    });
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      signature_verification_status: 'missing',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'response_sent',
+      response_status: 400,
+      ack_latency_ms: elapsedMs(startedAt),
+    });
     res.end(
       JSON.stringify(
         clientErrorBody('Invalid request', API_CONTRACT_CODE.VALIDATION_ERROR),
@@ -245,6 +326,20 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      signature_verification_status: 'invalid',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'signature_verification_failed',
+    });
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      signature_verification_status: 'invalid',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'response_sent',
+      response_status: 400,
+      ack_latency_ms: elapsedMs(startedAt),
+    });
     res.end(
       JSON.stringify(
         clientErrorBody('Invalid request', API_CONTRACT_CODE.VALIDATION_ERROR),
@@ -262,9 +357,23 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         ? event.id.slice(-8)
         : 'unknown',
   });
+  await recordStripeWebhookAudit({
+    ...auditBase,
+    ...stripeWebhookAuditEventFields(event),
+    signature_verification_status: 'verified',
+    idempotency_status: 'not_applicable',
+    handler_stage: 'signature_verified',
+  });
 
   if (isHostedCheckoutSessionCompletedEvent(event)) {
     const t0 = Date.now();
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      ...stripeWebhookAuditEventFields(event),
+      signature_verification_status: 'verified',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'handler_stage_entered',
+    });
     try {
       const processor =
         typeof globalThis.__zwSlimWebhookCheckoutSessionCompletedImpl ===
@@ -279,6 +388,22 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_completed',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'idempotency_checked',
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
       });
       res.end(
         JSON.stringify({
@@ -307,6 +432,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_completed_error_ack',
       });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: 'error',
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
+        redacted_error_code: err?.name ?? 'processor_error',
+      });
       res.end(JSON.stringify({ received: true, path: 'slim_checkout_session_completed_error_ack' }));
     }
     return;
@@ -314,6 +449,13 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
 
   if (isHostedCheckoutSessionExpiredEvent(event)) {
     const t0 = Date.now();
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      ...stripeWebhookAuditEventFields(event),
+      signature_verification_status: 'verified',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'handler_stage_entered',
+    });
     try {
       const processor =
         typeof globalThis.__zwSlimWebhookCheckoutSessionExpiredImpl === 'function'
@@ -327,6 +469,22 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_expired',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'idempotency_checked',
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
       });
       res.end(
         JSON.stringify({
@@ -355,6 +513,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_checkout_session_expired_error_ack',
       });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: 'error',
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
+        redacted_error_code: err?.name ?? 'processor_error',
+      });
       res.end(JSON.stringify({ received: true, path: 'slim_checkout_session_expired_error_ack' }));
     }
     return;
@@ -362,6 +530,13 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
 
   if (isChargeRefundedEvent(event)) {
     const t0 = Date.now();
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      ...stripeWebhookAuditEventFields(event),
+      signature_verification_status: 'verified',
+      idempotency_status: 'not_applicable',
+      handler_stage: 'handler_stage_entered',
+    });
     try {
       const result = await slimProcessChargeRefundedWebhook(event);
       res.statusCode = 200;
@@ -371,6 +546,22 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_charge_refunded',
         latencyMs: result.latencyMs ?? Date.now() - t0,
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'idempotency_checked',
+      });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: idempotencyStatusFromSlimResult(result),
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
       });
       res.end(
         JSON.stringify({
@@ -399,6 +590,16 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         stripeEventType: event.type,
         path: 'slim_charge_refunded_error_ack',
       });
+      await recordStripeWebhookAudit({
+        ...auditBase,
+        ...stripeWebhookAuditEventFields(event),
+        signature_verification_status: 'verified',
+        idempotency_status: 'error',
+        handler_stage: 'response_sent',
+        response_status: 200,
+        ack_latency_ms: elapsedMs(startedAt),
+        redacted_error_code: err?.name ?? 'processor_error',
+      });
       res.end(JSON.stringify({ received: true, path: 'slim_charge_refunded_error_ack' }));
     }
     return;
@@ -421,9 +622,25 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      ...stripeWebhookAuditEventFields(event),
+      signature_verification_status: 'verified',
+      idempotency_status: 'skipped',
+      handler_stage: 'handler_stage_entered',
+    });
     logStripeWebhookLifecycle('ack_returned', {
       stripeEventType: event.type,
       path: 'slim_unmatched_fast_ack',
+    });
+    await recordStripeWebhookAudit({
+      ...auditBase,
+      ...stripeWebhookAuditEventFields(event),
+      signature_verification_status: 'verified',
+      idempotency_status: 'skipped',
+      handler_stage: 'response_sent',
+      response_status: 200,
+      ack_latency_ms: elapsedMs(startedAt),
     });
     res.end(
       JSON.stringify({
@@ -440,10 +657,26 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     stripeEventType: event.type,
     path: 'express_replay',
   });
+  await recordStripeWebhookAudit({
+    ...auditBase,
+    ...stripeWebhookAuditEventFields(event),
+    signature_verification_status: 'verified',
+    idempotency_status: 'not_applicable',
+    handler_stage: 'handler_stage_entered',
+  });
   const replayReq = createStripeWebhookReplayStream(req, rawBody);
   const next = await getHandler();
   const out = next(replayReq, res);
   if (out && typeof out.then === 'function') {
     await out;
   }
+  await recordStripeWebhookAudit({
+    ...auditBase,
+    ...stripeWebhookAuditEventFields(event),
+    signature_verification_status: 'verified',
+    idempotency_status: 'not_applicable',
+    handler_stage: 'response_sent',
+    response_status: res.statusCode,
+    ack_latency_ms: elapsedMs(startedAt),
+  });
 }
