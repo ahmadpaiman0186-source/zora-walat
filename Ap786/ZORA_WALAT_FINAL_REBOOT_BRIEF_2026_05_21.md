@@ -105,10 +105,11 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-12 durable non-money webhook audit | **MERGED (PR #87)** — audit-only metadata module and slim handler integration on `main`; staging runtime proof after merge **PENDING** |
 | STR-12 merge-readiness evidence (PR #89) | **MERGED** — Ap786 blocker/merge evidence on `main`; does not prove staging runtime behavior |
 | STR-12 PR #87 Vercel rate-limit blocker | **HISTORICAL / CLOSED BY MERGE** — external rate limit blocked merge; PR #87 subsequently merged |
-| STR-13 post-STR-12 runtime proof scaffold | **FILED / PENDING CAPTURE** — STR13-001..008 defined; no probe/deploy/replay executed |
+| STR-13 post-STR-12 runtime proof scaffold | **MERGED (PR #90) / PENDING CAPTURE** — STR13-001..008 defined; no probe/deploy/replay executed |
+| STR-14 runtime proof execution gate | **FILED / NOT EXECUTED** — separate approval phrases; STR14-C01..C09 pending |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
-| Fix proven | **NOT FULLY PROVEN** — STR-12 merged but post-merge staging runtime proof pending; STR-13 scaffold only; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** for post-STR-12 window; full webhook/app processing proof remains pending |
+| Fix proven | **NOT FULLY PROVEN** — STR-12 merged; STR-13 scaffold merged; STR-14 gate filed but execution not authorized; post-merge staging runtime proof pending; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** for post-STR-12 window; full webhook/app processing proof remains pending |
 
 ---
 
