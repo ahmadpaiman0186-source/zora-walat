@@ -115,7 +115,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | XCH-05 compliance/corridor/KYC-AML gate matrix | **MERGED / GOVERNANCE SPEC ONLY** — corridor, KYC/KYB, AML/sanctions, TM, privacy, launch gates; runtime **NOT IMPLEMENTED**; XCH5-G1..G5 **BLOCKED** |
 | XCH-06 sandbox-only non-money simulation boundary | **MERGED / SIMULATION SPEC ONLY** — fake quote/ledger/providers, scenario matrix, fail-closed rules; runtime **NOT IMPLEMENTED**; XCH6-G1..G4 **BLOCKED** |
 | CARD-00 digital card + bank partner architecture | **MERGED / FUTURE REGULATED EXPANSION ONLY** — cross-border card track; CARD0-G1..G8 **BLOCKED** |
-| AFG-CARD-00 domestic wallet + card + bill pay | **FILED / AFGHANISTAN DOMESTIC ONLY** — wallet/ATM/POS/bill-pay/top-up; **EXCLUDES REMITTANCE**; AFGCARD0-G **BLOCKED** |
+| AFG-CARD-00 domestic wallet + card + bill pay | **MERGED / AFGHANISTAN DOMESTIC ONLY** — architecture; **EXCLUDES REMITTANCE**; AFGCARD0-G **BLOCKED** |
+| AFG-CARD-01 bank/switch/biller/telecom due diligence | **FILED / DD DOCUMENTATION ONLY** — checklists and pilot gate; DD **NOT EXECUTED**; AFGCARD1-G1..G5 **BLOCKED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT FULLY PROVEN** — STR-12 merged; STR-13 scaffold merged; STR-14 gate filed but execution not authorized; post-merge staging runtime proof pending; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** for post-STR-12 window; full webhook/app processing proof remains pending |
