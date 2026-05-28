@@ -107,7 +107,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | STR-12 PR #87 Vercel rate-limit blocker | **HISTORICAL / CLOSED BY MERGE** — external rate limit blocked merge; PR #87 subsequently merged |
 | STR-13 post-STR-12 runtime proof scaffold | **MERGED (PR #90) / PENDING CAPTURE** — STR13-001..008 defined; no probe/deploy/replay executed |
 | STR-14 runtime proof execution gate | **MERGED (PR #91) / NOT EXECUTED** — separate approval phrases; STR14-C01..C09 pending |
-| XCH-00 future remittance/exchange architecture | **FILED / FUTURE ONLY** — global corridor planning; money transmission **NOT ENABLED**; XCH-G1..G10 **BLOCKED** |
+| XCH-00 future remittance/exchange architecture | **MERGED (PR #92) / FUTURE ONLY** — strategy architecture; money transmission **NOT ENABLED** |
+| XCH-01 exchange infrastructure execution gate | **FILED / GOVERNANCE ONLY** — provider/quote/ledger/compliance specs; **NOT EXECUTABLE**; XCH1-G1..G5 **BLOCKED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT FULLY PROVEN** — STR-12 merged; STR-13 scaffold merged; STR-14 gate filed but execution not authorized; post-merge staging runtime proof pending; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** for post-STR-12 window; full webhook/app processing proof remains pending |
