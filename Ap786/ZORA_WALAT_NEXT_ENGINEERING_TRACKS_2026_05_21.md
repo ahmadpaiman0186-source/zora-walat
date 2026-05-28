@@ -92,6 +92,7 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **XCH-03 quote/rate/fee/tax engine spec (2026-05-28)** | [ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md](./ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md) — **MERGED (PR #95)**; execution spec only; **NOT IMPLEMENTED**; real-money quote **NO-GO** |
 | **XCH-04 ledger/settlement/reconciliation invariants (2026-05-28)** | [ZORA_WALAT_XCH04_LEDGER_SETTLEMENT_RECONCILIATION_INVARIANTS_2026_05_28.md](./ZORA_WALAT_XCH04_LEDGER_SETTLEMENT_RECONCILIATION_INVARIANTS_2026_05_28.md) — **MERGED (PR #96)**; invariant spec only; **NOT IMPLEMENTED**; settlement-ready **NO-GO** |
 | **XCH-05 compliance/corridor/KYC-AML gate matrix (2026-05-28)** | [ZORA_WALAT_XCH05_COMPLIANCE_CORRIDOR_KYC_AML_GATE_MATRIX_2026_05_28.md](./ZORA_WALAT_XCH05_COMPLIANCE_CORRIDOR_KYC_AML_GATE_MATRIX_2026_05_28.md) — governance spec only; **NOT IMPLEMENTED**; corridor launch **NO-GO** |
+| **XCH-06 sandbox non-money simulation boundary (2026-05-28)** | [ZORA_WALAT_XCH06_SANDBOX_ONLY_NON_MONEY_SIMULATION_BOUNDARY_2026_05_28.md](./ZORA_WALAT_XCH06_SANDBOX_ONLY_NON_MONEY_SIMULATION_BOUNDARY_2026_05_28.md) — simulation spec only; **NOT IMPLEMENTED**; no real-money path **NO-GO** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
