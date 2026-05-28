@@ -87,7 +87,8 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **STR-13 post-STR-12 runtime proof scaffold (2026-05-27)** | [ZORA_WALAT_STR13_POST_STR12_RUNTIME_PROOF_SCAFFOLD_2026_05_27.md](./ZORA_WALAT_STR13_POST_STR12_RUNTIME_PROOF_SCAFFOLD_2026_05_27.md) — **MERGED (PR #90)**; STR13-001..008 **PENDING CAPTURE** |
 | **STR-14 runtime proof execution gate (2026-05-27)** | [ZORA_WALAT_STR14_RUNTIME_PROOF_EXECUTION_APPROVAL_GATE_2026_05_27.md](./ZORA_WALAT_STR14_RUNTIME_PROOF_EXECUTION_APPROVAL_GATE_2026_05_27.md) — **MERGED (PR #91)**; execution **NOT AUTHORIZED**; runtime proof **PENDING** |
 | **XCH-00 future remittance/exchange architecture (2026-05-27)** | [ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md](./ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md) — **MERGED (PR #92)**; strategy only; launch **NO-GO** |
-| **XCH-01 exchange infrastructure gate (2026-05-28)** | [ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) — infrastructure planning; **NOT EXECUTABLE**; XCH1-G1..G5 **BLOCKED** |
+| **XCH-01 exchange infrastructure gate (2026-05-28)** | [ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) — **MERGED (PR #93)**; **NOT EXECUTABLE** |
+| **XCH-02 provider interface contracts (2026-05-28)** | [ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md](./ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md) — contract spec only; **NOT IMPLEMENTED**; launch **NO-GO** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
