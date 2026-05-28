@@ -240,7 +240,28 @@
 
 **Evidence IDs:** PR72-D01, D02, D03, D05, D06, D07, D08 **CAPTURED**; PR72-D04 **MISSING / NOT PROVIDED**; PR72-S01 **CAPTURED / SUPPLEMENTAL**; STR12-PR87-001 **CAPTURED**; STR13-001..008 **PENDING CAPTURE**; STR14-C01..C09 **PENDING APPROVAL / PENDING CAPTURE**.
 
-**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · STR-07 post-merge deployment readiness scaffold **PENDING CAPTURE** · STR-08 invalid-signature observability probe **EXECUTED ONCE / HTTP 400 / MARKERS NOT FOUND** · STR-09 Stripe email evidence **TEST-MODE DELIVERY RESUMED / APP PROCESSING NOT PROVEN** · STR-10 decision gate **FILED** · STR-11 audit approval pack **FILED** · STR-12 durable audit **MERGED (PR #87)** · STR-12 merge-readiness evidence **MERGED (PR #89)** · STR-13 scaffold **MERGED (PR #90)** · STR-14 execution gate **FILED / NOT EXECUTED** · post-STR-12 staging runtime proof **PENDING** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · staging runtime proof after STR-06/STR-12 **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **NOT FULLY PROVEN** · production-ready **NOT PROVEN** · prod/real-money/pilot **NO-GO**.
+**Verdict:** Implementation merged **YES** · static route bridge verification **PASS** · deployed route surface **PARTIAL DEPLOYMENT EVIDENCE CAPTURED** · route reachability **PROVEN PARTIAL** by invalid-signature `400` · sandbox `checkout.expired` resend **BLOCKED / NO ELIGIBLE EVENT DELIVERY FOUND** · STR-03 controlled sandbox proof **SCREENSHOTS INGESTED / PARTIAL INCONCLUSIVE** · STR-04 runtime correlation gap investigation **FILED** · STR-05 source review **FILED** · STR-07 post-merge deployment readiness scaffold **PENDING CAPTURE** · STR-08 invalid-signature observability probe **EXECUTED ONCE / HTTP 400 / MARKERS NOT FOUND** · STR-09 Stripe email evidence **TEST-MODE DELIVERY RESUMED / APP PROCESSING NOT PROVEN** · STR-10 decision gate **FILED** · STR-11 audit approval pack **FILED** · STR-12 durable audit **MERGED (PR #87)** · STR-12 merge-readiness evidence **MERGED (PR #89)** · STR-13 scaffold **MERGED (PR #90)** · STR-14 execution gate **MERGED (PR #91) / NOT EXECUTED** · post-STR-12 staging runtime proof **PENDING** · Stripe-side sandbox trigger/delivery proof **PARTIAL PROOF CAPTURED** · staging runtime proof after STR-06/STR-12 **NOT FOUND / INCONCLUSIVE** · full processing proof **NOT FULLY PROVEN** · fix **NOT FULLY PROVEN** · production-ready **NOT PROVEN** · prod/real-money/pilot **NO-GO**.
+
+---
+
+## Start here — XCH-00 Future Remittance / Exchange Architecture (2026-05-27)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md](./ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md) | **Master architecture** — future corridors to Afghanistan; **NOT EXECUTABLE** |
+| [ZORA_WALAT_XCH00_SUPER_SYSTEM_INTELLIGENT_EXCHANGE_CONTROLS_2026_05_27.md](./ZORA_WALAT_XCH00_SUPER_SYSTEM_INTELLIGENT_EXCHANGE_CONTROLS_2026_05_27.md) | Super-System Intelligent controls — **DESIGN ONLY** |
+| [ZORA_WALAT_XCH00_KYC_KYB_AML_SANCTIONS_FRAMEWORK_2026_05_27.md](./ZORA_WALAT_XCH00_KYC_KYB_AML_SANCTIONS_FRAMEWORK_2026_05_27.md) | KYC/KYB/AML/sanctions — **NOT INTEGRATED** |
+| [ZORA_WALAT_XCH00_COUNTRY_CORRIDOR_COMPLIANCE_MAP_2026_05_27.md](./ZORA_WALAT_XCH00_COUNTRY_CORRIDOR_COMPLIANCE_MAP_2026_05_27.md) | Corridor map — **ALL BLOCKED** |
+| [ZORA_WALAT_XCH00_TRANSPARENT_QUOTE_RATE_FEE_TAX_ENGINE_DESIGN_2026_05_27.md](./ZORA_WALAT_XCH00_TRANSPARENT_QUOTE_RATE_FEE_TAX_ENGINE_DESIGN_2026_05_27.md) | Quote/fee/tax engine — **DESIGN ONLY** |
+| [ZORA_WALAT_XCH00_LEDGER_AND_SETTLEMENT_ARCHITECTURE_2026_05_27.md](./ZORA_WALAT_XCH00_LEDGER_AND_SETTLEMENT_ARCHITECTURE_2026_05_27.md) | Ledger/settlement — **NO FUNDS HELD** |
+| [ZORA_WALAT_XCH00_MARKETING_AND_GTM_COMPLIANCE_SAFE_FRAMEWORK_2026_05_27.md](./ZORA_WALAT_XCH00_MARKETING_AND_GTM_COMPLIANCE_SAFE_FRAMEWORK_2026_05_27.md) | GTM framework — **NO LAUNCH** |
+| [ZORA_WALAT_XCH00_RISK_REGISTER_2026_05_27.md](./ZORA_WALAT_XCH00_RISK_REGISTER_2026_05_27.md) | XCH risks **OPEN** |
+| [ZORA_WALAT_XCH00_EXECUTION_GATES_2026_05_27.md](./ZORA_WALAT_XCH00_EXECUTION_GATES_2026_05_27.md) | XCH-G0…G10 — **BLOCKED** except G0 docs |
+| [evidence/xch00-global-remittance-exchange-architecture-2026-05-27/](./evidence/xch00-global-remittance-exchange-architecture-2026-05-27/README.md) | XCH00-D01…D09 evidence registry |
+
+**Evidence IDs:** XCH00-D01…D09 **CREATED / PLANNING ONLY**.
+
+**Verdict:** Future remittance/exchange architecture **CREATED** · money transmission **NOT ENABLED** · FX **NOT ENABLED** · licensing **NOT OBTAINED** · compliance approval **NOT CLAIMED** · marketing launch **NO-GO** · production/real-money/pilot **NO-GO**.
 
 ---
 
