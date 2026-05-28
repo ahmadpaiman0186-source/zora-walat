@@ -110,7 +110,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | XCH-00 future remittance/exchange architecture | **MERGED (PR #92) / FUTURE ONLY** — strategy architecture; money transmission **NOT ENABLED** |
 | XCH-01 exchange infrastructure execution gate | **MERGED (PR #93) / GOVERNANCE ONLY** — infrastructure specs; **NOT EXECUTABLE** |
 | XCH-02 provider-neutral interface contracts | **MERGED (PR #94) / CONTRACT SPEC ONLY** — v1.0-draft; adapters **NOT IMPLEMENTED**; XCH2-G1..G5 **BLOCKED** |
-| XCH-03 quote/rate/fee/tax engine execution spec | **FILED / EXECUTION SPEC ONLY** — lifecycle, expiry, rounding, idempotency, audit; engine **NOT IMPLEMENTED**; XCH3-G1..G4 **BLOCKED** |
+| XCH-03 quote/rate/fee/tax engine execution spec | **MERGED (PR #95) / EXECUTION SPEC ONLY** — lifecycle, expiry, rounding, idempotency, audit; engine **NOT IMPLEMENTED**; XCH3-G1..G4 **BLOCKED** |
+| XCH-04 ledger/settlement/reconciliation invariants | **FILED / INVARIANT SPEC ONLY** — entry model, zero-duplicate, finality, recon, reversal, audit; runtime **NOT IMPLEMENTED**; XCH4-G1..G5 **BLOCKED** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
 | Fix proven | **NOT FULLY PROVEN** — STR-12 merged; STR-13 scaffold merged; STR-14 gate filed but execution not authorized; post-merge staging runtime proof pending; Vercel marker correlation remains **NOT FOUND / INCONCLUSIVE** for post-STR-12 window; full webhook/app processing proof remains pending |

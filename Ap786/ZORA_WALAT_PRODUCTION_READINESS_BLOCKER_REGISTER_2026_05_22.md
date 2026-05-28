@@ -122,7 +122,8 @@ See master table BL-M01 … BL-M04.
 | **XCH00-FUTURE-REMIT-001** | **BLOCKED / FUTURE ONLY** | _Program + compliance_ — XCH-00 strategy architecture **MERGED (PR #92)**; money transmission **NOT ENABLED**; licensing **NOT OBTAINED**; [pack](./ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md) |
 | **XCH01-INFRA-GATE-001** | **BLOCKED / PLANNING ONLY** | _Program + engineering + compliance_ — XCH-01 **MERGED (PR #93)**; infrastructure specs **NOT EXECUTED**; [gate](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) |
 | **XCH02-CONTRACTS-001** | **BLOCKED / SPEC ONLY** | _Program + engineering_ — XCH-02 **MERGED (PR #94)**; provider-neutral interface contracts; adapters **NOT IMPLEMENTED**; XCH2-G1..G5 **BLOCKED**; [contracts](./ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md) |
-| **XCH03-QUOTE-ENGINE-001** | **BLOCKED / SPEC ONLY** | _Program + engineering + legal_ — XCH-03 quote/rate/fee/tax execution spec filed; runtime engine **NOT IMPLEMENTED**; tax calculation **NO-GO**; XCH3-G1..G4 **BLOCKED**; [spec](./ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md) |
+| **XCH03-QUOTE-ENGINE-001** | **BLOCKED / SPEC ONLY** | _Program + engineering + legal_ — XCH-03 **MERGED (PR #95)**; quote/rate/fee/tax execution spec; runtime engine **NOT IMPLEMENTED**; tax calculation **NO-GO**; XCH3-G1..G4 **BLOCKED**; [spec](./ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md) |
+| **XCH04-LEDGER-SETTLEMENT-001** | **BLOCKED / SPEC FILED ONLY** | _Program + engineering + finance + compliance_ — ledger, settlement, reconciliation, duplicate-prevention, reversal, and audit invariants documented; no runtime implementation, DB schema, migration, provider integration, payout, wallet mutation, settlement execution, or production evidence; XCH4-G1..G5 **BLOCKED**; [invariants](./ZORA_WALAT_XCH04_LEDGER_SETTLEMENT_RECONCILIATION_INVARIANTS_2026_05_28.md) |
 
 ---
 
