@@ -120,7 +120,8 @@ See master table BL-M01 … BL-M04.
 | **STR13-POST-MERGE-RT-001** | **PENDING EVIDENCE** | _Engineering + ops_ — STR-13 scaffold merged (PR **#90**); STR13-001..008 **PENDING CAPTURE**; merge ≠ runtime proof |
 | **STR14-EXEC-GATE-001** | **PENDING APPROVAL** | _Engineering + ops_ — STR-14 execution gate merged (PR **#91**); STR14-C01..C09 **PENDING APPROVAL / PENDING CAPTURE**; execution **NOT AUTHORIZED**; [gate](./ZORA_WALAT_STR14_RUNTIME_PROOF_EXECUTION_APPROVAL_GATE_2026_05_27.md) |
 | **XCH00-FUTURE-REMIT-001** | **BLOCKED / FUTURE ONLY** | _Program + compliance_ — XCH-00 strategy architecture **MERGED (PR #92)**; money transmission **NOT ENABLED**; licensing **NOT OBTAINED**; [pack](./ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md) |
-| **XCH01-INFRA-GATE-001** | **BLOCKED / PLANNING ONLY** | _Program + engineering + compliance_ — XCH-01 infrastructure execution gate filed; provider/quote/ledger specs **NOT EXECUTED**; XCH1-G1..G5 **BLOCKED**; [gate](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) |
+| **XCH01-INFRA-GATE-001** | **BLOCKED / PLANNING ONLY** | _Program + engineering + compliance_ — XCH-01 **MERGED (PR #93)**; infrastructure specs **NOT EXECUTED**; [gate](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) |
+| **XCH02-CONTRACTS-001** | **BLOCKED / SPEC ONLY** | _Program + engineering_ — XCH-02 provider-neutral interface contracts filed; adapters **NOT IMPLEMENTED**; XCH2-G1..G5 **BLOCKED**; [contracts](./ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md) |
 
 ---
 
