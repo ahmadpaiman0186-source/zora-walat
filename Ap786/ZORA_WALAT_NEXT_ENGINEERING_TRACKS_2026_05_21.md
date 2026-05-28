@@ -88,7 +88,8 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **STR-14 runtime proof execution gate (2026-05-27)** | [ZORA_WALAT_STR14_RUNTIME_PROOF_EXECUTION_APPROVAL_GATE_2026_05_27.md](./ZORA_WALAT_STR14_RUNTIME_PROOF_EXECUTION_APPROVAL_GATE_2026_05_27.md) — **MERGED (PR #91)**; execution **NOT AUTHORIZED**; runtime proof **PENDING** |
 | **XCH-00 future remittance/exchange architecture (2026-05-27)** | [ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md](./ZORA_WALAT_XCH00_GLOBAL_REMITTANCE_EXCHANGE_ARCHITECTURE_2026_05_27.md) — **MERGED (PR #92)**; strategy only; launch **NO-GO** |
 | **XCH-01 exchange infrastructure gate (2026-05-28)** | [ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md](./ZORA_WALAT_XCH01_EXCHANGE_INFRASTRUCTURE_EXECUTION_GATE_2026_05_28.md) — **MERGED (PR #93)**; **NOT EXECUTABLE** |
-| **XCH-02 provider interface contracts (2026-05-28)** | [ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md](./ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md) — contract spec only; **NOT IMPLEMENTED**; launch **NO-GO** |
+| **XCH-02 provider interface contracts (2026-05-28)** | [ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md](./ZORA_WALAT_XCH02_PROVIDER_NEUTRAL_INTERFACE_CONTRACTS_2026_05_28.md) — **MERGED (PR #94)**; contract spec only; **NOT IMPLEMENTED**; launch **NO-GO** |
+| **XCH-03 quote/rate/fee/tax engine spec (2026-05-28)** | [ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md](./ZORA_WALAT_XCH03_QUOTE_RATE_FEE_TAX_ENGINE_EXECUTION_SPEC_2026_05_28.md) — execution spec only; **NOT IMPLEMENTED**; real-money quote **NO-GO** |
 | **Objective** | Plan L-12/L-13 and live-money cert **without** executing without approval |
 | **Allowed files** | `Ap786/**` plans, checklists, gate records |
 | **Forbidden** | Stripe refund/replay; DB writes; claiming global money-path **proven** |
