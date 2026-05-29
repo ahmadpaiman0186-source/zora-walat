@@ -1,0 +1,15 @@
+{
+  "scanAt": "2026-05-29T12:00:00.000Z",
+  "stalePendingThresholdMs": 3600000,
+  "orders": [
+    {
+      "orderId": "ord_paid_no_provider",
+      "orderStatus": "PAID",
+      "stripePaid": true,
+      "paidAt": "2026-05-29T12:00:00.000Z",
+      "updatedAt": "2026-05-29T12:00:00.000Z",
+      "fulfillmentAttempts": [],
+      "auditEvents": []
+    }
+  ]
+}

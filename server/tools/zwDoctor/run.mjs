@@ -22,6 +22,7 @@ import {
   ZW_DOCTOR_VERSION,
 } from './types.mjs';
 import { runZwDoctorIntelligence } from './superSystemIntelligence.mjs';
+import { runZwDoctorReliability } from './reliabilityMode.mjs';
 
 export { runZwDoctorIntelligence };
 
@@ -36,6 +37,7 @@ export const MODES = [
   'evidence',
   'incidents',
   'intelligence',
+  'reliability',
   'all',
 ];
 
@@ -45,6 +47,15 @@ export const MODES = [
  */
 export async function runZwDoctor(mode, opts = {}) {
   const normalized = MODES.includes(mode) ? mode : 'all';
+
+  if (normalized === 'reliability') {
+    return runZwDoctorReliability({
+      fixturePath: opts.fixturePath,
+      json: opts.json === true,
+      strict: opts.strict === true,
+    });
+  }
+
   /** @type {import('./invariants.mjs').ZwDoctorContext} */
   const ctx = {
     probeStaging: opts.probeStaging !== false,

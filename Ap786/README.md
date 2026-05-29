@@ -510,6 +510,19 @@
 
 ---
 
+## Start here — CORE-04 Detect-Only Runtime Doctor (2026-05-29)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_CORE04_DETECT_ONLY_RUNTIME_DOCTOR_2026_05_29.md](./ZORA_WALAT_CORE04_DETECT_ONLY_RUNTIME_DOCTOR_2026_05_29.md) | **Implemented v1** — `server/src/reliability/runtimeDoctor/` |
+| [ZORA_WALAT_CORE04_DETECT_ONLY_SAFETY_BOUNDARY_2026_05_29.md](./ZORA_WALAT_CORE04_DETECT_ONLY_SAFETY_BOUNDARY_2026_05_29.md) | Fail-closed prohibitions |
+| [ZORA_WALAT_CORE04_RUNTIME_DOCTOR_TEST_EVIDENCE_2026_05_29.md](./ZORA_WALAT_CORE04_RUNTIME_DOCTOR_TEST_EVIDENCE_2026_05_29.md) | Unit test fixtures a–h |
+| [ZORA_WALAT_CORE04_CONSERVATIVE_VERDICT_2026_05_29.md](./ZORA_WALAT_CORE04_CONSERVATIVE_VERDICT_2026_05_29.md) | Required verdict table |
+
+**Verdict:** CORE-04 doctor **IMPLEMENTED (detect-only)** · `npm run test:runtime-doctor` · CLI `zw-doctor reliability --fixture` · **no** DB/API/mutations · auto-repair apply **NOT ENABLED** · production / real-money / pilot / launch **NO-GO**.
+
+---
+
 ## Start here — CORE-00 Return To Core Execution Gate (2026-05-28)
 
 | Document | Contents |
