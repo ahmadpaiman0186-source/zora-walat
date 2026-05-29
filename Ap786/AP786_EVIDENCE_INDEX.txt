@@ -454,6 +454,13 @@ CORE04_SAFETY_BOUNDARY 2026-05-29: ZORA_WALAT_CORE04_DETECT_ONLY_SAFETY_BOUNDARY
 CORE04_TEST_EVIDENCE 2026-05-29: ZORA_WALAT_CORE04_RUNTIME_DOCTOR_TEST_EVIDENCE_2026_05_29.md — fixtures a-h; npm run test:runtime-doctor.
 CORE04_VERDICT 2026-05-29: ZORA_WALAT_CORE04_CONSERVATIVE_VERDICT_2026_05_29.md — local tests only; prod/real-money/pilot/launch NO-GO.
 
+CORE05_IDEMPOTENCY_KERNEL 2026-05-29: ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_IDEMPOTENCY_KERNEL_2026_05_29.md — implemented server/src/reliability/idempotencyKernel; classify-only; NOT wired live; NOT production-proven.
+CORE05_KEY_MODEL 2026-05-29: ZORA_WALAT_CORE05_IDEMPOTENCY_KEY_MODEL_2026_05_29.md — canonical key v1; fail-closed validation.
+CORE05_DECISION_MATRIX 2026-05-29: ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_DECISION_MATRIX_2026_05_29.md — ALLOW/BLOCK/RETRY decisions; mutationAllowed false.
+CORE05_INTEGRATION_BOUNDARY 2026-05-29: ZORA_WALAT_CORE05_INTEGRATION_BOUNDARY_2026_05_29.md — NOT wired; future hooks documented.
+CORE05_TEST_EVIDENCE 2026-05-29: ZORA_WALAT_CORE05_RUNTIME_TEST_EVIDENCE_2026_05_29.md — fixtures a-k; npm run test:idempotency-kernel.
+CORE05_VERDICT 2026-05-29: ZORA_WALAT_CORE05_CONSERVATIVE_VERDICT_2026_05_29.md — local tests only; no live duplicate prevention; prod/real-money/pilot/launch NO-GO.
+
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504

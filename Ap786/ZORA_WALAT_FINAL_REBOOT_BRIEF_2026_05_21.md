@@ -122,6 +122,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | CORE-02 provider catalog / Reloadly sandbox boundary | **FILED / GOVERNANCE ONLY** — sandbox vs real boundary, evidence matrix (CORE2-EV-* **PENDING**), no-pay-no-service rules, readiness gates; **NO PROVIDER EXECUTION**; sandbox proof **NOT EXECUTED**; prod/real-money/pilot/launch **NO-GO** |
 | CORE-03 Super-System reliability kernel | **FILED / ARCHITECTURE + SOURCE REVIEW ONLY** — invariants INV-01..07, failure modes FM-01..15, detection matrix, failover/retry bounds, self-repair A–D (**apply NOT ENABLED**); duplicate prevention / no-pay-no-service **NOT VERIFIED**; prod/real-money/pilot/launch **NO-GO** |
 | CORE-04 detect-only runtime doctor | **IMPLEMENTED (detect-only v1)** — `server/src/reliability/runtimeDoctor/` + `test:runtime-doctor`; fixture-only CLI; **no** DB write / external API / apply; runtime proof **local tests only**; prod/real-money/pilot/launch **NO-GO** |
+| CORE-05 idempotency control kernel | **IMPLEMENTED (classify-only v1)** — `server/src/reliability/idempotencyKernel/` + `test:idempotency-kernel`; **not wired** live; **no** live duplicate prevention claim; prod/real-money/pilot/launch **NO-GO** |
 | CORE-00 return to core execution gate | **FILED / EXECUTION GATE ONLY** — top-up/data/call/checkout/webhook priorities; CORE0-G1..G4 **BLOCKED**; pilot **NO-GO** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |

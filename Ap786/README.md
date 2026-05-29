@@ -523,6 +523,21 @@
 
 ---
 
+## Start here — CORE-05 Duplicate Transaction + Idempotency Kernel (2026-05-29)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_IDEMPOTENCY_KERNEL_2026_05_29.md](./ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_IDEMPOTENCY_KERNEL_2026_05_29.md) | **Implemented v1** — `server/src/reliability/idempotencyKernel/` |
+| [ZORA_WALAT_CORE05_IDEMPOTENCY_KEY_MODEL_2026_05_29.md](./ZORA_WALAT_CORE05_IDEMPOTENCY_KEY_MODEL_2026_05_29.md) | Canonical key + validation |
+| [ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_DECISION_MATRIX_2026_05_29.md](./ZORA_WALAT_CORE05_DUPLICATE_TRANSACTION_DECISION_MATRIX_2026_05_29.md) | Decision matrix |
+| [ZORA_WALAT_CORE05_INTEGRATION_BOUNDARY_2026_05_29.md](./ZORA_WALAT_CORE05_INTEGRATION_BOUNDARY_2026_05_29.md) | **NOT wired** to live money path |
+| [ZORA_WALAT_CORE05_RUNTIME_TEST_EVIDENCE_2026_05_29.md](./ZORA_WALAT_CORE05_RUNTIME_TEST_EVIDENCE_2026_05_29.md) | Fixtures a–k |
+| [ZORA_WALAT_CORE05_CONSERVATIVE_VERDICT_2026_05_29.md](./ZORA_WALAT_CORE05_CONSERVATIVE_VERDICT_2026_05_29.md) | Required verdict table |
+
+**Verdict:** CORE-05 kernel **IMPLEMENTED (classify-only)** · `npm run test:idempotency-kernel` · **not** wired live · **no** live duplicate prevention claim · production / real-money / pilot / launch **NO-GO**.
+
+---
+
 ## Start here — CORE-00 Return To Core Execution Gate (2026-05-28)
 
 | Document | Contents |
