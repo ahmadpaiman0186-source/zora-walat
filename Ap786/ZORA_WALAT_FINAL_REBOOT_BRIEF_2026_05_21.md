@@ -127,6 +127,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | CORE-07 provider sandbox drill gate | **FILED ONLY (Ap786)** — approval gate + runbook + CORE7-EV matrix; drill **NOT EXECUTED**; phrase `APPROVE CORE-07 RELOADLY SANDBOX DRILL ONLY`; provider proof **NOT VERIFIED**; prod/real-money/pilot/launch **NO-GO** |
 | CORE-08 safe repair dry-run engine | **IMPLEMENTED (dry-run v1)** — `server/src/reliability/safeRepairDryRun/` + `test:safe-repair-dry-run`; apply **NOT ENABLED**; `--apply` forbidden; prod/real-money/pilot/launch **NO-GO** |
 | CORE-09 controlled pilot gate | **FILED ONLY (Ap786)** — entry/exit, exposure limits, CORE9-EV checklist, incident/abort, support; pilot **NOT APPROVED NOT EXECUTED**; phrase `APPROVE CORE-09 CONTROLLED PILOT GATE ONLY`; real-money → CORE-11 (future); pilot/launch **NO-GO** |
+| CORE-10 staging doctor + observability gate | **FILED ONLY (Ap786)** — CORE10-EV matrix, read-only runbook, snapshot spec; scan **NOT EXECUTED**; staging/obs proof **NOT VERIFIED**; prod/pilot/launch **NO-GO** |
 | CORE-00 return to core execution gate | **FILED / EXECUTION GATE ONLY** — top-up/data/call/checkout/webhook priorities; CORE0-G1..G4 **BLOCKED**; pilot **NO-GO** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
