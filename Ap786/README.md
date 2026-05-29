@@ -538,6 +538,21 @@
 
 ---
 
+## Start here — CORE-06 No-Pay-No-Service Runtime Proof (2026-05-29)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_CORE06_NO_PAY_NO_SERVICE_RUNTIME_PROOF_2026_05_29.md](./ZORA_WALAT_CORE06_NO_PAY_NO_SERVICE_RUNTIME_PROOF_2026_05_29.md) | **Implemented v1** — `server/src/reliability/noPayNoServiceProof/` |
+| [ZORA_WALAT_CORE06_DELIVERY_DECISION_ENGINE_2026_05_29.md](./ZORA_WALAT_CORE06_DELIVERY_DECISION_ENGINE_2026_05_29.md) | Delivery decision engine |
+| [ZORA_WALAT_CORE06_PAYMENT_PROVIDER_ORDER_PROOF_MODEL_2026_05_29.md](./ZORA_WALAT_CORE06_PAYMENT_PROVIDER_ORDER_PROOF_MODEL_2026_05_29.md) | Proof bundle model |
+| [ZORA_WALAT_CORE06_INTEGRATION_BOUNDARY_2026_05_29.md](./ZORA_WALAT_CORE06_INTEGRATION_BOUNDARY_2026_05_29.md) | **NOT wired** to live money path |
+| [ZORA_WALAT_CORE06_RUNTIME_TEST_EVIDENCE_2026_05_29.md](./ZORA_WALAT_CORE06_RUNTIME_TEST_EVIDENCE_2026_05_29.md) | Fixtures a–l |
+| [ZORA_WALAT_CORE06_CONSERVATIVE_VERDICT_2026_05_29.md](./ZORA_WALAT_CORE06_CONSERVATIVE_VERDICT_2026_05_29.md) | Required verdict table |
+
+**Verdict:** CORE-06 proof **IMPLEMENTED (classify-only)** · `npm run test:no-pay-no-service` · **no** live NPNS claim · production / real-money / pilot / launch **NO-GO**.
+
+---
+
 ## Start here — CORE-00 Return To Core Execution Gate (2026-05-28)
 
 | Document | Contents |

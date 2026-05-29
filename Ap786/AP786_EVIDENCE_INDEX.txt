@@ -461,6 +461,13 @@ CORE05_INTEGRATION_BOUNDARY 2026-05-29: ZORA_WALAT_CORE05_INTEGRATION_BOUNDARY_2
 CORE05_TEST_EVIDENCE 2026-05-29: ZORA_WALAT_CORE05_RUNTIME_TEST_EVIDENCE_2026_05_29.md — fixtures a-k; npm run test:idempotency-kernel.
 CORE05_VERDICT 2026-05-29: ZORA_WALAT_CORE05_CONSERVATIVE_VERDICT_2026_05_29.md — local tests only; no live duplicate prevention; prod/real-money/pilot/launch NO-GO.
 
+CORE06_NO_PAY_NO_SERVICE_PROOF 2026-05-29: ZORA_WALAT_CORE06_NO_PAY_NO_SERVICE_RUNTIME_PROOF_2026_05_29.md — implemented server/src/reliability/noPayNoServiceProof; classify-only; NOT wired live; NOT production-proven.
+CORE06_DELIVERY_ENGINE 2026-05-29: ZORA_WALAT_CORE06_DELIVERY_DECISION_ENGINE_2026_05_29.md — ALLOW/BLOCK/PENDING/FAIL_CLOSED matrix.
+CORE06_PROOF_MODEL 2026-05-29: ZORA_WALAT_CORE06_PAYMENT_PROVIDER_ORDER_PROOF_MODEL_2026_05_29.md — payment/provider/order/audit/idempotency proof bundles.
+CORE06_INTEGRATION_BOUNDARY 2026-05-29: ZORA_WALAT_CORE06_INTEGRATION_BOUNDARY_2026_05_29.md — NOT wired; doctor export optional only.
+CORE06_TEST_EVIDENCE 2026-05-29: ZORA_WALAT_CORE06_RUNTIME_TEST_EVIDENCE_2026_05_29.md — fixtures a-l; npm run test:no-pay-no-service.
+CORE06_VERDICT 2026-05-29: ZORA_WALAT_CORE06_CONSERVATIVE_VERDICT_2026_05_29.md — local tests only; no live NPNS claim; prod/real-money/pilot/launch NO-GO.
+
 Verified milestone (staging, operator harness):
   Stripe Checkout opened (test mode)
   GET /success — no 504
