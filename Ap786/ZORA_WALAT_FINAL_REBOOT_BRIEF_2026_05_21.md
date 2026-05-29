@@ -119,6 +119,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | AFG-CARD-01 bank/switch/biller/telecom due diligence | **MERGED / DD DOCUMENTATION ONLY** — checklists; DD **NOT EXECUTED**; AFGCARD1-G1..G5 **BLOCKED** |
 | AFG-CARD-02 parking / activation gate | **MERGED / TRACK PARKED** — activation E-01…E-10 **PENDING**; **return to core product** |
 | CORE-01 provider catalog / Reloadly readiness review | **FILED / READINESS REVIEW ONLY** — read-only repo inspection; AF airtime Reloadly path observed; data/calling disabled; no provider API execution; CORE1-EV-* **PENDING**; pilot **NO-GO** |
+| CORE-02 provider catalog / Reloadly sandbox boundary | **FILED / GOVERNANCE ONLY** — sandbox vs real boundary, evidence matrix (CORE2-EV-* **PENDING**), no-pay-no-service rules, readiness gates; **NO PROVIDER EXECUTION**; sandbox proof **NOT EXECUTED**; prod/real-money/pilot/launch **NO-GO** |
 | CORE-00 return to core execution gate | **FILED / EXECUTION GATE ONLY** — top-up/data/call/checkout/webhook priorities; CORE0-G1..G4 **BLOCKED**; pilot **NO-GO** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
