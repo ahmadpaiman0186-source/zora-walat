@@ -7,10 +7,13 @@
  *
  * Modes: summary | money-path | stripe-env | webhook | operator-auth |
  *        frontend-env | deploy-root | evidence | incidents | intelligence |
- *        reliability | all
+ *        reliability | repair-dry-run | all
  *
  * reliability (CORE-04): detect-only scan from JSON fixture — requires --fixture <path>
  *   (no DB, no Stripe/Reloadly/Vercel, no mutations). --apply is rejected.
+ *
+ * repair-dry-run (CORE-08): safe repair plan from JSON fixture — requires --fixture <path>
+ *   (dry-run only; apply NOT ENABLED). --apply is rejected.
  *
  * Never executes refunds, payments, or webhook resends.
  */
@@ -53,7 +56,7 @@ for (let i = 0; i < argv.length; i++) {
 
 if (flags.has('--apply')) {
   process.stderr.write(
-    'zw-doctor: --apply is forbidden (CORE-04 detect-only; auto-repair NOT ENABLED)\n',
+    'zw-doctor: --apply is forbidden (CORE-04/CORE-08 dry-run only; auto-repair NOT ENABLED)\n',
   );
   process.exit(2);
 }

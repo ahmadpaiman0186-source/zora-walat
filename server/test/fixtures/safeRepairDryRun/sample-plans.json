@@ -1,0 +1,25 @@
+{
+  "findings": [
+    {
+      "id": "CORE4-NPNS-001",
+      "fmId": "FM-10",
+      "invariantIds": ["INV-03"],
+      "severity": "critical",
+      "repairClass": "C",
+      "recommendation": "paid_without_fulfillment_attempt_ops_review",
+      "mutationAllowed": false,
+      "entityType": "order",
+      "entityId": "ord_sample_1"
+    }
+  ],
+  "idempotencyDecisions": [
+    {
+      "code": "CORE5-RETRY-UNSAFE-001",
+      "decision": "RETRY_UNSAFE",
+      "severity": "high",
+      "invariantIds": ["INV-01"],
+      "requiredNextAction": "manual_reconciliation",
+      "mutationAllowed": false
+    }
+  ]
+}
