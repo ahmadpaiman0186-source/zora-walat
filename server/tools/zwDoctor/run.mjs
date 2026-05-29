@@ -23,6 +23,7 @@ import {
 } from './types.mjs';
 import { runZwDoctorIntelligence } from './superSystemIntelligence.mjs';
 import { runZwDoctorReliability } from './reliabilityMode.mjs';
+import { runZwDoctorRepairDryRun } from './repairDryRunMode.mjs';
 
 export { runZwDoctorIntelligence };
 
@@ -38,6 +39,7 @@ export const MODES = [
   'incidents',
   'intelligence',
   'reliability',
+  'repair-dry-run',
   'all',
 ];
 
@@ -50,6 +52,14 @@ export async function runZwDoctor(mode, opts = {}) {
 
   if (normalized === 'reliability') {
     return runZwDoctorReliability({
+      fixturePath: opts.fixturePath,
+      json: opts.json === true,
+      strict: opts.strict === true,
+    });
+  }
+
+  if (normalized === 'repair-dry-run') {
+    return runZwDoctorRepairDryRun({
       fixturePath: opts.fixturePath,
       json: opts.json === true,
       strict: opts.strict === true,

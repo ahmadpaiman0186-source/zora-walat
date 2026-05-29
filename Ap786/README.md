@@ -571,6 +571,21 @@
 
 ---
 
+## Start here — CORE-08 Safe Repair Dry-Run Engine (2026-05-29)
+
+| Document | Contents |
+|----------|----------|
+| [ZORA_WALAT_CORE08_SAFE_REPAIR_DRY_RUN_ENGINE_2026_05_29.md](./ZORA_WALAT_CORE08_SAFE_REPAIR_DRY_RUN_ENGINE_2026_05_29.md) | **Implemented v1** — `server/src/reliability/safeRepairDryRun/` |
+| [ZORA_WALAT_CORE08_REPAIR_CLASSIFICATION_MODEL_2026_05_29.md](./ZORA_WALAT_CORE08_REPAIR_CLASSIFICATION_MODEL_2026_05_29.md) | Classes A–D |
+| [ZORA_WALAT_CORE08_DRY_RUN_REPAIR_PLAN_SCHEMA_2026_05_29.md](./ZORA_WALAT_CORE08_DRY_RUN_REPAIR_PLAN_SCHEMA_2026_05_29.md) | RepairPlan schema |
+| [ZORA_WALAT_CORE08_APPROVAL_AND_APPLY_BOUNDARY_2026_05_29.md](./ZORA_WALAT_CORE08_APPROVAL_AND_APPLY_BOUNDARY_2026_05_29.md) | **apply NOT ENABLED** |
+| [ZORA_WALAT_CORE08_RUNTIME_TEST_EVIDENCE_2026_05_29.md](./ZORA_WALAT_CORE08_RUNTIME_TEST_EVIDENCE_2026_05_29.md) | Fixtures a–j |
+| [ZORA_WALAT_CORE08_CONSERVATIVE_VERDICT_2026_05_29.md](./ZORA_WALAT_CORE08_CONSERVATIVE_VERDICT_2026_05_29.md) | Required verdict table |
+
+**Verdict:** CORE-08 dry-run **IMPLEMENTED** · `npm run test:safe-repair-dry-run` · zw-doctor `repair-dry-run --fixture` · `--apply` **forbidden** · production / real-money / pilot / launch **NO-GO**.
+
+---
+
 ## Start here — CORE-00 Return To Core Execution Gate (2026-05-28)
 
 | Document | Contents |

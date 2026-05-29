@@ -125,6 +125,7 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | CORE-05 idempotency control kernel | **IMPLEMENTED (classify-only v1)** — `server/src/reliability/idempotencyKernel/` + `test:idempotency-kernel`; **not wired** live; **no** live duplicate prevention claim; prod/real-money/pilot/launch **NO-GO** |
 | CORE-06 no-pay-no-service runtime proof | **IMPLEMENTED (classify-only v1)** — `server/src/reliability/noPayNoServiceProof/` + `test:no-pay-no-service`; **not wired** live; **no** live NPNS claim; prod/real-money/pilot/launch **NO-GO** |
 | CORE-07 provider sandbox drill gate | **FILED ONLY (Ap786)** — approval gate + runbook + CORE7-EV matrix; drill **NOT EXECUTED**; phrase `APPROVE CORE-07 RELOADLY SANDBOX DRILL ONLY`; provider proof **NOT VERIFIED**; prod/real-money/pilot/launch **NO-GO** |
+| CORE-08 safe repair dry-run engine | **IMPLEMENTED (dry-run v1)** — `server/src/reliability/safeRepairDryRun/` + `test:safe-repair-dry-run`; apply **NOT ENABLED**; `--apply` forbidden; prod/real-money/pilot/launch **NO-GO** |
 | CORE-00 return to core execution gate | **FILED / EXECUTION GATE ONLY** — top-up/data/call/checkout/webhook priorities; CORE0-G1..G4 **BLOCKED**; pilot **NO-GO** |
 | Root cause (404 routing) | **NOT CONFIRMED** |
 | G-02 staging replay | **FAILED / INCONCLUSIVE** — LOG-01…LOG-04 **NOT CORRELATED**; Vercel **NO MATCH** |
