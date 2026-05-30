@@ -1,0 +1,55 @@
+L-16 session transcript (redacted) 2026-05-30
+AUTHORIZATION L-16 phrase recorded in evidence doc (not repeated here)
+BRANCH evidence/l16-core10-staging-auth-login-route-surface-verification-2026-05-30
+BASE main 9f3503d (PR #130 L-15 merged)
+
+ACTION deploy:staging:guard (read-only; no deploy)
+DEPLOY_GUARD_PASS true
+DEPLOY_GUARD_ROOT server_api_project
+DEPLOY_GUARD_EXIT 0
+
+ACTION staging-api-smoke (read-only HTTP probes)
+MODE staging-api-smoke
+SMOKE_API_ORIGIN REDACTED_STAGING_API_HOST
+DO_NOT_REFUND true
+
+SMOKE_PROBE health
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+
+SMOKE_PROBE index
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+
+SMOKE_PROBE login_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+
+SMOKE_PROBE operator_status_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+
+SMOKE_PROBE operator_phase1_truth_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+
+STAGING_API_SMOKE_VERDICT FAIL
+BLOCKED_REASON route_missing_or_wrong_deployment
+DEPLOY_REQUIRED true
+NOTE deploy command named in tool output; L-16 did NOT execute deploy
+SMOKE_EXIT 1
+
+LOGIN_SKIPPED true (abort: surface FAIL)
+STATUS_CHECK_SKIPPED true
+TOKEN_REFRESH_SKIPPED true
+FULL_SNAPSHOT_SKIPPED true
+
+MUTATION none
+DEPLOY none REDEPLOY none
+ENV_EDIT none
+STRIPE none RELOADLY none DB none
