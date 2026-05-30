@@ -1,0 +1,40 @@
+L-18 session transcript (redacted) 2026-05-30
+AUTHORIZATION L-18 phrase recorded in evidence doc (not repeated here)
+BRANCH evidence/l18-staging-api-surface-correction-redeploy-2026-05-30
+BASE main 633bae9 (PR #132 L-17 merged)
+
+PREFLIGHT
+git status clean on evidence branch
+PROJECT zora-walat-api-staging (from server/.vercel/project.json — not pasted in full)
+
+ACTION deploy:staging:guard
+DEPLOY_GUARD_PASS true
+DEPLOY_GUARD_ROOT server_api_project
+GUARD_EXIT 0
+
+ACTION deploy:staging (exactly one)
+DEPLOY_SCOPE ahmadpaiman0186-sources-projects/zora-walat-api-staging
+DEPLOYMENT_ID dpl_7MLPajMPygfHLrpi9k5z11en7pze
+DEPLOY_URL https://zora-walat-api-staging-5ggb001zm.vercel.app
+ALIAS https://zora-walat-api-staging.vercel.app
+READY_STATE READY
+REDEPLOY_COUNT 1
+DEPLOY_EXIT 0
+
+ACTION GET /api/health (read-only)
+HEALTH_HTTP 200
+HEALTH_CONTENT_TYPE application/json
+HEALTH_BODY_STATUS ok
+
+ACTION staging-api-smoke (read-only)
+SMOKE_API_ORIGIN REDACTED_STAGING_API_HOST
+SMOKE_PROBE health HTTP=200 ROUTE_DIAGNOSIS=ok API_SURFACE=api_serverless
+SMOKE_PROBE index HTTP=200 ROUTE_DIAGNOSIS=ok
+SMOKE_PROBE login_route HTTP=400 ROUTE_DIAGNOSIS=validation_error (route reachable)
+SMOKE_PROBE operator_status_route HTTP=401 auth_required
+SMOKE_PROBE operator_phase1_truth_route HTTP=401 auth_required
+STAGING_API_SMOKE_VERDICT PASS
+SMOKE_EXIT 0
+
+NOT_EXECUTED login token_refresh status_check full_snapshot
+MUTATION none ENV_EDIT none DB none STRIPE none RELOADLY none
