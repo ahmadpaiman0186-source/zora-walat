@@ -1,0 +1,43 @@
+L-14 session transcript (redacted) 2026-05-30
+AUTHORIZATION L-14 phrase recorded in evidence doc (not repeated here)
+BRANCH evidence/l14-core10-staging-operator-credential-token-refresh-2026-05-30
+BASE main d6579eb (PR #128 L-13 merged)
+
+PREFLIGHT git check-ignore
+server/.env.local IGNORED (.env*.local)
+server/.staging-token.local IGNORED (.staging-token.local)
+
+SESSION_NOTE initial agent pass: HAS_PASSWORD=false; login skipped (filed separately)
+SESSION_RETRY operator retry with password present (results below)
+
+ACTION boolean credential presence (no values printed)
+HAS_EMAIL=true
+HAS_PASSWORD=true
+
+ACTION login (exactly one attempt)
+L14_LOGIN_START (retry)
+MODE login
+LOGIN_API_ORIGIN REDACTED_STAGING_API_HOST
+LOGIN_ENDPOINT /api/auth/login
+LOGIN_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+TOKEN_OK false
+TOKEN_SAVED false
+TOKEN_REFRESH_COMPLETED false
+
+ACTION token file presence (no content read)
+TOKEN_FILE_EXISTS=true
+TOKEN_STATE expired (unchanged — refresh not completed)
+
+ACTION status-check
+SKIPPED (token refresh not completed)
+
+TOKEN_PRINTED false
+PASSWORD_PRINTED false
+CREDENTIAL_COMMITTED false
+
+MUTATION none
+DEPLOY none REDEPLOY none VERCEL none ENV_EDIT none
+STRIPE none RELOADLY none DB none
+FULL_SNAPSHOT none
