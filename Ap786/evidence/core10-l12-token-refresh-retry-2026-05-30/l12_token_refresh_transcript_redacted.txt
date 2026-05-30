@@ -1,0 +1,57 @@
+L-12 session transcript (redacted) 2026-05-30
+AUTHORIZATION phrase recorded in operator chat (verbatim in evidence doc §2)
+SESSION_START 2026-05-30 (L-12 execution window)
+BRANCH evidence/l12-core10-token-refresh-retry-2026-05-30
+BASE merge 64e6a75 PR #126 L-11 gate merged
+
+PREFLIGHT git status -sb
+## evidence/l12-core10-token-refresh-retry-2026-05-30
+(clean tracked baseline — no Ap786 evidence staged at session start)
+
+PREFLIGHT git log --oneline -5
+64e6a75 Merge pull request #126 ...
+ac4c734 docs(core): add L-11 token refresh retry approval gate
+5b2a8dc Merge pull request #125 ...
+45fa27e docs(evidence): add L-10 staging API redeploy evidence
+357a496 Merge pull request #124 ...
+
+GITIGNORE server/.gitignore covers: .staging-token.local, .staging-operator-email.local, .staging-operator-verify-token.local, .env, .env*.local
+git check-ignore: server/.staging-token.local OK, server/.env.local OK
+STAGED_CREDENTIAL_FILES none
+STAGED_TOKEN_FILES none
+
+LOCAL_FILE_PRESENCE (boolean only, no contents read)
+server/.env.local exists=true
+server/.staging-token.local exists=true (pre-session stale token)
+server/.staging-operator-email.local exists=false
+
+ACTION auth-env-check (from server/)
+MODE auth-env-check
+LOGIN_API_ORIGIN REDACTED_STAGING_API_HOST
+LOGIN_ENDPOINT /api/auth/login
+HAS_EMAIL true
+HAS_PASSWORD false
+EMAIL_LENGTH 25
+PASSWORD_LENGTH 0
+INTERACTIVE_TTY false
+TOKEN_FILE_EXISTS true
+TOKEN_STATE expired
+TOKEN_EXPIRY_ISO 2026-05-19T19:45:18.000Z
+TOKEN_EXPIRED true
+NOTE dotenv loader banner lines omitted (non-secret noise)
+
+CREDS_PRESENCE verdict: PARTIAL — email present via gitignored .env.local load; password absent
+TOKEN_REFRESH_STATUS BLOCKED_CREDS_MISSING
+ACTION login SKIPPED (password required; non-interactive; do not create creds)
+
+ACTION status-check SKIPPED (token refresh not executed)
+
+TOKEN_PRINTED false
+TOKEN_CONTENT_READ false
+CREDENTIAL_VALUES_PRINTED false
+CREDENTIAL_FILES_CREATED_OR_EDITED false
+
+MUTATION none
+DEPLOY none REDEPLOY none VERCEL none ENV_EDIT none
+STRIPE none RELOADLY none PROVIDER none DB none
+FULL_SNAPSHOT none SELF_HEALING none
