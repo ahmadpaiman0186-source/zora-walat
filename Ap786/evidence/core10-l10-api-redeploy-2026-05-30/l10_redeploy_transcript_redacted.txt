@@ -1,0 +1,33 @@
+L-10 redeploy transcript (redacted) 2026-05-30
+AUTHORIZATION L-10 phrase recorded in operator chat (not repeated here)
+SESSION_START 2026-05-30T20:02:21.665Z
+BRANCH evidence/l10-staging-api-surface-correction-redeploy-2026-05-30
+
+PREDEPLOY_GUARD PASS
+VERCEL_PROJECT_NAME zora-walat-api-staging
+VERCEL_PROJECT_ID REDACTED
+DEPLOY_SCOPE server_directory_only
+PRODUCTION_LIVE_DEPLOY false
+ENV_EDIT false
+
+REDEPLOY_COUNT 1
+REDEPLOY_COMMAND npm run deploy:staging
+REDEPLOY_EXIT 0
+DEPLOYMENT_ALIAS_HOST zora-walat-api-staging.vercel.app
+DEPLOYMENT_ID dpl_BqvndARx6oY3XKNLW3ernxuRX9Gy
+
+POSTDEPLOY_HEALTH path=/api/health
+POSTDEPLOY_HEALTH_HTTP 200
+POSTDEPLOY_HEALTH_RESPONSE_CLASS api_json
+POSTDEPLOY_HEALTH_BODY_STATUS ok
+
+POSTDEPLOY_SMOKE STAGING_API_SMOKE_VERDICT PASS
+POSTDEPLOY_API_SURFACE api_serverless
+SMOKE_PROBE health HTTP=200 ROUTE_DIAGNOSIS=ok
+SMOKE_PROBE index HTTP=200
+SMOKE_PROBE login_route HTTP=400 validation_error
+SMOKE_PROBE operator_status HTTP=401 auth_required
+SMOKE_PROBE operator_phase1 HTTP=401 auth_required
+
+STRIPE none RELOADLY none DB_WRITE none WEBHOOK_REPLAY none
+TOKEN_REFRESH none FULL_SNAPSHOT none
