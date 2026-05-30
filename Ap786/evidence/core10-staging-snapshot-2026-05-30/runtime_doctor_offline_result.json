@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "scanAt": "2026-05-30T18:35:08.932Z",
+  "mode": "detect_only",
+  "detectOnly": true,
+  "autoRepairApplyEnabled": false,
+  "findings": [],
+  "counts": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "info": 0
+  },
+  "verdict": "PASS",
+  "safety": {
+    "detect_only": true,
+    "auto_repair_apply_enabled": false,
+    "db_writes": false,
+    "external_api_calls": false,
+    "payment_mutations": false,
+    "provider_execution": false
+  },
+  "fixture": "REDACTED_PATH"
+}
