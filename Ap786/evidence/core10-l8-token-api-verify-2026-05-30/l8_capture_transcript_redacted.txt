@@ -1,0 +1,33 @@
+L-8 session transcript (redacted) 2026-05-30
+AUTHORIZATION L-8 phrase recorded in operator chat (not repeated here)
+SESSION_START 2026-05-30T19:20:21.505Z
+BRANCH evidence/l8-core10-token-refresh-api-base-verify-2026-05-30
+
+TOKEN_FILE_BEFORE exists=true
+ACTION login
+RESULT LOGIN_SKIPPED true (STAGING_OPERATOR_EMAIL/PASSWORD not set in shell)
+TOKEN_REFRESH_COMPLETED false
+TOKEN_FILE_AFTER exists=true
+TOKEN_PRINTED false
+TOKEN_CONTENT_READ_INTO_DOCS false
+
+ACTION npm run deploy:staging:guard
+RESULT DEPLOY_GUARD_PASS true (local server/ API project layout only — not live deploy)
+
+ACTION staging-api-smoke
+SMOKE_API_ORIGIN REDACTED_STAGING_API_HOST
+SMOKE_PROBE health HTTP=404 ROUTE_DIAGNOSIS=route_missing_or_wrong_deployment API_SURFACE_LIKELY=nextjs_frontend
+SMOKE_PROBE index HTTP=404 (same diagnosis)
+SMOKE_PROBE login_route HTTP=404 (same)
+SMOKE_PROBE operator_status_route HTTP=404 (same)
+SMOKE_PROBE operator_phase1_truth_route HTTP=404 (same)
+STAGING_API_SMOKE_VERDICT FAIL
+BLOCKED_REASON route_missing_or_wrong_deployment
+NOTE deploy guard PASS locally but hosted URL serves Next.js 404 HTML not API JSON
+
+ACTION status-check
+RESULT TOKEN_EXPIRED=true ORDER_STATE_UNAVAILABLE=true ORDER_AUTH_FAILURE=true
+ORDER_ENUMS not exported (auth blocked)
+
+MUTATION none
+STRIPE none RELOADLY none DB none DEPLOY none ENV_EDIT none
