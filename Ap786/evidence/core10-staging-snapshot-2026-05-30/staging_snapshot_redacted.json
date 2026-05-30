@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-05-30T18:34:26.130Z",
+  "environmentLabel": "staging-api-host-2026-05-30",
+  "captureSession": {
+    "authorizationPhraseRecorded": true,
+    "captureScope": "minimum_read_only",
+    "stagingApiBase": "REDACTED_STAGING_HOST",
+    "healthProbePath": "/api/health",
+    "healthProbeHttpStatus": 404,
+    "healthProbeBodyClass": "html_not_api_json",
+    "operatorStatusCheck": "attempted",
+    "operatorStatusCheckBlockedReason": "TOKEN_EXPIRED",
+    "orderStateExported": false,
+    "dbExportPerformed": false,
+    "stripeCalled": false,
+    "reloadlyCalled": false,
+    "dbMutation": false
+  },
+  "orders": [],
+  "stripeWebhookEvents": [],
+  "paymentEvents": [],
+  "auditLogs": [],
+  "environmentHints": {
+    "nodeEnv": "unknown",
+    "reloadlySandbox": null,
+    "airtimeProvider": "unknown"
+  }
+}
