@@ -45,12 +45,14 @@
 | Pilot execution DR id | _not created_ |
 | Pilot executed? | **NO** |
 
-### Real-money (CORE-11 — future)
+### Real-money (CORE-11 — gate filed; execution separate)
 
 | Field | Status |
 |-------|--------|
-| CORE-11 approval | **NOT IN SCOPE** |
+| CORE-11 gate | **FILED ONLY** — [gate](../ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md) |
+| Gate review phrase | `APPROVE CORE-11 REAL-MONEY GO-NO-GO GATE ONLY` |
 | Real-money authorized? | **NO** |
+| Real-money executed? | **NO** |
 
 ---
 
