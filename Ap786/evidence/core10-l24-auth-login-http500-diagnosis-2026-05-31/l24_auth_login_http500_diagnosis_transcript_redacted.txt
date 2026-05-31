@@ -1,0 +1,87 @@
+L24_SESSION_START 2026-05-31T10:45:00-07:00
+AUTHORIZATION_RECEIVED true
+DIAGNOSIS_MODE read_only
+BRANCH evidence/l24-core10-staging-auth-login-http500-diagnosis-2026-05-31
+BASE_HEAD 1e74679
+
+=== API health GET /api/health ===
+API_HEALTH_HTTP 404
+API_HEALTH FAIL
+
+=== staging-api-smoke ===
+MODE staging-api-smoke
+DO_NOT_REFUND true
+SMOKE_API_ORIGIN https://zora-walat-api-staging.vercel.app
+SMOKE_PROBE health
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+SMOKE_PROBE index
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+SMOKE_PROBE login_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+SMOKE_PROBE operator_status_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+SMOKE_PROBE operator_phase1_truth_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+STAGING_API_SMOKE_VERDICT FAIL
+BLOCKED_REASON route_missing_or_wrong_deployment
+SMOKE_EXIT 1
+API_SURFACE FAIL
+
+LOGIN_ROUTE_REACHABLE false
+LOGIN_ROUTE_NOT_404 false
+
+=== dependency probe GET /api/ready (non-mutating) ===
+READY_PROBE_HTTP 404
+DEPENDENCY_PROBE_EXECUTED true
+
+=== Vercel env name presence (production, values not read) ===
+ENV_NAME_PRESENCE_CHECKED true
+VERCEL_PROJECT zora-walat-api-staging
+ENV_PRESENT_DATABASE_URL true
+ENV_PRESENT_JWT_ACCESS_SECRET true
+ENV_PRESENT_JWT_REFRESH_SECRET true
+ENV_PRESENT_NODE_ENV true
+ENV_VALUES_PRINTED false
+
+=== Vercel runtime logs ===
+RUNTIME_LOGS_CAPTURED false
+RUNTIME_LOGS_NOTE no_logs_returned_48h_query_status_500_or_auth_slim
+
+=== source inspection (read-only, repo) ===
+LOGIN_ROUTE_OWNER server/api/index.mjs POST /api/auth/login -> slimAuthLoginHandler.mjs
+LOGIN_HANDLER server/api/slimAuthLoginHandler.mjs handleSlimAuthLoginPost
+LOGIN_SERVICE server/src/services/authService.js loginUser (prisma.user.findUnique, bcrypt, issueTokenPair)
+HTTP_500_MAPPING mapLoginErrorToResponse catch-all -> status 500 body Service unavailable auth_invalid_request
+HTTP_401_MAPPING HttpError AUTH_INVALID_CREDENTIALS from loginUser (bad password / inactive user)
+HTTP_403_MAPPING owner_only guard when OWNER_ONLY enforced
+REQUIRED_ENV_NAMES DATABASE_URL JWT_ACCESS_SECRET JWT_REFRESH_SECRET (auth token issue)
+DB_DEPENDENCY prisma user + refreshToken tables via sessionIssuance
+
+=== L-22 historical context (from L-22 evidence, not re-executed) ===
+L22_SMOKE_AT_ATTEMPT PASS
+L22_LOGIN_HTTP 500
+L22_LOGIN_SAFE_CODE auth_invalid_request
+L22_LOGIN_SAFE_MESSAGE Service unavailable
+
+=== session attestations ===
+LOGIN_ATTEMPT_EXECUTED false
+TOKEN_REFRESH_EXECUTED false
+SNAPSHOT_EXECUTED false
+DEPLOY_EXECUTED false
+TOKEN_PRINTED false
+PASSWORD_PRINTED false
+SECRET_VALUES_PRINTED false
+CREDENTIAL_COMMITTED false
+MUTATION_DETECTED false
+
+L24_SESSION_END 2026-05-31T10:46:00-07:00
