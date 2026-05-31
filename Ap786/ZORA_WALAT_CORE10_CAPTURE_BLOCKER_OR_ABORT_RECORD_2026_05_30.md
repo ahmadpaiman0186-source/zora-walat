@@ -17,8 +17,8 @@ Blocker filed conservatively. **No** staging mutation attempted. **No** external
 |-------|-------|
 | **Blocker ID** | **CORE10-BLK-CAPTURE-001** |
 | **Severity** | **CRITICAL** (blocks staging proof) |
-| **Status** | **OPEN** |
-| **Capture status** | **CAPTURE NOT EXECUTED** |
+| **Status** | **PARTIAL_MINIMUM** (updated 2026-05-31 — [L-30](./ZORA_WALAT_L30_SAME_WINDOW_REDEPLOY_TOKEN_REFRESH_READONLY_SNAPSHOT_EVIDENCE_2026_05_31.md)) |
+| **Capture status** | **OPERATOR MINIMUM COMPLETED** — full DB/webhook/audit export still **NOT PROVEN** |
 | **Abort phrase used?** | **NO** (`CORE-10 SCAN ABORT` not applicable — pre-start stop) |
 
 ---

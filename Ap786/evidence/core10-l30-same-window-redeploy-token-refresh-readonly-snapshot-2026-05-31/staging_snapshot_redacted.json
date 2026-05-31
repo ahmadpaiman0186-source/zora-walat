@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-05-31T20:24:05.344Z",
+  "environmentLabel": "staging-api-readonly-l30-2026-05-31",
+  "captureSession": {
+    "authorizationPhraseRecorded": true,
+    "captureScope": "full_read_only_operator_apis",
+    "stagingApiBase": "REDACTED_STAGING_HOST",
+    "healthProbePath": "/api/health",
+    "operatorStatusCheck": "executed",
+    "operatorPhase1Truth": "executed",
+    "refundableCandidatesHttp": 200,
+    "candidateCount": 0,
+    "orderStateExported": true,
+    "dbExportPerformed": false,
+    "stripeCalled": false,
+    "reloadlyCalled": false,
+    "dbMutation": false
+  },
+  "orders": [
+    {
+      "orderIdSuffix": "unknown",
+      "orderStatus": "FULFILLED",
+      "stripePaid": true,
+      "fulfillmentAttemptCount": 1,
+      "fulfillmentAttempts": []
+    }
+  ],
+  "refundableCandidates": [],
+  "stripeWebhookEvents": [],
+  "paymentEvents": [],
+  "auditLogs": [],
+  "phase1TruthSummary": {
+    "exitCode": 0,
+    "captured": true
+  },
+  "recordCounts": {
+    "orders": 1,
+    "refundableCandidates": 0,
+    "stripeWebhookEvents": 0,
+    "paymentEvents": 0,
+    "auditLogs": 0
+  }
+}
