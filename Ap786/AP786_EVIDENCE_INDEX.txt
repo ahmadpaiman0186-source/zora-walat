@@ -558,6 +558,8 @@ L30_SAME_WINDOW_SNAPSHOT 2026-05-31: ZORA_WALAT_L30_SAME_WINDOW_REDEPLOY_TOKEN_R
 CORE10_L30_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l30-same-window-redeploy-token-refresh-readonly-snapshot-2026-05-31/l30_transcript_redacted.txt + staging_snapshot_redacted.json
 L31_RUNTIME_DOCTOR_OBS 2026-05-31: ZORA_WALAT_L31_CORE10_STAGING_RUNTIME_DOCTOR_OBSERVABILITY_PROOF_2026_05_31.md — L-31 AUTHORIZED; surface PASS; doctor read-only inconclusive; Vercel logs captured; TOKEN expired no refresh; NO-GO launch.
 CORE10_L31_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l31-runtime-doctor-observability-2026-05-31/l31_runtime_doctor_observability_transcript_redacted.txt
+L32_SAME_WINDOW_STATUS_LOG 2026-05-31: ZORA_WALAT_L32_SAME_WINDOW_TOKEN_REFRESH_OPERATOR_STATUS_LOG_CORRELATION_2026_05_31.md — L-32 AUTHORIZED; TOKEN_VALID; status-check 200; log correlation SUCCESS delta 0.03s; NO-GO launch.
+CORE10_L32_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l32-token-refresh-status-log-correlation-2026-05-31/l32_transcript_redacted.txt
 
 CORE11_REAL_MONEY_GATE 2026-05-29: ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md — gate FILED ONLY; real-money NOT APPROVED NOT EXECUTED; Ap786 only.
 CORE11_ENTRY_CRITERIA 2026-05-29: ZORA_WALAT_CORE11_GO_NO_GO_ENTRY_CRITERIA_2026_05_29.md — G1-G12 go; N1-N17 no-go triggers.
