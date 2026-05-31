@@ -1,0 +1,13 @@
+﻿L34_PRODUCTION_API_DEPLOYMENT_STATUS_REDACTED
+CAPTURE_METHOD vercel_cli_inspect_read_only
+PRODUCTION_HOST https://zora-walat-api.vercel.app
+SECRET_PRINTED false
+ENV_VALUES_PRINTED false
+
+deployment_id dpl_REDACTED_PRODUCTION_API
+project_name zora-walat-api
+target production
+status Ready
+alias_primary https://zora-walat-api.vercel.app
+build_output api_index_serverless_present true
+production_health_probe_executed false

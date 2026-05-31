@@ -1,0 +1,11 @@
+﻿L34_VERCEL_PROJECT_LIST_REDACTED
+CAPTURE_METHOD vercel_cli_project_ls_read_only
+SCOPE production_projects_only
+SECRET_PRINTED false
+ENV_VALUES_PRINTED false
+
+Projects (production URLs only — team name redacted):
+  zora-walat-api-staging  https://zora-walat-api-staging.vercel.app  (staging — reference only)
+  zora-walat-api          https://zora-walat-api.vercel.app          (production API)
+  zora-walat              https://zorawalat.com                      (production frontend)
+  zora-walat-mj41         https://zora-walat-mj41.vercel.app           (preview/aux — not primary prod claim)
