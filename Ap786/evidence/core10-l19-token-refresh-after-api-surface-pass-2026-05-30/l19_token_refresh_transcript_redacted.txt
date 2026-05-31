@@ -1,0 +1,39 @@
+L-19 session transcript (redacted) 2026-05-30
+AUTHORIZATION L-19 phrase recorded in evidence doc (not repeated here)
+BRANCH evidence/l19-core10-staging-operator-token-refresh-after-api-surface-pass-2026-05-30
+BASE main 79825bd (PR #133 L-18 merged)
+
+PREFLIGHT git status clean
+
+ACTION staging-api-smoke (abort gate)
+STAGING_API_SMOKE_VERDICT PASS
+API_SURFACE_LIKELY api_serverless
+SMOKE_PROBE health HTTP=200
+SMOKE_PROBE login_route HTTP=400 validation_error (not 404)
+SMOKE_PREFLIGHT_EXIT 0
+
+ACTION credential_presence_boolean
+HAS_EMAIL=true
+HAS_PASSWORD=true
+
+ACTION login (exactly one)
+LOGIN_HTTP 200
+ROUTE_DIAGNOSIS ok
+API_SURFACE_LIKELY api_serverless
+TOKEN_SAVED true
+L19_LOGIN_EXIT 0
+TOKEN_FILE_EXISTS=true
+TOKEN_CONTENT_READ false
+
+ACTION status-check (exactly one, after login success)
+STATUS_CHECK_HTTP 200
+ORDER_FOUND true
+ORDER_STATUS FULFILLED
+PAID_CONFIRMED true
+FULFILLMENT_ATTEMPT_COUNT 1
+L19_STATUS_CHECK_EXIT 0
+
+FULL_SNAPSHOT NOT_EXECUTED
+DEPLOY none MUTATION none
+TOKEN_PRINTED false PASSWORD_PRINTED false
+CREDENTIAL_COMMITTED false
