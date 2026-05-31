@@ -1,0 +1,75 @@
+L31_SESSION_START 2026-05-31T13:54:00-07:00
+AUTHORIZATION_RECEIVED true
+L31_MODE runtime_doctor_observability_read_only
+MAIN_GATE_PRECHECK true
+MAIN_GATE_STATUS ## main...origin/main
+STARTING_MAIN_COMMIT 3b9240b
+L30_MERGED_CONFIRMED true
+MAIN_CLEAN_SYNCED true
+BRANCH evidence/l31-core10-staging-runtime-doctor-observability-proof-2026-05-31
+SECRET_PRINTED false
+PASSWORD_PRINTED false
+ENV_VALUES_PRINTED false
+TOKEN_PRINTED false
+CREDENTIAL_COMMITTED false
+
+=== API surface (read-only) ===
+API_HEALTH PASS HTTP 200
+API_READY PASS HTTP 200
+API_SURFACE PASS
+STAGING_API_SMOKE_VERDICT PASS
+API_SURFACE_LIKELY api_serverless
+LOGIN_ROUTE_PROBE_HTTP 400
+LOGIN_ROUTE_REACHABLE true
+LOGIN_ROUTE_NOT_404 true
+
+=== token check only (no refresh) ===
+TOKEN_PRESENT true
+TOKEN_VALID false
+TOKEN_STATE expired
+TOKEN_PRINTED false
+
+=== status-check (token invalid — no mutation) ===
+STATUS_CHECK_EXECUTED true
+STATUS_CHECK_RESULT blocked_token_expired
+TOKEN_EXPIRED true
+ORDER_STATE_UNAVAILABLE true
+STATUS_CHECK_HTTP not_available
+
+=== Runtime Doctor read-only ===
+RUNTIME_DOCTOR_EXECUTED true
+RUNTIME_DOCTOR_MODE read_only
+RUNTIME_DOCTOR_APPLY false
+SELF_HEALING_APPLY false
+ZW_DOCTOR_MODE summary VERDICT PASS invariants_pass 6
+ZW_DOCTOR_MODE all VERDICT PARTIAL invariants_pass 22 warn 1 not_implemented 1
+ZW_DOCTOR_STAGING_HEALTH PASS evidence GET_api_health_HTTP_200
+ZW_DOCTOR_MODE reliability FIXTURE L30_snapshot VERDICT FAIL findings 4 detect_only
+RUNTIME_DOCTOR_RESULT inconclusive
+
+=== Observability read-only ===
+OBSERVABILITY_CAPTURE_EXECUTED true
+VERCEL_LOGS_CAPTURED true
+VERCEL_LOGS_LIMIT 25
+VERCEL_LOGS_SINCE 6h
+LOG_CORRELATION_FOUND true
+LOG_CORRELATION_NOTES health_200_matches_smoke login_200_at_L30_window ops_routes_200_with_valid_token ops_401_with_expired_token
+LOG_PATHS_REDACTED true
+DEPLOY_EXECUTED false
+SNAPSHOT_EXECUTED false
+
+=== no-mutation attestation ===
+DB_MUTATION false
+PAYMENT_MUTATION false
+ORDER_MUTATION false
+WALLET_MUTATION false
+PROVIDER_MUTATION false
+STRIPE_MUTATION false
+RELOADLY_MUTATION false
+PRODUCTION_READY false
+REAL_MONEY_READY false
+CONTROLLED_PILOT_READY false
+MARKET_READY false
+VERDICT L31_PARTIAL_OBSERVABILITY_PROOF
+NEXT_GATE token refresh separate authorization then operator status-check correlation retry
+L31_SESSION_END 2026-05-31T13:55:00-07:00
