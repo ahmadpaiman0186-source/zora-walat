@@ -554,6 +554,8 @@ L28_CORE10_TOKEN_REFRESH_AFTER_L27 2026-05-31: ZORA_WALAT_L28_CORE10_TOKEN_REFRE
 CORE10_L28_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l28-token-refresh-after-l27-surface-pass-2026-05-31/l28_token_refresh_transcript_redacted.txt
 L29_SURFACE_DRIFT_SAME_WINDOW 2026-05-31: ZORA_WALAT_L29_SURFACE_DRIFT_CONTROL_SAME_WINDOW_TOKEN_REFRESH_EVIDENCE_2026_05_31.md — L-29 AUTHORIZED; redeploy+token same-window SUCCESS delta 0.49s; TOKEN_VALID; status-check OK; snapshot NOT EXECUTED; NO-GO launch.
 CORE10_L29_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l29-surface-drift-control-same-window-token-refresh-2026-05-31/l29_transcript_redacted.txt
+L30_SAME_WINDOW_SNAPSHOT 2026-05-31: ZORA_WALAT_L30_SAME_WINDOW_REDEPLOY_TOKEN_REFRESH_READONLY_SNAPSHOT_EVIDENCE_2026_05_31.md — L-30 AUTHORIZED; main gate PASS; surface PASS (no redeploy); TOKEN_VALID; operator read-only snapshot COMPLETED (1 order); doctor/obs NOT EXECUTED; NO-GO launch.
+CORE10_L30_EVIDENCE_ARTIFACTS 2026-05-31: Ap786/evidence/core10-l30-same-window-redeploy-token-refresh-readonly-snapshot-2026-05-31/l30_transcript_redacted.txt + staging_snapshot_redacted.json
 
 CORE11_REAL_MONEY_GATE 2026-05-29: ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md — gate FILED ONLY; real-money NOT APPROVED NOT EXECUTED; Ap786 only.
 CORE11_ENTRY_CRITERIA 2026-05-29: ZORA_WALAT_CORE11_GO_NO_GO_ENTRY_CRITERIA_2026_05_29.md — G1-G12 go; N1-N17 no-go triggers.
