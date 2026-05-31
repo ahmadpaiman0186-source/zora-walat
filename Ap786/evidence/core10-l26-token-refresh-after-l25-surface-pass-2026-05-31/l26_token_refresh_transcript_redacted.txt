@@ -1,0 +1,51 @@
+﻿L26_SESSION_START 2026-05-31T11:24:45-07:00
+AUTHORIZATION_RECEIVED true
+TOKEN_REFRESH_MODE read_only_after_l25_surface_pass
+BRANCH evidence/l26-core10-token-refresh-after-l25-surface-pass-2026-05-31
+BASE_HEAD 0310792
+TOKEN_PRINTED false
+PASSWORD_PRINTED false
+ENV_VALUES_PRINTED false
+CREDENTIAL_COMMITTED false
+DEPLOY_EXECUTED false
+FULL_SNAPSHOT_EXECUTED false
+
+=== API preflight ===
+API_HEALTH_HTTP 404
+API_HEALTH FAIL
+API_READY_HTTP 404
+API_READY FAIL
+
+=== staging-api-smoke ===
+MODE staging-api-smoke
+SMOKE_API_ORIGIN https://zora-walat-api-staging.vercel.app
+SMOKE_PROBE health
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+API_SURFACE_LIKELY nextjs_frontend
+SMOKE_PROBE login_route
+SMOKE_HTTP 404
+ROUTE_DIAGNOSIS route_missing_or_wrong_deployment
+STAGING_API_SMOKE_VERDICT FAIL
+BLOCKED_REASON route_missing_or_wrong_deployment
+SMOKE_EXIT 1
+API_SURFACE FAIL
+LOGIN_ROUTE_NOT_404 false
+LOGIN_ROUTE_REACHABLE false
+
+=== token state (pre-login, no body) ===
+TOKEN_PRESENT=true
+TOKEN_VALID=false
+TOKEN_STATE=expired
+
+=== aborted (no login) ===
+LOGIN_ATTEMPT_COUNT 0
+LOGIN_HTTP N/A
+LOGIN_RESULT not_attempted
+STATUS_CHECK_EXECUTED false
+STATUS_CHECK_HTTP N/A
+STATUS_CHECK_RESULT not_executed
+VERDICT BLOCKED_PREFLIGHT
+SESSION_RESULT preflight_aborted_surface_regression
+
+L26_SESSION_END 2026-05-31T11:24:46-07:00
