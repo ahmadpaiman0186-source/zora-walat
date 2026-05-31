@@ -1,0 +1,62 @@
+L27_SESSION_START 2026-05-31T11:45:00-07:00
+AUTHORIZATION_RECEIVED true
+REDEPLOY_MODE staging_api_surface_correction_after_l26_blocked_preflight
+DEPLOY_TARGET server_only
+VERCEL_PROJECT zora-walat-api-staging
+BRANCH evidence/l27-staging-api-surface-correction-redeploy-after-l26-blocked-preflight-2026-05-31
+BASE_HEAD 9b310ab
+
+=== BEFORE redeploy (L-26 regression baseline) ===
+API_HEALTH_BEFORE_HTTP 404
+API_HEALTH_BEFORE FAIL
+
+=== Predeploy guard ===
+DEPLOY_GUARD_PASS true
+DEPLOY_GUARD_ROOT server_api_project
+VERCEL_PROJECT_NAME zora-walat-api-staging
+
+=== Redeploy (count=1) ===
+REDEPLOY_ATTEMPT_COUNT 1
+COMMAND npm run deploy:staging
+DEPLOYMENT_ID dpl_FJQ3LpzHz9QC4vVvqWcGvx2xnAoi
+DEPLOYMENT_URL https://zora-walat-api-staging-23j6r0056.vercel.app
+ALIAS https://zora-walat-api-staging.vercel.app
+DEPLOY_READY_STATE READY
+DEPLOY_EXIT 0
+ENV_EDITED false
+ENV_VALUES_PRINTED false
+SECRET_VALUES_PRINTED false
+
+=== POST-DEPLOY read-only verify ===
+API_HEALTH_AFTER_HTTP 200
+API_HEALTH_AFTER PASS
+API_READY_AFTER_HTTP 200
+API_READY_AFTER PASS
+=== staging-api-smoke ===
+MODE staging-api-smoke
+SMOKE_API_ORIGIN https://zora-walat-api-staging.vercel.app
+SMOKE_PROBE health
+SMOKE_HTTP 200
+ROUTE_DIAGNOSIS ok
+API_SURFACE_LIKELY api_serverless
+SMOKE_PROBE login_route
+SMOKE_HTTP 400
+ROUTE_DIAGNOSIS validation_error
+STAGING_API_SMOKE_VERDICT PASS
+SMOKE_EXIT 0
+API_SURFACE_AFTER PASS
+LOGIN_ROUTE_NOT_404 true
+LOGIN_ROUTE_REACHABLE true
+L27_VERDICT PASS
+
+=== Not executed ===
+LOGIN_ATTEMPT_EXECUTED false
+TOKEN_REFRESH_EXECUTED false
+SNAPSHOT_EXECUTED false
+RUNTIME_DOCTOR_EXECUTED false
+OBSERVABILITY_CAPTURE_EXECUTED false
+TOKEN_PRINTED false
+PASSWORD_PRINTED false
+MUTATION_DETECTED false
+
+L27_SESSION_END 2026-05-31T11:46:30-07:00
