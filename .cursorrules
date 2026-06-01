@@ -1,0 +1,35 @@
+# Zora-Walat — Cursor global proof standard (summary)
+
+
+
+See `.cursor/rules/global-proof-standard.mdc` for full rules.
+
+
+
+**Goal:** International / Global Public Launch.
+
+**Standard:** Real production proof, not documents alone.
+
+
+
+Docs ≠ proof · Plan ≠ readiness · Staging ≠ production · Partial ≠ launch · Manifest ≠ proven.
+
+
+
+**Verdicts only:** PASS_WITH_REAL_PROOF | PARTIAL | BLOCKED | NOT_PROVEN | PENDING_EVIDENCE | NO-GO
+
+
+
+**Never** claim production-ready, real-money-ready, controlled-pilot-ready, market-ready, or self-healing apply-ready without operational proof.
+
+
+
+**No runtime mutations** without exact operator approval (deploy, probes, login, env edit, secrets print, DB/payment/provider actions, doctor apply, self-healing apply).
+
+
+
+Start from clean `main`; scoped branch; `secrets:scan`; conservative Ap786 evidence; no commit until operator review unless asked.
+
+
+
+If proof is incomplete, say so. Do not guess. Do not beautify.

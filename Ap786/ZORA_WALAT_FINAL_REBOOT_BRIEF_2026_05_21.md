@@ -127,7 +127,8 @@ The **investor evidence / diligence / readiness documentation phase** (PR **#35�
 | CORE-07 provider sandbox drill gate | **FILED ONLY (Ap786)** — approval gate + runbook + CORE7-EV matrix; drill **NOT EXECUTED**; phrase `APPROVE CORE-07 RELOADLY SANDBOX DRILL ONLY`; provider proof **NOT VERIFIED**; prod/real-money/pilot/launch **NO-GO** |
 | CORE-08 safe repair dry-run engine | **IMPLEMENTED (dry-run v1)** — `server/src/reliability/safeRepairDryRun/` + `test:safe-repair-dry-run`; apply **NOT ENABLED**; `--apply` forbidden; prod/real-money/pilot/launch **NO-GO** |
 | CORE-09 controlled pilot gate | **FILED ONLY (Ap786)** — entry/exit, exposure limits, CORE9-EV checklist, incident/abort, support; pilot **NOT APPROVED NOT EXECUTED**; phrase `APPROVE CORE-09 CONTROLLED PILOT GATE ONLY`; real-money → CORE-11 (future); pilot/launch **NO-GO** |
-| CORE-10 staging doctor + observability gate | L-30..L-32 **SUCCESS**; L-34 **PARTIAL**; L-35 screenshots **PENDING** ([L-35](./ZORA_WALAT_L35_PRODUCTION_DASHBOARD_SCREENSHOT_EVIDENCE_2026_05_31.md)); **NOT PROVEN**; **NO-GO** |
+| CORE-10 staging doctor + observability gate | L-30..L-35 **PARTIAL/PENDING**; **NOT PROVEN**; **NO-GO** |
+| Global proof standard (Cursor) | [L-36A](./ZORA_WALAT_L36A_CURSOR_GLOBAL_PROOF_STANDARD_RULES_2026_06_01.md) rules **FILED** — real proof required; docs alone **≠** launch |
 | CORE-11 real-money go/no-go gate | **FILED ONLY (Ap786)** — CORE11-EV matrix, risk register, financial/compliance gates; real-money **NOT APPROVED NOT EXECUTED**; default **NO-GO** |
 | CORE-12 final core evidence reconciliation | **FILED (Ap786)** — CORE-01..11 rollup, gap register, proof matrix, RM-BLK map, PWOW gaps, intelligence review; **not** prod/real-money/pilot/market GO |
 | CORE-00 return to core execution gate | **FILED / EXECUTION GATE ONLY** — top-up/data/call/checkout/webhook priorities; CORE0-G1..G4 **BLOCKED**; pilot **NO-GO** |
