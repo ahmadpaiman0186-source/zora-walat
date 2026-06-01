@@ -1,0 +1,147 @@
+---
+
+description: Zora-Walat global proof standard — real production proof required for launch claims; conservative verdicts only.
+
+alwaysApply: true
+
+---
+
+
+
+# GLOBAL PROOF STANDARD (Zora-Walat)
+
+
+
+**Goal:** International / Global Public Launch.
+
+**Standard:** Real production proof, not documents alone.
+
+
+
+## Proof vs documentation
+
+
+
+- Docs ≠ proof.
+
+- Plan ≠ readiness.
+
+- Staging ≠ production.
+
+- Partial ≠ launch.
+
+- Manifest ≠ proven.
+
+- Token valid ≠ money-ready.
+
+- Snapshot ≠ production-ready.
+
+- Self-healing design ≠ self-healing apply-ready.
+
+
+
+## Allowed verdicts only
+
+
+
+Use only: `PASS_WITH_REAL_PROOF` · `PARTIAL` · `BLOCKED` · `NOT_PROVEN` · `PENDING_EVIDENCE` · `NO-GO`
+
+
+
+Never claim **production-ready**, **real-money-ready**, **controlled-pilot-ready**, **market-ready**, or **self-healing apply-ready** without operational proof.
+
+
+
+## Preserve (non-negotiable)
+
+
+
+- no-pay-no-service
+
+- zero duplicate transaction
+
+- fail-closed behavior
+
+- idempotency
+
+- auditability
+
+- observability
+
+- rollback safety
+
+- security-first execution
+
+- least privilege
+
+- redacted evidence
+
+- gated production operations
+
+- gated self-healing
+
+
+
+## Forbidden without exact operator approval phrase
+
+
+
+- production or staging deploy / redeploy
+
+- production API probe
+
+- staging API probe
+
+- login / token refresh
+
+- env / config / secret edit
+
+- secret / token / password / env print
+
+- `cat .env.local` or `cat .staging-token.local`
+
+- DB / payment / order / wallet / provider mutation
+
+- Stripe / Reloadly / provider action
+
+- Runtime Doctor repair / apply
+
+- self-healing apply
+
+- app / server code fix (unless explicitly scoped)
+
+- launch / real-money / pilot / market-ready claims
+
+
+
+## Every engineering task must
+
+
+
+1. Start from clean synced `main` (`git status -sb` = `## main...origin/main`) unless otherwise approved.
+
+2. Use a scoped evidence or docs branch.
+
+3. Keep scope narrow — no drive-by changes.
+
+4. Validate `git diff --check` PASS.
+
+5. Run `npm --prefix server run secrets:scan` PASS when Ap786 or tracked sources change.
+
+6. File conservative Ap786 evidence with safe enums only.
+
+7. Avoid commit until operator review unless explicitly asked.
+
+8. Require clean merge / cleanup verification after evidence PRs.
+
+
+
+## Agent conduct
+
+
+
+If proof is incomplete, say so. Do not guess. Do not beautify. Do not claim readiness without proof.
+
+
+
+Evidence PRs: prefer `git diff --name-only` scoped to allowed paths only (often Ap786-only for governance steps).
