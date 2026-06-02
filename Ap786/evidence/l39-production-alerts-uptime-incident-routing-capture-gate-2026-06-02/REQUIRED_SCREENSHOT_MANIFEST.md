@@ -19,8 +19,8 @@
 | OBS-ROLLBACK-DRILL-001 | `OBS-ROLLBACK-DRILL-001-2026-06-02-redacted.png` | [ROLLBACK_RESTORE_DRILL_REQUIREMENTS.md](./ROLLBACK_RESTORE_DRILL_REQUIREMENTS.md) | **NO** | — | — |
 | OBS-SRE-SIGNOFF-001 | `OBS-SRE-SIGNOFF-001-2026-06-02-redacted.png` | [SRE_OPERATOR_SIGNOFF_REQUIREMENTS.md](./SRE_OPERATOR_SIGNOFF_REQUIREMENTS.md) | **NO** | — | — |
 
-**PNG count in intake folder:** **0**
+**PNG count in intake folder:** **0** (L-40 intake 2026-06-02: **0** of 4 alert/uptime PNGs found)
 
 ---
 
-*All rows PENDING_EVIDENCE at L-39 gate filing.*
+*Rows 1–4 remain **PENDING_EVIDENCE** after [L-40](../../l40-production-alert-routing-uptime-screenshot-intake-2026-06-02/) intake. Rows 5–9 unchanged.*
