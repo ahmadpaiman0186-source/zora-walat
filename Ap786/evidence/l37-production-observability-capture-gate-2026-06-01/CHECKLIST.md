@@ -9,9 +9,9 @@
 
 | # | Item | OBS ID (example) | Filed? | Redacted? | Prod scope? |
 |---|------|------------------|--------|-----------|-------------|
-| 1 | Platform / deployment dashboard | `OBS-DASH-PLATFORM-001` | **NO** | — | — |
-| 2 | API deployment / health visibility | `OBS-DASH-API-001` | **NO** | — | — |
-| 3 | Frontend deployment / availability | `OBS-DASH-FRONTEND-001` | **NO** | — | — |
+| 1 | Platform / deployment dashboard | `OBS-DASH-PLATFORM-001` | **YES** (L-38) | **PASS** review | **YES** |
+| 2 | API deployment / health visibility | `OBS-DASH-API-001` | **YES** (L-38) | **PASS** review | **YES** |
+| 3 | Frontend deployment / availability | `OBS-DASH-FRONTEND-001` | **YES** (L-38) | **PASS** review | **YES** |
 | 4 | Logs / error dashboard | `OBS-DASH-LOGS-001` | **NO** | — | — |
 | 5 | APM / metrics dashboard | `OBS-DASH-APM-001` | **NO** | — | — |
 | 6 | Uptime / synthetics | `OBS-SYNTH-UPTIME-001` | **NO** | — | — |
@@ -43,4 +43,4 @@
 
 ---
 
-*Checklist filing only — all rows NO at L-37 gate session.*
+*L-38 intake (2026-06-01): rows 1–3 + API observability/active-branches PNGs filed — see [L-38 pack](../../l38-production-observability-screenshot-intake-2026-06-01/). Rows 4–10 remain **NO**.*
