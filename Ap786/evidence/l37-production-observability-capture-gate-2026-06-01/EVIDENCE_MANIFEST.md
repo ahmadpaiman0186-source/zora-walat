@@ -9,9 +9,9 @@
 
 | Category | Required artifact | Filename pattern | Status |
 |----------|-------------------|------------------|--------|
-| Platform / deployment | PNG/PDF dashboard | `OBS-DASH-PLATFORM-*-redacted.png` | **PENDING** |
-| API health / deployment | PNG | `OBS-DASH-API-*-redacted.png` | **PENDING** |
-| Frontend availability | PNG | `OBS-DASH-FRONTEND-*-redacted.png` | **PENDING** |
+| Platform / deployment | PNG/PDF dashboard | `OBS-DASH-PLATFORM-*-redacted.png` | **FILED** (L-38) |
+| API health / deployment | PNG | `OBS-DASH-API-*-redacted.png` | **FILED** (L-38) |
+| Frontend availability | PNG | `OBS-DASH-FRONTEND-*-redacted.png` | **FILED** (L-38) |
 | Logs / errors | PNG or redacted JSONL | `OBS-DASH-LOGS-*` / `OBS-LOG-*-redacted.jsonl` | **PENDING** |
 | APM / metrics | PNG | `OBS-DASH-APM-*-redacted.png` | **PENDING** |
 | Uptime / synthetics | PNG | `OBS-SYNTH-UPTIME-*-redacted.png` | **PENDING** |
@@ -41,7 +41,10 @@ Evidence must visibly tie to these **production** labels. Staging hostnames (`*-
 |--------|-------|
 | L-36B screenshots ingested | **0** |
 | L-37 gate filing | **Defines capture path only** |
+| L-38 screenshots ingested | **5** (partial — not FULLY_PROVEN) |
+
+**Also filed (L-38):** `OBS-DASH-API-OBSERVABILITY-001`, `OBS-DASH-API-ACTIVE-BRANCHES-001` — partial API context only.
 
 ---
 
-*Manifest rows remain PENDING until operator files redacted artifacts.*
+*Remaining manifest rows PENDING until additional operator artifacts filed.*
