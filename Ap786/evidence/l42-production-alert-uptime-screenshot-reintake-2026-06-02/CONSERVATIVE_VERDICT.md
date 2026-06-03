@@ -35,4 +35,4 @@ Operator must file all four PNGs per [L-41](../l41-production-alert-uptime-opera
 
 ---
 
-*L-42 re-intake blocked on missing operator screenshots.*
+*L-42 re-intake blocked on missing operator screenshots at session time. Superseded for intake count by L-43/PR #160 + [L-44 reconciliation](../../../ZORA_WALAT_L44_PRODUCTION_OBSERVABILITY_EVIDENCE_RECONCILIATION_2026_06_02.md).*
