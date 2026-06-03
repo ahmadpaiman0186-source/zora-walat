@@ -6,11 +6,51 @@ import { getValidatedStripeSecretKey } from '../config/stripeEnv.js';
 let stripeSingleton = null;
 let stripeSingletonForKey = null;
 
+/** @type {import('stripe').Stripe | Record<string, unknown> | null} */
+let stripeClientOverrideForTests = null;
+
+function nodeEnvNormalized() {
+  return String(process.env.NODE_ENV ?? '').trim();
+}
+
+function isStripeClientTestOverrideAllowed() {
+  if (nodeEnvNormalized() === 'production') {
+    return false;
+  }
+  return (
+    nodeEnvNormalized() === 'test' ||
+    process.env.npm_lifecycle_event === 'test'
+  );
+}
+
+/**
+ * Inject a fake Stripe client for HTTP/unit tests (e.g. dispute `charges.retrieve` paths).
+ * Throws outside an explicit test runtime; **never** allowed when NODE_ENV=production.
+ *
+ * @param {import('stripe').Stripe | Record<string, unknown> | null} client
+ */
+export function setStripeClientOverrideForTests(client) {
+  if (nodeEnvNormalized() === 'production') {
+    throw new Error('setStripeClientOverrideForTests: forbidden when NODE_ENV=production');
+  }
+  if (!isStripeClientTestOverrideAllowed()) {
+    throw new Error('setStripeClientOverrideForTests: test runtime only');
+  }
+  stripeClientOverrideForTests = client;
+}
+
+export function clearStripeClientOverrideForTests() {
+  stripeClientOverrideForTests = null;
+}
+
 /**
  * Single Stripe client for the process. Returns null if key is not configured.
  * Key is read at call time (after `server/bootstrap.js` loads `server/.env`).
  */
 export function getStripeClient() {
+  if (stripeClientOverrideForTests != null && isStripeClientTestOverrideAllowed()) {
+    return /** @type {import('stripe').Stripe} */ (stripeClientOverrideForTests);
+  }
   const key = getValidatedStripeSecretKey();
   if (!key) return null;
   if (stripeSingleton && stripeSingletonForKey === key) {

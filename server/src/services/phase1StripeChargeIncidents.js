@@ -6,6 +6,19 @@ import { orchestrateStripeCall } from './reliability/reliabilityOrchestrator.js'
 import { mirrorCanonicalPaymentCheckoutById } from './canonicalTransactionSync.js';
 
 /**
+ * Thrown when `charges.retrieve` is required to map a dispute to a PaymentIntent but Stripe fails.
+ * Webhook layer maps this to a non-2xx response so Stripe retries (no `StripeWebhookEvent` row yet).
+ */
+export class DisputeChargeLookupError extends Error {
+  /** @param {unknown} [cause] */
+  constructor(cause) {
+    super('stripe_dispute_charge_lookup_failed');
+    this.name = 'DisputeChargeLookupError';
+    if (cause !== undefined) this.cause = cause;
+  }
+}
+
+/**
  * @param {unknown} obj Stripe Charge or similar
  * @returns {string | null}
  */
@@ -44,6 +57,59 @@ export function stripeChargeIdFromDispute(dispute) {
     return id.startsWith('ch_') ? id : null;
   }
   return null;
+}
+
+/**
+ * Resolve PaymentIntent id for `charge.dispute.created` **before** any Prisma interactive transaction.
+ * Performs `stripe.charges.retrieve` only when the dispute payload omits `payment_intent` but includes `charge`.
+ *
+ * @param {import('stripe').Stripe | null | undefined} stripe
+ * @param {unknown} dispute Stripe Dispute object
+ * @param {{ warn?: Function } | undefined} log
+ * @returns {Promise<{ piId: string | null, mapSource: string | null }>}
+ */
+export async function resolvePhase1DisputePaymentIntentForWebhook(stripe, dispute, log) {
+  let piId = stripePaymentIntentIdFromDispute(dispute);
+  let mapSource = piId ? POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_PAYLOAD_PI : null;
+  if (piId) {
+    return { piId, mapSource };
+  }
+
+  const chargeId = stripeChargeIdFromDispute(dispute);
+  if (!chargeId || !stripe || typeof stripe.charges?.retrieve !== 'function') {
+    return { piId: null, mapSource: null };
+  }
+
+  try {
+    const ch = await orchestrateStripeCall({
+      operationName: 'charges.retrieve.dispute_map',
+      traceId: null,
+      log,
+      maxAttempts: 1,
+      backoffMs: [0],
+      fn: () => stripe.charges.retrieve(chargeId),
+    });
+    piId = stripePaymentIntentIdFromObject(ch);
+    if (piId) {
+      mapSource = POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_CHARGE_LOOKUP;
+    }
+    return { piId, mapSource };
+  } catch (e) {
+    log?.warn?.(
+      {
+        securityEvent: 'dispute_charge_lookup_failed',
+        stripeChargeIdSuffix: chargeId.slice(-10),
+        err: String(e?.message ?? e).slice(0, 160),
+      },
+      'stripe webhook',
+    );
+    emitPhase1OperationalEvent('charge_dispute_charge_lookup_failed', {
+      disputeMappingResolution: 'charge_lookup_failed',
+      stripeDisputeIdSuffix: dispute?.id ? String(dispute.id).slice(-10) : null,
+      stripeChargeIdSuffix: chargeId.slice(-10),
+    });
+    throw new DisputeChargeLookupError(e);
+  }
 }
 
 /**
@@ -93,46 +159,21 @@ export async function applyPhase1ChargeRefunded(tx, charge, eventId) {
  * @param {import('@prisma/client').Prisma.TransactionClient} tx
  * @param {object} dispute Stripe Dispute
  * @param {string} eventId
- * @param {{ stripe?: import('stripe').Stripe | null, log?: { warn?: Function } }} [ctx]
+ * @param {{
+ *   disputePaymentIntentResolution?: { piId: string | null, mapSource: string | null },
+ *   log?: { warn?: Function },
+ * }} [ctx]
  */
 export async function applyPhase1DisputeCreated(tx, dispute, eventId, ctx = {}) {
-  const { stripe, log } = ctx;
-  let piId = stripePaymentIntentIdFromDispute(dispute);
-  let mapSource = piId ? POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_PAYLOAD_PI : null;
-
-  if (!piId) {
-    const chargeId = stripeChargeIdFromDispute(dispute);
-    if (chargeId && stripe && typeof stripe.charges?.retrieve === 'function') {
-      try {
-        /** In-DB-transaction: single Stripe attempt (no multi-retry while holding locks). */
-        const ch = await orchestrateStripeCall({
-          operationName: 'charges.retrieve.dispute_map',
-          traceId: null,
-          log,
-          maxAttempts: 1,
-          backoffMs: [0],
-          fn: () => stripe.charges.retrieve(chargeId),
-        });
-        piId = stripePaymentIntentIdFromObject(ch);
-        if (piId) {
-          mapSource = POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_CHARGE_LOOKUP;
-        }
-      } catch (e) {
-        log?.warn?.(
-          {
-            securityEvent: 'dispute_charge_lookup_failed',
-            stripeChargeIdSuffix: chargeId.slice(-10),
-            err: String(e?.message ?? e).slice(0, 160),
-          },
-          'stripe webhook',
-        );
-        emitPhase1OperationalEvent('charge_dispute_charge_lookup_failed', {
-          disputeMappingResolution: 'charge_lookup_failed',
-          stripeDisputeIdSuffix: dispute?.id ? String(dispute.id).slice(-10) : null,
-          stripeChargeIdSuffix: chargeId.slice(-10),
-        });
-      }
-    }
+  const { disputePaymentIntentResolution } = ctx;
+  let piId;
+  let mapSource;
+  if (disputePaymentIntentResolution) {
+    piId = disputePaymentIntentResolution.piId;
+    mapSource = disputePaymentIntentResolution.mapSource;
+  } else {
+    piId = stripePaymentIntentIdFromDispute(dispute);
+    mapSource = piId ? POST_PAYMENT_INCIDENT_MAP_SOURCE.DISPUTE_PAYLOAD_PI : null;
   }
 
   if (!piId) {
