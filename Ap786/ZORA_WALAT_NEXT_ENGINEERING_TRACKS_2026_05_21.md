@@ -120,7 +120,8 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **L-46 read-only capture gate** | [L-46](./ZORA_WALAT_L46_OPERATOR_READONLY_OBSERVABILITY_EVIDENCE_COLLECTION_GATE_2026_06_02.md) **FILED_ONLY** — operator protocol; capture **NOT EXECUTED** |
 | **L-47 read-only evidence intake** | [L-47](./ZORA_WALAT_L47_OPERATOR_READONLY_OBSERVABILITY_EVIDENCE_INTAKE_2026_06_02.md) **BLOCKED_NO_OPERATOR_EVIDENCE** — 0 files |
 | **L-48 operator pre-stage dropzone** | [L-48](./ZORA_WALAT_L48_OPERATOR_EVIDENCE_PRESTAGE_READINESS_GATE_2026_06_03.md) **DROPZONE READY** — folder + manifest; 0 capture artifacts |
-| **L-49 capture approval gate** | [L-49](./ZORA_WALAT_L49_OPERATOR_READONLY_EVIDENCE_CAPTURE_APPROVAL_GATE_2026_06_03.md) **FILED** — L-50 phrase; no capture executed |
+| **L-49 capture approval gate** | [L-49](./ZORA_WALAT_L49_OPERATOR_READONLY_EVIDENCE_CAPTURE_APPROVAL_GATE_2026_06_03.md) **FILED** — L-50 phrase |
+| **L-50 manual capture** | [L-50](./ZORA_WALAT_L50_MANUAL_READONLY_OBSERVABILITY_EVIDENCE_CAPTURE_2026_06_03.md) **PARTIAL** — 9/9 PNGs; money-path gap; L-51 intake next |
 | **CORE-11 real-money go/no-go (2026-05-29)** | [ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md](./ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md) — **FILED ONLY**; real-money **NOT APPROVED**; [verdict](./ZORA_WALAT_CORE11_CONSERVATIVE_VERDICT_2026_05_29.md) |
 | **CORE-12 evidence reconciliation (2026-05-29)** | [ZORA_WALAT_CORE12_FINAL_CORE_EVIDENCE_RECONCILIATION_2026_05_29.md](./ZORA_WALAT_CORE12_FINAL_CORE_EVIDENCE_RECONCILIATION_2026_05_29.md) — CORE-01..11 rollup; market gaps OPEN; [verdict](./ZORA_WALAT_CORE12_CONSERVATIVE_VERDICT_2026_05_29.md) |
 | **CORE-00 return to core execution gate (2026-05-28)** | [ZORA_WALAT_CORE00_RETURN_TO_CORE_EXECUTION_GATE_2026_05_28.md](./ZORA_WALAT_CORE00_RETURN_TO_CORE_EXECUTION_GATE_2026_05_28.md) — core priority gate; **NOT EXECUTED**; pilot **NO-GO** |
