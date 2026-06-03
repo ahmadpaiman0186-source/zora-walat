@@ -28,7 +28,9 @@ Ap786/evidence/l39-production-alerts-uptime-incident-routing-capture-gate-2026-0
 | L-step | Result |
 |--------|--------|
 | [L-39](../l39-production-alerts-uptime-incident-routing-capture-gate-2026-06-02/) | 9-category gate **FILED_NOT_PROOF** |
-| [L-40](../l40-production-alert-routing-uptime-screenshot-intake-2026-06-02/) | **PENDING_OPERATOR_CAPTURE** (0/4) |
+| [L-40](../l40-production-alert-routing-uptime-screenshot-intake-2026-06-02/) | **PENDING_OPERATOR_CAPTURE** (0/4 at session) |
+| L-43 / PR #160 | **4 PNGs filed** (`69251dc`) |
+| [L-44](../../../ZORA_WALAT_L44_PRODUCTION_OBSERVABILITY_EVIDENCE_RECONCILIATION_2026_06_02.md) | Screenshot intake gap **closed**; not full observability proof |
 
 ---
 
@@ -36,4 +38,4 @@ Ap786/evidence/l39-production-alerts-uptime-incident-routing-capture-gate-2026-0
 
 **CAPTURE_GATE_FILED_ONLY** — not proof · **NO-GO** launch unchanged.
 
-Next: **L-42** intake after operator capture.
+Next: [L-44](../../../ZORA_WALAT_L44_PRODUCTION_OBSERVABILITY_EVIDENCE_RECONCILIATION_2026_06_02.md) reconciliation (4/4 PNGs filed on main).

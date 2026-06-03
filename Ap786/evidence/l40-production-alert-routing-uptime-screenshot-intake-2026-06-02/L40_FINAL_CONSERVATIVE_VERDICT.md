@@ -35,3 +35,9 @@
 ---
 
 *End of L-40 verdict.*
+
+---
+
+## L-44 reconciliation addendum (2026-06-02)
+
+**4/4** required alert/uptime PNGs filed via PR #160 (`69251dc`). See [L-44](../../../ZORA_WALAT_L44_PRODUCTION_OBSERVABILITY_EVIDENCE_RECONCILIATION_2026_06_02.md). Screenshot intake gap closed; not full observability proof.
