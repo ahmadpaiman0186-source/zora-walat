@@ -125,7 +125,8 @@ Define **safe, parallelizable workstreams** after the documentation phase — wi
 | **L-51 retry intake + attestation** | [L-51](./ZORA_WALAT_L51_OPERATOR_EVIDENCE_RETRY_INTAKE_REDACTION_ATTESTATION_2026_06_03.md) **PARTIAL** — attestations filed; SRE pending |
 | **L-52 SRE signoff + redaction gate** | [L-52](./ZORA_WALAT_L52_HUMAN_SRE_OPERATOR_SIGNOFF_REDACTION_SPOTCHECK_GATE_2026_06_03.md) **FILED** — L-53 phrase |
 | **L-53 signoff + spot-check filing** | [L-53](./ZORA_WALAT_L53_HUMAN_SRE_OPERATOR_SIGNOFF_REDACTION_SPOTCHECK_2026_06_05.md) **EXECUTED** — signoff filed |
-| **L-54 per-PNG content spot-check** | [L-54](./ZORA_WALAT_L54_EXPLICIT_HUMAN_PER_PNG_CONTENT_SPOTCHECK_2026_06_05.md) **9/9 visible PASS** — not fully proven |
+| **L-54 per-PNG content spot-check** | [L-54](./ZORA_WALAT_L54_EXPLICIT_HUMAN_PER_PNG_CONTENT_SPOTCHECK_2026_06_05.md) **9/9 visible PASS** |
+| **L-55 remaining L-45 gap planning** | [L-55](./ZORA_WALAT_L55_REMAINING_L45_GAP_CLOSURE_PLANNING_GATE_2026_06_05.md) **FILED** — L-56/L-57/L-58 phrases |
 | **CORE-11 real-money go/no-go (2026-05-29)** | [ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md](./ZORA_WALAT_CORE11_REAL_MONEY_GO_NO_GO_DECISION_GATE_2026_05_29.md) — **FILED ONLY**; real-money **NOT APPROVED**; [verdict](./ZORA_WALAT_CORE11_CONSERVATIVE_VERDICT_2026_05_29.md) |
 | **CORE-12 evidence reconciliation (2026-05-29)** | [ZORA_WALAT_CORE12_FINAL_CORE_EVIDENCE_RECONCILIATION_2026_05_29.md](./ZORA_WALAT_CORE12_FINAL_CORE_EVIDENCE_RECONCILIATION_2026_05_29.md) — CORE-01..11 rollup; market gaps OPEN; [verdict](./ZORA_WALAT_CORE12_CONSERVATIVE_VERDICT_2026_05_29.md) |
 | **CORE-00 return to core execution gate (2026-05-28)** | [ZORA_WALAT_CORE00_RETURN_TO_CORE_EXECUTION_GATE_2026_05_28.md](./ZORA_WALAT_CORE00_RETURN_TO_CORE_EXECUTION_GATE_2026_05_28.md) — core priority gate; **NOT EXECUTED**; pilot **NO-GO** |
