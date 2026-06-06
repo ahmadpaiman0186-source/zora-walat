@@ -1,7 +1,7 @@
 # L-67 operator dropzone — operator-captured evidence
 
-**Date:** 2026-06-06 (L-70 re-attempt artifacts staged)
-**L-70 review:** [L-70](../../l70-readonly-l69-evidence-re-attempt-2026-06-06/)
+**Date:** 2026-06-06 (L-71 v3 artifacts staged)
+**L-71 review:** [L-71](../../l71-readonly-stripe-redaction-final-pass-v3-2026-06-06/)
 
 ---
 
@@ -21,7 +21,20 @@
 | 12 | WEBHOOK-EVENT-READONLY-001-redacted-v2.png | **YES** |
 | 13 | PROVIDER-ROUTE-RUNTIME-SURFACE-READONLY-001-redacted.png | **YES** |
 
-**L-70 NEW count:** **3 / 3 PRESENT** · **Total files:** **13** (+ README)
+### L-71 NEW v3 (2 required)
+
+| # | Artifact | Present |
+|---|----------|---------|
+| 14 | STRIPE-WEBHOOK-DESTINATION-READONLY-001-redacted-v3.png | **YES** |
+| 15 | WEBHOOK-EVENT-READONLY-001-redacted-v3.png | **YES** |
+
+### L-71 optional
+
+| Artifact | Present |
+|----------|---------|
+| PROVIDER-ROUTE-RUNTIME-SURFACE-READONLY-002-redacted.png | **YES** (Stripe Events — not route proof) |
+
+**L-71 required v3:** **2 / 2 PRESENT**
 
 ---
 
