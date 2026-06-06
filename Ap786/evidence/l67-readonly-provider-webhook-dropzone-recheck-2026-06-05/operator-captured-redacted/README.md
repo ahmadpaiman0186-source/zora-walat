@@ -1,23 +1,27 @@
-# L-67 operator dropzone
+# L-67 operator dropzone — operator-captured evidence
 
-**Date:** 2026-06-05
-**Approval phrase:** `APPROVE L-67 READ-ONLY PROVIDER WEBHOOK DROPZONE RE-CHECK ONLY` (**ISSUED**)
-
----
-
-## Required artifacts (10)
-
-Same list as L-63/L-64/L-65/L-66 — see [L-63 operator README](../../l63-readonly-provider-webhook-evidence-capture-2026-06-05/operator-captured-redacted/README.md).
-
-Stage files here or in [L-64](../../l64-readonly-provider-webhook-evidence-reintake-2026-06-05/operator-captured-redacted/) / [L-65](../../l65-readonly-provider-webhook-operator-staged-capture-2026-06-05/operator-captured-redacted/) / [L-66](../../l66-readonly-provider-webhook-visible-content-spotcheck-2026-06-05/operator-captured-redacted/) dropzones.
+**Date:** 2026-06-06 (artifacts staged)
+**Approval phrase (L-68 issued):** `APPROVE L-68 READ-ONLY PROVIDER WEBHOOK VISIBLE CONTENT RE-SPOT-CHECK ONLY`
+**Review gate:** [L-68](../../l68-readonly-provider-webhook-visible-content-respotcheck-2026-06-06/)
 
 ---
 
-## L-67 filing result
+## Physical inventory (excluding this README)
 
-**0/10** present at re-check. **AWAITING_OPERATOR_CAPTURE**.
+| # | Artifact | Present |
+|---|----------|---------|
+| 1 | PROVIDER-CATALOG-READONLY-001-redacted.png | **YES** |
+| 2 | PROVIDER-ROUTE-READONLY-001-redacted.png | **YES** |
+| 3 | PROVIDER-SANDBOX-BOUNDARY-READONLY-001-redacted.png | **YES** |
+| 4 | PROVIDER-NO-CALL-ATTESTATION-001.md | **YES** |
+| 5 | STRIPE-WEBHOOK-DESTINATION-READONLY-001-redacted.png | **YES** |
+| 6 | WEBHOOK-EVENT-READONLY-001-redacted.png | **YES** |
+| 7 | WEBHOOK-NO-REPLAY-NO-PAYMENT-ATTESTATION-001.md | **YES** |
+| 8 | PAYMENT-CHECKOUT-NOT-PERFORMED-001.md | **YES** |
+| 9 | REDACTION-REVIEW-001.md | **YES** |
+| 10 | OPERATOR-TIMESTAMP-001.md | **YES** |
 
-All four inspected dropzones contain **README.md only**.
+**Total:** **10 / 10 PRESENT**
 
 ---
 
