@@ -1,0 +1,30 @@
+L-77 TEST RESULTS CAPTURE
+Date: 2026-06-07
+
+--- test:wired-path-safety-dry-run ---
+Command: npm --prefix server run test:wired-path-safety-dry-run
+Exit code: 0
+Tests: 8 pass / 0 fail
+
+--- test:no-pay-no-service (regression) ---
+Command: npm --prefix server run test:no-pay-no-service
+Exit code: 0
+Tests: 17 pass / 0 fail
+
+--- test:idempotency-kernel (regression) ---
+Command: npm --prefix server run test:idempotency-kernel
+Exit code: 0
+Tests: 14 pass / 0 fail
+
+--- wired-path-safety-dry-run CLI ---
+Command: npm --prefix server run wired-path-safety-dry-run
+Exit code: 0
+Scenarios: 6 / failed_expectations: 0
+
+--- secrets:scan (validation) ---
+Command: npm --prefix server run secrets:scan
+Exit code: 0
+Result: OK — no high-confidence live-secret patterns in tracked sources.
+
+--- git diff --check ---
+Exit code: 0
