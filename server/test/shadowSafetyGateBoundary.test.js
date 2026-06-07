@@ -91,6 +91,10 @@ describe('L-79 enabled shadow diagnostics only', () => {
         info: (payload) => {
           logged = true;
           assert.equal(payload.event, 'shadow_safety_gate_webhook_diagnostic');
+          assert(payload.envelope);
+          assert.equal(payload.envelope.wouldScheduleFulfillment, false);
+          assert.equal(payload.envelope.diagnosticsOnly, true);
+          assert.ok(payload.envelope.correlationFingerprint);
         },
       },
     });

@@ -42,6 +42,7 @@
     "test:wired-path-safety-dry-run": "node --test --test-concurrency=1 test/wiredPathSafetyDryRun.test.js",
     "test:shadow-safety-gate": "node --test --test-concurrency=1 test/shadowSafetyGate.test.js",
     "test:shadow-safety-gate-boundary": "node --test --test-concurrency=1 test/shadowSafetyGateBoundary.test.js",
+    "test:shadow-safety-diagnostics-envelope": "node --test --test-concurrency=1 test/shadowSafetyDiagnosticsEnvelope.test.js",
     "shadow-safety-gate": "node scripts/run-shadow-safety-gate.mjs",
     "test:safe-repair-dry-run": "node --test --test-concurrency=1 test/safeRepairDryRun.test.js",
     "test:integration:preflight": "node scripts/integration-preflight.mjs",

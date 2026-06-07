@@ -1,0 +1,11 @@
+L-80 SHADOW DIAGNOSTICS ENVELOPE COMMAND OUTPUT
+Date: 2026-06-07
+
+npm --prefix server run test:shadow-safety-diagnostics-envelope — exit 0 — 13/13 pass
+npm --prefix server run test:shadow-safety-gate-boundary — exit 0 — 11/11 pass
+npm --prefix server run test:shadow-safety-gate — exit 0 — 10/10 pass
+npm --prefix server run test:wired-path-safety-dry-run — exit 0 — 8/8 pass
+npm --prefix server run test:no-pay-no-service — exit 0 — 17/17 pass
+npm --prefix server run test:idempotency-kernel — exit 0 — 14/14 pass
+
+No Stripe/provider/DB/env file/deploy mutation during test execution.
