@@ -1,0 +1,33 @@
+L-75 LOCAL SAFETY COMMAND DISCOVERY — READ-ONLY REPO INSPECTION
+Date: 2026-06-07
+Project: Zora-Walat
+Base: main @ 7a7a45b (L-74 merged PR #191)
+
+Method: Read-only inspection of server/package.json and test file headers.
+No runtime, DB, env, provider, Stripe, webhook, or deployment mutation.
+
+--- DISCOVERED COMMANDS (EXISTING ONLY) ---
+
+1) No-pay-no-service (CORE-06 classify-only unit tests)
+   Script: test:no-pay-no-service
+   Command: npm --prefix server run test:no-pay-no-service
+   Underlying: node --test --test-concurrency=1 test/noPayNoServiceProof.test.js
+   Source header: "pure unit tests (no DB, no env, no APIs)"
+   Module: server/src/reliability/noPayNoServiceProof/
+
+2) Duplicate / idempotency prevention (CORE-05 classify-only unit tests)
+   Script: test:idempotency-kernel
+   Command: npm --prefix server run test:idempotency-kernel
+   Underlying: node --test --test-concurrency=1 test/idempotencyKernelControl.test.js
+   Source header: "pure unit tests (no DB, no env, no APIs)"
+   Module: server/src/reliability/idempotencyKernel/
+
+--- EXCLUDED (NOT SELECTED FOR L-75) ---
+
+- verify:wallet-topup-idempotency — integration test; requires test DB preload; out of L-75 read-only local unit scope.
+- proof:* / preflight:production / provider API scripts — forbidden for this gate.
+
+--- DISCOVERY VERDICT ---
+
+Relevant existing local unit-test commands found: YES (2/2)
+Proceed with L-75 command output capture: YES

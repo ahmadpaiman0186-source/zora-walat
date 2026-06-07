@@ -1,0 +1,76 @@
+L-75 NO-PAY-NO-SERVICE COMMAND OUTPUT CAPTURE
+Date: 2026-06-07
+Working directory: c:\Users\ahmad\zora_walat
+
+Command:
+npm --prefix server run test:no-pay-no-service
+
+Exit code: 0
+
+--- STDOUT/STDERR (combined) ---
+
+> zora-walat-api@1.0.0 test:no-pay-no-service
+> node --test --test-concurrency=1 test/noPayNoServiceProof.test.js
+
+▶ CORE-06 proof evaluators
+  ✔ hasPaymentProof and hasProviderSuccessProof (2.2145ms)
+✔ CORE-06 proof evaluators (4.5952ms)
+▶ fixture a — healthy payment + provider + audit
+  ✔ ALLOW_DELIVERY (1.5405ms)
+✔ fixture a — healthy payment + provider + audit (1.872ms)
+▶ fixture b — paid, provider proof missing
+  ✔ PENDING_REVIEW (3.5634ms)
+✔ fixture b — paid, provider proof missing (4.5651ms)
+▶ fixture c — provider success, payment missing
+  ✔ BLOCK_NO_PAYMENT (0.4156ms)
+✔ fixture c — provider success, payment missing (0.6993ms)
+▶ fixture d — completed without provider reference
+  ✔ BLOCK_AMBIGUOUS (0.6232ms)
+✔ fixture d — completed without provider reference (1.1456ms)
+▶ fixture e — provider timeout / ambiguous
+  ✔ BLOCK_AMBIGUOUS (6.8119ms)
+✔ fixture e — provider timeout / ambiguous (7.0817ms)
+▶ fixture f — delivered flag, no payment
+  ✔ BLOCK_NO_PAYMENT (0.4769ms)
+✔ fixture f — delivered flag, no payment (0.6662ms)
+▶ fixture g — delivered flag, no provider proof
+  ✔ BLOCK_NO_PROVIDER_PROOF (0.3568ms)
+✔ fixture g — delivered flag, no provider proof (0.5303ms)
+▶ fixture h — duplicate / idempotency risk
+  ✔ FAIL_CLOSED on duplicate risk (0.3992ms)
+✔ fixture h — duplicate / idempotency risk (0.5896ms)
+▶ fixture i — missing audit event
+  ✔ FAIL_CLOSED when paid + provider proof but audit incomplete (0.5363ms)
+✔ fixture i — missing audit event (0.7463ms)
+▶ fixture j — stale pending with payment success
+  ✔ PENDING_REVIEW (0.3242ms)
+✔ fixture j — stale pending with payment success (0.4855ms)
+▶ fixture k — failed payment, provider not executed
+  ✔ FAIL_CLOSED safe path (0.3475ms)
+✔ fixture k — failed payment, provider not executed (0.5081ms)
+▶ fixture l — sandbox non-money proof
+  ✔ ALLOW_DELIVERY for sandbox fixture only (0.269ms)
+✔ fixture l — sandbox non-money proof (0.3995ms)
+▶ mutationAllowed safety
+  ✔ false on all fixture decisions (2.2587ms)
+✔ mutationAllowed safety (2.4411ms)
+▶ doctor export boundary
+  ✔ maps non-ALLOW decisions to doctor findings without mutating doctor (1.3735ms)
+  ✔ returns null for ALLOW_DELIVERY (0.5857ms)
+✔ doctor export boundary (2.532ms)
+▶ proof report safety
+  ✔ never_mark_delivered_in_module (1.767ms)
+✔ proof report safety (1.9424ms)
+ℹ tests 17
+ℹ suites 16
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 444.5706
+
+--- SUMMARY ---
+
+Tests: 17 pass / 0 fail
+Result: PASS (local unit fixture scope only)
