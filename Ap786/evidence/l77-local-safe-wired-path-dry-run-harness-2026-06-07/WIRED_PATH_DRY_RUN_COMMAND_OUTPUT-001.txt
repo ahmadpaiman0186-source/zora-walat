@@ -1,0 +1,60 @@
+L-77 WIRED-PATH DRY-RUN COMMAND OUTPUT CAPTURE
+Date: 2026-06-07
+Working directory: c:\Users\ahmad\zora_walat
+
+--- Command 1: unit tests ---
+Command: npm --prefix server run test:wired-path-safety-dry-run
+Exit code: 0
+
+> zora-walat-api@1.0.0 test:wired-path-safety-dry-run
+> node --test --test-concurrency=1 test/wiredPathSafetyDryRun.test.js
+
+ℹ tests 8
+ℹ suites 8
+ℹ pass 8
+ℹ fail 0
+ℹ duration_ms 190.2366
+
+--- Command 2: CLI harness ---
+Command: npm --prefix server run wired-path-safety-dry-run
+Exit code: 0
+
+========== L-77 wired-path safety dry-run harness ==========
+mode=local_wired_path_simulation_dry_run | CORE-05+CORE-06 | no network | no DB
+
+scenario=healthy_wired_path_first_webhook
+  boundary=webhook_to_fulfillment
+  idempotency=ALLOW (CORE5-WH-ALLOW-001)
+  delivery=ALLOW_DELIVERY (CORE6-ALLOW-001)
+  fulfillmentIntentAllowed=true
+  mutations=none (stripe=false provider=false db=false)
+
+scenario=unpaid_webhook_blocks_fulfillment
+  boundary=webhook_to_fulfillment
+  idempotency=ALLOW (CORE5-WH-ALLOW-001)
+  delivery=BLOCK_NO_PAYMENT (CORE6-NO-PAY-001)
+  fulfillmentIntentAllowed=false
+
+scenario=duplicate_webhook_blocks_fulfillment
+  boundary=webhook_to_fulfillment
+  idempotency=BLOCK_DUPLICATE (CORE5-DUP-WH-001)
+  fulfillmentIntentAllowed=false
+
+scenario=duplicate_provider_dispatch_blocked
+  boundary=paid_to_provider_dispatch
+  idempotency=BLOCK_DUPLICATE (CORE5-DUP-PRVEXEC-001)
+  fulfillmentIntentAllowed=false
+
+scenario=missing_key_fail_closed
+  idempotency=BLOCK_AMBIGUOUS (CORE5-KEY-001)
+  fulfillmentIntentAllowed=false
+
+scenario=ambiguous_provider_fail_closed
+  idempotency=PENDING_REVIEW (CORE5-PAID-NO-PROOF-001)
+  delivery=BLOCK_AMBIGUOUS (CORE6-PRV-AMBIG-001)
+  fulfillmentIntentAllowed=false
+
+scenarios=6 failed_expectations=0
+
+--- Mutation attestation ---
+No Stripe/provider/DB/env/deploy/runtime mutation occurred during command execution.
