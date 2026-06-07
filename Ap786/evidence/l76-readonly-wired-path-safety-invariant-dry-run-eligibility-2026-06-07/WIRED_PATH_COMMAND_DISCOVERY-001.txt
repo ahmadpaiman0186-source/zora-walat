@@ -1,0 +1,70 @@
+L-76 WIRED-PATH COMMAND DISCOVERY — READ-ONLY REPO INSPECTION
+Date: 2026-06-07
+Project: Zora-Walat
+Base: main @ 4a5a465 (L-75 merged PR #192)
+Prior: L-75 local unit fixture PASS (not wired-path)
+
+Method: Read-only inspection of server/package.json, server/tools/zw-doctor.mjs,
+server/tools/zwDoctor/*, server/src/reliability/*, CORE-05/CORE-06 docs,
+and grep for idempotencyKernel / noPayNoServiceProof imports in routes/webhook code.
+
+--- L-76 SCOPE (wired/staging-like path) ---
+
+Required: existing safe read-only/dry-run command that exercises
+  (a) no-pay-no-service enforcement on wired/staging-like path
+  (b) duplicate/idempotency enforcement on wired/staging-like path
+
+--- WIRING FINDING (static) ---
+
+grep server/src/**/routes/** and server/src/**webhook** for idempotencyKernel / noPayNoServiceProof:
+  RESULT: NO MATCHES
+
+CORE-05 doc: "not wired into live checkout/webhook/provider paths in v1"
+CORE-06 doc: "exports (unused by live money path)"
+
+Conclusion: No live wired-path enforcement hook exists in codebase for L-76 target invariants.
+
+--- CANDIDATE COMMANDS DISCOVERED ---
+
+A) npm --prefix server run test:no-pay-no-service
+   Underlying: test/noPayNoServiceProof.test.js (unit fixtures)
+   Wired-path: NO (L-75 already captured)
+
+B) npm --prefix server run test:idempotency-kernel
+   Underlying: test/idempotencyKernelControl.test.js (unit fixtures)
+   Wired-path: NO (L-75 already captured)
+
+C) npm --prefix server run test:safe-repair-dry-run
+   Underlying: test/safeRepairDryRun.test.js (unit fixtures)
+   Wired-path: NO
+
+D) npm --prefix server run zw:doctor -- repair-dry-run --fixture server/test/fixtures/safeRepairDryRun/sample-plans.json
+   Mode: CORE-08 JSON fixture dry-run (idempotencyDecisions in fixture file)
+   Wired-path: NO — fixture input only; no HTTP/webhook/checkout path
+
+E) npm --prefix server run zw:doctor -- reliability --fixture server/test/fixtures/runtimeDoctor/sample.json
+   Mode: CORE-04 detect-only JSON fixture scan (includes NPNS scanner on snapshot orders)
+   Wired-path: NO — fixture snapshot only
+
+F) npm --prefix server run zw:doctor -- webhook [--ci-static | --no-staging]
+   Mode: zw-doctor invariant probes (local file/env reads; optional staging HTTP if probes enabled)
+   NPNS/idempotency kernel: NOT INVOKED (invariants.mjs has no CORE-05/06 imports)
+   Wired-path NPNS/idempotency dry-run: NO
+
+G) npm --prefix server run verify:wallet-topup-idempotency
+   Mode: integration test with preloadTestDatabaseUrl
+   Wired-path: YES (integration) but DB_MUTATION_RISK — excluded
+
+H) npm --prefix server run proof:stripe-webhook-local
+   Mode: local webhook proof with test DB preload
+   Wired-path: YES but DB_MUTATION_RISK + webhook simulation — excluded
+
+I) npm --prefix server run proof:reloadly-dry-run
+   Mode: provider dry-run script
+   NETWORK_PROVIDER_RISK — excluded
+
+--- DISCOVERY VERDICT ---
+
+Safe wired-path dry-run command for NPNS + idempotency on staging-like path: NOT FOUND
+Safe fixture-only dry-run commands exist (D, E) but do NOT meet L-76 wired-path scope.
+L-76 execution: STOP — BLOCKED (discovery evidence only)
