@@ -1,0 +1,13 @@
+L-79 TEST RESULTS — 2026-06-07
+Commit: cbc2e81 (feat(reliability): add L-79 feature-flagged shadow safety gate webhook wiring)
+
+npm --prefix server run test:shadow-safety-gate-boundary — exit 0 — 11/11 pass
+npm --prefix server run test:shadow-safety-gate — exit 0 — 10/10 pass
+npm --prefix server run test:wired-path-safety-dry-run — exit 0 — 8/8 pass
+npm --prefix server run test:no-pay-no-service — exit 0 — 17/17 pass
+npm --prefix server run test:idempotency-kernel — exit 0 — 14/14 pass
+npm --prefix server run secrets:scan — exit 0 — OK (no high-confidence live-secret patterns)
+git diff --check — exit 0 — PASS (no whitespace errors after trailing-space fix)
+
+Total automated tests: 60/60 pass across required commands.
+No Stripe/provider/DB/env file/deploy mutation during test execution.

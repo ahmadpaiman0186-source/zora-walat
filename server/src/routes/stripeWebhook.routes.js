@@ -48,6 +48,7 @@ import {
 import { MONEY_PATH_EVENT } from '../domain/payments/moneyPathEvents.js';
 import { emitMoneyPathLog } from '../infrastructure/logging/moneyPathLog.js';
 import { emitPhase1OperationalEvent } from '../lib/phase1OperationalEvents.js';
+import { maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary } from '../reliability/shadowSafetyGate/webhookBoundaryHook.js';
 import { classifyTransactionFailure } from '../constants/transactionFailureClass.js';
 import { transactionRetryDirective } from '../lib/transactionRetryPolicy.js';
 import { enrichReliabilityDecisionWithSeverity } from '../services/reliability/failureSeverity.js';
@@ -555,6 +556,12 @@ router.post('/', async (req, res) => {
               );
             }
           }
+          maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary({
+            event,
+            orderId: String(raw),
+            session: sess,
+            log: req.log,
+          });
           scheduleFulfillmentProcessing(String(raw), replayTrace);
         }
       }
@@ -672,6 +679,13 @@ router.post('/', async (req, res) => {
         traceId: phase1TraceForFulfillmentDispatch,
       });
       evaluateRollingAlerts();
+      maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary({
+        event,
+        orderId: orderIdToScheduleFulfillment,
+        session:
+          event.type === 'checkout.session.completed' ? event.data?.object : undefined,
+        log: req.log,
+      });
       if (!env.phase1WebhookSkipFulfillmentDispatch) {
         scheduleFulfillmentProcessing(
           orderIdToScheduleFulfillment,
