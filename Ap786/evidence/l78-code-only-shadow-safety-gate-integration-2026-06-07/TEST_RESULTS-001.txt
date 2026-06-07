@@ -1,0 +1,10 @@
+L-78 TEST RESULTS
+Date: 2026-06-07
+
+test:shadow-safety-gate — exit 0 — 10/10 pass
+shadow-safety-gate CLI — exit 0 — 7/7 scenarios
+test:wired-path-safety-dry-run — exit 0 — 8/8 pass
+test:no-pay-no-service — exit 0 — 17/17 pass
+test:idempotency-kernel — exit 0 — 14/14 pass
+secrets:scan — exit 0 — OK
+git diff --check — exit 0
