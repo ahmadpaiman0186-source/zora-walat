@@ -36,7 +36,14 @@
 
 **L-72 review:** [L-72](../../l72-readonly-stripe-destination-v4-redaction-hardening-2026-06-07/)
 
-### L-71 optional
+### L-73 operator redaction reconciliation
+
+| Artifact | Present |
+|----------|---------|
+| REDACTION-REVIEW-STRIPE-V4-EVENT-V3-001.md | **YES** |
+| (references v4 destination + v3 event PNGs above) | **YES** |
+
+**L-73 review:** [L-73](../../l73-readonly-operator-redaction-review-reconciliation-2026-06-07/)
 
 | Artifact | Present |
 |----------|---------|
