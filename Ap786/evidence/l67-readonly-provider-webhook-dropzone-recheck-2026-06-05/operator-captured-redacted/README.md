@@ -28,6 +28,14 @@
 | 14 | STRIPE-WEBHOOK-DESTINATION-READONLY-001-redacted-v3.png | **YES** |
 | 15 | WEBHOOK-EVENT-READONLY-001-redacted-v3.png | **YES** |
 
+### L-72 NEW v4 (1 required)
+
+| # | Artifact | Present |
+|---|----------|---------|
+| 16 | STRIPE-WEBHOOK-DESTINATION-READONLY-001-redacted-v4.png | **YES** |
+
+**L-72 review:** [L-72](../../l72-readonly-stripe-destination-v4-redaction-hardening-2026-06-07/)
+
 ### L-71 optional
 
 | Artifact | Present |
