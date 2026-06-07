@@ -460,6 +460,12 @@ export const env = {
    */
   phase1WebhookSkipFulfillmentDispatch:
     process.env.PHASE1_WEBHOOK_SKIP_FULFILLMENT_DISPATCH === 'true',
+  /**
+   * L-79: When true, webhook post-commit path emits **shadow safety diagnostics only**
+   * (no blocking, no fulfillment mutation). Default false — disabled-by-default.
+   */
+  shadowSafetyGateWebhookDiagnosticsEnabled:
+    process.env.SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED === 'true',
   /** HTTP timeout for future real provider calls (ms). */
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,

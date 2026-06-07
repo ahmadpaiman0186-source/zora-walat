@@ -29,4 +29,7 @@ export const WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR = Object.freeze({
   module: 'server/src/routes/stripeWebhook.routes.js',
   anchor: 'scheduleFulfillmentProcessing',
   shadowWiredInL78: false,
+  shadowWiredInL79: true,
+  featureFlag: 'SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED',
+  defaultEnabled: false,
 });

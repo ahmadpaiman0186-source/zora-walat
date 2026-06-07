@@ -54,8 +54,9 @@ describe('L-78 shadow gate — production passthrough', () => {
     );
   });
 
-  it('boundary anchor documents webhook module without live wiring', () => {
-    assert.equal(WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR.shadowWiredInL78, false);
+  it('boundary anchor documents webhook module with L-79 feature-flag wiring', () => {
+    assert.equal(WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR.shadowWiredInL79, true);
+    assert.equal(WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR.defaultEnabled, false);
     assert.match(WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR.module, /stripeWebhook/);
   });
 });
