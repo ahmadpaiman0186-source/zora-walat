@@ -30,6 +30,7 @@ export const WEBHOOK_FULFILLMENT_BOUNDARY_ANCHOR = Object.freeze({
   anchor: 'scheduleFulfillmentProcessing',
   shadowWiredInL78: false,
   shadowWiredInL79: true,
+  sanitizedEnvelopeInL80: true,
   featureFlag: 'SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED',
   defaultEnabled: false,
 });

@@ -16,4 +16,11 @@ export {
   buildWebhookShadowContextFromRouteSnapshot,
   maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary,
 } from './webhookBoundaryHook.js';
+export {
+  SANITIZED_SHADOW_DIAGNOSTICS_ENVELOPE_VERSION,
+  buildSanitizedShadowDiagnosticsEnvelope,
+  fingerprintCorrelation,
+  redactSensitiveString,
+  serializeSanitizedEnvelopeForLog,
+} from './sanitizedDiagnosticsEnvelope.js';
 export { SHADOW_SAFETY_GATE_SCHEMA_VERSION } from './types.js';

@@ -4,6 +4,10 @@
  */
 import { env } from '../../config/env.js';
 import { evaluateShadowSafetyGate } from './evaluate.js';
+import {
+  buildSanitizedShadowDiagnosticsEnvelope,
+  serializeSanitizedEnvelopeForLog,
+} from './sanitizedDiagnosticsEnvelope.js';
 
 /**
  * @param {{ shadowSafetyGateWebhookDiagnosticsEnabled?: boolean }} [envConfig]
@@ -98,14 +102,19 @@ export function maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary(params) {
 
   const report = evaluateShadowSafetyGate(context);
   if (report && typeof params.log?.info === 'function') {
+    const envelope = buildSanitizedShadowDiagnosticsEnvelope({
+      report,
+      shadowModeEnabled: true,
+      correlationMaterial: {
+        orderId: params.orderId,
+        eventId: params.event?.id,
+        eventType: params.event?.type,
+      },
+    });
     params.log.info(
       {
         event: 'shadow_safety_gate_webhook_diagnostic',
-        fulfillmentIntentAllowed: report.fulfillmentIntentAllowed,
-        wouldScheduleFulfillment: report.wouldScheduleFulfillment,
-        idempotencyDecision: report.wiredPathReport.idempotencyDecision.decision,
-        deliveryDecision: report.wiredPathReport.deliveryDecision.decision,
-        orderIdSuffix: String(params.orderId).slice(-8),
+        envelope: serializeSanitizedEnvelopeForLog(envelope),
       },
       'shadow safety gate diagnostic (diagnostics only)',
     );
