@@ -1,0 +1,33 @@
+L-81 NONPROD FLAG ENABLEMENT PREFLIGHT — 2026-06-08
+
+git checkout main — OK
+git pull --ff-only origin main — OK (already up to date)
+git status -sb — ## main...origin/main (clean at preflight)
+
+L-80 on main confirmed:
+6c907aa Merge pull request #197 (L-80 sanitized shadow diagnostics envelope)
+dce1a86 feat(reliability): add L-80 sanitized shadow diagnostics envelope
+
+L-80 files present:
+server/src/reliability/shadowSafetyGate/sanitizedDiagnosticsEnvelope.js — YES
+server/src/reliability/shadowSafetyGate/webhookBoundaryHook.js — YES
+server/src/config/env.js shadowSafetyGateWebhookDiagnosticsEnabled — YES
+
+Flag default:
+SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED === 'true' required for enable
+Absent or any other value → false (disabled)
+
+Production env/deploy changes during L-81: NONE
+
+Local regression commands (2026-06-08):
+npm --prefix server run test:shadow-safety-diagnostics-envelope — exit 0 — 13/13
+npm --prefix server run test:shadow-safety-gate-boundary — exit 0 — 11/11
+npm --prefix server run test:shadow-safety-gate — exit 0 — 10/10
+npm --prefix server run test:wired-path-safety-dry-run — exit 0 — 8/8
+npm --prefix server run test:no-pay-no-service — exit 0 — 17/17
+npm --prefix server run test:idempotency-kernel — exit 0 — 14/14
+npm --prefix server run secrets:scan — exit 0 — OK
+git diff --check — exit 0 — PASS
+
+Staging/non-prod flag enablement executed: NO
+Staging log capture executed: NO
