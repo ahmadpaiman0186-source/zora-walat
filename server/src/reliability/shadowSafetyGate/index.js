@@ -23,4 +23,11 @@ export {
   redactSensitiveString,
   serializeSanitizedEnvelopeForLog,
 } from './sanitizedDiagnosticsEnvelope.js';
+export {
+  STAGING_PROBE_FIXED_SCENARIO,
+  STAGING_PROBE_ID,
+  emitStagingProbeShadowDiagnostic,
+  isStagingProbeRouteAllowed,
+  readStagingProbeEnvConfig,
+} from './stagingProbeDiagnostics.js';
 export { SHADOW_SAFETY_GATE_SCHEMA_VERSION } from './types.js';

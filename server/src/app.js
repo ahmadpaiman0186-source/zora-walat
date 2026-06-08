@@ -39,6 +39,7 @@ import supportRoutes from './routes/support.routes.js';
 import reliabilityAdminRoutes from './routes/reliabilityAdmin.routes.js';
 import internalWebtopupLogsRoutes from './routes/internalWebtopupLogs.routes.js';
 import internalPhase1MissionMetricsRoutes from './routes/internalPhase1MissionMetrics.routes.js';
+import internalShadowSafetyGateStagingProbeRoutes from './routes/internalShadowSafetyGateStagingProbe.routes.js';
 import fulfillmentDlqRoutes from './routes/fulfillmentDlq.routes.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -220,6 +221,7 @@ export function createApp() {
   /** Internal structured webtop observation buffer (token-gated; not for public clients). */
   app.use('/internal', apiIpLimiter, internalWebtopupLogsRoutes);
   app.use('/internal', apiIpLimiter, internalPhase1MissionMetricsRoutes);
+  app.use('/internal', apiIpLimiter, internalShadowSafetyGateStagingProbeRoutes);
 
   /** Dev/local: Stripe success/cancel when client base is this API (see CLIENT_URL / Origin). */
   mountCheckoutReturnRoutesIfNonProduction(app);
