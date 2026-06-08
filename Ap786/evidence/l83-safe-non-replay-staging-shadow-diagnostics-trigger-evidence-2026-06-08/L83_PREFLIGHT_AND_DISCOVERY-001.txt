@@ -1,0 +1,34 @@
+L-83 PREFLIGHT AND DISCOVERY — 2026-06-08
+Approval: APPROVE L-83 READ-ONLY PLAN AND BEGIN BRANCH + DISCOVERY ONLY
+
+git checkout main — OK
+git pull --ff-only origin main — OK (already up to date)
+git checkout -b evidence/l83-safe-non-replay-staging-shadow-diagnostics-trigger-evidence-2026-06-08 — OK
+
+Preflight git state:
+branch: evidence/l83-safe-non-replay-staging-shadow-diagnostics-trigger-evidence-2026-06-08
+base HEAD: 5d8892c (main — L-81 PR #198 merged)
+working tree: clean
+
+L-82 on branch base confirmed:
+eb4cae7 evidence(ap786): L-82 staging shadow diagnostics flag enablement and redeploy proof
+staging project: zora-walat-api-staging
+flag: SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED=true (staging only, per L-82)
+deployment: dpl_AwVbG2rAUHHnbNuyjcXVrgtoiJH4 Ready
+
+L-82 Ap786 evidence on main at discovery: pending merge (included on this branch)
+
+Discovery commands executed (read-only / local-only):
+rg maybeEmitShadowSafetyDiagnosticsAtWebhookBoundary server — 2 route call sites + tests
+rg shadow_safety_gate_webhook_diagnostic server — hook + tests only
+rg SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED server Ap786 — env.js + hook + tests
+read stripeWebhook.routes.js control flow — signature + DB paths before hook
+read run-shadow-safety-gate.mjs — local L-78 batch, no webhook log event
+npm --prefix server run test:shadow-safety-diagnostics-envelope — exit 0 — 13/13
+npm --prefix server run secrets:scan — exit 0 — OK
+
+Staging network: NOT CALLED
+Vercel: NOT CALLED
+Production: NOT TOUCHED
+
+Discovery conclusion: NO EXISTING SAFE NON-REPLAY STAGING TRIGGER PATH
