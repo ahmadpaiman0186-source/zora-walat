@@ -466,6 +466,17 @@ export const env = {
    */
   shadowSafetyGateWebhookDiagnosticsEnabled:
     process.env.SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED === 'true',
+  /**
+   * L-83A: When true **and** `ZW_API_DEPLOYMENT_TIER=staging`, internal staging probe may emit
+   * sanitized shadow diagnostics. Default false — fail closed.
+   */
+  shadowSafetyGateStagingProbeEnabled:
+    process.env.SHADOW_SAFETY_GATE_STAGING_PROBE_ENABLED === 'true',
+  /**
+   * Deployment tier label (e.g. `staging`). L-83A probe route requires explicit `staging`.
+   * Unset or other values fail closed for probe route.
+   */
+  zwApiDeploymentTier: String(process.env.ZW_API_DEPLOYMENT_TIER ?? '').trim().toLowerCase(),
   /** HTTP timeout for future real provider calls (ms). */
   airtimeProviderTimeoutMs: parsePositiveInt(
     process.env.AIRTIME_PROVIDER_TIMEOUT_MS,
