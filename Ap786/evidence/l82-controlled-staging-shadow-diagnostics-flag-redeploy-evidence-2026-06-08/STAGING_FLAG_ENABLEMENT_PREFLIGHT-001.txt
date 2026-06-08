@@ -1,0 +1,31 @@
+L-82 STAGING FLAG ENABLEMENT PREFLIGHT — 2026-06-08
+
+git checkout main — OK
+git pull --ff-only origin main — OK
+git status -sb — clean at preflight
+
+L-81 on main confirmed:
+5d8892c Merge pull request #198 (L-81 blocked enablement proof)
+
+L-80 on main confirmed:
+6c907aa Merge pull request #197 (L-80 sanitized envelope)
+
+Server code change required for L-82: NO (evidence-only)
+
+Vercel operator: ahmadpaiman0186-source
+Vercel scope: ahmadpaiman0186-sources-projects
+
+Staging target project: zora-walat-api-staging
+Production API project (must remain untouched): zora-walat-api
+
+Pre-change: SHADOW_SAFETY_GATE_WEBHOOK_DIAGNOSTICS_ENABLED absent on staging project
+
+Local regression (2026-06-08):
+test:shadow-safety-diagnostics-envelope — exit 0 — 13/13
+test:shadow-safety-gate-boundary — exit 0 — 11/11
+test:shadow-safety-gate — exit 0 — 10/10
+test:wired-path-safety-dry-run — exit 0 — 8/8
+test:no-pay-no-service — exit 0 — 17/17
+test:idempotency-kernel — exit 0 — 14/14
+secrets:scan — exit 0 — OK
+git diff --check — exit 0 — PASS
