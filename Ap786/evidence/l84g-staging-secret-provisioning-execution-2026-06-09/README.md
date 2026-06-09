@@ -2,12 +2,13 @@
 
 **Verdict:** `CORE10-L84G-VERDICT-001: L84G_STAGING_SECRET_PROVISIONING_BLOCKED_OR_INCOMPLETE`
 
-**STOPPED:** Vercel UI token paste **failed**. Staging `OPS_HEALTH_TOKEN` **not provisioned**. Local token generated (redacted). **No commit. No redeploy. No HTTP/POST.**
+**STOPPED:** Vercel UI token paste **failed**. Staging `OPS_HEALTH_TOKEN` **not provisioned**. Post-stop: wrong value in Vercel UI **discarded** — **no env save** (`WRONG_VALUE_APPEARED_IN_VERCEL_UI_NOT_SAVED_DISCARDED`).
 
 | Artifact | Purpose |
 |----------|---------|
 | [L84G_EXECUTION_SUMMARY.md](./L84G_EXECUTION_SUMMARY.md) | Summary |
 | [L84G_EXECUTION_STOP_AND_BLOCK_REASON.md](./L84G_EXECUTION_STOP_AND_BLOCK_REASON.md) | Stop reason |
+| [L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md](./L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md) | Post-stop discard |
 | [L84G_OPERATOR_APPROVAL_RECORD.md](./L84G_OPERATOR_APPROVAL_RECORD.md) | Approval + stop |
 | [L84G_SECRET_GENERATION_REDACTED_ATTESTATION.md](./L84G_SECRET_GENERATION_REDACTED_ATTESTATION.md) | Generation |
 | [L84G_LOCAL_TOKEN_SET_REDACTED_EVIDENCE.md](./L84G_LOCAL_TOKEN_SET_REDACTED_EVIDENCE.md) | Local SET |

@@ -7,6 +7,7 @@
 - Operator-approved **attempt** with local high-entropy token generation (redacted).
 - Vercel UI paste **failed**; staging `OPS_HEALTH_TOKEN` **not provisioned**.
 - Fail-closed stop — no redeploy, HTTP/POST, or retry.
+- Post-stop: wrong/non-L84 value in Vercel UI Value field **not saved** — operator **Discard Changes** ([addendum](./L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md)); classification **`WRONG_VALUE_APPEARED_IN_VERCEL_UI_NOT_SAVED_DISCARDED`**; **no secret material recorded**.
 
 ## NOT CLAIMED
 

@@ -35,6 +35,7 @@ TOKEN PASTE FAILED IN VERCEL UI — STOP L-84G
 | Staging `OPS_HEALTH_TOKEN` | **NOT PRESENT / NOT PROVISIONED** |
 | Production touched | **NO** |
 | Unrelated env changed | **NO** |
+| Vercel env mutation saved (post-stop) | **NO** — wrong value discarded; see [post-stop addendum](./evidence/l84g-staging-secret-provisioning-execution-2026-06-09/L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md) |
 | Redeploy | **NO** |
 | HTTP/POST | **NO** |
 
@@ -49,6 +50,8 @@ TOKEN PASTE FAILED IN VERCEL UI — STOP L-84G
 ## Evidence package
 
 [Ap786/evidence/l84g-staging-secret-provisioning-execution-2026-06-09/](./evidence/l84g-staging-secret-provisioning-execution-2026-06-09/)
+
+Post-stop addendum: [L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md](./evidence/l84g-staging-secret-provisioning-execution-2026-06-09/L84G_POST_STOP_VERCEL_UI_WRONG_VALUE_DISCARDED_ADDENDUM.md) — **`WRONG_VALUE_APPEARED_IN_VERCEL_UI_NOT_SAVED_DISCARDED`**; no env save; no secret material recorded.
 
 Prior chain: [L-84F](./ZORA_WALAT_L84F_OPERATOR_SECRET_PROVISIONING_EXECUTION_AUTHORIZATION_GATE_2026_06_09.md) · [L-84E](./ZORA_WALAT_L84E_OPERATOR_SECRET_PROVISIONING_PROCEDURE_GATE_2026_06_09.md) · [L-84D](./ZORA_WALAT_L84D_OPERATOR_CREDENTIAL_PROVISIONING_GATE_2026_06_08.md)
 
