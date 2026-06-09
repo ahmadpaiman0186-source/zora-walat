@@ -15,7 +15,7 @@
 | DB mutation | **NO** |
 | Provider / payment / order / checkout paths | **NO** |
 
-**Redeploy performed:** **NO**  
+**Redeploy performed:** **NO**
 **HTTP/POST performed:** **NO**
 
 ---
