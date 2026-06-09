@@ -1,0 +1,19 @@
+# L-84K — Artifact inventory
+
+**Package:** `Ap786/evidence/l84k-operator-key-family-attestation-gate-2026-06-09/`
+**Master:** `Ap786/ZORA_WALAT_L84K_OPERATOR_KEY_FAMILY_ATTESTATION_GATE_2026_06_09.md`
+**Verdict:** `CORE10-L84K-VERDICT-001: L84K_OPERATOR_KEY_FAMILY_ATTESTATION_GATE_ONLY_NO_ATTESTATION_RECORDED`
+
+| # | Artifact | Purpose |
+|---|----------|---------|
+| 1 | [L84K_ATTESTATION_CHOICES.md](./L84K_ATTESTATION_CHOICES.md) | Allowed choice codes |
+| 2 | [L84K_NO_SECRET_INSTRUCTION.md](./L84K_NO_SECRET_INSTRUCTION.md) | No-secret operator rules |
+| 3 | [L84K_OPERATOR_RESPONSE_TEMPLATE.md](./L84K_OPERATOR_RESPONSE_TEMPLATE.md) | Response template |
+| 4 | [L84K_FAIL_CLOSED_DECISION_MATRIX.md](./L84K_FAIL_CLOSED_DECISION_MATRIX.md) | Fail-closed matrix |
+| 5 | [L84K_NON_CLAIMS_AND_READINESS_BOUNDARY.md](./L84K_NON_CLAIMS_AND_READINESS_BOUNDARY.md) | Non-claims |
+| 6 | [L84K_NO_OPERATIONAL_ACTION_ATTESTATION.md](./L84K_NO_OPERATIONAL_ACTION_ATTESTATION.md) | No ops |
+| 7 | [README.md](./README.md) | Package index |
+
+---
+
+*End.*
