@@ -45,6 +45,10 @@ Hard reconciliation of Zora-Walat proof posture from **2026-03-28** to **2026-06
 | L-74 | **OPEN / MISSING** |
 | L-84 retry | **NOT AUTHORIZED** |
 
+## L-85A addendum (PR #219 Vercel check)
+
+Read-only triage addendum: [L85A_VERCEL_PRODUCTION_API_PREVIEW_FAILURE_ADDENDUM.md](./evidence/l85-global-real-proof-baseline-reconciliation-2026-06-10/L85A_VERCEL_PRODUCTION_API_PREVIEW_FAILURE_ADDENDUM.md) — **`Vercel – zora-walat-api`** failure on PR #219 is **pre-existing on main @ `dad1111`**; **not caused by L-85**; **no runtime fix** in L-85A. Verdict: `CORE10-L85A-VERDICT-001: L85A_PRE_EXISTING_VERCEL_API_PREVIEW_FAILURE_DOCUMENTED_NO_RUNTIME_FIX`
+
 ## Evidence package
 
 [Ap786/evidence/l85-global-real-proof-baseline-reconciliation-2026-06-10/](./evidence/l85-global-real-proof-baseline-reconciliation-2026-06-10/)
