@@ -1,0 +1,18 @@
+# L-84R — Artifact inventory
+
+**Date:** 2026-06-10
+**Verdict:** `CORE10-L84R-VERDICT-002: L84R_TOKEN_ROTATION_ABORTED_WRONG_SECRET_LIKE_VALUE_PRESENT_NO_SAVE_NO_REDEPLOY_NO_HTTP`
+
+| # | Artifact | Purpose |
+|---|----------|---------|
+| 1 | [L84R_EXECUTION_RECORD.md](./L84R_EXECUTION_RECORD.md) | Full execution timeline |
+| 2 | [L84R_LOCAL_SESSION_TOKEN_SETUP_ATTESTATION.md](./L84R_LOCAL_SESSION_TOKEN_SETUP_ATTESTATION.md) | Local token generated and discarded |
+| 3 | [L84R_VERCEL_STAGING_ENV_ABORT_ATTESTATION.md](./L84R_VERCEL_STAGING_ENV_ABORT_ATTESTATION.md) | Vercel UI edit aborted — no save |
+| 4 | [L84R_CLIPBOARD_CLEARANCE_ATTESTATION.md](./L84R_CLIPBOARD_CLEARANCE_ATTESTATION.md) | Clipboard cleared |
+| 5 | [L84R_NO_SECRET_MATERIAL_ATTESTATION.md](./L84R_NO_SECRET_MATERIAL_ATTESTATION.md) | No secret material in evidence |
+| 6 | [L84R_STRIPE_LIVE_SECRET_TRIAGE_BOUNDARY.md](./L84R_STRIPE_LIVE_SECRET_TRIAGE_BOUNDARY.md) | Stripe triage — separate gate only |
+| 7 | [L84R_NON_CLAIMS_AND_RETRY_BOUNDARY.md](./L84R_NON_CLAIMS_AND_RETRY_BOUNDARY.md) | Non-claims and retry boundary |
+
+---
+
+*End.*
