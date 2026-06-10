@@ -1,0 +1,19 @@
+# L-85 — Artifact inventory
+
+**Package:** `Ap786/evidence/l85-global-real-proof-baseline-reconciliation-2026-06-10/`
+**Master:** `Ap786/ZORA_WALAT_L85_GLOBAL_REAL_PROOF_BASELINE_RECONCILIATION_2026_06_10.md`
+**Verdict:** `CORE10-L85-VERDICT-001: L85_GLOBAL_REAL_PROOF_BASELINE_RECONCILED_NO_COMMERCIAL_READINESS`
+
+| # | Artifact | Purpose |
+|---|----------|---------|
+| 1 | [L85_EXECUTION_RECORD.md](./L85_EXECUTION_RECORD.md) | Reconciliation execution |
+| 2 | [L85_REAL_PROOF_LEDGER.md](./L85_REAL_PROOF_LEDGER.md) | Domain ledger |
+| 3 | [L85_PRIOR_L_CLASSIFICATION_MATRIX.md](./L85_PRIOR_L_CLASSIFICATION_MATRIX.md) | L/CORE matrix |
+| 4 | [L85_FAKE_OR_UNSUPPORTED_PROOF_REJECTION_REGISTER.md](./L85_FAKE_OR_UNSUPPORTED_PROOF_REJECTION_REGISTER.md) | Rejection register |
+| 5 | [L85_REPROOF_BACKLOG_FROM_MARCH28_TO_JUNE10.md](./L85_REPROOF_BACKLOG_FROM_MARCH28_TO_JUNE10.md) | Re-proof backlog |
+| 6 | [L85_CURRENT_TRUE_READINESS_VERDICT.md](./L85_CURRENT_TRUE_READINESS_VERDICT.md) | True readiness |
+| 7 | [README.md](./README.md) | Package index |
+
+---
+
+*End.*
