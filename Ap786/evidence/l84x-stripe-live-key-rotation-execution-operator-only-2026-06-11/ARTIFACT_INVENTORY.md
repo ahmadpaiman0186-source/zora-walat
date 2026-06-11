@@ -1,0 +1,18 @@
+# L-84X — Artifact inventory
+
+**Date:** 2026-06-11
+**Verdict:** `CORE10-L84X-VERDICT-001: L84X_STRIPE_LIVE_KEY_ROTATION_OPERATOR_COMPLETED_NO_SECRET_REVEAL_VERCEL_UNCHANGED`
+
+| # | Artifact | Purpose |
+|---|----------|---------|
+| 1 | [L84X_EXECUTION_RECORD.md](./L84X_EXECUTION_RECORD.md) | Execution timeline |
+| 2 | [L84X_OPERATOR_STRIPE_ACTION_ATTESTATION.md](./L84X_OPERATOR_STRIPE_ACTION_ATTESTATION.md) | Operator non-secret attestation |
+| 3 | [L84X_NO_SECRET_REVEAL_ATTESTATION.md](./L84X_NO_SECRET_REVEAL_ATTESTATION.md) | No secret in evidence |
+| 4 | [L84X_STRIPE_ROTATION_OUTCOME.md](./L84X_STRIPE_ROTATION_OUTCOME.md) | Stripe-side outcome |
+| 5 | [L84X_VERCEL_NON_MUTATION_ATTESTATION.md](./L84X_VERCEL_NON_MUTATION_ATTESTATION.md) | Vercel unchanged |
+| 6 | [L84X_POST_ROTATION_NEXT_GATES.md](./L84X_POST_ROTATION_NEXT_GATES.md) | Next gates |
+| 7 | [L84X_NON_CLAIMS.md](./L84X_NON_CLAIMS.md) | Non-claims |
+
+---
+
+*End.*
