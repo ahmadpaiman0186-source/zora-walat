@@ -171,7 +171,7 @@ export async function runMoneyPathInvariants(ctx) {
   for (const [id, file, needle] of [
     ['CHECKOUT_SESSION_MAPPING_SAFE', 'tools/stagingOperatorL11StripeMapping.mjs', 'evaluateDbStripeMapping'],
     ['PAYMENT_INTENT_MAPPING_SAFE', 'tools/stagingOperatorL11StripeMapping.mjs', 'piSuffixesMatch'],
-    ['UNMATCHED_EVENT_SAFE', 'api/slimStripeWebhookHandler.mjs', 'stripeEventSlimUnmatchedFastAck'],
+    ['UNMATCHED_EVENT_SAFE', 'handlers/slimStripeWebhookHandler.mjs', 'stripeEventSlimUnmatchedFastAck'],
     ['EVENT_ORDERING_SAFE', 'test/integrations/stripeWebhookHttpChaos.integration.test.js', 'describe'],
   ]) {
     const p = serverFile(file);
@@ -664,7 +664,7 @@ export async function runOperationalInvariants(ctx) {
     invariant({
       id: 'PHASE1_TRUTH_AVAILABLE',
       status: existsSync(
-        serverFile('api/slimStagingOperatorPhase1TruthHandler.mjs'),
+        serverFile('handlers/slimStagingOperatorPhase1TruthHandler.mjs'),
       )
         ? 'PASS'
         : 'PARTIAL',
@@ -706,9 +706,9 @@ export async function runOperationalInvariants(ctx) {
 export async function runWebhookInvariants(ctx) {
   const results = [];
   const handlers = [
-    'api/slimStripeWebhookHandler.mjs',
-    'api/slimStripeWebhookCheckoutCompleted.mjs',
-    'api/slimStripeWebhookChargeRefunded.mjs',
+    'handlers/slimStripeWebhookHandler.mjs',
+    'handlers/slimStripeWebhookCheckoutCompleted.mjs',
+    'handlers/slimStripeWebhookChargeRefunded.mjs',
   ];
   const allPresent = handlers.every((h) => existsSync(serverFile(h)));
   results.push(

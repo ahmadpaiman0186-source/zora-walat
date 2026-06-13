@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
 import { Readable } from 'node:stream';
 
-import { handleSlimAuthRegisterPost } from '../api/slimAuthRegisterHandler.mjs';
+import { handleSlimAuthRegisterPost } from '../handlers/slimAuthRegisterHandler.mjs';
 import { AUTH_ERROR_CODE } from '../src/constants/authErrors.js';
 import { API_CONTRACT_CODE } from '../src/constants/apiContractCodes.js';
 import { HttpError } from '../src/lib/httpError.js';

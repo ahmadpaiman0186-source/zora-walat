@@ -83,7 +83,7 @@ export function verifyStr02RootVercelRoute(options = {}) {
 
   const rootVercelPath = join(repoRoot, 'vercel.json');
   const bridgePath = join(repoRoot, 'api/webhooks/stripe.mjs');
-  const slimHandlerPath = join(repoRoot, 'server/api/slimStripeWebhookHandler.mjs');
+  const slimHandlerPath = join(repoRoot, 'server/handlers/slimStripeWebhookHandler.mjs');
   const packagePath = join(repoRoot, 'package.json');
 
   const rootVercelExists = existsSync(rootVercelPath);
@@ -135,7 +135,7 @@ export function verifyStr02RootVercelRoute(options = {}) {
     check(
       'slim_stripe_handler_exists',
       slimHandlerExists,
-      'server/api/slimStripeWebhookHandler.mjs exists',
+      'server/handlers/slimStripeWebhookHandler.mjs exists',
     ),
   );
 
@@ -245,7 +245,7 @@ export function verifyStr02RootVercelRoute(options = {}) {
     checkedFiles: {
       rootVercel: 'vercel.json',
       rootBridge: 'api/webhooks/stripe.mjs',
-      slimHandler: 'server/api/slimStripeWebhookHandler.mjs',
+      slimHandler: 'server/handlers/slimStripeWebhookHandler.mjs',
       packageJson: 'package.json',
     },
     checks,

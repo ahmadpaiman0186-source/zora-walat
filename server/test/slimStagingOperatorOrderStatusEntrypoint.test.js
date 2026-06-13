@@ -8,7 +8,7 @@ import { Readable } from 'node:stream';
 import {
   orderIdFromStagingOperatorStatusUrl,
   STAGING_OPERATOR_ORDER_STATUS_PATH_PREFIX,
-} from '../api/slimStagingOperatorOrderStatusHandler.mjs';
+} from '../handlers/slimStagingOperatorOrderStatusHandler.mjs';
 
 describe('slimStagingOperatorOrderStatusHandler URL parse', () => {
   it('extracts order id from path', () => {

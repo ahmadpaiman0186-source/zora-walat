@@ -9,7 +9,7 @@ import {
   normalizePostPaymentIncidentStatus,
   orderIdFromStagingOperatorPhase1TruthUrl,
   STAGING_OPERATOR_PHASE1_TRUTH_PATH_PREFIX,
-} from '../api/slimStagingOperatorPhase1TruthHandler.mjs';
+} from '../handlers/slimStagingOperatorPhase1TruthHandler.mjs';
 import { POST_PAYMENT_INCIDENT_STATUS } from '../src/constants/postPaymentIncidentStatus.js';
 
 describe('slimStagingOperatorPhase1TruthHandler URL parse', () => {

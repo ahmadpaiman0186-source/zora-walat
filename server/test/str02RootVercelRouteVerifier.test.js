@@ -35,7 +35,7 @@ function makeFixture(overrides = {}) {
     return;
   }
   req.url = '/webhooks/stripe';
-  const { handleSlimStripeWebhookPost } = await import('../../server/api/slimStripeWebhookHandler.mjs');
+  const { handleSlimStripeWebhookPost } = await import('../../server/handlers/slimStripeWebhookHandler.mjs');
   await handleSlimStripeWebhookPost(req, res, async () => () => {});
 }
 `;
@@ -48,7 +48,7 @@ function makeFixture(overrides = {}) {
   if (overrides.bridge !== null) {
     writeText(join(root, 'api/webhooks/stripe.mjs'), bridge);
   }
-  writeText(join(root, 'server/api/slimStripeWebhookHandler.mjs'), 'export function handleSlimStripeWebhookPost() {}\n');
+  writeText(join(root, 'server/handlers/slimStripeWebhookHandler.mjs'), 'export function handleSlimStripeWebhookPost() {}\n');
   for (const route of ['app/page.tsx', 'app/history/page.tsx', 'app/success/page.tsx', 'app/cancel/page.tsx']) {
     writeText(join(root, route), 'export default function Page() { return null; }\n');
   }

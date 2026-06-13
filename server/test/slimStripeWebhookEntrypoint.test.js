@@ -13,7 +13,7 @@ import {
   handleSlimStripeWebhookPost,
   stripeEventSlimUnmatchedFastAck,
   WEBHOOK_RAW_BODY_LIMIT_BYTES,
-} from '../api/slimStripeWebhookHandler.mjs';
+} from '../handlers/slimStripeWebhookHandler.mjs';
 import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../src/constants/webTopupStripePiMetadata.js';
 
 /**

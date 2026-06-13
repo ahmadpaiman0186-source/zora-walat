@@ -6,7 +6,7 @@ import { describe, it } from 'node:test';
 
 import {
   isChargeRefundedEvent,
-} from '../api/slimStripeWebhookChargeRefunded.mjs';
+} from '../handlers/slimStripeWebhookChargeRefunded.mjs';
 import { stripePaymentIntentIdFromObject } from '../src/services/phase1StripeChargeIncidents.js';
 
 describe('slimStripeWebhookChargeRefunded', () => {

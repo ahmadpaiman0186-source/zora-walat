@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { handleSlimReady } from '../api/slimReadyHandler.mjs';
+import { handleSlimReady } from '../handlers/slimReadyHandler.mjs';
 
 function assertPayloadHasNoSecretLikeStrings(payload) {
   const s = JSON.stringify(payload);

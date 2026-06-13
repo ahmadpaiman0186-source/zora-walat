@@ -8,7 +8,7 @@ import { Readable } from 'node:stream';
 import {
   orderIdFromStagingOperatorRefundTargetUrl,
   STAGING_OPERATOR_REFUND_TARGET_PATH_PREFIX,
-} from '../api/slimStagingOperatorRefundTargetHandler.mjs';
+} from '../handlers/slimStagingOperatorRefundTargetHandler.mjs';
 
 describe('slimStagingOperatorRefundTargetHandler URL parse', () => {
   it('extracts order id from path', () => {

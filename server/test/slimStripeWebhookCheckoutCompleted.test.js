@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { isHostedCheckoutSessionCompletedEvent } from '../api/slimStripeWebhookCheckoutCompleted.mjs';
+import { isHostedCheckoutSessionCompletedEvent } from '../handlers/slimStripeWebhookCheckoutCompleted.mjs';
 
 describe('isHostedCheckoutSessionCompletedEvent', () => {
   it('returns true when internalCheckoutId is a valid checkout id', () => {

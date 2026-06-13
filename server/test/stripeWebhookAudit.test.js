@@ -10,8 +10,8 @@ import {
   recordStripeWebhookAudit,
   sanitizeStripeWebhookAuditInput,
   STRIPE_WEBHOOK_AUDIT_ALLOWED_FIELDS,
-} from '../api/stripeWebhookAudit.mjs';
-import { handleSlimStripeWebhookPost } from '../api/slimStripeWebhookHandler.mjs';
+} from '../handlers/stripeWebhookAudit.mjs';
+import { handleSlimStripeWebhookPost } from '../handlers/slimStripeWebhookHandler.mjs';
 
 function makeStripeWebhookReq(body, headers = {}) {
   const buf = Buffer.isBuffer(body) ? body : Buffer.from(String(body), 'utf8');

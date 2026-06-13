@@ -6,7 +6,7 @@
 import '../src/runtime/registerServerlessRuntime.js';
 import { clientErrorBody } from '../src/lib/clientErrorJson.js';
 import { sendLivenessJsonOk } from '../src/lib/sendLivenessJsonOk.js';
-import { handleSlimReady } from './slimReadyHandler.mjs';
+import { handleSlimReady } from '../handlers/slimReadyHandler.mjs';
 
 let cachedHandler = null;
 
@@ -76,7 +76,7 @@ export default function handler(req, res) {
       return;
     }
     if (hp === '/success' || hp === '/cancel') {
-      return import('./slimCheckoutReturnHandler.mjs').then((m) =>
+      return import('../handlers/slimCheckoutReturnHandler.mjs').then((m) =>
         m.handleSlimCheckoutReturnGet(req, res),
       );
     }
@@ -115,7 +115,7 @@ export default function handler(req, res) {
    * Express `/webhooks/stripe` route (see slimStripeWebhookHandler.mjs).
    */
   if (req.method === 'POST' && requestPathname(req.url) === '/webhooks/stripe') {
-    return import('./slimStripeWebhookHandler.mjs').then((m) =>
+    return import('../handlers/slimStripeWebhookHandler.mjs').then((m) =>
       m.handleSlimStripeWebhookPost(req, res, getHandler),
     );
   }
@@ -126,7 +126,7 @@ export default function handler(req, res) {
   {
     const p = normalizedPathname(req.url);
     if (req.method === 'POST' && (p === '/api/auth/login' || p === '/auth/login')) {
-      return import('./slimAuthLoginHandler.mjs').then((m) =>
+      return import('../handlers/slimAuthLoginHandler.mjs').then((m) =>
         m.handleSlimAuthLoginPost(req, res),
       );
     }
@@ -141,7 +141,7 @@ export default function handler(req, res) {
       req.method === 'POST' &&
       (p === '/api/auth/register' || p === '/auth/register')
     ) {
-      return import('./slimAuthRegisterHandler.mjs').then((m) =>
+      return import('../handlers/slimAuthRegisterHandler.mjs').then((m) =>
         m.handleSlimAuthRegisterPost(req, res),
       );
     }
@@ -159,7 +159,7 @@ export default function handler(req, res) {
         p === '/api/auth/resend-otp' ||
         p === '/auth/resend-otp')
     ) {
-      return import('./slimAuthRequestOtpHandler.mjs').then((m) =>
+      return import('../handlers/slimAuthRequestOtpHandler.mjs').then((m) =>
         m.handleSlimAuthRequestOtpPost(req, res),
       );
     }
@@ -174,7 +174,7 @@ export default function handler(req, res) {
       req.method === 'POST' &&
       p === '/api/ops/staging-verify-operator-email'
     ) {
-      return import('./slimStagingOperatorVerifyEmailHandler.mjs').then((m) =>
+      return import('../handlers/slimStagingOperatorVerifyEmailHandler.mjs').then((m) =>
         m.handleSlimStagingOperatorVerifyEmailPost(req, res),
       );
     }
@@ -188,7 +188,7 @@ export default function handler(req, res) {
       req.method === 'GET' &&
       p.startsWith('/api/ops/staging-operator-order-status/')
     ) {
-      return import('./slimStagingOperatorOrderStatusHandler.mjs').then((m) =>
+      return import('../handlers/slimStagingOperatorOrderStatusHandler.mjs').then((m) =>
         m.handleSlimStagingOperatorOrderStatusGet(req, res),
       );
     }
@@ -202,7 +202,7 @@ export default function handler(req, res) {
       req.method === 'GET' &&
       p.startsWith('/api/ops/staging-operator-phase1-truth/')
     ) {
-      return import('./slimStagingOperatorPhase1TruthHandler.mjs').then((m) =>
+      return import('../handlers/slimStagingOperatorPhase1TruthHandler.mjs').then((m) =>
         m.handleSlimStagingOperatorPhase1TruthGet(req, res),
       );
     }
@@ -216,7 +216,7 @@ export default function handler(req, res) {
       req.method === 'GET' &&
       p === '/api/ops/staging-operator-refundable-candidates'
     ) {
-      return import('./slimStagingOperatorRefundableCandidatesHandler.mjs').then(
+      return import('../handlers/slimStagingOperatorRefundableCandidatesHandler.mjs').then(
         (m) => m.handleSlimStagingOperatorRefundableCandidatesGet(req, res),
       );
     }
@@ -230,7 +230,7 @@ export default function handler(req, res) {
       req.method === 'GET' &&
       p.startsWith('/api/ops/staging-operator-refund-target/')
     ) {
-      return import('./slimStagingOperatorRefundTargetHandler.mjs').then((m) =>
+      return import('../handlers/slimStagingOperatorRefundTargetHandler.mjs').then((m) =>
         m.handleSlimStagingOperatorRefundTargetGet(req, res),
       );
     }
@@ -251,7 +251,7 @@ export default function handler(req, res) {
         authz.startsWith('Bearer ') &&
         authz.slice(7).trim().length > 0;
       if (hasBearer) {
-        return import('./slimCreateCheckoutHandler.mjs').then((m) =>
+        return import('../handlers/slimCreateCheckoutHandler.mjs').then((m) =>
           m.handleSlimCreateCheckoutPost(req, res),
         );
       }

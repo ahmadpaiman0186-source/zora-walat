@@ -19,7 +19,7 @@ import {
   validateLayer3WebPaidTransition,
 } from '../src/payment/paymentStateMachine.js';
 import { paymentCheckoutPendingForPhase1CheckoutSessionPaidReplay } from '../src/services/phase1StripeCheckoutSessionCompleted.js';
-import { stripeEventSlimUnmatchedFastAck } from '../api/slimStripeWebhookHandler.mjs';
+import { stripeEventSlimUnmatchedFastAck } from '../handlers/slimStripeWebhookHandler.mjs';
 import { isAllowedWebTopupPaymentTransition } from '../src/domain/topupOrder/webtopupStateMachine.js';
 import { PAYMENT_STATUS } from '../src/domain/topupOrder/statuses.js';
 import { canTransition } from '../src/domain/orders/orderLifecycle.js';
