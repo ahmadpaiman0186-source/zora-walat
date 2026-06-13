@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { Readable } from 'node:stream';
 
-import { handleSlimCheckoutReturnGet } from '../api/slimCheckoutReturnHandler.mjs';
+import { handleSlimCheckoutReturnGet } from '../handlers/slimCheckoutReturnHandler.mjs';
 
 function makeGetReq(url) {
   const stream = Readable.from([]);

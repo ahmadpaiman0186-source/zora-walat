@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
 import { Readable } from 'node:stream';
 
-import { handleSlimStagingOperatorVerifyEmailPost } from '../api/slimStagingOperatorVerifyEmailHandler.mjs';
+import { handleSlimStagingOperatorVerifyEmailPost } from '../handlers/slimStagingOperatorVerifyEmailHandler.mjs';
 
 function makeReq(body, headers = {}) {
   const buf = Buffer.from(body, 'utf8');

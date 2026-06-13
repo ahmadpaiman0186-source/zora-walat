@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
 import { Readable } from 'node:stream';
 
-import { handleSlimCreateCheckoutPost } from '../api/slimCreateCheckoutHandler.mjs';
+import { handleSlimCreateCheckoutPost } from '../handlers/slimCreateCheckoutHandler.mjs';
 
 function makeCheckoutReq(body, headers = {}) {
   const buf = Buffer.from(JSON.stringify(body), 'utf8');

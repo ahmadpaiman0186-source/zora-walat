@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { describe, it } from 'node:test';
 
-import { isHostedCheckoutSessionExpiredEvent } from '../api/slimStripeWebhookCheckoutExpired.mjs';
-import { stripeEventSlimUnmatchedFastAck } from '../api/slimStripeWebhookHandler.mjs';
+import { isHostedCheckoutSessionExpiredEvent } from '../handlers/slimStripeWebhookCheckoutExpired.mjs';
+import { stripeEventSlimUnmatchedFastAck } from '../handlers/slimStripeWebhookHandler.mjs';
 
 describe('slimStripeWebhookCheckoutExpired classifier', () => {
   const internalCheckoutId = 'cmp91xbrt0003jm04m9ub8wrw';

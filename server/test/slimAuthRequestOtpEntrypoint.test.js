@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
 import { Readable } from 'node:stream';
 
-import { handleSlimAuthRequestOtpPost } from '../api/slimAuthRequestOtpHandler.mjs';
+import { handleSlimAuthRequestOtpPost } from '../handlers/slimAuthRequestOtpHandler.mjs';
 import { AUTH_ERROR_CODE } from '../src/constants/authErrors.js';
 import { API_CONTRACT_CODE } from '../src/constants/apiContractCodes.js';
 import { clearSlidingWindowsForTests } from '../src/services/risk/riskSlidingWindow.js';

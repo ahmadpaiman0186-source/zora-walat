@@ -42,7 +42,7 @@ export default async function handler(req, res) {
   req.url = webhookUrlFrom(req);
   try {
     const { handleSlimStripeWebhookPost } = await import(
-      '../../server/api/slimStripeWebhookHandler.mjs'
+      '../../server/handlers/slimStripeWebhookHandler.mjs'
     );
     await handleSlimStripeWebhookPost(req, res, getExpressHandler);
   } finally {

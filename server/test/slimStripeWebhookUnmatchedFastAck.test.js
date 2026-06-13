@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { describe, it } from 'node:test';
 
-import { stripeEventSlimUnmatchedFastAck } from '../api/slimStripeWebhookHandler.mjs';
+import { stripeEventSlimUnmatchedFastAck } from '../handlers/slimStripeWebhookHandler.mjs';
 import { WEBTOPUP_STRIPE_PI_METADATA_SOURCE } from '../src/constants/webTopupStripePiMetadata.js';
 
 describe('stripeEventSlimUnmatchedFastAck (L-7 classifier)', () => {
