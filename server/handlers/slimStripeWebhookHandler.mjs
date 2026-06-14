@@ -203,12 +203,6 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     route: webhookAuditRouteFromRequest(req),
     received_at: new Date(startedAt).toISOString(),
   };
-  await recordStripeWebhookAudit({
-    ...auditBase,
-    signature_verification_status: 'not_attempted',
-    idempotency_status: 'not_applicable',
-    handler_stage: 'route_entry',
-  });
   logWebhookSlimBreadcrumb('webhook_slim_entry');
   logStripeWebhookLifecycle('webhook_received', { path: 'slim' });
 
@@ -221,15 +215,6 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    await recordStripeWebhookAudit({
-      ...auditBase,
-      signature_verification_status: 'not_attempted',
-      idempotency_status: 'not_applicable',
-      handler_stage: 'response_sent',
-      response_status: 503,
-      ack_latency_ms: elapsedMs(startedAt),
-      redacted_error_code: 'signing_secret_not_configured',
-    });
     res.end(
       JSON.stringify(
         clientErrorBody('Service unavailable', API_CONTRACT_CODE.INTERNAL_ERROR),
@@ -253,15 +238,6 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
         res.statusCode = 413;
         res.setHeader('Content-Type', 'application/json; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
-        await recordStripeWebhookAudit({
-          ...auditBase,
-          signature_verification_status: 'missing',
-          idempotency_status: 'not_applicable',
-          handler_stage: 'response_sent',
-          response_status: 413,
-          ack_latency_ms: elapsedMs(startedAt),
-          redacted_error_code: 'webhook_body_too_large',
-        });
         res.end(
           JSON.stringify(
             clientErrorBody('Payload too large', API_CONTRACT_CODE.VALIDATION_ERROR),
@@ -274,20 +250,6 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    await recordStripeWebhookAudit({
-      ...auditBase,
-      signature_verification_status: 'missing',
-      idempotency_status: 'not_applicable',
-      handler_stage: 'signature_verification_failed',
-    });
-    await recordStripeWebhookAudit({
-      ...auditBase,
-      signature_verification_status: 'missing',
-      idempotency_status: 'not_applicable',
-      handler_stage: 'response_sent',
-      response_status: 400,
-      ack_latency_ms: elapsedMs(startedAt),
-    });
     res.end(
       JSON.stringify(
         clientErrorBody('Invalid request', API_CONTRACT_CODE.VALIDATION_ERROR),
@@ -326,20 +288,6 @@ export async function handleSlimStripeWebhookPost(req, res, getHandler) {
     res.statusCode = 400;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');
-    await recordStripeWebhookAudit({
-      ...auditBase,
-      signature_verification_status: 'invalid',
-      idempotency_status: 'not_applicable',
-      handler_stage: 'signature_verification_failed',
-    });
-    await recordStripeWebhookAudit({
-      ...auditBase,
-      signature_verification_status: 'invalid',
-      idempotency_status: 'not_applicable',
-      handler_stage: 'response_sent',
-      response_status: 400,
-      ack_latency_ms: elapsedMs(startedAt),
-    });
     res.end(
       JSON.stringify(
         clientErrorBody('Invalid request', API_CONTRACT_CODE.VALIDATION_ERROR),
