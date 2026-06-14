@@ -127,7 +127,7 @@ describe('STR-12 Stripe webhook audit sanitizer', () => {
 });
 
 describe('STR-12 slim webhook audit integration', () => {
-  it('keeps invalid signature fail-closed and records only safe metadata', async () => {
+  it('rejects invalid signature fail-closed without pre-signature audit writes', async () => {
     const records = [];
     globalThis.__zwStripeWebhookAuditAdapter = async (record) => {
       records.push(record);
@@ -165,10 +165,7 @@ describe('STR-12 slim webhook audit integration', () => {
     assert.equal(handlerCalls, 0);
     assert.equal(res.statusCode, 400);
     assert.equal(res.ended, true);
-    assert.equal(records.some((r) => r.handler_stage === 'route_entry'), true);
-    assert.equal(records.some((r) => r.handler_stage === 'signature_verification_failed'), true);
-    assert.equal(records.some((r) => r.handler_stage === 'response_sent' && r.response_status === 400), true);
-    assertAuditContainsNoSensitiveText(records);
+    assert.equal(records.length, 0, 'invalid signature must not invoke audit adapter');
   });
 
   it('does not let audit adapter failure change invalid signature behavior', async () => {
