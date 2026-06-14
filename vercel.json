@@ -7,6 +7,22 @@
     {
       "source": "/webhooks/stripe",
       "destination": "/api/webhooks/stripe"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/health-ready?route=health"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health-ready?route=health"
+    },
+    {
+      "source": "/ready",
+      "destination": "/api/health-ready?route=ready"
+    },
+    {
+      "source": "/api/ready",
+      "destination": "/api/health-ready?route=ready"
     }
   ]
 }
