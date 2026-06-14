@@ -15,12 +15,28 @@ export function loadOperatorDotenv(serverRoot) {
   /**
    * Stripe / general config: `.env` fills unset vars; `.env.local` overrides `.env`.
    * Shell `STRIPE_SECRET_KEY` (set before node) is preserved — not overwritten by `.env`.
-   * Operator email/password: when set in shell before node, `.env` must not clobber them.
+   * Operator email/password: when present in shell before node (including explicit empty),
+   * file loads must not clobber them — empty password stays fail-closed local validation.
    */
+  const shellOperatorKeys = ['STAGING_OPERATOR_EMAIL', 'STAGING_OPERATOR_PASSWORD'];
+  /** @type {Record<string, string | undefined>} */
+  const shellOperatorValues = {};
+  for (const key of shellOperatorKeys) {
+    if (Object.hasOwn(process.env, key)) {
+      shellOperatorValues[key] = process.env[key];
+    }
+  }
+
   dotenv.config({ path: resolve(serverRoot, '.env'), override: false });
   const localPath = resolve(serverRoot, '.env.local');
   if (existsSync(localPath)) {
     dotenv.config({ path: localPath, override: true });
+  }
+
+  for (const key of shellOperatorKeys) {
+    if (Object.hasOwn(shellOperatorValues, key)) {
+      process.env[key] = shellOperatorValues[key];
+    }
   }
 }
 
