@@ -71,12 +71,28 @@ function readRootVercelJson() {
 }
 
 describe('root Vercel webhook route declaration', () => {
-  it('rewrites exact /webhooks/stripe to the root serverless bridge', () => {
+  it('rewrites /webhooks/stripe and L-84ZJ health/ready probes to root serverless bridges', () => {
     const cfg = readRootVercelJson();
     assert.deepEqual(cfg.rewrites, [
       {
         source: '/webhooks/stripe',
         destination: '/api/webhooks/stripe',
+      },
+      {
+        source: '/health',
+        destination: '/api/health-ready?route=health',
+      },
+      {
+        source: '/api/health',
+        destination: '/api/health-ready?route=health',
+      },
+      {
+        source: '/ready',
+        destination: '/api/health-ready?route=ready',
+      },
+      {
+        source: '/api/ready',
+        destination: '/api/health-ready?route=ready',
       },
     ]);
     assert.match(
