@@ -23,6 +23,10 @@
     {
       "source": "/api/ready",
       "destination": "/api/health-ready?route=ready"
+    },
+    {
+      "source": "/create-checkout-session",
+      "destination": "/api/create-checkout-session"
     }
   ]
 }
