@@ -94,6 +94,10 @@ describe('root Vercel webhook route declaration', () => {
         source: '/api/ready',
         destination: '/api/health-ready?route=ready',
       },
+      {
+        source: '/create-checkout-session',
+        destination: '/api/create-checkout-session',
+      },
     ]);
     assert.match(
       cfg.installCommand,

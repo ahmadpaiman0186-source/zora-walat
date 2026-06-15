@@ -1,0 +1,23 @@
+# L-84ZW — Checkout API routing bridge fix (local proof)
+
+**Gate UTC:** 2026-06-15  
+**Verdict:** `CORE10-L84ZW-VERDICT-001: CHECKOUT_API_ROUTING_BRIDGE_FIX_PROVEN_LOCAL_CODE_TEST_NO_RUNTIME_POST_NO_PAYMENT_NO_PROVIDER_NO_MARKET_GLOBAL_LAUNCH_NO_GO`
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [GIT_BASELINE.md](./GIT_BASELINE.md) | Preflight + L-84ZV merge baseline |
+| [ROUTING_GAP_ROOT_CAUSE.md](./ROUTING_GAP_ROOT_CAUSE.md) | Why L-84ZV returned 404 HTML |
+| [CODE_CHANGE_SUMMARY.md](./CODE_CHANGE_SUMMARY.md) | Minimal fix diff |
+| [LOCAL_TEST_RESULTS.md](./LOCAL_TEST_RESULTS.md) | Scoped test results |
+| [NO_RUNTIME_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md](./NO_RUNTIME_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md) | Non-action attestation |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Standing non-claims |
+
+## Parent record
+
+[ZORA_WALAT_L84ZW_CHECKOUT_API_ROUTING_BRIDGE_FIX_LOCAL_PROOF_2026_06_15.md](../../ZORA_WALAT_L84ZW_CHECKOUT_API_ROUTING_BRIDGE_FIX_LOCAL_PROOF_2026_06_15.md)
+
+---
+
+*End.*
