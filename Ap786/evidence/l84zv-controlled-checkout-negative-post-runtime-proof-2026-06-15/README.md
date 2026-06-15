@@ -1,0 +1,23 @@
+# L-84ZV — Controlled checkout negative POST runtime proof
+
+**Gate UTC:** 2026-06-15  
+**Probe UTC:** **2026-06-15T20:53:12Z**  
+**Verdict:** `CORE10-L84ZV-VERDICT-002: CONTROLLED_CHECKOUT_NEGATIVE_POST_RUNTIME_BOUNDARY_PARTIAL_INCOMPLETE_OR_TIMEOUT_NO_PAYMENT_NO_PROVIDER_NO_MARKET_GLOBAL_LAUNCH_NO_GO`
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [GIT_BASELINE.md](./GIT_BASELINE.md) | Preflight + merge baseline |
+| [RUNTIME_PROBE_MATRIX.md](./RUNTIME_PROBE_MATRIX.md) | C1–C4 execution results |
+| [FORBIDDEN_ARTIFACT_SCAN.md](./FORBIDDEN_ARTIFACT_SCAN.md) | Response body artifact scan |
+| [NO_PAYMENT_NO_PROVIDER_ATTESTATION.md](./NO_PAYMENT_NO_PROVIDER_ATTESTATION.md) | Scope attestation |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Standing non-claims |
+
+## Parent record
+
+[ZORA_WALAT_L84ZV_CONTROLLED_CHECKOUT_NEGATIVE_POST_RUNTIME_PROOF_2026_06_15.md](../../ZORA_WALAT_L84ZV_CONTROLLED_CHECKOUT_NEGATIVE_POST_RUNTIME_PROOF_2026_06_15.md)
+
+---
+
+*End.*
