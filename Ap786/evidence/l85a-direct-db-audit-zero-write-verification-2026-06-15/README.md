@@ -1,0 +1,25 @@
+# L-85A — Direct SELECT-only DB/audit zero-write verification
+
+**Gate UTC:** 2026-06-15  
+**Probe window (L-84ZY C1–C4):** `2026-06-15T22:20:00Z` → `2026-06-15T22:40:00Z`  
+**L-84ZY probe anchor:** `2026-06-15T22:28:00Z`  
+**Verdict:** `CORE10-L85A-VERDICT-002: DB_AUDIT_ZERO_WRITE_VERIFICATION_PARTIAL_OR_UNAVAILABLE_DIRECT_PROOF_NOT_COMPLETE_NO_POST_NO_PAYMENT_NO_PROVIDER_NO_MARKET_GLOBAL_LAUNCH_NO_GO`
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [GIT_BASELINE.md](./GIT_BASELINE.md) | Preflight git baseline + L-84ZY/L-84ZZ merge proof |
+| [DB_ACCESS_SAFETY_ATTESTATION.md](./DB_ACCESS_SAFETY_ATTESTATION.md) | SELECT-only safety + DB identity limitation |
+| [DB_AUDIT_QUERY_RESULTS.md](./DB_AUDIT_QUERY_RESULTS.md) | Count-only query results (no PII) |
+| [SIDE_EFFECT_ZERO_WRITE_MATRIX.md](./SIDE_EFFECT_ZERO_WRITE_MATRIX.md) | Artifact category matrix |
+| [NO_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md](./NO_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md) | Non-action attestation |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Standing non-claims |
+
+## Parent record
+
+[ZORA_WALAT_L85A_DIRECT_DB_AUDIT_ZERO_WRITE_VERIFICATION_2026_06_15.md](../../ZORA_WALAT_L85A_DIRECT_DB_AUDIT_ZERO_WRITE_VERIFICATION_2026_06_15.md)
+
+---
+
+*End.*
