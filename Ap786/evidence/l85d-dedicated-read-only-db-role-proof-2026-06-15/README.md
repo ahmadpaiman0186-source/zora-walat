@@ -1,0 +1,25 @@
+# L-85D — Dedicated read-only DB role proof
+
+**Gate UTC:** 2026-06-15  
+**Verdict:** `CORE10-L85D-VERDICT-002: DEDICATED_READ_ONLY_DB_ROLE_PROOF_PARTIAL_OR_UNAVAILABLE_WRITE_CAPABLE_OR_UNVERIFIED_NO_POST_NO_PAYMENT_NO_PROVIDER_NO_MARKET_GLOBAL_LAUNCH_NO_GO`
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [GIT_BASELINE.md](./GIT_BASELINE.md) | Preflight + L-85C merge proof |
+| [SCHEMA_TABLE_SCOPE.md](./SCHEMA_TABLE_SCOPE.md) | Prisma side-effect table scope |
+| [READ_ONLY_CONNECTION_AVAILABILITY.md](./READ_ONLY_CONNECTION_AVAILABILITY.md) | Env var scan (names/lengths only) |
+| [DB_ROLE_IDENTITY_REDACTED.md](./DB_ROLE_IDENTITY_REDACTED.md) | Connected role identity |
+| [TABLE_PRIVILEGE_MATRIX.md](./TABLE_PRIVILEGE_MATRIX.md) | SELECT/INSERT/UPDATE/DELETE probe |
+| [NO_DB_WRITE_ATTESTATION.md](./NO_DB_WRITE_ATTESTATION.md) | No mutation attestation |
+| [SECRET_NON_DISCLOSURE_ATTESTATION.md](./SECRET_NON_DISCLOSURE_ATTESTATION.md) | No secret exposure |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Standing non-claims |
+
+## Parent record
+
+[ZORA_WALAT_L85D_DEDICATED_READ_ONLY_DB_ROLE_PROOF_2026_06_15.md](../../ZORA_WALAT_L85D_DEDICATED_READ_ONLY_DB_ROLE_PROOF_2026_06_15.md)
+
+---
+
+*End.*
