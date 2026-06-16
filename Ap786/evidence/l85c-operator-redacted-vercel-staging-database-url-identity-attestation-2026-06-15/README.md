@@ -1,0 +1,26 @@
+# L-85C — Operator redacted Vercel staging DATABASE_URL identity attestation
+
+**Gate UTC:** 2026-06-15  
+**Verdict:** `CORE10-L85C-VERDICT-002: VERCEL_STAGING_DATABASE_URL_IDENTITY_ATTESTATION_PARTIAL_MATCH_NOT_DIRECTLY_PROVEN_NO_POST_NO_PAYMENT_NO_PROVIDER_NO_MARKET_GLOBAL_LAUNCH_NO_GO`
+
+Operator attestation: `DATABASE_URL` exists (Production, Sensitive); no secret exposed; redacted identity not capturable from UI.
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [GIT_BASELINE.md](./GIT_BASELINE.md) | Preflight + L-85B merge proof |
+| [OPERATOR_VERCEL_DASHBOARD_ATTESTATION.md](./OPERATOR_VERCEL_DASHBOARD_ATTESTATION.md) | Operator manual inspection record |
+| [REDACTED_DATABASE_URL_IDENTITY_COMPARISON.md](./REDACTED_DATABASE_URL_IDENTITY_COMPARISON.md) | L-85A vs Vercel staging comparison |
+| [SECRET_NON_DISCLOSURE_ATTESTATION.md](./SECRET_NON_DISCLOSURE_ATTESTATION.md) | No secret exposure boundary |
+| [DB_ZERO_WRITE_CLAIM_BOUNDARY.md](./DB_ZERO_WRITE_CLAIM_BOUNDARY.md) | Claim limits after L-85C |
+| [NO_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md](./NO_POST_NO_PAYMENT_NO_PROVIDER_ATTESTATION.md) | Non-action attestation |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Standing non-claims |
+
+## Parent record
+
+[ZORA_WALAT_L85C_OPERATOR_REDACTED_VERCEL_STAGING_DATABASE_URL_IDENTITY_ATTESTATION_2026_06_15.md](../../ZORA_WALAT_L85C_OPERATOR_REDACTED_VERCEL_STAGING_DATABASE_URL_IDENTITY_ATTESTATION_2026_06_15.md)
+
+---
+
+*End.*
