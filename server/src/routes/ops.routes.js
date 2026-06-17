@@ -20,6 +20,7 @@ import { env } from '../config/env.js';
 import { getPhase1FulfillmentQueue } from '../queues/phase1FulfillmentQueue.js';
 import { isFulfillmentQueueEnabled } from '../queues/queueEnabled.js';
 import { denyUnauthenticatedInfraIfPrelaunch } from '../middleware/opsInfraHealthGate.js';
+import { executeDbReadonlyProof } from '../services/dbReadonlyProofService.js';
 import { getMoneyPathOperatorSnapshot } from '../services/opsMoneyPathCountService.js';
 
 const router = Router();
@@ -63,6 +64,18 @@ router.get('/health', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json(payload);
 });
+
+/**
+ * Read-only DB identity + privilege proof (token-gated, fail-closed).
+ * Uses READ_ONLY_DATABASE_URL only — never owner DATABASE_URL or shared Prisma.
+ * Mounted at `/ops/db-readonly-proof` and `/api/admin/ops/db-readonly-proof`.
+ */
+router.get('/db-readonly-proof', async (req, res) => {
+  const result = await executeDbReadonlyProof(req);
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(result.httpStatus).json(result.body);
+});
+
 /**
  * Phase 1 MOBILE_TOPUP operational exception snapshot (DB-backed).
  * Optional `?emitStuckSignals=1` bumps in-process stuck counters (default off).
