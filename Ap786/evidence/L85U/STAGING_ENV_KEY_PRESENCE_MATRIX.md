@@ -8,16 +8,17 @@
 
 ## Required keys for future L-85M
 
-| Env key name | Key present (operator) | Value inspected | Value validity proven | Runtime binding proven |
-|--------------|------------------------|-----------------|----------------------|------------------------|
-| `READ_ONLY_DATABASE_URL` | **UNKNOWN** | **NO** | **NO** | **NO** |
-| `OPS_HEALTH_TOKEN` | **UNKNOWN** | **NO** | **NO** | **NO** |
+| Env key name | Key present (operator) | Scope (operator) | Value inspected | Value validity proven | Runtime binding proven |
+|--------------|------------------------|------------------|-----------------|----------------------|------------------------|
+| `READ_ONLY_DATABASE_URL` | **NO** | **NONE / NOT PRESENT** (All Environments search) | **NO** | **NO** | **NO** |
+| `OPS_HEALTH_TOKEN` | **YES** | **Production** | **NO** | **NO** | **NO** |
 
-## Scope
+## Scope summary
 
-| Field | Operator answer |
-|-------|-----------------|
-| Vercel environment scope | **UNKNOWN** |
+| Key | Scope |
+|-----|-------|
+| `READ_ONLY_DATABASE_URL` | **NONE / NOT PRESENT** |
+| `OPS_HEALTH_TOKEN` | **Production** |
 
 ---
 
@@ -25,11 +26,11 @@
 
 | Flag | Value | Rule |
 |------|-------|------|
-| `KEY_NAME_PRESENCE_ATTESTED` | **NO** | Both keys must be YES for YES |
+| `KEY_NAME_PRESENCE_ATTESTED` | **NO** | `READ_ONLY_DATABASE_URL` absent — both keys required YES |
 | `VALUE_VALIDITY_PROVEN` | **NO** | No value inspection in this gate |
 | `RUNTIME_BINDING_PROVEN` | **NO** | No deploy, no live proof |
-| `L85M_GO` | **NO** | Blockers remain |
-| `L85M_BLOCKED` | **YES** | UNKNOWN or absent key → blocked |
+| `L85M_GO` | **NO** | `READ_ONLY_DATABASE_URL` absent |
+| `L85M_BLOCKED` | **YES** | Missing required readonly env key |
 
 ---
 

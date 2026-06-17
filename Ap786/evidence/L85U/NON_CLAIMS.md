@@ -4,8 +4,8 @@
 
 ## Not claimed
 
-- `READ_ONLY_DATABASE_URL` or `OPS_HEALTH_TOKEN` key presence on staging (both **UNKNOWN**)
-- Secret value validity
+- `READ_ONLY_DATABASE_URL` key present on staging — **CLAIMED ABSENT** (operator attested NO)
+- Secret value validity for either key
 - Runtime env binding on active deployment
 - Runtime DB identity proof
 - L-85M retry performed or authorized
@@ -15,8 +15,10 @@
 ## What L-85U does claim
 
 - Operator attested **no value exposure** and **no env mutation** during inspection
-- Key name presence **not confirmed** — `L85M_BLOCKED = YES`
-- `KEY_NAME_PRESENCE_ATTESTED = NO`
+- `READ_ONLY_DATABASE_URL` **absent** on `zora-walat-api-staging` (All Environments search)
+- `OPS_HEALTH_TOKEN` **present** on **Production** scope (key name only)
+- `KEY_NAME_PRESENCE_ATTESTED = NO` (readonly key missing)
+- `L85M_BLOCKED = YES` — reason: **`READ_ONLY_DATABASE_URL` absent**
 - `L85M_GO = NO`
 
 ## Standard position
