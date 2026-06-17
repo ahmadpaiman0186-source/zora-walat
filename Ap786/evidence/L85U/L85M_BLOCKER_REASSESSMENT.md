@@ -1,6 +1,6 @@
 # L-85U — L-85M blocker reassessment
 
-**Compared to:** [L-85T L85M retry preconditions](../L85T/L85M_RETRY_PRECONDITIONS.md)  
+**Compared to:** [L-85T L85M retry preconditions](../L85T/L85M_RETRY_PRECONDITIONS.md)
 **Updated:** Definitive operator attestation supplement (2026-06-17)
 
 ---
