@@ -110,6 +110,24 @@ export default function handler(req, res) {
     }
   }
   /**
+   * Read-only DB proof: fail closed before bootstrap/Express for missing/invalid token (L-85P).
+   * Valid token + READ_ONLY_DATABASE_URL may pass through to Express for future L-85M proof.
+   */
+  {
+    const p = normalizedPathname(req.url);
+    if (
+      req.method === 'GET' &&
+      (p === '/ops/db-readonly-proof' || p === '/api/admin/ops/db-readonly-proof')
+    ) {
+      return import('../handlers/slimDbReadonlyProofPrebootstrapHandler.mjs').then((m) =>
+        m.handleSlimDbReadonlyProofPrebootstrapGet(req, res, {
+          route: p,
+          passThrough: () => getHandler().then((nextHandler) => nextHandler(req, res)),
+        }),
+      );
+    }
+  }
+  /**
    * Stripe webhooks: verify signature before bootstrap (Redis + full Express import graph).
    * Invalid/missing signatures return 400 here; verified payloads replay into the existing
    * Express `/webhooks/stripe` route (see slimStripeWebhookHandler.mjs).
