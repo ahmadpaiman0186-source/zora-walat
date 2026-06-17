@@ -14,16 +14,15 @@ Record **operator attestation** of whether required **environment variable key n
 
 | Item | Result |
 |------|--------|
-| `READ_ONLY_DATABASE_URL` key present | **UNKNOWN** |
-| `OPS_HEALTH_TOKEN` key present | **UNKNOWN** |
-| Env scope | **UNKNOWN** |
+| `READ_ONLY_DATABASE_URL` key present | **NO** (scope: **NONE / NOT PRESENT**; searched **All Environments**) |
+| `OPS_HEALTH_TOKEN` key present | **YES** (scope: **Production**) |
 | Env value inspected/printed | **NO** (operator attested) |
 | Env mutation | **NO** (operator attested) |
-| `KEY_NAME_PRESENCE_ATTESTED` | **NO** (both keys UNKNOWN) |
+| `KEY_NAME_PRESENCE_ATTESTED` | **NO** (`READ_ONLY_DATABASE_URL` absent) |
 | `VALUE_VALIDITY_PROVEN` | **NO** |
 | `RUNTIME_BINDING_PROVEN` | **NO** |
 | `L85M_GO` | **NO** |
-| `L85M_BLOCKED` | **YES** |
+| `L85M_BLOCKED` | **YES** — **`READ_ONLY_DATABASE_URL` absent** |
 
 ## Contents
 
@@ -39,7 +38,7 @@ Record **operator attestation** of whether required **environment variable key n
 
 ## Next step
 
-Operator re-inspects Vercel UI for **`zora-walat-api-staging`** and files **L-85U retry** or **L-85U-B** with definitive YES/NO key presence — still no values in evidence.
+**`READ_ONLY_DATABASE_URL`** must be added on **`zora-walat-api-staging`** via separate **operator env-remediation authorization** gate (L-85L pattern) — value never in evidence. After bind + optional redeploy attestation, re-run key-presence attestation then authorize L-85M.
 
 ---
 
