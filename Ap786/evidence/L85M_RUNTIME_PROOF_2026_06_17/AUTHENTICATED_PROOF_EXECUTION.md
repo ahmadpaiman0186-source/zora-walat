@@ -1,42 +1,58 @@
 # L-85M runtime proof — Authenticated proof execution
 
-**Gate UTC:** 2026-06-17
+**Gate UTC:** 2026-06-17  
+**Updated:** operator local attempt recorded (404 blocked)
 
 ---
 
 ## Operator authorization
 
-Operator authorized L-85M authenticated staging runtime read-only DB proof (recorded in gate request).
+Operator authorized L-85M authenticated staging runtime read-only DB proof.
 
 ## Execution status
 
 | Step | Status |
 |------|--------|
-| Endpoint identified | **YES** — `GET /ops/db-readonly-proof` |
-| `OPS_HEALTH_TOKEN` secure local injection | **NOT COMPLETED** |
-| Authenticated HTTP call | **NOT PERFORMED** |
-| Calls attempted | **0** with credentials |
+| Endpoint identified (tracked source) | **YES** — `GET /ops/db-readonly-proof` |
+| `OPS_HEALTH_TOKEN` secure local injection | **YES** — operator local secure prompt |
+| Authenticated HTTP calls | **1** (exactly one safe attempt) |
+| Additional retries in this gate | **NO** |
 
-## Block detail
+## Attempt result (safe fields only)
 
-| Item | Detail |
+| Field | Value |
+|-------|-------|
+| `endpoint_path` | `/ops/db-readonly-proof` |
+| `http_status` | **404** |
+| `verdict` | **BLOCKED_OR_FAILED_NO_RAW_BODY_PRINTED** |
+| `error_type` | **WebException** |
+| Raw response body printed | **NO** |
+
+## Cleanup (operator attested)
+
+| Field | Value |
+|-------|-------|
+| `ENV_OPS_TOKEN_PRESENT` | **false** |
+| `CLIPBOARD` | **CLEARED_NO_SECRET** |
+
+## Hygiene
+
+| Item | Status |
 |------|--------|
-| `OPS_HEALTH_TOKEN` in agent process env | **NO** |
-| Secure prompt (`Read-Host -AsSecureString`) | **Initiated; no operator input received in agent shell** |
 | Token printed/logged/committed | **NO** |
+| Env values printed | **NO** |
+| `DATABASE_URL` / `READ_ONLY_DATABASE_URL` printed | **NO** |
+| URL / host / password / connection string printed | **NO** |
 | `.env.local` read | **NO** |
 | Vercel env pull | **NO** |
 
-## Intended execution (not completed)
-
-1. Inject `OPS_HEALTH_TOKEN` via secure local prompt (no echo).
-2. Single `GET /ops/db-readonly-proof` with `Authorization: Bearer …`.
-3. Retain allowed safe JSON flags only; reject response if secret-like content.
-4. Clear token from process environment.
-
 ## Classification
 
-**`L-85M_EXECUTION_BLOCKED`** — `SECURE_TOKEN_NOT_INJECTED`
+**`L-85M_EXECUTION_BLOCKED_404`** — route not reachable on active staging deployment at attempt time; runtime DB proof not performed.
+
+## Next gate
+
+**L-85X** — route exposure / runtime route mapping audit (no L-85M retry until complete).
 
 ---
 

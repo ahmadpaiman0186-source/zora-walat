@@ -2,33 +2,29 @@
 
 ---
 
-## Prior gates (context)
-
-| Gate | Relevant outcome |
-|------|------------------|
-| L-85V | `READ_ONLY_DATABASE_URL` added Production/Sensitive |
-| L-85W | `DEPLOYMENT_PICKUP_METADATA = OBSERVED` |
-| L-85T | `L85M_GO = NO` pending proof |
-
-## L-85M runtime proof gate
+## L-85M runtime proof gate (updated)
 
 | Question | Answer |
 |----------|--------|
-| Endpoint identified | **YES** |
-| Authenticated proof executed | **NO** |
+| Endpoint identified (tracked source) | **YES** |
+| Authenticated attempt performed | **YES** (one) |
+| HTTP status | **404** |
 | Runtime identity `zora_walat_readonly_audit` proven | **NO** |
+| Read-only runtime identity confirmed | **NO** |
+| **`L85M_PASS`** | **NO** |
 | **`L85M_GO`** | **NO** |
-| **`l85m_go_no_go`** | **NO** |
 
 ## Verdict
 
-**`L-85M_AUTHENTICATED_STAGING_RUNTIME_READ_ONLY_DB_PROOF_BLOCKED_OR_FAILED__NO_PASS`**
+**`L-85M_AUTHENTICATED_STAGING_RUNTIME_READ_ONLY_DB_PROOF_BLOCKED_404__NO_PASS`**
 
-**Block reason:** Secure `OPS_HEALTH_TOKEN` injection not completed; zero authenticated calls.
+**Block reason:** Authenticated `GET /ops/db-readonly-proof` returned **404** — route exposure failure on active staging runtime.
 
-## Retry requirement
+## Next required gate
 
-Operator must inject token in **local terminal** (secure prompt or pre-set `$env:OPS_HEALTH_TOKEN` without chat exposure), then re-run L-85M proof gate or authorized one-shot script.
+**L-85X** — route exposure / runtime route mapping audit before any L-85M retry.
+
+**Do not retry L-85M** until L-85X completes and operator re-authorizes.
 
 ---
 
