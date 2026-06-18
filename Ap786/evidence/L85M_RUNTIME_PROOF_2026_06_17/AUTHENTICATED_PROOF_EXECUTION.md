@@ -1,6 +1,6 @@
 # L-85M runtime proof — Authenticated proof execution
 
-**Gate UTC:** 2026-06-17  
+**Gate UTC:** 2026-06-17
 **Updated:** operator local attempt recorded (404 blocked)
 
 ---
