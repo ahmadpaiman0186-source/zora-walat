@@ -6,7 +6,8 @@
 
 - Any PR merged, closed, or modified on GitHub
 - Any PR safe to merge immediately
-- Full mergeable/CI rollup (unauthenticated API limits)
+- Full mergeable/CI rollup (unauthenticated API limits; `gh` unavailable)
+- Any `git fetch` that creates/updates local PR-head refs
 - CLOSE_SUPERSEDED for L29–L40 docs (content not on `main`, not replaced by L-85)
 - Global launch / compliance / money / provider / market proof
 - L-85M PASS

@@ -9,6 +9,8 @@
 
 Read-only governance inventory and **disposition recommendations** for all open PRs after L-85X merge. **No merge, close, comment, label, or branch deletion.**
 
+Metadata collected via GitHub REST API and `git ls-remote` only — **no** `git fetch remote:local` (ref mutation rejected).
+
 ## Headline summary
 
 | Metric | Value |

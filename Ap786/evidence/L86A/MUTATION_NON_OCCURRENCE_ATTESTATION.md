@@ -20,14 +20,21 @@
 | Vercel env pull | **NO** |
 | Runtime code changes | **NO** |
 | `git push` | **NO** |
+| `git fetch` creating/updating local refs (`remote:local`) | **NO** |
+| Local branch / ref creation for PR heads | **NO** |
 
 ## Read-only actions performed
 
 | Action | Performed |
 |--------|-----------|
-| GitHub API open PR list | **YES** |
-| Local `git fetch` + `merge-tree` | **YES** |
+| GitHub REST API open PR list | **YES** |
+| `git ls-remote --heads origin <branch>` | **YES** |
+| `git merge-tree` vs `origin/main` (preflight ref only) | **YES** |
 | L-86A evidence authoring | **YES** |
+
+## Rejected action (operator directive)
+
+`git fetch origin <branch>:<branch>` was **not run** — rejected because it may create or update local refs/branches.
 
 ---
 

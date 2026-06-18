@@ -30,9 +30,17 @@
 | Live endpoint / token / DB proof | **NO** |
 | GitHub PR mutation | **NO** |
 
-## Inventory method
+## Inventory method (read-only metadata only)
 
-GitHub REST API `pulls?state=open` + local `git merge-tree` vs `origin/main` (read-only). No authenticated token required for public metadata; mergeable field may be absent unauthenticated.
+| Method | Used | Notes |
+|--------|------|-------|
+| GitHub REST `pulls?state=open` | **YES** | Open count, dates, head SHA |
+| `git ls-remote --heads origin <branch>` | **YES** | Head SHA per PR branch; **no local ref mutation** |
+| `gh pr view --json …` | **NO** | `gh` not available in environment |
+| `git fetch origin remote:local` | **NO** | **Rejected** — would create/update local refs |
+| `git merge-tree` vs existing `origin/main` | **YES** (initial pass) | Conflict proxy only; uses refs already on disk from preflight `git pull` |
+
+No authenticated token, deploy, endpoint call, or env mutation. `mergeable` / `statusCheckRollup` may be absent without `gh` auth.
 
 ---
 
