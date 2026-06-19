@@ -1,0 +1,41 @@
+# L-85M-R3 — Deployment pickup proof (read-only)
+
+**Gate UTC:** 2026-06-19  
+**Branch:** `evidence/l85m-r3-deployment-pickup-proof-readonly-2026-06-19`  
+**Baseline `main` merge commit:** `39e784d` (Merge PR #293)  
+**L-85M-R2B content commit:** `9077765`
+
+## Verdict
+
+`L-85M-R3_DEPLOYMENT_PICKUP_METADATA_OBSERVED_FILED_LOCAL_ONLY__NO_MANUAL_DEPLOY_NO_REDEPLOY_NO_ENDPOINT_CALL_NO_RUNTIME_DB_PROOF_NO_AUTHENTICATED_PROOF_NO_ENV_MUTATION_NO_PAYMENT_PROVIDER_ACTION_PR5_OPEN_BLOCKED_NO_PR5_MERGE_NO_PR5_CLOSE_NO_GLOBAL_MONEY_PROVIDER_MARKET_CLAIMS`
+
+## Headline
+
+| Field | Value |
+|-------|-------|
+| `DEPLOYMENT_PICKUP_METADATA_OBSERVED` | **YES** |
+| `ENDPOINT_PROOF` | **NOT CLAIMED** |
+| `RUNTIME_DB_PROOF` | **NOT CLAIMED** |
+| `WEBHOOK_PROOF` | **NOT CLAIMED** |
+| `PRODUCTION_READY` | **NOT CLAIMED** |
+
+## Contents
+
+| File | Purpose |
+|------|---------|
+| [BASELINE_VERIFICATION.md](./BASELINE_VERIFICATION.md) | Preflight |
+| [MAIN_COMMIT_PICKUP.md](./MAIN_COMMIT_PICKUP.md) | Git main contains R2B |
+| [PR293_MERGE_METADATA.md](./PR293_MERGE_METADATA.md) | PR #293 merge |
+| [GITHUB_ACTIONS_METADATA.md](./GITHUB_ACTIONS_METADATA.md) | Workflow/check metadata |
+| [VERCEL_METADATA_READONLY.md](./VERCEL_METADATA_READONLY.md) | Vercel status contexts |
+| [DEPLOYMENT_PICKUP_ASSESSMENT.md](./DEPLOYMENT_PICKUP_ASSESSMENT.md) | Pickup assessment |
+| [PR5_NON_INTERFERENCE.md](./PR5_NON_INTERFERENCE.md) | PR #5 unchanged |
+| [NO_ENDPOINT_CALL_ATTESTATION.md](./NO_ENDPOINT_CALL_ATTESTATION.md) | No HTTP calls |
+| [NO_DB_PROOF_ATTESTATION.md](./NO_DB_PROOF_ATTESTATION.md) | No DB proof |
+| [NO_DEPLOY_OR_ENV_MUTATION_ATTESTATION.md](./NO_DEPLOY_OR_ENV_MUTATION_ATTESTATION.md) | No manual deploy/env |
+| [NON_CLAIMS.md](./NON_CLAIMS.md) | Explicit non-claims |
+| [NEXT_GATE_RECOMMENDATION.md](./NEXT_GATE_RECOMMENDATION.md) | R4 next |
+
+---
+
+*End.*
