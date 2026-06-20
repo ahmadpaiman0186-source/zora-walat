@@ -10,7 +10,8 @@ This gate does **not** claim:
 - Authenticated proof success
 - Runtime DB identity proof
 - Active deployment bound to new token (no redeploy attestation)
-- Operator Process token aligned with new staging value
+- Operator Process token aligned with new staging value — **NOT PROVEN** (`OPERATOR_LOCAL_MATCHING_TOKEN_NOT_PROVEN`)
+- Vercel UI post-rotation secret retrieval — **NOT AVAILABLE / NOT ATTEMPTED**
 - Production, payment, provider, real-money, or market readiness
 - Webhook proof
 

@@ -8,6 +8,19 @@
 
 `L-85M-R5T_STAGING_ONLY_OPS_HEALTH_TOKEN_ROTATION_FILED_LOCAL_ONLY__TOKEN_VALUE_NOT_EXPOSED_NO_ENDPOINT_CALL_NO_RUNTIME_DB_PROOF_NO_SECRET_EXPOSURE_NO_DEPLOY_NO_REDEPLOY_NO_PAYMENT_PROVIDER_ACTION_PR5_OPEN_BLOCKED_NO_PR5_MERGE_NO_PR5_CLOSE_NO_GLOBAL_MONEY_PROVIDER_MARKET_CLAIMS`
 
+## Classification notes (R5-T-FIX1)
+
+| Note | Status |
+|------|--------|
+| `ROTATION_RECORDED_TOKEN_VALUE_NOT_EXPOSED` | **YES** |
+| `OPERATOR_LOCAL_MATCHING_TOKEN_NOT_PROVEN` | **YES** |
+| `RUNTIME_DB_PROOF_NOT_ESTABLISHED` | **YES** |
+| `L85M_PASS_NOT_CLAIMED` | **YES** |
+
+## Token alignment limitation (R5-T-FIX1)
+
+The rotated **`OPS_HEALTH_TOKEN`** value was intentionally **not** printed, logged, committed, or exposed. Unless the operator securely retained the generated value in the active local process at rotation time, a future authenticated retry **cannot** be performed with this token. If no matching local token is available, the next gate must be a **separately authorized controlled re-rotation / local-process-alignment gate**, followed by deployment propagation if required, then an authenticated proof retry.
+
 ## Headline
 
 | Field | Value |

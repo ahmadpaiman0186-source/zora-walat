@@ -25,7 +25,7 @@
 
 ## R5-T rationale
 
-Rotate **`OPS_HEALTH_TOKEN`** on **`zora-walat-api-staging`** **`production`** scope only — invalidate prior staging configured value without reading or printing it; enable out-of-band operator alignment before authenticated proof retry.
+Rotate **`OPS_HEALTH_TOKEN`** on **`zora-walat-api-staging`** **`production`** scope only — invalidate prior staging configured value without reading or printing it. Post-rotation authenticated retry requires a matching Process-scoped token **securely retained at rotation time** or a **separate controlled re-rotation / local-process-alignment gate** — not Vercel UI secret retrieval.
 
 ---
 
