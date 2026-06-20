@@ -8,6 +8,9 @@
 |-----------|--------|
 | Runtime user is not `neondb_owner` | **NOT PROVEN** |
 | `owner_database_url_fallback_used` | **NOT OBSERVED** |
+| Auth gate passed | **NO** — **401** both variants |
+
+Owner-role negative assertion requires runtime DB identity fields from an authenticated PASS path; auth was rejected before DB proof.
 
 ---
 

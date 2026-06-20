@@ -4,26 +4,31 @@
 
 ---
 
-## Blocker
+## Current blocker
 
-**`R5_R1_BLOCKED_TOKEN_NOT_AVAILABLE`** in agent execution subprocess.
+**`L-85M-R5-R1_AUTH_REJECTED_NOT_PASS`** — Process-scoped `$env:OPS_HEALTH_TOKEN` rejected by staging on **both** tracked auth variants (**401**). Route mapping remains structurally correct; runtime DB identity proof **not established**.
 
-## Retry path (separate authorization)
+## Recommended next gate (separate authorization)
 
-Execute authenticated GET **in the same PowerShell session** where `$env:OPS_HEALTH_TOKEN` is set:
+| Gate | Goal | Preconditions |
+|------|------|---------------|
+| **L-85M-R5-R2** (or env-alignment sub-gate) | Confirm local `OPS_HEALTH_TOKEN` matches staging Vercel project env for `zora-walat-api-staging` | Authorized read-only env inspection — **no token in evidence** |
+| Re-run authenticated proof | After token alignment confirmed | Same allowlisted capture rules |
 
-1. Do **not** paste token into chat or evidence.
-2. Run allowlisted capture script inline in that session.
-3. File **L-85M-R5-R2** or re-run R5-R1 with subprocess that inherits Process env.
+## Retry path (operator)
 
-Alternative: operator runs proof script locally in token-bearing session; agent files evidence from allowlisted output fields only (no headers, no token).
+1. Verify staging `OPS_HEALTH_TOKEN` in Vercel dashboard matches Process token (compare out-of-band; do not paste into chat or evidence).
+2. Re-run authenticated GET in token-bearing session using allowlisted capture only.
+3. File new evidence gate from safe fields — do **not** amend R5-R1 auth-rejected record.
 
 ## Unchanged
 
 | Item | Status |
 |------|--------|
+| L-85M structural (R4) | **PASS** — route exposed, not 404 |
+| L-85M overall | **NOT PASS** — auth rejected, no runtime DB proof |
 | PR #5 | **KEEP_OPEN_BLOCKED** |
-| L-85M structural (R4) | **PASS** |
+| Deploy / env mutation | **NOT PERFORMED** |
 
 ---
 

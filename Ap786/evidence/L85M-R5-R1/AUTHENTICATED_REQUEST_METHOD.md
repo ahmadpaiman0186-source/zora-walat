@@ -4,18 +4,24 @@
 
 ---
 
-## Planned (not executed)
+## Executed (operator session)
 
 | Field | Value |
 |-------|--------|
 | URL | `https://zora-walat-api-staging.vercel.app/ops/db-readonly-proof` |
 | Method | GET |
-| Auth | `Authorization: Bearer $env:OPS_HEALTH_TOKEN` |
-| User-Agent | `zora-walat-l85m-r5-r1-authenticated-readonly-db-proof` |
+| Session | PowerShell Process-scoped `$env:OPS_HEALTH_TOKEN` |
+| Variants tried | Bearer; `X-ZW-Ops-Token` |
+| User-Agent | Not filed (not allowlisted) |
 
-## Actual
+## Outcome
 
-**BLOCKED** — `R5_R1_BLOCKED_TOKEN_NOT_AVAILABLE`
+| Variant | HTTP status | Auth accepted |
+|---------|-------------|---------------|
+| Bearer | **401 Unauthorized** | **NO** |
+| `X-ZW-Ops-Token` | **401 Unauthorized** | **NO** |
+
+Classification: **`L-85M-R5-R1_AUTH_REJECTED_NOT_PASS`**
 
 ---
 

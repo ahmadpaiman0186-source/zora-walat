@@ -8,7 +8,13 @@
 |-------|--------|
 | Token printed/logged/stored | **NO** |
 | Authorization header in evidence | **NO** |
+| Request headers stored | **NO** |
+| Cookies stored | **NO** |
+| Raw full response stored | **NO** |
 | Response with secrets | **NOT RECEIVED** |
+| `npm --prefix server run secrets:scan` | **OK** |
+
+Evidence contains allowlisted safe fields only (HTTP status, `X-Matched-Path`, non-secret attestation fields).
 
 ---
 

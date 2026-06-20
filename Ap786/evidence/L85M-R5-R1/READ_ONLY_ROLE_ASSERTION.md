@@ -7,7 +7,11 @@
 | Assertion | Status |
 |-----------|--------|
 | Read-only role proven | **NOT ESTABLISHED** |
+| Expected role `zora_walat_readonly_audit` | **NOT PROVEN** |
 | `readonly_role_expected=true` in response | **NOT OBSERVED** |
+| Auth gate passed | **NO** — **401** both variants |
+
+Read-only role assertion requires authenticated proof acceptance; auth was rejected.
 
 ---
 
