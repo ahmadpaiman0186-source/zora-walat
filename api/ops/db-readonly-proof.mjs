@@ -5,6 +5,7 @@
  * This bridge maps the L-85M proof path through the existing L-85P pre-bootstrap
  * guard and Express pass-through used in `server/api/index.mjs`.
  */
+import '../../server/src/runtime/registerServerlessRuntime.js';
 
 let cachedExpressHandler = null;
 
