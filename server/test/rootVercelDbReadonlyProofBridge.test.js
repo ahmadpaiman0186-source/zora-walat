@@ -1,5 +1,5 @@
 /**
- * Root Vercel deployment bridge for GET /ops/db-readonly-proof (L-85M-R5-R3F).
+ * Root Vercel deployment bridge for GET /ops/db-readonly-proof (L-85M-R5-R3F, L-85M-R5-R4F).
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -65,6 +65,16 @@ describe('root Vercel db-readonly-proof bridge static review', () => {
     assert.match(src, /passThrough[\s\S]*catch/);
     assert.ok(!/err\.message/.test(src));
     assert.ok(!/err\.stack/.test(src));
+  });
+
+  it('registers serverless runtime before bootstrap pass-through (L-85M-R5-R4F parity)', () => {
+    const src = readFileSync(BRIDGE_SRC, 'utf8');
+    assert.match(src, /registerServerlessRuntime/);
+    const regIdx = src.indexOf('registerServerlessRuntime');
+    const bootstrapIdx = src.indexOf("import('../../server/bootstrap.js')");
+    assert.notEqual(regIdx, -1);
+    assert.notEqual(bootstrapIdx, -1);
+    assert.ok(regIdx < bootstrapIdx, 'registerServerlessRuntime must precede bootstrap import');
   });
 });
 
