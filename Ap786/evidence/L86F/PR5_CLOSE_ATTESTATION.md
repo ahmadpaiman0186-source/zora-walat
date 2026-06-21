@@ -1,6 +1,7 @@
 # L-86F — PR #5 close attestation
 
-**Gate UTC:** 2026-06-20
+**Gate UTC:** 2026-06-20  
+**Updated:** L-86F-R1 post-close verification
 
 ---
 
@@ -11,21 +12,17 @@
 | PR #5 title/body edited | **NO** |
 | PR #5 labels changed | **NO** |
 | PR #5 merged | **NO** |
-| Automated close via `gh` / GitHub API | **NOT EXECUTED** |
+| L-86F automated close | **NOT EXECUTED** |
+| Operator manual close (attested) | **YES** |
+| L-86F-R1 API close confirmed | **NO** — see [PR5_POST_CLOSE_STATE.md](./PR5_POST_CLOSE_STATE.md) |
 
-## Automation blocker
+## L-86F automation blocker (historical)
 
 | Check | Result |
 |-------|--------|
 | `gh` CLI | **NOT AVAILABLE** |
 | `GITHUB_TOKEN` / `GH_TOKEN` env | **NOT SET** |
-| `git credential fill` | **NOT USED** (standing boundary) |
-
-## Operator completion step
-
-Close PR **#5** via GitHub UI (or authenticated `gh pr close 5 --comment "…"`) using the exact text in [FINAL_CLOSE_NOTE.md](./FINAL_CLOSE_NOTE.md). Re-verify with read-only API: `state=closed`, `merged=false`.
-
-Post-close verification gate recommended separately.
+| `git credential fill` | **NOT USED** |
 
 ---
 
