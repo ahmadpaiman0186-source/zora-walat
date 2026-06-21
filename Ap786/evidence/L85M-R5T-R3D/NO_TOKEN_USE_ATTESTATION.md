@@ -1,0 +1,16 @@
+# L-85M-R5T-R3D — No token use attestation
+
+**Gate UTC:** 2026-06-21
+
+---
+
+| Action | Performed |
+|--------|-----------|
+| `$env:OPS_HEALTH_TOKEN` read/check | **NO** |
+| Token generation | **NO** |
+| Token print/log | **NO** |
+| `vercel env pull` / `get` | **NO** |
+
+---
+
+*End.*
