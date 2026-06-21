@@ -1,34 +1,35 @@
-# L-86F-R1 — PR #5 post-close state
+# L-86F-R2 — PR #5 post-close state
 
-**Gate UTC:** 2026-06-20  
+**Gate UTC:** 2026-06-21  
 **Source:** GitHub read-only API
 
 ---
-
-## Operator attestation (context)
-
-Operator reported PR **#5** manually closed in GitHub UI with the authorized close note from [FINAL_CLOSE_NOTE.md](./FINAL_CLOSE_NOTE.md).
 
 ## Read-only API verification (this gate)
 
 | Field | Value |
 |-------|--------|
 | PR number | **#5** |
-| `state` | **open** |
+| `state` | **closed** |
 | `merged` | **false** |
-| `closed_at` | **null** |
-| `updated_at` | `2026-05-10T18:42:59Z` |
+| `closed_at` | `2026-06-21T00:23:37Z` |
+| `updated_at` | `2026-06-21T00:23:37Z` |
 
 ## Close note check
 
 | Check | Result |
 |-------|--------|
-| Issue comments scanned | **1** comment (non-matching / bot-encoded payload) |
-| Authorized close note text match | **NOT CONFIRMED** |
+| Issue comments scanned | **2** (Vercel bot + operator) |
+| Operator close comment | **YES** — `ahmadpaiman0186-source`, `2026-06-21T00:23:37Z` |
+| Authorized close note text match | **CONFIRMED** — matches [FINAL_CLOSE_NOTE.md](./FINAL_CLOSE_NOTE.md) |
 
 ## Classification
 
-**Close without merge NOT CONFIRMED** by read-only GitHub API at L-86F-R1 verification time. Fail-closed — do **not** record `state=closed` until API confirms.
+**Close without merge CONFIRMED** by read-only GitHub API at L-86F-R2 verification time.
+
+## Prior gate reference (L-86F-R1)
+
+L-86F-R1 recorded `state=open` at first API check (`2026-06-20`). Operator manual close attestation was correct; API lag or timing caused R1 fail-closed outcome.
 
 ---
 
