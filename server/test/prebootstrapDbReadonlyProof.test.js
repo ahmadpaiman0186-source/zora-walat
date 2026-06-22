@@ -190,6 +190,15 @@ describe('L-85P import boundary static review', () => {
     const stripeIdx = src.indexOf('slimStripeWebhookHandler');
     assert.ok(preIdx > 0 && stripeIdx > preIdx);
   });
+
+  it('index proof pass-through uses slim authenticated handler (L-86B)', () => {
+    const src = readFileSync(INDEX_SRC, 'utf8');
+    const start = src.indexOf('slimDbReadonlyProofPrebootstrapHandler');
+    const end = src.indexOf('slimStripeWebhookHandler', start);
+    const block = src.slice(start, end);
+    assert.match(block, /slimDbReadonlyProofAuthenticatedHandler/);
+    assert.ok(!/getHandler\(\)/.test(block), 'proof block must not call getHandler()');
+  });
 });
 
 describe('L-85P blocked body contract', () => {
