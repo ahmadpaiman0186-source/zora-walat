@@ -111,7 +111,7 @@ export default function handler(req, res) {
   }
   /**
    * Read-only DB proof: fail closed before bootstrap/Express for missing/invalid token (L-85P).
-   * Valid token + READ_ONLY_DATABASE_URL may pass through to Express for future L-85M proof.
+   * Valid token + READ_ONLY_DATABASE_URL uses slim authenticated handler only (L-86B).
    */
   {
     const p = normalizedPathname(req.url);
@@ -122,7 +122,40 @@ export default function handler(req, res) {
       return import('../handlers/slimDbReadonlyProofPrebootstrapHandler.mjs').then((m) =>
         m.handleSlimDbReadonlyProofPrebootstrapGet(req, res, {
           route: p,
-          passThrough: () => getHandler().then((nextHandler) => nextHandler(req, res)),
+          passThrough: async () => {
+            try {
+              if (typeof globalThis.__zwProofBridgePassThroughImplForTest === 'function') {
+                await globalThis.__zwProofBridgePassThroughImplForTest(req, res);
+                return;
+              }
+              const { handleSlimDbReadonlyProofAuthenticatedGet } = await import(
+                '../handlers/slimDbReadonlyProofAuthenticatedHandler.mjs'
+              );
+              await handleSlimDbReadonlyProofAuthenticatedGet(req, res, { route: p });
+            } catch {
+              if (res.headersSent) return;
+              res.setHeader('Cache-Control', 'no-store');
+              res.setHeader('Content-Type', 'application/json; charset=utf-8');
+              res.status(503).json({
+                ok: false,
+                success: false,
+                verdict: 'BLOCKED',
+                classification: 'PROOF_ROUTE_BRIDGE_RUNTIME_EXCEPTION',
+                reason: 'proof_route_bridge_runtime_exception',
+                route: p,
+                auth_required: true,
+                prebootstrap_guard: false,
+                proof_route_bridge: true,
+                db_query_performed: false,
+                row_export_occurred: false,
+                write_probe_occurred: false,
+                secret_disclosure: false,
+                owner_database_url_fallback_used: false,
+                runtime_db_identity_proof: false,
+                readonly_database_url_proof: false,
+              });
+            }
+          },
         }),
       );
     }
