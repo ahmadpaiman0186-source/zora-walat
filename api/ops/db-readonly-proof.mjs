@@ -2,12 +2,10 @@
  * Root Vercel deployment bridge for GET /ops/db-readonly-proof.
  *
  * Staging builds from repo root (`./`), so `server/api/index.mjs` is not exposed.
- * This bridge maps the L-85M proof path through the existing L-85P pre-bootstrap
- * guard and Express pass-through used in `server/api/index.mjs`.
+ * Unauthenticated/missing-token paths use the L-85P pre-bootstrap guard.
+ * Authenticated pass-through uses the slim handler only (no full app cold start).
  */
 import '../../server/src/runtime/registerServerlessRuntime.js';
-
-let cachedExpressHandler = null;
 
 const PROOF_ROUTE = '/ops/db-readonly-proof';
 
@@ -44,28 +42,16 @@ async function runAuthenticatedPassThrough(req, res) {
     await globalThis.__zwProofBridgePassThroughImplForTest(req, res);
     return;
   }
-  const nextHandler = await getExpressHandler();
-  await nextHandler(req, res);
+  const { handleSlimDbReadonlyProofAuthenticatedGet } = await import(
+    '../../server/handlers/slimDbReadonlyProofAuthenticatedHandler.mjs'
+  );
+  await handleSlimDbReadonlyProofAuthenticatedGet(req, res, { route: PROOF_ROUTE });
 }
 
 function opsDbReadonlyProofUrlFrom(req) {
   const raw = typeof req?.url === 'string' ? req.url : '';
   const q = raw.indexOf('?');
   return q === -1 ? '/ops/db-readonly-proof' : `/ops/db-readonly-proof${raw.slice(q)}`;
-}
-
-async function getExpressHandler() {
-  if (!cachedExpressHandler) {
-    await import('../../server/bootstrap.js');
-    const [{ createValidatedApp }, { default: serverless }] = await Promise.all([
-      import('../../server/src/index.js'),
-      import('serverless-http'),
-    ]);
-    cachedExpressHandler = serverless(createValidatedApp(), {
-      callbackWaitsForEmptyEventLoop: false,
-    });
-  }
-  return cachedExpressHandler;
 }
 
 export default async function handler(req, res) {
