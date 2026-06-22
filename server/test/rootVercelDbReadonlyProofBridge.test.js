@@ -1,5 +1,5 @@
 /**
- * Root Vercel deployment bridge for GET /ops/db-readonly-proof (L-85M-R5-R3F, L-85M-R5-R4F).
+ * Root Vercel deployment bridge for GET /ops/db-readonly-proof (L-85M-R5-R3F, L-85M-R5-R4F, L-85M-R5-R4G).
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -9,6 +9,7 @@ import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import rootDbReadonlyProofHandler from '../../api/ops/db-readonly-proof.mjs';
+import { dbReadonlyProofInvariants } from '../src/lib/dbReadonlyProofContract.js';
 import {
   SENSITIVE_LEAK_MARKERS,
   SENSITIVE_LEAK_MATERIAL,
@@ -67,14 +68,14 @@ describe('root Vercel db-readonly-proof bridge static review', () => {
     assert.ok(!/err\.stack/.test(src));
   });
 
-  it('registers serverless runtime before bootstrap pass-through (L-85M-R5-R4F parity)', () => {
+  it('registers serverless runtime and wires slim authenticated handler (L-85M-R5-R4G)', () => {
     const src = readFileSync(BRIDGE_SRC, 'utf8');
     assert.match(src, /registerServerlessRuntime/);
-    const regIdx = src.indexOf('registerServerlessRuntime');
-    const bootstrapIdx = src.indexOf("import('../../server/bootstrap.js')");
-    assert.notEqual(regIdx, -1);
-    assert.notEqual(bootstrapIdx, -1);
-    assert.ok(regIdx < bootstrapIdx, 'registerServerlessRuntime must precede bootstrap import');
+    assert.match(src, /slimDbReadonlyProofAuthenticatedHandler/);
+    assert.ok(!/import\(['"].*bootstrap/.test(src), 'must not load bootstrap.js');
+    assert.ok(!/createValidatedApp/.test(src), 'must not load createValidatedApp');
+    assert.ok(!/getExpressHandler/.test(src), 'must not use getExpressHandler');
+    assert.ok(!/serverless-http/.test(src), 'must not use serverless-http');
   });
 });
 
@@ -126,6 +127,51 @@ describe('root Vercel db-readonly-proof bridge handler', () => {
       assertNoSensitiveLeak(JSON.stringify(out.body));
     } finally {
       delete globalThis.__zwProofBridgePassThroughImplForTest;
+      if (priorToken === undefined) delete process.env.OPS_HEALTH_TOKEN;
+      else process.env.OPS_HEALTH_TOKEN = priorToken;
+      if (priorReadonly === undefined) delete process.env.READ_ONLY_DATABASE_URL;
+      else process.env.READ_ONLY_DATABASE_URL = priorReadonly;
+    }
+  });
+
+  it('authenticated pass-through uses slim handler JSON without bootstrap (L-85M-R5-R4G)', async () => {
+    const priorToken = process.env.OPS_HEALTH_TOKEN;
+    const priorReadonly = process.env.READ_ONLY_DATABASE_URL;
+    process.env.OPS_HEALTH_TOKEN = OPS_TOKEN;
+    process.env.READ_ONLY_DATABASE_URL = 'postgresql://readonly-audit@example.invalid/neondb';
+    globalThis.__zwSlimDbReadonlyProofExecuteForTest = async () => ({
+      httpStatus: 503,
+      body: {
+        ...dbReadonlyProofInvariants(),
+        verdict: 'FAIL',
+        fail_reason: 'db_connect_failed',
+        checked_at: new Date().toISOString(),
+        readonly_role_expected: false,
+        database_expected: false,
+        role_superuser_false: false,
+        role_createdb_false: false,
+        role_createrole_false: false,
+        scoped_tables_checked_count: 0,
+        select_allowed_all_scoped_tables: false,
+        write_denied_all_scoped_tables: false,
+      },
+    });
+    try {
+      const { res, out } = makeMockRes();
+      await rootDbReadonlyProofHandler(
+        makeReq('GET', ROUTE, { authorization: `Bearer ${OPS_TOKEN}` }),
+        res,
+      );
+      assert.equal(out.statusCode, 503);
+      assert.equal(out.body.verdict, 'FAIL');
+      assert.equal(out.body.fail_reason, 'db_connect_failed');
+      assert.equal(out.body.secret_disclosure, false);
+      assert.equal(out.body.owner_database_url_fallback_used, false);
+      assert.equal(out.body.no_rows_exported, true);
+      assert.equal(out.body.write_probe_occurred, undefined);
+      assertNoSensitiveLeak(JSON.stringify(out.body));
+    } finally {
+      delete globalThis.__zwSlimDbReadonlyProofExecuteForTest;
       if (priorToken === undefined) delete process.env.OPS_HEALTH_TOKEN;
       else process.env.OPS_HEALTH_TOKEN = priorToken;
       if (priorReadonly === undefined) delete process.env.READ_ONLY_DATABASE_URL;
