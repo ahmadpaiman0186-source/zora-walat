@@ -4,3 +4,7 @@
 .env.local
 .env.production
 .env.production.local
+
+# Ad-hoc local gate/proof scripts — never ship in staging API artifact.
+tools/l89b-*.mjs
+tools/*-readonly-*-proof.mjs

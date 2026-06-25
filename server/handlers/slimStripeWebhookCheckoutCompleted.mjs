@@ -251,6 +251,43 @@ function logSlimWebhookCheckout(fields) {
 }
 
 /**
+ * Audit-grade slim-path breadcrumb when webhook post-commit dispatch is skipped.
+ *
+ * @param {string} orderId
+ * @param {string | null | undefined} traceId
+ */
+export function logPhase1WebhookFulfillmentDispatchSkippedSlim(orderId, traceId) {
+  console.log(
+    JSON.stringify({
+      event: 'phase1_webhook_fulfillment_dispatch_skipped',
+      schema: 'zora.webhook_slim.v1',
+      path: 'slim_post_commit',
+      reason: 'PHASE1_WEBHOOK_SKIP_FULFILLMENT_DISPATCH',
+      orderIdSuffix: safeSuffix(String(orderId), 10),
+      providerCallPerformed: false,
+      realMoney: false,
+      liveCardUsed: false,
+      traceId: traceId ?? null,
+      t: new Date().toISOString(),
+    }),
+  );
+}
+
+/**
+ * @param {string | null | undefined} orderIdToScheduleFulfillment
+ * @param {boolean} phase1WebhookSkipFulfillmentDispatch
+ * @returns {'none' | 'schedule' | 'skip'}
+ */
+export function slimPostCommitFulfillmentDispatchMode(
+  orderIdToScheduleFulfillment,
+  phase1WebhookSkipFulfillmentDispatch,
+) {
+  if (!orderIdToScheduleFulfillment) return 'none';
+  if (phase1WebhookSkipFulfillmentDispatch) return 'skip';
+  return 'schedule';
+}
+
+/**
  * @param {{ orderIdToScheduleFulfillment: string | null, paymentIntentIdsForFeeCapture: string[], traceId: string | null }} p
  */
 function queuePostCommitSideEffects(p) {
@@ -260,11 +297,17 @@ function queuePostCommitSideEffects(p) {
     for (const piId of new Set(paymentIntentIdsForFeeCapture)) {
       schedulePaymentCheckoutStripeFeeCapture(piId, noopLog);
     }
-    if (
-      orderIdToScheduleFulfillment &&
-      !env.phase1WebhookSkipFulfillmentDispatch
-    ) {
+    const dispatchMode = slimPostCommitFulfillmentDispatchMode(
+      orderIdToScheduleFulfillment,
+      env.phase1WebhookSkipFulfillmentDispatch,
+    );
+    if (dispatchMode === 'schedule') {
       scheduleFulfillmentProcessing(orderIdToScheduleFulfillment, traceId);
+    } else if (dispatchMode === 'skip') {
+      logPhase1WebhookFulfillmentDispatchSkippedSlim(
+        orderIdToScheduleFulfillment,
+        traceId,
+      );
     }
   });
 }
